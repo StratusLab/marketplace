@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.stratuslab.marketplace</groupId>
+  <artifactId>metadata</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>StratusLab Marketplace metadata utilities</name>
+
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>eu.stratuslab.marketplace</groupId>
+    <artifactId>marketplace</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.xmlrpc</groupId>
+      <artifactId>xmlrpc-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.hp.hpl.jena</groupId>
+      <artifactId>jena</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+	<groupId>org.codehaus.mojo</groupId>
+	<artifactId>exec-maven-plugin</artifactId>
+	<configuration>
+	  <mainClass>eu.stratuslab.marketplace.metadata.CreateMetadata</mainClass>
+	</configuration>
+      </plugin>
+
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-assembly-plugin</artifactId>
+	<configuration>
+	  <descriptorRefs>
+	    <descriptorRef>jar-with-dependencies</descriptorRef>
+	  </descriptorRefs>
+	  <archive>
+	    <manifest>
+              <mainClass>eu.stratuslab.marketplace.metadata.CreateMetadata</mainClass>
+	    </manifest>
+	  </archive>
+	</configuration>
+	<executions>
+	  <execution>
+	    <id>make-assembly</id>
+	    <phase>package</phase>
+	    <goals>
+	      <goal>single</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+
+      <plugin>
+	<groupId>org.codehaus.mojo</groupId>
+	<artifactId>findbugs-maven-plugin</artifactId>
+	<executions>
+	<execution>
+	  <id>run-findbugs</id>
+	  <phase>process-classes</phase>
+	  <goals>
+	    <goal>check</goal>
+	  </goals>
+	</execution>
+	</executions>
+      </plugin>
+    </plugins>
+
+  </build>
+
+</project>

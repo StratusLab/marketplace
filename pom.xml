@@ -1,0 +1,198 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+ 
+  <groupId>eu.stratuslab.marketplace</groupId>
+  <artifactId>marketplace</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>StratusLab Marketplace</name>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>metadata</module>
+    <module>server</module>
+  </modules>
+
+  <properties>
+    <jetty.version>7.2.2.v20101205</jetty.version>
+  </properties>
+
+  <scm>
+    <connection>scm:git:ssh://apache@code.stratuslab.eu/ext/git/stratuslab-marketplace.git</connection>
+    <developerConnection>scm:git:ssh://apache@code.stratuslab.eu/ext/git/stratuslab-marketplace.git</developerConnection>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>stratuslab.releases</id>
+      <name>Releases</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>stratuslab.snapshots</id>
+      <name>Snapshots</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <releases>
+	<enabled>true</enabled>
+	<updatePolicy>always</updatePolicy>
+	<checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+	<enabled>false</enabled>
+	<updatePolicy>never</updatePolicy>
+	<checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+      <id>StratusLabReleases</id>
+      <name>StratusLab Releases</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/releases/</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+	<groupId>org.apache.xmlrpc</groupId>
+	<artifactId>xmlrpc-client</artifactId>
+	<version>3.1.3</version>
+      </dependency>
+      <dependency>
+	<groupId>org.apache.xmlrpc</groupId>
+	<artifactId>xmlrpc-server</artifactId>
+	<version>3.1.3</version>
+      </dependency>
+      <dependency>
+	<groupId>bouncycastle</groupId>
+	<artifactId>bcprov-jdk16</artifactId>
+	<version>140</version>
+      </dependency>
+      <dependency>
+	<groupId>log4j</groupId>
+	<artifactId>log4j</artifactId>
+	<version>1.2.16</version>
+      </dependency>
+      <dependency>
+	<groupId>org.glite.security</groupId>
+	<artifactId>trustmanager</artifactId>
+	<version>2.5.5</version>
+      </dependency>
+      <dependency>
+	<groupId>org.glite.security</groupId>
+	<artifactId>util-java</artifactId>
+	<version>2.8.0</version>
+      </dependency>
+      <dependency>
+	<groupId>org.eclipse.jetty</groupId>
+	<artifactId>jetty-server</artifactId>
+	<version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+	<groupId>org.eclipse.jetty</groupId>
+	<artifactId>jetty-plus</artifactId>
+	<version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+	<groupId>com.hp.hpl.jena</groupId>
+	<artifactId>jena</artifactId>
+	<version>2.6.4</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  <build>
+
+    <pluginManagement>
+      <plugins>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-clean-plugin</artifactId>
+	  <version>2.4.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-deploy-plugin</artifactId>
+	  <version>2.5</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-dependency-plugin</artifactId>
+	  <version>2.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-install-plugin</artifactId>
+	  <version>2.3.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-jar-plugin</artifactId>
+	  <version>2.3.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-war-plugin</artifactId>
+	  <version>2.1.1</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-resources-plugin</artifactId>
+	  <version>2.4.3</version>
+	  <configuration>
+	    <encoding>UTF-8</encoding>
+	  </configuration>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-site-plugin</artifactId>
+	  <version>2.2</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-surefire-plugin</artifactId>
+	  <version>2.6</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-compiler-plugin</artifactId>
+	  <version>2.3.2</version>
+	  <configuration>
+	    <encoding>UTF-8</encoding>
+	    <target>1.5</target>
+	    <source>1.5</source>
+	  </configuration>
+	</plugin>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-assembly-plugin</artifactId>
+	  <version>2.2</version>
+	</plugin>
+
+	<plugin>
+	  <groupId>org.mortbay.jetty</groupId>
+	  <artifactId>jetty-maven-plugin</artifactId>
+	  <version>${jetty.version}</version>
+	</plugin>
+
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>exec-maven-plugin</artifactId>
+	  <version>1.2</version>
+	</plugin>
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>findbugs-maven-plugin</artifactId>
+	  <version>2.3.1</version>
+	</plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
+
+</project>
