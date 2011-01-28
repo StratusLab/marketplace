@@ -20,6 +20,11 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.shared.AlreadyExistsException;
 
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -29,47 +34,8 @@ import java.util.Iterator;
 /**
  * This resource represents all races in the appliction
  */
-public class ImagesResource extends BaseResource {
-
-    /**
-     * Handle POST requests: create a new item.
-     */
-    @Post
-    public Representation acceptItem(Representation entity) throws IOException {
-        Representation result = null;
-        
-        ModelMaker mk = ModelFactory.createMemModelMaker();
-        Model image = mk.createDefaultModel();
-        image.read(entity.getStream(), "");
-
-        String identifier = ((image.listStatements(
-                              new SimpleSelector(null, DCTerms.identifier,
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
-        /* String endorser = ((image.listStatements(
-                              new SimpleSelector(null, ResourceFactory.createProperty(
-                                                           "http://stratuslab.eu/terms#", "email"),
-                                                 (RDFNode)null))).nextStatement()).getObject().toString(); */
-
-	try{
-            getImages().addNamedModel(identifier, image);
-            
-            // Set the response's status and entity
-            setStatus(Status.SUCCESS_CREATED);
-            Representation rep = new StringRepresentation("Image created",
-                 MediaType.TEXT_PLAIN);
-            // Indicates where is located the new resource.
-            rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
-                 + identifier);
-            result = rep;
-        } catch(AlreadyExistsException are){
-            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-            result = generateErrorRepresentation("Image " + identifier
-                + " already exists.", "1");   
-        }
-
-        return result;
-    }
-
+public class EndorsersResource extends BaseResource {
+    
     /**
      * Generate an XML representation of an error response.
      * 
@@ -117,6 +83,17 @@ public class ImagesResource extends BaseResource {
             Document d = representation.getDocument();
             Element r = d.createElement("images");
             d.appendChild(r);
+            
+            // Create a new query
+            String queryString =
+                "PREFIX slterms: <http://stratuslab.eu/terms#> " +
+                        "SELECT ?email { _:z slterms:email ?email . }";
+
+            Query query = QueryFactory.create(queryString);
+            // Execute the query and obtain results
+            QueryExecution qe = QueryExecutionFactory.create(query);
+            ResultSet results = qe.execSelect();
+
             for ( Iterator<String> imagesIter = getImages().listNames(); imagesIter.hasNext(); ){
                 Element eltItem = d.createElement("image");
 

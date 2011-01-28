@@ -4,8 +4,8 @@ import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.query.DatasetFactory;
+import com.hp.hpl.jena.query.DataSource;
 
 import eu.stratuslab.marketplace.server.resources.ImagesResource;
 import eu.stratuslab.marketplace.server.resources.ImageResource;
@@ -13,7 +13,7 @@ import eu.stratuslab.marketplace.server.resources.ImageResource;
 public class MarketPlaceApplication extends Application {
 
     /** The list of images is stored in memory. */
-    private final ModelMaker images = ModelFactory.createMemModelMaker();   
+    private final DataSource images = DatasetFactory.create();   
 
  
     /**
@@ -36,7 +36,7 @@ public class MarketPlaceApplication extends Application {
      * 
      * @return the list of registered images.
     */
-    public ModelMaker getImages() {
+    public DataSource getImages() {
            return images;
     }
 }

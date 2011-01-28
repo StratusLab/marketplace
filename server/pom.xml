@@ -27,6 +27,11 @@
         <groupId>com.hp.hpl.jena</groupId>
         <artifactId>jena</artifactId>
     </dependency>
+    <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>arq</artifactId>
+        <version>2.8.7</version>
+    </dependency>
     <dependency>  
         <groupId>org.restlet.jee</groupId>  
         <artifactId>org.restlet</artifactId>  
