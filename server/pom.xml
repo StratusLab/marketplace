@@ -84,6 +84,7 @@
              </executions>
          </plugin>
 
+<!-- Turn off use of FindBugs until code it updated.
          <plugin>
 	     <groupId>org.codehaus.mojo</groupId>
 	     <artifactId>findbugs-maven-plugin</artifactId>
@@ -97,6 +98,8 @@
 	          </execution>
 	     </executions>
           </plugin>
+-->
+
       </plugins>
 
   </build>
