@@ -15,6 +15,7 @@
       <Class name="eu.stratuslab.marketplace.metadata.CreateMetadata" />
       <Class name="eu.stratuslab.metadata.GenXmlSign" />
       <Class name="eu.stratuslab.metadata.ValidateSign" />
+      <Class name="eu.stratuslab.metadata.ValidateSign$X509KeySelector" />
     </Or>
     <Bug pattern="NP_ALWAYS_NULL" />
   </Match>
