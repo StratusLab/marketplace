@@ -75,7 +75,10 @@
 	  <goals>
 	    <goal>check</goal>
 	  </goals>
-	</execution>
+          <configuration>
+            <excludeFilterFile>${basedir}/src/test/findbugs/findbugs-exclude.xml</excludeFilterFile>
+          </configuration>
+        </execution>
 	</executions>
       </plugin>
     </plugins>
