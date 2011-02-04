@@ -17,6 +17,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.ModelMaker;
 
 import com.hp.hpl.jena.sdb.Store;
 import com.hp.hpl.jena.sdb.SDBFactory;
@@ -32,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.InputStream;
 
 /**
@@ -65,8 +68,11 @@ public abstract class BaseResource extends ServerResource {
         return images;
     }
 
-    protected Collection query(String queryString, Dataset data){
-        QueryExecution qe = QueryExecutionFactory.create(queryString, data);
+    protected Collection query(String queryString, DataSource data){
+        //This should not be necessary, won't work in reality and is clearly wrong!!!
+        DataSource dataCopy = forceDataSourceCopy(data);
+
+        QueryExecution qe = QueryExecutionFactory.create(queryString, dataCopy);
         ResultSet results = qe.execSelect();
 
         List<String> columnNames = results.getResultVars();
@@ -85,10 +91,24 @@ public abstract class BaseResource extends ServerResource {
                 list.add(row);
         } 
 
-        //qe.close();
-        //data.close();
-        //getImageStore().close();
-
         return ((Collection) list); 
+    }
+
+    private DataSource forceDataSourceCopy(DataSource data){
+        ModelMaker mk = ModelFactory.createMemModelMaker();
+        DataSource images = DatasetFactory.create(mk.createDefaultModel());
+
+        for ( Iterator<String> imagesIter = data.listNames(); imagesIter.hasNext(); ){
+            String id = imagesIter.next();
+            Model image = getImages().getNamedModel(id);
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            BufferedOutputStream out = new BufferedOutputStream(bytes);
+            image.getWriter().write(image, out, "");
+            images.addNamedModel(id, mk.createDefaultModel().read(new
+            ByteArrayInputStream(bytes.toString().getBytes()),""));
+            images.addNamedModel(id, image);
+        }
+
+        return images;
     }
 }
