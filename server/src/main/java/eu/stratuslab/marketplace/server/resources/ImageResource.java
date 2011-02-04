@@ -45,7 +45,7 @@ public class ImageResource extends BaseResource {
     public void removeImage() {
         if (image != null) {
             // Remove the image from the list.
-            getImages().removeNamedModel(identifier);
+            //getImages().removeNamedModel(identifier);
         }
 
         // Tells the client that the request has been successfully fulfilled.

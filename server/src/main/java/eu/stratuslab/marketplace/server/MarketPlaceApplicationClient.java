@@ -37,6 +37,7 @@ public class MarketPlaceApplicationClient {
         // Define our Restlet client resources.
         ClientResource imagesResource = new ClientResource(url + "/images");
         ClientResource imageResource = null;
+        ClientResource endorsersResource = new ClientResource(url + "/endorsers");
 
         // Create a new item
         Representation rdf = new FileRepresentation(metadata, MediaType.APPLICATION_RDF_XML);
@@ -78,6 +79,9 @@ public class MarketPlaceApplicationClient {
             get(imagesResource);
             System.out.println();            
 
+            //get(endorsersResource);
+            //System.out.println();
+
             // delete the image
             //imageResource.delete();
 
@@ -85,7 +89,8 @@ public class MarketPlaceApplicationClient {
             //get(imagesResource);
             //System.out.println();
        }
-    }
+
+}
 
     /**
      * Prints the resource's representation.

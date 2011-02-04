@@ -1,11 +1,15 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 
 import org.restlet.data.MediaType;
 import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
+import org.restlet.representation.FileRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.data.Status;
@@ -20,11 +24,13 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.shared.AlreadyExistsException;
 
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This resource represents all races in the appliction
@@ -37,7 +43,7 @@ public class ImagesResource extends BaseResource {
     @Post
     public Representation acceptItem(Representation entity) throws IOException {
         Representation result = null;
-        
+
         ModelMaker mk = ModelFactory.createMemModelMaker();
         Model image = mk.createDefaultModel();
         image.read(entity.getStream(), "");
@@ -45,15 +51,14 @@ public class ImagesResource extends BaseResource {
         String identifier = ((image.listStatements(
                               new SimpleSelector(null, DCTerms.identifier,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
-        /* String endorser = ((image.listStatements(
-                              new SimpleSelector(null, ResourceFactory.createProperty(
-                                                           "http://stratuslab.eu/terms#", "email"),
-                                                 (RDFNode)null))).nextStatement()).getObject().toString(); */
-
+        
 	try{
-            getImages().addNamedModel(identifier, image);
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            BufferedOutputStream out = new BufferedOutputStream(bytes);
+            image.getWriter().write(image, out, "");
+            storeImage(identifier, bytes.toString());
             
-            // Set the response's status and entity
+           // Set the response's status and entity
             setStatus(Status.SUCCESS_CREATED);
             Representation rep = new StringRepresentation("Image created",
                  MediaType.TEXT_PLAIN);
@@ -117,15 +122,26 @@ public class ImagesResource extends BaseResource {
             Document d = representation.getDocument();
             Element r = d.createElement("images");
             d.appendChild(r);
-            for ( Iterator<String> imagesIter = getImages().listNames(); imagesIter.hasNext(); ){
+
+            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
+                        "SELECT ?identifier " +
+                        "WHERE {" +
+                        " ?y <http://purl.org/dc/terms/identifier> ?identifier . }";
+
+            
+            ArrayList results = (ArrayList)query(queryString, getImages());
+
+            for ( int i = 0; i < results.size(); i++ ){
                 Element eltItem = d.createElement("image");
 
                 Element eltName = d.createElement("identifier");
-                eltName.appendChild(d.createTextNode(imagesIter.next()));
+                String email = (String)(((HashMap)results.get(i))).get("identifier");
+                eltName.appendChild(d.createTextNode(email));
                 eltItem.appendChild(eltName);
 
                 r.appendChild(eltItem);
             }
+ 
             d.normalizeDocument();
 
             // Returns the XML representation of this document.

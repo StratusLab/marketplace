@@ -2,6 +2,9 @@ package eu.stratuslab.marketplace.server.resources;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.restlet.data.MediaType;
 import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
@@ -10,26 +13,9 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.data.Status;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.SimpleSelector;
-import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.shared.AlreadyExistsException;
-
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Iterator;
 
 /**
  * This resource represents all races in the appliction
@@ -81,28 +67,24 @@ public class EndorsersResource extends BaseResource {
             // Generate a DOM document representing the list of
             // items.
             Document d = representation.getDocument();
-            Element r = d.createElement("images");
+            Element r = d.createElement("endorsers");
             d.appendChild(r);
             
-            // Create a new query
-            String queryString =
-                "PREFIX slterms: <http://stratuslab.eu/terms#> " +
-                        "SELECT ?email { _:z slterms:email ?email . }";
+            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> SELECT ?email { _:z slterms:email ?email . }";
 
-            Query query = QueryFactory.create(queryString);
-            // Execute the query and obtain results
-            QueryExecution qe = QueryExecutionFactory.create(query);
-            ResultSet results = qe.execSelect();
+            ArrayList results = (ArrayList)query(queryString, getImages());
+  
+            for ( int i = 0; i < results.size(); i++ ){
+                Element eltItem = d.createElement("endorser");
 
-            for ( Iterator<String> imagesIter = getImages().listNames(); imagesIter.hasNext(); ){
-                Element eltItem = d.createElement("image");
-
-                Element eltName = d.createElement("identifier");
-                eltName.appendChild(d.createTextNode(imagesIter.next()));
+                Element eltName = d.createElement("email");
+                String email = (String)(((HashMap)results.get(i))).get("email");
+                eltName.appendChild(d.createTextNode(email));
                 eltItem.appendChild(eltName);
 
                 r.appendChild(eltItem);
-            }
+            } 
+            
             d.normalizeDocument();
 
             // Returns the XML representation of this document.
