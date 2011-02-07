@@ -27,6 +27,10 @@
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
