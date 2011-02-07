@@ -16,16 +16,15 @@
         <slterms:os-version>9.7</slterms:os-version>
         <slterms:os-arch>i486</slterms:os-arch>
         <slterms:hypervisor>kvm</slterms:hypervisor>
-        <slterms:endorsement rdf:nodeID="endorsement"/>
+
+        <slterms:endorsement rdf:parseType="Resource">
+          <dcterms:created>2011-01-24T09:59:42+0100</dcterms:created>
+          <dcterms:creator rdf:parseType="Resource">
+            <slterms:email>loomis@lal.in2p3.fr</slterms:email>
+            <slterms:full-name>Charles LOOMIS</slterms:full-name>
+          </dcterms:creator>
+        </slterms:endorsement>
+
     </rdf:Description>
 
-    <rdf:Description rdf:nodeID="endorsement">
-        <dcterms:creator rdf:nodeID="endorser-info"/>
-        <dcterms:created>2011-01-24T09:59:42+0100</dcterms:created>
-    </rdf:Description>
-
-    <rdf:Description rdf:nodeID="endorser-info">
-        <slterms:email>loomis@lal.in2p3.fr</slterms:email>
-        <slterms:full-name>Charles LOOMIS</slterms:full-name>
-    </rdf:Description>
 </rdf:RDF>
