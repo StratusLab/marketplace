@@ -1,15 +1,9 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-
 import org.restlet.data.MediaType;
 import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.representation.FileRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.data.Status;
@@ -18,10 +12,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.SimpleSelector;
 import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.shared.AlreadyExistsException;
 
 import org.w3c.dom.Document;
@@ -31,6 +24,8 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import java.io.IOException;
 
 /**
  * This resource represents all races in the appliction
@@ -47,17 +42,15 @@ public class ImagesResource extends BaseResource {
         ModelMaker mk = ModelFactory.createMemModelMaker();
         Model image = mk.createDefaultModel();
         image.read(entity.getStream(), "");
+        image.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
+        image.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
 
         String identifier = ((image.listStatements(
                               new SimpleSelector(null, DCTerms.identifier,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
-        
 	try{
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bytes);
-            image.getWriter().write(image, out, "");
-            storeImage(identifier, bytes.toString());
-            
+            storeImage(identifier, image);            
+
            // Set the response's status and entity
             setStatus(Status.SUCCESS_CREATED);
             Representation rep = new StringRepresentation("Image created",

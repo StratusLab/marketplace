@@ -22,6 +22,8 @@ import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.sdb.Store;
 import com.hp.hpl.jena.sdb.SDBFactory;
 import com.hp.hpl.jena.sdb.store.DatasetStore;
+import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.sdb.SDB;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -36,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
 
 /**
  *  Base resource class that supports common behaviours or attributes shared by
@@ -53,28 +56,26 @@ public abstract class BaseResource extends ServerResource {
 		return ((MarketPlaceApplication) getApplication()).getImageStore();
     }
 
-    protected void storeImage(String iri, String rdf) {
+    protected void storeImage(String iri, Model rdf) {
         Model sdbModel = SDBFactory.connectNamedModel(getImageStore(), iri);
-        sdbModel.read(new ByteArrayInputStream(rdf.getBytes()), "");
-        sdbModel.close();
-        getImageStore().close();
+        sdbModel.add(rdf);
     }
 
     protected DataSource getImages() {
-        Dataset ds = DatasetStore.create(getImageStore());
+        Dataset ds = SDBFactory.connectDataset(getImageStore());
         DataSource images = DatasetFactory.create(ds);
-        images.setDefaultModel((ModelFactory.createMemModelMaker()).createDefaultModel());
- 
+
         return images;
     }
 
     protected Collection query(String queryString, DataSource data){
         //This should not be necessary, won't work in reality and is clearly wrong!!!
         DataSource dataCopy = forceDataSourceCopy(data);
-
-        QueryExecution qe = QueryExecutionFactory.create(queryString, dataCopy);
+        Query query = QueryFactory.create(queryString, Syntax.syntaxARQ);
+        QueryExecution qe = QueryExecutionFactory.create(query, dataCopy);
+        qe.getContext().set(SDB.unionDefaultGraph, true);
         ResultSet results = qe.execSelect();
-
+        
         List<String> columnNames = results.getResultVars();
         int cols = columnNames.size();
 
@@ -90,6 +91,7 @@ public abstract class BaseResource extends ServerResource {
                 }
                 list.add(row);
         } 
+        qe.close();
 
         return ((Collection) list); 
     }
@@ -106,7 +108,6 @@ public abstract class BaseResource extends ServerResource {
             image.getWriter().write(image, out, "");
             images.addNamedModel(id, mk.createDefaultModel().read(new
             ByteArrayInputStream(bytes.toString().getBytes()),""));
-            images.addNamedModel(id, image);
         }
 
         return images;
