@@ -35,6 +35,7 @@ public class ImageResource extends BaseResource {
         } else {
            this.image = null;
         }
+        
         setExisting(this.image != null);
     }
 
@@ -57,6 +58,8 @@ public class ImageResource extends BaseResource {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         BufferedOutputStream out = new BufferedOutputStream(bytes);
 
+        image.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
+        image.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
         RDFWriter writer = image.getWriter();
         writer.write(image, out, "");
         StringRepresentation representation = 

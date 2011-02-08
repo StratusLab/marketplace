@@ -4,17 +4,12 @@ import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
-import java.sql.Connection ;
-import java.sql.DriverManager ;
-import java.sql.SQLException ;
-
 import com.hp.hpl.jena.sdb.Store ;
-import com.hp.hpl.jena.sdb.StoreDesc ;
-import com.hp.hpl.jena.sdb.sql.JDBC ;
-import com.hp.hpl.jena.sdb.sql.SDBConnection ;
-import com.hp.hpl.jena.sdb.store.DatabaseType ;
-import com.hp.hpl.jena.sdb.store.LayoutType ;
-import com.hp.hpl.jena.sdb.store.StoreFactory ;
+import com.hp.hpl.jena.sdb.SDBFactory;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelMaker;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import eu.stratuslab.marketplace.server.resources.ImagesResource;
 import eu.stratuslab.marketplace.server.resources.ImageResource;
@@ -31,22 +26,10 @@ public class MarketPlaceApplication extends Application {
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
 
-        String jdbcURL = "jdbc:mysql://localhost/sdb";
-        JDBC.loadDriverMySQL();
-        Connection jdbcConnection = null;
-
-           try {
-               jdbcConnection = DriverManager.getConnection(jdbcURL, "sdb", "sdb");
-           } catch(SQLException sql){}
-
-           if (jdbcConnection != null) {
-               SDBConnection conn = new SDBConnection(jdbcConnection);
-               StoreDesc storeDesc = new StoreDesc(LayoutType.LayoutTripleNodesHash,DatabaseType.MySQL);
-               this.images = StoreFactory.create(storeDesc, conn);
-               this.images.getTableFormatter().create();
-           }
-
-           this.images.close();
+        images = SDBFactory.connectStore("/tmp/sdb-mysql-innodb.ttl");
+        images.getTableFormatter().create();
+        Model sdbModelDefault = SDBFactory.connectDefaultModel(this.images);
+        sdbModelDefault.add((ModelFactory.createMemModelMaker()).createDefaultModel());
     }
 
     /**
@@ -72,6 +55,7 @@ public class MarketPlaceApplication extends Application {
      * @return the list of registered images.
     */
     public Store getImageStore() {
-           return this.images;
+           return images;
     }
+
 }
