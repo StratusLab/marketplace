@@ -13,6 +13,7 @@
   <Match>
     <Or>
       <Class name="eu.stratuslab.marketplace.metadata.CreateMetadata" />
+      <Class name="eu.stratuslab.marketplace.metadata.CheckSchema" />
       <Class name="eu.stratuslab.metadata.GenXmlSign" />
       <Class name="eu.stratuslab.metadata.ValidateSign" />
       <Class name="eu.stratuslab.metadata.ValidateSign$X509KeySelector" />
