@@ -17,7 +17,7 @@ public class CheckSchema {
 
     static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
-    static final String schemaSource = "image-metadata.xsd";
+    static final String schemaSource = "src/main/resources/eu/stratuslab/marketplace/metadata/image-metadata.xsd";
 
     static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
@@ -38,7 +38,7 @@ public class CheckSchema {
 
         DocumentBuilder db = factory.newDocumentBuilder();
 
-        Document doc = db.parse("dummy.xml");
+        Document doc = db.parse("ttylinux-9.7-i486-base-1.0.xml");
 
         System.out.println("Document has been validated.");
 

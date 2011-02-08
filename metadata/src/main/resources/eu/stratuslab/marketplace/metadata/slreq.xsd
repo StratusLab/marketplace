@@ -6,10 +6,10 @@
 	<!-- Import other referenced schemas. -->
 
 	<xs:import namespace="http://purl.org/dc/terms/"
-		schemaLocation="dcterms.xsd" />
+		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/dcterms.xsd" />
 
 	<xs:import namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		schemaLocation="image-metadata.xsd" />
+		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/image-metadata.xsd" />
 
 	<!-- Definition of required StratusLab elements for image metadata. -->
 

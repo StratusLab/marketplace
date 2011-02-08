@@ -9,13 +9,13 @@
 		schemaLocation="http://www.w3.org/2001/03/xml.xsd" />
 
 	<xs:import namespace="http://stratuslab.eu/terms#"
-		schemaLocation="slterms.xsd" />
+		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/slterms.xsd" />
 
 	<xs:import namespace="http://mp.stratuslab.eu/slreq#"
-		schemaLocation="slreq.xsd" />
+		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/slreq.xsd" />
 
 	<xs:import namespace="http://purl.org/dc/terms/"
-		schemaLocation="dcterms.xsd" />
+		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/dcterms.xsd" />
 
 	<!-- Main element for image descriptions. -->
 	<xs:element name="RDF" type="rdf-root" />
