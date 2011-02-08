@@ -1,0 +1,40 @@
+<xs:schema xmlns="http://stratuslab.eu/terms#" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://stratuslab.eu/terms#" elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+
+	<!-- Optional StratusLab element declarations for image metadata. -->
+
+	<xs:element name="serial-number" type="xs:nonNegativeInteger" />
+	<xs:element name="version" type="xs:string" />
+
+	<xs:element name="hypervisor" type="xs:string" />
+
+	<xs:element name="inbound-port" type="port" />
+	<xs:element name="outbound-port" type="port" />
+	<xs:element name="icmp" type="icmp-type" />
+
+	<xs:element name="location" type="xs:anyURI" />
+
+	<xs:element name="deprecated" type="xs:string" />
+
+	<xs:element name="os" type="xs:string" />
+	<xs:element name="os-arch" type="xs:string" />
+	<xs:element name="os-version" type="xs:string" />
+
+	<!-- Restricted type definitions for simple values. -->
+
+	<xs:simpleType name="port">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="icmp-type">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="255" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

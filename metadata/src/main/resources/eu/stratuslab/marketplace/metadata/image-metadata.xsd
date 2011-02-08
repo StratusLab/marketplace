@@ -1,0 +1,50 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/"
+	xmlns:slterms="http://stratuslab.eu/terms#" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
+	targetNamespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	elementFormDefault="qualified" attributeFormDefault="qualified">
+
+	<!-- Import referenced schemas. -->
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="http://www.w3.org/2001/03/xml.xsd" />
+
+	<xs:import namespace="http://stratuslab.eu/terms#"
+		schemaLocation="slterms.xsd" />
+
+	<xs:import namespace="http://mp.stratuslab.eu/slreq#"
+		schemaLocation="slreq.xsd" />
+
+	<xs:import namespace="http://purl.org/dc/terms/"
+		schemaLocation="dcterms.xsd" />
+
+	<!-- Main element for image descriptions. -->
+	<xs:element name="RDF" type="rdf-root" />
+
+	<xs:complexType name="rdf-root">
+		<xs:sequence>
+			<xs:element name="Description" type="slreq:image-description" />
+		</xs:sequence>
+		<xs:attribute ref="xml:base" use="required" />
+	</xs:complexType>
+
+	<!-- Define some RDF elements and attributes that are used. -->
+
+	<xs:element name="type" type="xs:string" />
+
+	<xs:attribute name="about" type="id-frag-type" />
+
+	<xs:simpleType name="id-frag-type">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="#[A-Za-z0-9_-]{27}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:attribute name="parseType" type="parse-type-values" />
+
+	<xs:simpleType name="parse-type-values">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Resource" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

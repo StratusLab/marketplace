@@ -1,0 +1,90 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://mp.stratuslab.eu/slreq#"
+	xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	targetNamespace="http://mp.stratuslab.eu/slreq#" elementFormDefault="qualified"
+	attributeFormDefault="qualified">
+
+	<!-- Import other referenced schemas. -->
+
+	<xs:import namespace="http://purl.org/dc/terms/"
+		schemaLocation="dcterms.xsd" />
+
+	<xs:import namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		schemaLocation="image-metadata.xsd" />
+
+	<!-- Definition of required StratusLab elements for image metadata. -->
+
+	<xs:element name="bytes" type="xs:nonNegativeInteger" />
+	<xs:element name="checksum" type="checksum-type" />
+
+	<xs:element name="full-name" type="xs:string" />
+	<xs:element name="email" type="email-type" />
+	<xs:element name="subject" type="xs:string" />
+	<xs:element name="issuer" type="xs:string" />
+
+	<!-- Main description of image metadata.  Allow limited extensions. -->
+	<xs:complexType name="image-description">
+		<xs:sequence>
+			<xs:element ref="rdf:type" minOccurs="0" />
+			<xs:element ref="dcterms:identifier" />
+			<xs:element name="bytes" />
+			<xs:element name="checksum" maxOccurs="unbounded" />
+
+			<xs:element name="endorsement" />
+
+			<!-- Allow extensions with non-slreq namespaces. -->
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:any namespace="##other" />
+			</xs:choice>
+
+		</xs:sequence>
+		<xs:attribute ref="rdf:about" use="required" />
+	</xs:complexType>
+
+	<!--
+		Endorsement element contains signature and endorser information.
+	-->
+	<xs:element name="endorsement">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="dcterms:created" />
+				<xs:element name="endorser" type="endorser-type" />
+			</xs:sequence>
+			<xs:attribute ref="rdf:parseType" use="required" />
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Required information for the endorser. -->
+
+	<xs:complexType name="endorser-type">
+		<xs:sequence>
+			<xs:element name="full-name" minOccurs="0" />
+			<xs:element name="email" minOccurs="1" />
+			<xs:element name="subject" minOccurs="0" />
+			<xs:element name="issuer" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute ref="rdf:parseType" use="required" />
+	</xs:complexType>
+
+	<!-- Restricted type definitions for simple values. -->
+
+	<xs:simpleType name="email-type">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Za-z0-9\._%+-]+@[A-Za-z0-9\.-]+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="checksum-value-type">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Fa-f0-9]+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="checksum-type">
+		<xs:simpleContent>
+			<xs:extension base="checksum-value-type">
+				<xs:attribute name="type" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+</xs:schema>
