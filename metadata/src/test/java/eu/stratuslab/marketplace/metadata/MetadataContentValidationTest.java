@@ -20,7 +20,7 @@ public class MetadataContentValidationTest {
         docBuilderFactory.setNamespaceAware(true);
     }
 
-    @Test
+    @Test(expected = MetadataException.class)
     public void nullRootFails() {
         MetadataContentValidation.checkStructure(createEmptyRdfElement());
     }
