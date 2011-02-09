@@ -36,7 +36,6 @@ public class MarketPlaceApplicationClient {
 
         // Define our Restlet client resources.
         ClientResource imagesResource = new ClientResource(url + "/images");
-        ClientResource imageResource = null;
         ClientResource endorsersResource = new ClientResource(url + "/endorsers");
 
         // Create a new item
@@ -45,49 +44,45 @@ public class MarketPlaceApplicationClient {
         Model image = mk.createDefaultModel();
         image.read(rdf.getStream(), "");
 
-        Statement state = (image.listStatements(
-                  new SimpleSelector(null,
-                  ResourceFactory.createProperty("http://stratuslab.eu/terms#", "email"),
-                         (RDFNode)null))).nextStatement();
-        String endorser = state.getObject().toString();
-        System.out.println("Endorser:  " + endorser);
-
-        Statement id = (image.listStatements(
-                   new SimpleSelector(null, DCTerms.identifier,
-                         (RDFNode)null))).nextStatement();
-        String identifier = id.getObject().toString();
-        System.out.println("Identifier:  " + identifier);
         
+        String identifier = ((image.listStatements(
+                              new SimpleSelector(null, DCTerms.identifier,
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        /*
+        String endorser = ((image.listStatements(
+                              new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        String created = ((image.listStatements(
+                              new SimpleSelector(null, DCTerms.created,
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        */
+        ClientResource imageResource = new ClientResource(url + "/images/" + identifier);
+        //ClientResource metadataResource = null;
+
         try {
             if(imagesResource != null){
-                Representation r = imagesResource.post(rdf);
-                imageResource = new ClientResource(r.getLocationRef());
+                imagesResource.post(rdf);
+                //metadataResource = new ClientResource(r.getLocationRef());
             }
         } catch (ResourceException e) {
             System.out.println("Error  status: " + e.getStatus());
             System.out.println("Error message: " + e.getMessage());
         }
+
         // Consume the response's entity which releases the connection
         imagesResource.getResponseEntity().exhaust();
 
         if (imageResource != null) {
-            // Prints the representation of the newly created resource.
-            get(imageResource);
-            System.out.println();
-
             // Prints the list of registered images.
             get(imagesResource);
             System.out.println();            
 
-            //get(endorsersResource);
-            //System.out.println();
-
-            // delete the image
-            //imageResource.delete();
-
-            //Print the list of registered items.
-            //get(imagesResource);
-            //System.out.println();
+            // Prints the list of metadata entried for an image.
+            get(imageResource);
+            System.out.println();
+            
+            get(endorsersResource);
+            System.out.println();
        }
 
 }

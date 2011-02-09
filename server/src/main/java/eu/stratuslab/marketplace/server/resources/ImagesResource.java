@@ -15,7 +15,6 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.SimpleSelector;
 import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.shared.AlreadyExistsException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,55 +47,26 @@ public class ImagesResource extends BaseResource {
         String identifier = ((image.listStatements(
                               new SimpleSelector(null, DCTerms.identifier,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
-	try{
-            storeImage(identifier, image);            
+        String endorser = ((image.listStatements(
+                              new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        String created = ((image.listStatements(
+                              new SimpleSelector(null, DCTerms.created,
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
 
-           // Set the response's status and entity
-            setStatus(Status.SUCCESS_CREATED);
-            Representation rep = new StringRepresentation("Image created",
-                 MediaType.TEXT_PLAIN);
-            // Indicates where is located the new resource.
-            rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
-                 + identifier);
-            result = rep;
-        } catch(AlreadyExistsException are){
-            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-            result = generateErrorRepresentation("Image " + identifier
-                + " already exists.", "1");   
-        }
+        String ref = getRequest().getResourceRef().toString();
+        String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
-        return result;
-    }
+        storeImage(iri, image);
+        // Set the response's status and entity
+        setStatus(Status.SUCCESS_CREATED);
+        Representation rep = new StringRepresentation("Image created",
+            MediaType.TEXT_PLAIN);
+        // Indicates where is located the new resource.
+        rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
+             + identifier + "/" + endorser + "/" + created);
+        result = rep;
 
-    /**
-     * Generate an XML representation of an error response.
-     * 
-     * @param errorMessage
-     *            the error message.
-     * @param errorCode
-     *            the error code.
-    */
-    private Representation generateErrorRepresentation(String errorMessage,
-            String errorCode) {
-        DomRepresentation result = null;
-        // This is an error
-        // Generate the output representation
-        try {
-            result = new DomRepresentation(MediaType.TEXT_XML);
-            // Generate a DOM document representing the list of
-            // items.
-            Document d = result.getDocument();
-            Element eltError = d.createElement("error");
-            Element eltCode = d.createElement("code");
-            eltCode.appendChild(d.createTextNode(errorCode));
-            eltError.appendChild(eltCode);
-            Element eltMessage = d.createElement("message");
-            eltMessage.appendChild(d.createTextNode(errorMessage));
-            eltError.appendChild(eltMessage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
         return result;
     }
     
@@ -117,20 +87,25 @@ public class ImagesResource extends BaseResource {
             d.appendChild(r);
 
             String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
-                        "SELECT ?identifier " +
+                        "SELECT ?identifier ?description " +
                         "WHERE {" +
-                        " ?y <http://purl.org/dc/terms/identifier> ?identifier . }";
-
+                        " ?y <http://purl.org/dc/terms/identifier> ?identifier . " +
+                        " ?y <http://purl.org/dc/terms/description> ?description . }";
             
-            ArrayList results = (ArrayList)query(queryString, getImages());
+            ArrayList results = (ArrayList)query(queryString);
 
             for ( int i = 0; i < results.size(); i++ ){
                 Element eltItem = d.createElement("image");
 
-                Element eltName = d.createElement("identifier");
-                String email = (String)(((HashMap)results.get(i))).get("identifier");
-                eltName.appendChild(d.createTextNode(email));
-                eltItem.appendChild(eltName);
+                Element eltIdentifier = d.createElement("identifier");
+                String identifier = (String)(((HashMap)results.get(i))).get("identifier");
+                eltIdentifier.appendChild(d.createTextNode(identifier));
+                eltItem.appendChild(eltIdentifier);
+        
+                Element eltDescription = d.createElement("description");
+                String description = (String)(((HashMap)results.get(i))).get("description");
+                eltDescription.appendChild(d.createTextNode(description));
+                eltItem.appendChild(eltDescription);
 
                 r.appendChild(eltItem);
             }
