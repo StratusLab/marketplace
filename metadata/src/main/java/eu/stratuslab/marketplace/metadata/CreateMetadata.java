@@ -11,8 +11,10 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import eu.stratuslab.marketplace.metadata.CreateChecksums.Namespace;
 import org.w3c.dom.Document;
+
+import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.metadata.CreateChecksums.Namespace;
 
 public class CreateMetadata {
 
@@ -56,14 +58,14 @@ public class CreateMetadata {
             System.out.println(field.tag);
             String data = r.readLine();
 
-            if (data!=null && !data.trim().equals("")) {
+            if (data != null && !data.trim().equals("")) {
                 userInput.put(field, data);
             }
 
         }
 
         Document doc = CreateChecksums.createSkeletonRDF(imageFile, userInput);
-        String result = CreateChecksums.documentToString(doc);
+        String result = XMLUtils.documentToString(doc);
 
         System.out.println(result);
 

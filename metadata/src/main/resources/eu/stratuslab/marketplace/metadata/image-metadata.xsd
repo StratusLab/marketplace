@@ -1,6 +1,5 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/"
-	xmlns:slterms="http://stratuslab.eu/terms#" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
 	targetNamespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	elementFormDefault="qualified" attributeFormDefault="qualified">
 
@@ -8,14 +7,8 @@
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
 		schemaLocation="http://www.w3.org/2001/03/xml.xsd" />
 
-	<xs:import namespace="http://stratuslab.eu/terms#"
-		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/slterms.xsd" />
-
 	<xs:import namespace="http://mp.stratuslab.eu/slreq#"
-		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/slreq.xsd" />
-
-	<xs:import namespace="http://purl.org/dc/terms/"
-		schemaLocation="src/main/resources/eu/stratuslab/marketplace/metadata/dcterms.xsd" />
+		schemaLocation="slreq.xsd" />
 
 	<!-- Main element for image descriptions. -->
 	<xs:element name="RDF" type="rdf-root" />

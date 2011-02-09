@@ -1,35 +1,60 @@
 package eu.stratuslab.marketplace.metadata;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.IOException;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.util.FileManager;
+import javax.xml.parsers.DocumentBuilder;
 
-public class CheckRdf {
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-    /**
-     * @param args
-     */
+import eu.stratuslab.marketplace.XMLUtils;
+
+public class CheckRDF {
+
     public static void main(String[] args) {
 
-        // create an empty model
-        ModelMaker maker = ModelFactory.createMemModelMaker();
+        int rc = 0;
 
-        String inputFileName = "ttylinux-9.7-i486-base-1.0.xml";
-        String imageIdentifier = "MMZu9WvwKIro-rtBQfDk4PsKO7_";
-        Model model = maker.createModel(imageIdentifier);
+        for (String fname : args) {
 
-        // use the FileManager to find the input file
-        InputStream in = FileManager.get().open(inputFileName);
-        if (in == null) {
-            throw new IllegalArgumentException("File: " + inputFileName
-                    + " not found");
+            File file = new File(fname);
+
+            if (!file.canRead()) {
+                System.err.println("Cannot read " + fname);
+                rc++;
+                continue;
+            }
+
+            try {
+
+                DocumentBuilder db = XMLUtils.newDocumentBuilder();
+
+                Document doc = db.parse(file);
+
+                ValidateRDFModel.validate(doc);
+                System.out.println("Valid: " + fname);
+
+            } catch (MetadataException e) {
+
+                rc++;
+                System.err.println("Invalid: " + fname + "\n" + e.getMessage());
+
+            } catch (SAXException e) {
+
+                rc++;
+                System.err.println("Invalid: " + fname + "\n" + e.getMessage());
+
+            } catch (IOException e) {
+
+                rc++;
+                System.err.println("IO exception during read: " + fname + "\n"
+                        + e.getMessage());
+
+            }
         }
-        // read the RDF/XML file
-        model.read(in, "");
 
+        System.exit(rc);
     }
 
 }

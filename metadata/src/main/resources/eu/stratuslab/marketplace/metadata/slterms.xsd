@@ -1,5 +1,5 @@
-<xs:schema xmlns="http://stratuslab.eu/terms#" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="http://stratuslab.eu/terms#" elementFormDefault="qualified"
+<xs:schema xmlns="http://mp.stratuslab.eu/slterms#" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://mp.stratuslab.eu/slterms#" elementFormDefault="qualified"
 	attributeFormDefault="qualified">
 
 	<!-- Optional StratusLab element declarations for image metadata. -->

@@ -4,47 +4,57 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import eu.stratuslab.marketplace.XMLUtils;
+
 public class CheckSchema {
 
-    static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+    public static void main(String[] args) {
 
-    static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+        int rc = 0;
 
-    static final String schemaSource = "src/main/resources/eu/stratuslab/marketplace/metadata/image-metadata.xsd";
+        for (String fname : args) {
 
-    static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
+            File file = new File(fname);
 
-    public static void main(String[] args) throws ParserConfigurationException,
-            SAXException, IOException, TransformerException {
+            if (!file.canRead()) {
+                System.err.println("Cannot read " + fname);
+                rc++;
+                continue;
+            }
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        factory.setValidating(true);
+            try {
 
-        try {
-            factory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-        } catch (IllegalArgumentException consumed) {
-            // No support for JAXP 1.2
+                DocumentBuilder db = XMLUtils.newDocumentBuilder();
+
+                Document doc = db.parse(file);
+
+                ValidateXMLSchema.validate(doc);
+                System.out.println("Valid: " + fname);
+
+            } catch (MetadataException e) {
+
+                rc++;
+                System.err.println("Invalid: " + fname + "\n" + e.getMessage());
+
+            } catch (SAXException e) {
+
+                rc++;
+                System.err.println("Invalid: " + fname + "\n" + e.getMessage());
+
+            } catch (IOException e) {
+
+                rc++;
+                System.err.println("IO exception during read: " + fname + "\n"
+                        + e.getMessage());
+
+            }
         }
 
-        factory.setAttribute(JAXP_SCHEMA_SOURCE, new File(schemaSource));
-
-        DocumentBuilder db = factory.newDocumentBuilder();
-
-        Document doc = db.parse("ttylinux-9.7-i486-base-1.0.xml");
-
-        System.out.println("Document has been validated.");
-
-        String contents = CreateChecksums.documentToString(doc);
-
-        System.err.println(contents);
-
+        System.exit(rc);
     }
+
 }

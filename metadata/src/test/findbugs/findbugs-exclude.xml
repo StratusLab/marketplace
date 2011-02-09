@@ -1,19 +1,17 @@
 <FindBugsFilter>
   
   <!--
-      These are false positives for file descriptors in 
-      the System class on Ubuntu JDK 1.6.0_20.  These are
-      not flagged as errors on other platforms. 
-      
-      Anything like:
-      System.out.println("xxx");
-      
-      will produce an warning from FindBugs.
+      These are false positives for file descriptors in the System class on
+      Ubuntu JDK 1.6.0_20. These are not flagged as errors on other
+      platforms. Anything like: System.out.println("xxx"); will produce an
+      warning from FindBugs.
   -->
   <Match>
     <Or>
-      <Class name="eu.stratuslab.marketplace.metadata.CreateMetadata" />
+      <Class name="eu.stratuslab.marketplace.metadata.CheckRDF" />
       <Class name="eu.stratuslab.marketplace.metadata.CheckSchema" />
+      <Class name="eu.stratuslab.marketplace.metadata.CheckXMLSignatures" />
+      <Class name="eu.stratuslab.marketplace.metadata.CreateMetadata" />
       <Class name="eu.stratuslab.metadata.GenXmlSign" />
       <Class name="eu.stratuslab.metadata.ValidateSign" />
       <Class name="eu.stratuslab.metadata.ValidateSign$X509KeySelector" />

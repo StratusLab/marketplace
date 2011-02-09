@@ -1,29 +1,25 @@
 package eu.stratuslab.marketplace.metadata;
 
+import static eu.stratuslab.marketplace.metadata.MetadataUtils.sha1ToIdentifier;
+import static eu.stratuslab.marketplace.metadata.MetadataUtils.streamInfo;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
+import java.util.TimeZone;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
-import eu.stratuslab.marketplace.metadata.CreateMetadata.MetadataFields;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.metadata.CreateMetadata.MetadataFields;
 
 public class CreateChecksums {
 
@@ -31,11 +27,15 @@ public class CreateChecksums {
 
     final static private SimpleDateFormat xmlDateTimeFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ssZ");
+    static {
+        xmlDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public enum Namespace {
         RDF("http://www.w3.org/1999/02/22-rdf-syntax-ns#"), DCTERMS(
                 "http://purl.org/dc/terms/"), SLTERMS(
-                "http://stratuslab.eu/terms#");
+                "http://stratuslab.eu/terms#"), SLREQ(
+                "http://mp.stratuslab.eu/slreq#");
 
         final public String url;
         final public String abbrev;
@@ -46,47 +46,24 @@ public class CreateChecksums {
         }
     }
 
-    public static String documentToString(Document doc)
-            throws ParserConfigurationException, TransformerException {
-
-        TransformerFactory factory = TransformerFactory.newInstance();
-        factory.setAttribute("indent-number", Integer.valueOf(4));
-
-        Transformer transformer = factory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-
-        StringWriter sw = new StringWriter();
-        transformer.transform(new DOMSource(doc), new StreamResult(sw));
-        return sw.toString();
-
-    }
-
     public static Document createSkeletonRDF(File imageFile,
             Map<MetadataFields, String> userInput)
             throws ParserConfigurationException, IOException {
 
         FileInputStream fis = new FileInputStream(imageFile);
 
-        Map<String, BigInteger> checksums = MetadataUtils
-                .streamInfo(fis);
+        Map<String, BigInteger> checksums = streamInfo(fis);
 
-        String uuid = UUID.randomUUID().toString();
-        String identifier = MetadataUtils.sha1ToIdentifier(checksums.get("SHA-1"));
+        String identifier = sha1ToIdentifier(checksums.get("SHA-1"));
 
-        DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-        dbfac.setNamespaceAware(true);
-
-        DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
+        Document doc = XMLUtils.newDocument();
 
         Element root = createRootElement(doc);
 
-        root.appendChild(createMetadataElement(checksums, uuid, identifier,
-                doc, userInput));
+        root.appendChild(createMetadataElement(checksums, identifier, doc,
+                userInput));
 
-        root.appendChild(createEndorserElement(uuid, doc, userInput));
+        root.appendChild(createEndorsement(doc, userInput));
 
         return doc;
 
@@ -106,57 +83,58 @@ public class CreateChecksums {
     }
 
     private static Element createMetadataElement(
-            Map<String, BigInteger> checksums, String uuid, String identifier,
-            Document doc, Map<MetadataFields, String> userInput) {
+            Map<String, BigInteger> checksums, String identifier, Document doc,
+            Map<MetadataFields, String> userInput) {
 
         Element metadata = createRdfElement(doc, "Description");
 
-        createAttr(Namespace.RDF, doc, metadata, "refID", uuid);
+        createAttr(metadata, Namespace.RDF, "refID", "dummy");
 
-        createAttr(Namespace.RDF, doc, metadata, "about", "#" + identifier);
+        createAttr(metadata, Namespace.RDF, "about", "#" + identifier);
 
-        dctermsElement(doc, metadata, "identifier", identifier);
+        dctermsElement(metadata, "identifier", identifier);
 
-        sltermsElement(doc, metadata, "bytes", checksums.get("BYTES")
-                .toString());
+        sltermsElement(metadata, "bytes", checksums.get("BYTES").toString());
 
         for (Map.Entry<String, BigInteger> entry : checksums.entrySet()) {
             if (!"BYTES".equals(entry.getKey())) {
-                sltermsElement(doc, metadata, "checksum", entry.getKey() + ":"
+                sltermsElement(metadata, "checksum", entry.getKey() + ":"
                         + entry.getValue().toString(16));
             }
         }
 
-        dctermsElement(doc, metadata, "valid", formattedTime(SixMonths));
+        dctermsElement(metadata, "valid", formattedTime(SixMonths));
 
         for (Map.Entry<MetadataFields, String> entry : userInput.entrySet()) {
             MetadataFields field = entry.getKey();
             if (field.isMetadataDesc) {
-                createElement(field.ns, doc, metadata, field.tag, entry.getValue());
+                createElement(field.ns, metadata, field.tag, entry.getValue());
             }
         }
 
         return metadata;
     }
 
-    private static Element createEndorserElement(String uuid, Document doc,
+    private static Element createEndorsement(Document doc,
             Map<MetadataFields, String> userInput) {
 
-        Element endorser = createRdfElement(doc, "Description");
-        createAttr(Namespace.RDF, doc, endorser, "about", uuid);
+        Element endorsement = doc.createElementNS(Namespace.SLREQ.url,
+                "endorsement");
+        createAttr(endorsement, Namespace.RDF, "parseType", "Resource");
 
-        dctermsElement(doc, endorser, "created", formattedTime(0L));
+        dctermsElement(endorsement, "created", formattedTime(0L));
 
-        Element creator = dctermsElement(doc, endorser, "creator", null);
+        Element endorser = dctermsElement(endorsement, "creator", null);
+        createAttr(endorser, Namespace.RDF, "parseType", "Resource");
 
         for (Map.Entry<MetadataFields, String> entry : userInput.entrySet()) {
             MetadataFields field = entry.getKey();
             if (!field.isMetadataDesc) {
-                createElement(field.ns, doc, creator, field.tag, entry.getValue());
+                createElement(field.ns, endorser, field.tag, entry.getValue());
             }
         }
 
-        return endorser;
+        return endorsement;
     }
 
     private static String formattedTime(long offset) {
@@ -164,8 +142,10 @@ public class CreateChecksums {
         return xmlDateTimeFormat.format(time);
     }
 
-    public static Attr createAttr(Namespace ns, Document doc, Element element,
-            String qname, String value) {
+    public static Attr createAttr(Element element, Namespace ns, String qname,
+            String value) {
+
+        Document doc = element.getOwnerDocument();
 
         Attr attr = doc.createAttributeNS(ns.url, qname);
         attr.setPrefix(ns.abbrev);
@@ -183,20 +163,27 @@ public class CreateChecksums {
         return element;
     }
 
-    public static Element dctermsElement(Document doc, Element parent,
-            String qname, String text) {
+    public static Element dctermsElement(Element parent, String qname,
+            String text) {
 
-        return createElement(Namespace.DCTERMS, doc, parent, qname, text);
+        return createElement(Namespace.DCTERMS, parent, qname, text);
     }
 
-    public static Element sltermsElement(Document doc, Element parent,
-            String qname, String text) {
+    public static Element sltermsElement(Element parent, String qname,
+            String text) {
 
-        return createElement(Namespace.SLTERMS, doc, parent, qname, text);
+        return createElement(Namespace.SLTERMS, parent, qname, text);
     }
 
-    public static Element createElement(Namespace ns, Document doc,
-            Element parent, String qname, String text) {
+    public static Element slreqElement(Element parent, String qname, String text) {
+
+        return createElement(Namespace.SLREQ, parent, qname, text);
+    }
+
+    public static Element createElement(Namespace ns, Element parent,
+            String qname, String text) {
+
+        Document doc = parent.getOwnerDocument();
 
         Element element = doc.createElementNS(ns.url, qname);
         element.setPrefix(ns.abbrev);
