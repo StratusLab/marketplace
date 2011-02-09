@@ -9,6 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
+
+import org.w3c.dom.Node;
+
 public class MetadataUtils {
 
     final static private String[] algorithms = { "MD5", "SHA-1", "SHA-256",
@@ -115,6 +123,27 @@ public class MetadataUtils {
             sha1 = sha1.or(bits);
         }
         return sha1;
+    }
+
+    public static boolean isSignatureOK(Node node) {
+
+        try {
+
+            DOMValidateContext context = new DOMValidateContext(
+                    new X509KeySelector(), node);
+
+            XMLSignatureFactory factory = XMLSignatureFactory
+                    .getInstance("DOM");
+            XMLSignature signature = factory.unmarshalXMLSignature(context);
+
+            return signature.validate(context);
+
+        } catch (MarshalException consumed) {
+            return false;
+
+        } catch (XMLSignatureException consumed) {
+            return false;
+        }
     }
 
 }
