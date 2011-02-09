@@ -8,62 +8,78 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.restlet.ext.xml.DomRepresentation;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
+
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This resource preprents an individual race instance
  */
 public class ImageResource extends BaseResource {
 
-    Model image;
     private String identifier;
     
     @Override
     protected void doInit() throws ResourceException {
         // Get the "identifier" attribute value taken from the URI template
         // /{identifier}.
-        //this.identifier = (String) getRequest().getAttributes().get("identifier");
-        this.identifier = getRequest().getResourceRef().toString(); 
-        // Get the image directly from the "persistence layer".
-        this.image = getImage(identifier);
-        
-        setExisting(this.image != null);
+        this.identifier = (String) getRequest().getAttributes().get("identifier");
     }
-
-    /**
-     * Handle DELETE requests.
-     */
-    @Delete
-    public void removeImage() {
-        if (image != null) {
-            // Remove the image from the list.
-            removeImage(identifier);
-        }
-
-        // Tells the client that the request has been successfully fulfilled.
-        setStatus(Status.SUCCESS_NO_CONTENT);
-    }
-
+    
     @Get("xml")
     public Representation toXml() {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        BufferedOutputStream out = new BufferedOutputStream(bytes);
+       try {
+            DomRepresentation representation = new DomRepresentation(
+                    MediaType.TEXT_XML);
 
-        image.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
-        image.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
-        RDFWriter writer = image.getWriter();
-        writer.write(image, out, "");
-        StringRepresentation representation = 
-                new StringRepresentation(new StringBuffer(bytes.toString()), 
-                                         MediaType.APPLICATION_RDF_XML);
+             Document d = representation.getDocument();
+            Element r = d.createElement("metadata");
+            d.appendChild(r);
 
-        // Returns the XML representation of this document.
-        return representation;
+            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
+                        "SELECT ?endorser ?created " +
+                        "WHERE {" +
+                        " ?y <http://purl.org/dc/terms/identifier> \"" + this.identifier + "\" . " +
+                        " ?z slterms:email ?endorser . " +
+                        " ?x <http://purl.org/dc/terms/created> ?created . }";
+
+            ArrayList results = (ArrayList)query(queryString);
+
+            for ( int i = 0; i < results.size(); i++ ){
+                Element eltItem = d.createElement("entry");
+
+                Element eltEndorser = d.createElement("endorser");
+                String endorser = (String)(((HashMap)results.get(i))).get("endorser");
+                eltEndorser.appendChild(d.createTextNode(endorser));
+                eltItem.appendChild(eltEndorser);
+
+                Element eltCreated = d.createElement("created");
+                String created = (String)(((HashMap)results.get(i))).get("created");
+                eltCreated.appendChild(d.createTextNode(created));
+                eltItem.appendChild(eltCreated);
+
+                r.appendChild(eltItem);
+            }
+
+            d.normalizeDocument();
+
+            return representation;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null; 
     }
   
 }

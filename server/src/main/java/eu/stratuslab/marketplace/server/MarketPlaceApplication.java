@@ -16,7 +16,6 @@ import org.openrdf.sail.memory.MemoryStore;
 public class MarketPlaceApplication extends Application {
 
     /** The image metadata is stored in a database. */
-    //private Store images = null;
     private Repository images = null;   
  
     public MarketPlaceApplication() {
@@ -40,6 +39,7 @@ public class MarketPlaceApplication extends Application {
     public Restlet createInboundRoot() {
         // Create a router Restlet that defines routes.
         Router router = new Router(getContext());
+        //router.setMatchingMode(Template.MODE_STARTS_WITH);
         // Defines a route for the resource "list of images"
         router.attach("/images", ImagesResource.class);
         // Defines a route for the resource "image"

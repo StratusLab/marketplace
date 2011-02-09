@@ -15,7 +15,6 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.SimpleSelector;
 import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.shared.AlreadyExistsException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,55 +57,16 @@ public class ImagesResource extends BaseResource {
         String ref = getRequest().getResourceRef().toString();
         String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
-	try{
-            storeImage(iri, image);
+        storeImage(iri, image);
+        // Set the response's status and entity
+        setStatus(Status.SUCCESS_CREATED);
+        Representation rep = new StringRepresentation("Image created",
+            MediaType.TEXT_PLAIN);
+        // Indicates where is located the new resource.
+        rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
+             + identifier + "/" + endorser + "/" + created);
+        result = rep;
 
-           // Set the response's status and entity
-            setStatus(Status.SUCCESS_CREATED);
-            Representation rep = new StringRepresentation("Image created",
-                 MediaType.TEXT_PLAIN);
-            // Indicates where is located the new resource.
-            rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
-                 + identifier + "/" + endorser + "/" + created);
-            result = rep;
-        } catch(AlreadyExistsException are){
-            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-            result = generateErrorRepresentation("Image " + identifier
-                + " already exists.", "1");   
-        }
-
-        return result;
-    }
-
-    /**
-     * Generate an XML representation of an error response.
-     * 
-     * @param errorMessage
-     *            the error message.
-     * @param errorCode
-     *            the error code.
-    */
-    private Representation generateErrorRepresentation(String errorMessage,
-            String errorCode) {
-        DomRepresentation result = null;
-        // This is an error
-        // Generate the output representation
-        try {
-            result = new DomRepresentation(MediaType.TEXT_XML);
-            // Generate a DOM document representing the list of
-            // items.
-            Document d = result.getDocument();
-            Element eltError = d.createElement("error");
-            Element eltCode = d.createElement("code");
-            eltCode.appendChild(d.createTextNode(errorCode));
-            eltError.appendChild(eltCode);
-            Element eltMessage = d.createElement("message");
-            eltMessage.appendChild(d.createTextNode(errorMessage));
-            eltError.appendChild(eltMessage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
         return result;
     }
     
@@ -127,11 +87,10 @@ public class ImagesResource extends BaseResource {
             d.appendChild(r);
 
             String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
-                        "SELECT ?identifier ?endorser ?created " +
+                        "SELECT ?identifier ?description " +
                         "WHERE {" +
                         " ?y <http://purl.org/dc/terms/identifier> ?identifier . " +
-                        " ?z slterms:email ?endorser . " +
-                        " ?x <http://purl.org/dc/terms/created> ?created . }";
+                        " ?y <http://purl.org/dc/terms/description> ?description . }";
             
             ArrayList results = (ArrayList)query(queryString);
 
@@ -143,15 +102,10 @@ public class ImagesResource extends BaseResource {
                 eltIdentifier.appendChild(d.createTextNode(identifier));
                 eltItem.appendChild(eltIdentifier);
         
-                Element eltEndorser = d.createElement("endorser");
-                String endorser = (String)(((HashMap)results.get(i))).get("endorser");
-                eltEndorser.appendChild(d.createTextNode(endorser));
-                eltItem.appendChild(eltEndorser);
-
-                Element eltCreated = d.createElement("created");
-                String created = (String)(((HashMap)results.get(i))).get("created");
-                eltCreated.appendChild(d.createTextNode(created));
-                eltItem.appendChild(eltCreated);
+                Element eltDescription = d.createElement("description");
+                String description = (String)(((HashMap)results.get(i))).get("description");
+                eltDescription.appendChild(d.createTextNode(description));
+                eltItem.appendChild(eltDescription);
 
                 r.appendChild(eltItem);
             }
