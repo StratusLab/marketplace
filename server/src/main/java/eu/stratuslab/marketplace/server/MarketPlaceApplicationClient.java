@@ -45,19 +45,17 @@ public class MarketPlaceApplicationClient {
         Model image = mk.createDefaultModel();
         image.read(rdf.getStream(), "");
 
-        Statement state = (image.listStatements(
-                  new SimpleSelector(null,
-                  ResourceFactory.createProperty("http://stratuslab.eu/terms#", "email"),
-                         (RDFNode)null))).nextStatement();
-        String endorser = state.getObject().toString();
-        System.out.println("Endorser:  " + endorser);
-
-        Statement id = (image.listStatements(
-                   new SimpleSelector(null, DCTerms.identifier,
-                         (RDFNode)null))).nextStatement();
-        String identifier = id.getObject().toString();
-        System.out.println("Identifier:  " + identifier);
-        
+        /*
+        String identifier = ((image.listStatements(
+                              new SimpleSelector(null, DCTerms.identifier,
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        String endorser = ((image.listStatements(
+                              new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        String created = ((image.listStatements(
+                              new SimpleSelector(null, DCTerms.created,
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        */
         try {
             if(imagesResource != null){
                 Representation r = imagesResource.post(rdf);
@@ -79,8 +77,8 @@ public class MarketPlaceApplicationClient {
             get(imagesResource);
             System.out.println();            
 
-            //get(endorsersResource);
-            //System.out.println();
+            get(endorsersResource);
+            System.out.println();
 
             // delete the image
             //imageResource.delete();

@@ -20,22 +20,17 @@
       <name>Public online Restlet repository</name>  
       <url>http://maven.restlet.org</url>  
    </repository>
+   <repository>
+      <id>openrdf</id>
+      <name>Public online sesame repository</name>                  
+      <url>http://repo.aduna-software.org/maven2/releases</url>
+    </repository>
   </repositories>
 
   <dependencies>
     <dependency>  
         <groupId>com.hp.hpl.jena</groupId>
         <artifactId>jena</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>arq</artifactId>
-        <version>2.8.7</version>
-    </dependency>
-    <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>sdb</artifactId>
-        <version>1.3.3</version>
     </dependency>
     <dependency>  
         <groupId>org.restlet.jee</groupId>  
@@ -53,9 +48,26 @@
          <version>2.0.4</version>
     </dependency>
     <dependency>
-         <groupId>xalan</groupId>
-         <artifactId>xalan</artifactId>
-         <version>2.7.1</version>
+       <groupId>org.openrdf.sesame</groupId>
+       <artifactId>sesame-repository-sail</artifactId>
+       <version>2.3.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-sail-memory</artifactId>
+        <version>2.3.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-rdfxml</artifactId>
+        <version>2.3.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-queryparser-sparql</artifactId>
+        <version>2.3.2</version>
+        <scope>runtime</scope>
     </dependency>
     <dependency>
         <groupId>mysql</groupId>
@@ -95,7 +107,6 @@
              </executions>
          </plugin>
 
-<!-- Turn off use of FindBugs until code it updated.
          <plugin>
 	     <groupId>org.codehaus.mojo</groupId>
 	     <artifactId>findbugs-maven-plugin</artifactId>
@@ -109,7 +120,6 @@
 	          </execution>
 	     </executions>
           </plugin>
--->
 
       </plugins>
 

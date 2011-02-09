@@ -48,8 +48,18 @@ public class ImagesResource extends BaseResource {
         String identifier = ((image.listStatements(
                               new SimpleSelector(null, DCTerms.identifier,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
+        String endorser = ((image.listStatements(
+                              new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        String created = ((image.listStatements(
+                              new SimpleSelector(null, DCTerms.created,
+                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+
+        String ref = getRequest().getResourceRef().toString();
+        String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
+
 	try{
-            storeImage(identifier, image);            
+            storeImage(iri, image);
 
            // Set the response's status and entity
             setStatus(Status.SUCCESS_CREATED);
@@ -57,7 +67,7 @@ public class ImagesResource extends BaseResource {
                  MediaType.TEXT_PLAIN);
             // Indicates where is located the new resource.
             rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
-                 + identifier);
+                 + identifier + "/" + endorser + "/" + created);
             result = rep;
         } catch(AlreadyExistsException are){
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
@@ -117,20 +127,31 @@ public class ImagesResource extends BaseResource {
             d.appendChild(r);
 
             String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
-                        "SELECT ?identifier " +
+                        "SELECT ?identifier ?endorser ?created " +
                         "WHERE {" +
-                        " ?y <http://purl.org/dc/terms/identifier> ?identifier . }";
-
+                        " ?y <http://purl.org/dc/terms/identifier> ?identifier . " +
+                        " ?z slterms:email ?endorser . " +
+                        " ?x <http://purl.org/dc/terms/created> ?created . }";
             
-            ArrayList results = (ArrayList)query(queryString, getImages());
+            ArrayList results = (ArrayList)query(queryString);
 
             for ( int i = 0; i < results.size(); i++ ){
                 Element eltItem = d.createElement("image");
 
-                Element eltName = d.createElement("identifier");
-                String email = (String)(((HashMap)results.get(i))).get("identifier");
-                eltName.appendChild(d.createTextNode(email));
-                eltItem.appendChild(eltName);
+                Element eltIdentifier = d.createElement("identifier");
+                String identifier = (String)(((HashMap)results.get(i))).get("identifier");
+                eltIdentifier.appendChild(d.createTextNode(identifier));
+                eltItem.appendChild(eltIdentifier);
+        
+                Element eltEndorser = d.createElement("endorser");
+                String endorser = (String)(((HashMap)results.get(i))).get("endorser");
+                eltEndorser.appendChild(d.createTextNode(endorser));
+                eltItem.appendChild(eltEndorser);
+
+                Element eltCreated = d.createElement("created");
+                String created = (String)(((HashMap)results.get(i))).get("created");
+                eltCreated.appendChild(d.createTextNode(created));
+                eltItem.appendChild(eltCreated);
 
                 r.appendChild(eltItem);
             }

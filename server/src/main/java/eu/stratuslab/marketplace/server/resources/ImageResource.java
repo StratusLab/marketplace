@@ -27,14 +27,10 @@ public class ImageResource extends BaseResource {
     protected void doInit() throws ResourceException {
         // Get the "identifier" attribute value taken from the URI template
         // /{identifier}.
-        this.identifier = (String) getRequest().getAttributes().get("identifier");
-         
+        //this.identifier = (String) getRequest().getAttributes().get("identifier");
+        this.identifier = getRequest().getResourceRef().toString(); 
         // Get the image directly from the "persistence layer".
-        if (getImages().containsNamedModel(identifier)){
-           this.image = getImages().getNamedModel(identifier);
-        } else {
-           this.image = null;
-        }
+        this.image = getImage(identifier);
         
         setExisting(this.image != null);
     }
@@ -46,7 +42,7 @@ public class ImageResource extends BaseResource {
     public void removeImage() {
         if (image != null) {
             // Remove the image from the list.
-            //getImages().removeNamedModel(identifier);
+            removeImage(identifier);
         }
 
         // Tells the client that the request has been successfully fulfilled.

@@ -4,26 +4,9 @@ import org.restlet.resource.ServerResource;
 
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 
-import com.hp.hpl.jena.query.DataSource;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.QuerySolution;
-
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
-
-import com.hp.hpl.jena.sdb.Store;
-import com.hp.hpl.jena.sdb.SDBFactory;
-import com.hp.hpl.jena.sdb.store.DatasetStore;
-import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.sdb.SDB;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -40,6 +23,18 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
+import org.openrdf.OpenRDFException;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.openrdf.rio.RDFHandler;
+
 /**
  *  Base resource class that supports common behaviours or attributes shared by
  *  all resources.
@@ -52,64 +47,111 @@ public abstract class BaseResource extends ServerResource {
      * Returns the map of images managed by this application.
      * @return the map of images managed by this application.
     */
-    protected Store getImageStore(){
+    protected Repository getImageStore(){
 		return ((MarketPlaceApplication) getApplication()).getImageStore();
     }
 
     protected void storeImage(String iri, Model rdf) {
-        Model sdbModel = SDBFactory.connectNamedModel(getImageStore(), iri);
-        sdbModel.add(rdf);
+        try {
+            RepositoryConnection con = getImageStore().getConnection();
+            ValueFactory vf = con.getValueFactory();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            BufferedOutputStream out = new BufferedOutputStream(bytes);
+            rdf.getWriter().write(rdf, out, "");
+
+            try {
+                con.add(new ByteArrayInputStream(bytes.toString().getBytes()), "", RDFFormat.RDFXML, 
+                               vf.createURI(iri));
+            }
+            finally {
+                con.close();
+            }
+        }
+        catch (OpenRDFException e) {
+            e.printStackTrace();
+        }
+        catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    protected DataSource getImages() {
-        Dataset ds = SDBFactory.connectDataset(getImageStore());
-        DataSource images = DatasetFactory.create(ds);
-
-        return images;
+    protected Model getImage(String iri) {
+        Model model = null;
+        try {
+            RepositoryConnection con = getImageStore().getConnection();
+            ValueFactory vf = con.getValueFactory();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            BufferedOutputStream out = new BufferedOutputStream(bytes);
+            RDFHandler rdfxmlWriter = new RDFXMLWriter(out);
+            logger.log(Level.INFO, bytes.toString());
+            try {
+                con.export(rdfxmlWriter, vf.createURI(iri));
+            }
+            finally {
+                con.close();
+            }
+            model = ModelFactory.createMemModelMaker().createDefaultModel();
+            model.read(new ByteArrayInputStream(bytes.toString().getBytes()), "");
+            model.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
+            model.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
+        }
+        catch (OpenRDFException e) {
+            e.printStackTrace();
+        }
+       
+        return model;
     }
 
-    protected Collection query(String queryString, DataSource data){
-        //This should not be necessary, won't work in reality and is clearly wrong!!!
-        DataSource dataCopy = forceDataSourceCopy(data);
-        Query query = QueryFactory.create(queryString, Syntax.syntaxARQ);
-        QueryExecution qe = QueryExecutionFactory.create(query, dataCopy);
-        qe.getContext().set(SDB.unionDefaultGraph, true);
-        ResultSet results = qe.execSelect();
-        
-        List<String> columnNames = results.getResultVars();
-        int cols = columnNames.size();
-
+    protected void removeImage(String iri) {
+        try {
+            RepositoryConnection con = getImageStore().getConnection();
+            ValueFactory vf = con.getValueFactory();
+            try {
+                con.clear(vf.createURI(iri));
+            }
+            finally {
+                con.close();
+            }
+        }
+        catch (OpenRDFException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    protected Collection query(String queryString){
         ArrayList list = new ArrayList();
 
-        while(results.hasNext()){
-		QuerySolution solution = results.next();
-		HashMap row = new HashMap(cols,1);
-                for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
-                   String columnName = namesIter.next();
-                   row.put(columnName,
-                          (solution.getLiteral(columnName)).getString());
-                }
-                list.add(row);
-        } 
-        qe.close();
+        try {
+            RepositoryConnection con = getImageStore().getConnection();
+            try {
+                TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+                TupleQueryResult results = tupleQuery.evaluate();
+                try {
+                    List<String> columnNames = results.getBindingNames();
+                    int cols = columnNames.size();
+
+                    while(results.hasNext()){
+		        BindingSet solution = results.next();
+		        HashMap row = new HashMap(cols,1);
+                        for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
+                           String columnName = namesIter.next();
+                           row.put(columnName, (solution.getValue(columnName)).stringValue());
+                        }
+                        list.add(row);
+                     }   
+                  } finally {
+                      results.close();
+                  }
+              }
+              finally {
+                  con.close();
+              }
+          }
+          catch (OpenRDFException e) {
+              e.printStackTrace();
+          }
 
         return ((Collection) list); 
     }
 
-    private DataSource forceDataSourceCopy(DataSource data){
-        ModelMaker mk = ModelFactory.createMemModelMaker();
-        DataSource images = DatasetFactory.create(mk.createDefaultModel());
-
-        for ( Iterator<String> imagesIter = data.listNames(); imagesIter.hasNext(); ){
-            String id = imagesIter.next();
-            Model image = getImages().getNamedModel(id);
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bytes);
-            image.getWriter().write(image, out, "");
-            images.addNamedModel(id, mk.createDefaultModel().read(new
-            ByteArrayInputStream(bytes.toString().getBytes()),""));
-        }
-
-        return images;
-    }
 }
