@@ -29,38 +29,38 @@ import java.io.IOException;
 /**
  * This resource represents all races in the appliction
  */
-public class ImagesResource extends BaseResource {
+public class MDataResource extends BaseResource {
 
     /**
      * Handle POST requests: create a new item.
      */
     @Post
-    public Representation acceptItem(Representation entity) throws IOException {
+    public Representation acceptMetadatum(Representation entity) throws IOException {
         Representation result = null;
 
         ModelMaker mk = ModelFactory.createMemModelMaker();
-        Model image = mk.createDefaultModel();
-        image.read(entity.getStream(), "");
-        image.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
-        image.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
+        Model datum = mk.createDefaultModel();
+        datum.read(entity.getStream(), "");
+        datum.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
+        datum.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
 
-        String identifier = ((image.listStatements(
+        String identifier = ((datum.listStatements(
                               new SimpleSelector(null, DCTerms.identifier,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
-        String endorser = ((image.listStatements(
-                              new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
+        String endorser = ((datum.listStatements(
+                              new SimpleSelector(null, datum.createProperty("http://stratuslab.eu/terms#", "email"),
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
-        String created = ((image.listStatements(
+        String created = ((datum.listStatements(
                               new SimpleSelector(null, DCTerms.created,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
 
         String ref = getRequest().getResourceRef().toString();
         String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
-        storeImage(iri, image);
+        storeMetadatum(iri, datum);
         // Set the response's status and entity
         setStatus(Status.SUCCESS_CREATED);
-        Representation rep = new StringRepresentation("Image created",
+        Representation rep = new StringRepresentation("Metadata entry created",
             MediaType.TEXT_PLAIN);
         // Indicates where is located the new resource.
         rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
@@ -83,25 +83,37 @@ public class ImagesResource extends BaseResource {
             // Generate a DOM document representing the list of
             // items.
             Document d = representation.getDocument();
-            Element r = d.createElement("images");
+            Element r = d.createElement("metadata");
             d.appendChild(r);
 
             String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
-                        "SELECT ?identifier ?description " +
+                        "SELECT ?identifier ?endorser ?created ?description " +
                         "WHERE {" +
                         " ?y <http://purl.org/dc/terms/identifier> ?identifier . " +
-                        " ?y <http://purl.org/dc/terms/description> ?description . }";
+                        " ?y <http://purl.org/dc/terms/description> ?description ." + 
+                        " ?z slterms:email ?endorser . " +
+                        " ?x <http://purl.org/dc/terms/created> ?created . }";
             
             ArrayList results = (ArrayList)query(queryString);
 
             for ( int i = 0; i < results.size(); i++ ){
-                Element eltItem = d.createElement("image");
+                Element eltItem = d.createElement("entry");
 
                 Element eltIdentifier = d.createElement("identifier");
                 String identifier = (String)(((HashMap)results.get(i))).get("identifier");
                 eltIdentifier.appendChild(d.createTextNode(identifier));
                 eltItem.appendChild(eltIdentifier);
-        
+
+                Element eltEndorser = d.createElement("endorser");
+                String endorser = (String)(((HashMap)results.get(i))).get("endorser");
+                eltEndorser.appendChild(d.createTextNode(endorser));
+                eltItem.appendChild(eltEndorser);
+
+                Element eltCreated = d.createElement("created");
+                String created = (String)(((HashMap)results.get(i))).get("created");
+                eltCreated.appendChild(d.createTextNode(created));
+                eltItem.appendChild(eltCreated);
+
                 Element eltDescription = d.createElement("description");
                 String description = (String)(((HashMap)results.get(i))).get("description");
                 eltDescription.appendChild(d.createTextNode(description));

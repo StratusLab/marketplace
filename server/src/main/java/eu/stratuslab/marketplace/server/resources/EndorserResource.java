@@ -10,8 +10,7 @@ import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-import org.restlet.resource.Post;
-import org.restlet.data.Status;
+import org.restlet.resource.ResourceException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,10 +19,17 @@ import org.w3c.dom.Element;
 /**
  * This resource represents all races in the appliction
  */
-public class EndorsersResource extends BaseResource {
+public class EndorserResource extends BaseResource {
     
+    private String email = null;
+
+   @Override
+    protected void doInit() throws ResourceException {
+        this.email = (String) getRequest().getAttributes().get("email");
+    } 
+
     /**
-     * Returns a listing of all registered images.
+     * Returns a listing of endorser.
      */
     @Get("xml")
     public Representation toXml() {
@@ -32,27 +38,27 @@ public class EndorsersResource extends BaseResource {
             DomRepresentation representation = new DomRepresentation(
                     MediaType.TEXT_XML);
 
-            // Generate a DOM document representing the list of
-            // items.
             Document d = representation.getDocument();
-            Element r = d.createElement("endorsers");
+            Element r = d.createElement("endorser");
             d.appendChild(r);
             
-            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> SELECT ?email { _:z slterms:email ?email . }";
+            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
+                                 "SELECT DISTINCT ?fullname " +
+                                 " { _:z slterms:email \"" + this.email +"\" . " +
+                                 " _:z slterms:full-name ?fullname }";
 
             ArrayList results = (ArrayList)query(queryString);
-  
-            for ( int i = 0; i < results.size(); i++ ){
-                Element eltItem = d.createElement("endorser");
 
-                Element eltName = d.createElement("email");
-                String email = (String)(((HashMap)results.get(i))).get("email");
-                eltName.appendChild(d.createTextNode(email));
-                eltItem.appendChild(eltName);
+            Element eltName = d.createElement("full-name");
+            String fullName = (String)(((HashMap)results.get(0))).get("fullname");
+            eltName.appendChild(d.createTextNode(fullName));
 
-                r.appendChild(eltItem);
-            } 
-            
+            Element eltEmail = d.createElement("email");
+            eltEmail.appendChild(d.createTextNode(email));
+
+            r.appendChild(eltName);
+            r.appendChild(eltEmail);                    
+    
             d.normalizeDocument();
 
             // Returns the XML representation of this document.

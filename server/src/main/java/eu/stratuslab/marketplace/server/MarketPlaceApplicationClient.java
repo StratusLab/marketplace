@@ -35,7 +35,7 @@ public class MarketPlaceApplicationClient {
         }
 
         // Define our Restlet client resources.
-        ClientResource imagesResource = new ClientResource(url + "/images");
+        ClientResource metadataResource = new ClientResource(url + "/metadata");
         ClientResource endorsersResource = new ClientResource(url + "/endorsers");
 
         // Create a new item
@@ -44,11 +44,11 @@ public class MarketPlaceApplicationClient {
         Model image = mk.createDefaultModel();
         image.read(rdf.getStream(), "");
 
-        
+        /*
         String identifier = ((image.listStatements(
                               new SimpleSelector(null, DCTerms.identifier,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
-        /*
+        
         String endorser = ((image.listStatements(
                               new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
@@ -56,13 +56,12 @@ public class MarketPlaceApplicationClient {
                               new SimpleSelector(null, DCTerms.created,
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
         */
-        ClientResource imageResource = new ClientResource(url + "/images/" + identifier);
-        //ClientResource metadataResource = null;
+        ClientResource metadatumResource = null;
 
         try {
-            if(imagesResource != null){
-                imagesResource.post(rdf);
-                //metadataResource = new ClientResource(r.getLocationRef());
+            if(metadataResource != null){
+                Representation r = metadataResource.post(rdf);
+                metadatumResource = new ClientResource(r.getLocationRef());
             }
         } catch (ResourceException e) {
             System.out.println("Error  status: " + e.getStatus());
@@ -70,17 +69,18 @@ public class MarketPlaceApplicationClient {
         }
 
         // Consume the response's entity which releases the connection
-        imagesResource.getResponseEntity().exhaust();
+        metadataResource.getResponseEntity().exhaust();
 
-        if (imageResource != null) {
-            // Prints the list of registered images.
-            get(imagesResource);
+        if (metadatumResource != null) {
+            // Prints the list of registered metadata.
+            get(metadataResource);
             System.out.println();            
 
-            // Prints the list of metadata entried for an image.
-            get(imageResource);
+            // Prints a metadata entry.
+            get(metadatumResource);
             System.out.println();
             
+            // Prints the current list of endorsers
             get(endorsersResource);
             System.out.println();
        }
