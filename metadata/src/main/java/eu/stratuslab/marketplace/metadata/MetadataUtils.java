@@ -17,6 +17,7 @@ import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 public class MetadataUtils {
 
     final static private String[] algorithms = { "MD5", "SHA-1", "SHA-256",
