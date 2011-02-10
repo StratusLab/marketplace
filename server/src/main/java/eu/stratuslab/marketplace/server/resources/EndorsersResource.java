@@ -23,38 +23,6 @@ import org.w3c.dom.Element;
 public class EndorsersResource extends BaseResource {
     
     /**
-     * Generate an XML representation of an error response.
-     * 
-     * @param errorMessage
-     *            the error message.
-     * @param errorCode
-     *            the error code.
-    */
-    private Representation generateErrorRepresentation(String errorMessage,
-            String errorCode) {
-        DomRepresentation result = null;
-        // This is an error
-        // Generate the output representation
-        try {
-            result = new DomRepresentation(MediaType.TEXT_XML);
-            // Generate a DOM document representing the list of
-            // items.
-            Document d = result.getDocument();
-            Element eltError = d.createElement("error");
-            Element eltCode = d.createElement("code");
-            eltCode.appendChild(d.createTextNode(errorCode));
-            eltError.appendChild(eltCode);
-            Element eltMessage = d.createElement("message");
-            eltMessage.appendChild(d.createTextNode(errorMessage));
-            eltError.appendChild(eltMessage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        return result;
-    }
-    
-    /**
      * Returns a listing of all registered images.
      */
     @Get("xml")

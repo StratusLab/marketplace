@@ -47,13 +47,13 @@ public abstract class BaseResource extends ServerResource {
      * Returns the map of images managed by this application.
      * @return the map of images managed by this application.
     */
-    protected Repository getImageStore(){
-		return ((MarketPlaceApplication) getApplication()).getImageStore();
+    protected Repository getMetadataStore(){
+		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
 
-    protected void storeImage(String iri, Model rdf) {
+    protected void storeMetadatum(String iri, Model rdf) {
         try {
-            RepositoryConnection con = getImageStore().getConnection();
+            RepositoryConnection con = getMetadataStore().getConnection();
             ValueFactory vf = con.getValueFactory();
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             BufferedOutputStream out = new BufferedOutputStream(bytes);
@@ -75,15 +75,15 @@ public abstract class BaseResource extends ServerResource {
         }
     }
 
-    protected Model getImage(String iri) {
+    protected Model getMetadatum(String iri) {
         Model model = null;
         try {
-            RepositoryConnection con = getImageStore().getConnection();
+            RepositoryConnection con = getMetadataStore().getConnection();
             ValueFactory vf = con.getValueFactory();
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             BufferedOutputStream out = new BufferedOutputStream(bytes);
             RDFHandler rdfxmlWriter = new RDFXMLWriter(out);
-            logger.log(Level.INFO, bytes.toString());
+            
             try {
                 con.export(rdfxmlWriter, vf.createURI(iri));
             }
@@ -102,9 +102,9 @@ public abstract class BaseResource extends ServerResource {
         return model;
     }
 
-    protected void removeImage(String iri) {
+    protected void removeMetadatum(String iri) {
         try {
-            RepositoryConnection con = getImageStore().getConnection();
+            RepositoryConnection con = getMetadataStore().getConnection();
             ValueFactory vf = con.getValueFactory();
             try {
                 con.clear(vf.createURI(iri));
@@ -122,7 +122,7 @@ public abstract class BaseResource extends ServerResource {
         ArrayList list = new ArrayList();
 
         try {
-            RepositoryConnection con = getImageStore().getConnection();
+            RepositoryConnection con = getMetadataStore().getConnection();
             try {
                 TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
                 TupleQueryResult results = tupleQuery.evaluate();
