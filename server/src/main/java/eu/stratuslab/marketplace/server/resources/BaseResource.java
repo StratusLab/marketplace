@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,6 +35,7 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.RDFHandler;
+import org.openrdf.model.Value;
 
 /**
  *  Base resource class that supports common behaviours or attributes shared by
