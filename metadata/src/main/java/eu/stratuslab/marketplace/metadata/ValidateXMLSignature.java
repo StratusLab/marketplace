@@ -20,6 +20,8 @@ public class ValidateXMLSignature {
         NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
                 "Signature");
 
+        System.err.println("SIGNATURES: " + nl.getLength());
+
         if (nl.getLength() == 0) {
             isValid = false;
         }

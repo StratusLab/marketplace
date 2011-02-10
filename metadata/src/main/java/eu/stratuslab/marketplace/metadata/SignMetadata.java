@@ -16,22 +16,24 @@ import eu.stratuslab.marketplace.XMLUtils;
 
 public class SignMetadata {
 
-    final static private String USAGE = "Usage: java eu.stratuslab.marketplace.metadata.SignMetadata [metadata file] [P12 GridCertificate] [P12 GridCertificate Passwd]";
+    final static private String USAGE = "Usage:\n"
+            + "  java eu.stratuslab.marketplace.metadata.SignMetadata \\\n"
+            + "    [metadata file] [signed metadata file] [P12 Certificate] [Password]";
 
     public static final Pattern cnExtractionPattern = Pattern
             .compile(".*CN=([^,]*?),.*");
 
     public static void main(String[] args) throws Exception {
 
-        if (args.length != 3) {
+        if (args.length != 4) {
             System.err.println(USAGE);
             System.exit(1);
         }
 
         File metadataFile = new File(args[0]);
-        File outputFile = new File(args[0] + ".signed");
-        File pkcs12File = new File(args[1]);
-        String passwd = args[2];
+        File outputFile = new File(args[1]);
+        File pkcs12File = new File(args[2]);
+        String passwd = args[3];
 
         // Read the PKCS12 information.
         KeyStore keyStore = X509Utils.pkcs12ToKeyStore(pkcs12File, passwd);

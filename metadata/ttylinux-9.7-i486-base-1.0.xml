@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    xmlns:dcterms="http://purl.org/dc/terms/" xmlns:slterms="http://stratuslab.eu/terms#" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
+    xmlns:dcterms="http://purl.org/dc/terms/" xmlns:slreq="http://mp.stratuslab.eu/slreq#"  xmlns:slterms="http://mp.stratuslab.eu/slterms#" 
     xml:base="http://mp.stratuslab.eu/">
 
     <rdf:Description rdf:about="#MMZu9WvwKIro-rtBQfDk4PsKO7_">
@@ -8,11 +8,27 @@
         <dcterms:identifier>MMZu9WvwKIro-rtBQfDk4PsKO7_</dcterms:identifier>
 
         <slreq:bytes>100</slreq:bytes>
-        <slreq:checksum slreq:type="MD5">ec434ef8a756cf4787e39247abcc8382</slreq:checksum>
-        <slreq:checksum slreq:type="SHA-1">c319bbd5afc0a22ba3eaed0507c39383ec28eeff</slreq:checksum>
-        <slreq:checksum slreq:type="SHA-256">fb84224a5b7a788549a64a01185c961a2894b9c4142fecfa4cffb20eff433cec</slreq:checksum>
-        <slreq:checksum slreq:type="SHA-512">816e6f78364c814701f6497dd3e3e076ba25754560cff489b33ca2e46889ad4ec14497fb6fce11fb7631b006e7621b2442a7da7fe6a92fc888ea6d9097b9e453</slreq:checksum>
 
+        <slreq:checksum rdf:parseType="Resource">
+          <slreq:algorithm>MD5</slreq:algorithm>
+          <slreq:value>ec434ef8a756cf4787e39247abcc8382</slreq:value>
+        </slreq:checksum>
+
+        <slreq:checksum rdf:parseType="Resource">
+          <slreq:algorithm>SHA-1</slreq:algorithm>
+          <slreq:value>c319bbd5afc0a22ba3eaed0507c39383ec28eeff</slreq:value>
+        </slreq:checksum>
+
+        <slreq:checksum rdf:parseType="Resource">
+          <slreq:algorithm>SHA-256</slreq:algorithm>
+          <slreq:value>fb84224a5b7a788549a64a01185c961a2894b9c4142fecfa4cffb20eff433cec</slreq:value>
+        </slreq:checksum>
+
+        <slreq:checksum rdf:parseType="Resource">
+          <slreq:algorithm>SHA-512</slreq:algorithm>
+          <slreq:value>816e6f78364c814701f6497dd3e3e076ba25754560cff489b33ca2e46889ad4ec14497fb6fce11fb7631b006e7621b2442a7da7fe6a92fc888ea6d9097b9e453</slreq:value>
+        </slreq:checksum>
+        
         <slreq:endorsement rdf:parseType="Resource">
             <dcterms:created>2011-01-24T09:59:42+0100</dcterms:created>
             <slreq:endorser rdf:parseType="Resource">
@@ -27,6 +43,7 @@
         <dcterms:title>ttylinux-9.7-i486-base-1.1</dcterms:title>
         <dcterms:description>A 32-bit ttylinux image that follows the standard
             StratusLab contextualization strategy.</dcterms:description>
+
         <slterms:version>1.0</slterms:version>
         <slterms:serial-number>0</slterms:serial-number>
         <slterms:os>ttylinux</slterms:os>

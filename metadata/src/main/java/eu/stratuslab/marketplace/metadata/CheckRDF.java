@@ -28,7 +28,7 @@ public class CheckRDF {
 
             try {
 
-                DocumentBuilder db = XMLUtils.newDocumentBuilder();
+                DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
 
                 Document doc = db.parse(file);
 
