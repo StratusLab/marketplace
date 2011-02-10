@@ -38,7 +38,8 @@ public class EndorsersResource extends BaseResource {
             Element r = d.createElement("endorsers");
             d.appendChild(r);
             
-            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> SELECT ?email { _:z slterms:email ?email . }";
+            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " + 
+                                 "SELECT ?email { _:z slterms:email ?email . }";
 
             ArrayList results = (ArrayList)query(queryString);
   
