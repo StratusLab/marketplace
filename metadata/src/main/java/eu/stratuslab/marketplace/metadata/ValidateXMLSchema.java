@@ -17,10 +17,10 @@ public class ValidateXMLSchema {
 
     static final private String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
-    static final private String[] xsdFiles = { "image-metadata.xsd",
-            "slreq.xsd", "slterms.xsd", "dcterms.xsd", "dcmitype.xsd", "dc.xsd" };
+    static final private String[] xsdFiles = { "dcmitype.xsd", "dc.xsd",
+            "dcterms.xsd", "slreq.xsd", "image-metadata.xsd" };
 
-    static final private Schema schema;
+    static final public Schema schema;
 
     static {
 

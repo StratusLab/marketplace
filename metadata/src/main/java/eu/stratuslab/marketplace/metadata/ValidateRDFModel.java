@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.metadata;
 
+import static eu.stratuslab.marketplace.metadata.MetadataUtils.stripSignatureElements;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +26,8 @@ public class ValidateRDFModel {
         InputStream is = null;
 
         try {
+
+            stripSignatureElements(doc);
 
             String contents = XMLUtils.documentToString(doc);
             is = new ByteArrayInputStream(contents.getBytes());

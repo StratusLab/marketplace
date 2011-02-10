@@ -24,13 +24,14 @@ public class CheckXMLSignatures {
                 continue;
             }
 
-            DocumentBuilder db = XMLUtils.newDocumentBuilder();
+            DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
 
             Document doc = db.parse(file);
 
             try {
                 ValidateXMLSignature.validate(doc);
             } catch (MetadataException e) {
+                e.printStackTrace();
                 System.err.println("signature for " + fname + " is INVALID");
                 rc = 1;
             }

@@ -5,6 +5,7 @@
 	<!-- Optional StratusLab element declarations for image metadata. -->
 
 	<xs:element name="serial-number" type="xs:nonNegativeInteger" />
+
 	<xs:element name="version" type="xs:string" />
 
 	<xs:element name="hypervisor" type="xs:string" />

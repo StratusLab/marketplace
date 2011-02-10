@@ -15,7 +15,9 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 @SuppressWarnings("restriction")
 public class MetadataUtils {
@@ -147,4 +149,16 @@ public class MetadataUtils {
         }
     }
 
+    public static void stripSignatureElements(Document doc) {
+
+        NodeList nodes = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
+                "Signature");
+
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            Node parent = node.getParentNode();
+            parent.removeChild(node);
+            doc.normalizeDocument();
+        }
+    }
 }

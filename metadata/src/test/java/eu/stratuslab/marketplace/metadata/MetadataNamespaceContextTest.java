@@ -2,6 +2,7 @@ package eu.stratuslab.marketplace.metadata;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.DCTERMS_NS_URI;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.RDF_NS_URI;
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLTERMS_NS_URI;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.getInstance;
 import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
@@ -14,8 +15,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Iterator;
 
+import javax.xml.crypto.dsig.XMLSignature;
+
 import org.junit.Test;
 
+@SuppressWarnings("restriction")
 public class MetadataNamespaceContextTest {
 
     @Test(expected = IllegalArgumentException.class)
@@ -70,7 +74,8 @@ public class MetadataNamespaceContextTest {
     public void allPrefixListsOK() {
         MetadataNamespaceContext context = getInstance();
         String[] uris = { RDF_NS_URI, DCTERMS_NS_URI, SLTERMS_NS_URI,
-                NULL_NS_URI, XML_NS_URI, XMLNS_ATTRIBUTE_NS_URI };
+                SLREQ_NS_URI, NULL_NS_URI, XML_NS_URI, XMLNS_ATTRIBUTE_NS_URI,
+                XMLSignature.XMLNS };
 
         for (String uri : uris) {
             String p1 = context.getPrefix(uri);

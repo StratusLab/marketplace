@@ -1,7 +1,9 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
-	targetNamespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-	elementFormDefault="qualified" attributeFormDefault="qualified">
+	targetNamespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xmldsig="http://www.w3.org/2000/09/xmldsig#"
+	xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" elementFormDefault="qualified"
+	attributeFormDefault="qualified">
 
 	<!-- Import referenced schemas. -->
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
@@ -10,14 +12,33 @@
 	<xs:import namespace="http://mp.stratuslab.eu/slreq#"
 		schemaLocation="slreq.xsd" />
 
-	<!-- Main element for image descriptions. -->
-	<xs:element name="RDF" type="rdf-root" />
+	<xs:import namespace="http://purl.org/dc/terms/"
+		schemaLocation="dcterms.xsd" />
 
-	<xs:complexType name="rdf-root">
+	<!-- Main element for image descriptions. -->
+	<xs:element name="RDF" type="rdf-type" />
+
+	<xs:complexType name="rdf-type">
 		<xs:sequence>
-			<xs:element name="Description" type="slreq:image-description" />
+			<xs:element name="Description" type="description-type" />
+			<xs:any namespace="http://www.w3.org/2000/09/xmldsig#"
+				minOccurs="0" processContents="skip" />
 		</xs:sequence>
 		<xs:attribute ref="xml:base" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="description-type">
+		<xs:sequence>
+			<xs:element name="type" minOccurs="0" />
+			<xs:element ref="dcterms:identifier" />
+			<xs:element ref="slreq:bytes" />
+			<xs:element ref="slreq:checksum" maxOccurs="unbounded" />
+
+			<xs:element ref="slreq:endorsement" />
+
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+		</xs:sequence>
+		<xs:attribute name="about" use="required" />
 	</xs:complexType>
 
 	<!-- Define some RDF elements and attributes that are used. -->
