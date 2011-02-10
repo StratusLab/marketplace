@@ -1,8 +1,8 @@
 package eu.stratuslab.marketplace.metadata;
 
+import static eu.stratuslab.marketplace.metadata.MetadataUtils.writeStringToFile;
+
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.util.regex.Pattern;
 
@@ -49,28 +49,6 @@ public class SignMetadata {
         // Write the signed output to disk.
         String signedContents = XMLUtils.documentToString(doc);
         writeStringToFile(signedContents, outputFile);
-    }
-
-    private static void writeStringToFile(String contents, File outputFile) {
-
-        FileWriter os = null;
-        try {
-
-            os = new FileWriter(outputFile);
-            os.write(contents);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        }
-
     }
 
 }

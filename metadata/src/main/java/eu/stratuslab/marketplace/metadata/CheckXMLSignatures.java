@@ -29,10 +29,15 @@ public class CheckXMLSignatures {
             Document doc = db.parse(file);
 
             try {
+
                 ValidateXMLSignature.validate(doc);
+                // Suppress printing of certificate for now.
+                // String message = ValidateXMLSignature.validate(doc);
+                // System.out.println("X509 Key for " + fname + "\n" + message);
+
             } catch (MetadataException e) {
-                e.printStackTrace();
-                System.err.println("signature for " + fname + " is INVALID");
+                System.err.println("signature for " + fname + " is INVALID\n"
+                        + e.getMessage());
                 rc = 1;
             }
 

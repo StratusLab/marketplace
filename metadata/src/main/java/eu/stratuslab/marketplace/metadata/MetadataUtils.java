@@ -1,19 +1,26 @@
 package eu.stratuslab.marketplace.metadata;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.X509Data;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -128,7 +135,7 @@ public class MetadataUtils {
         return sha1;
     }
 
-    public static boolean isSignatureOK(Node node) {
+    public static Object[] isSignatureOK(Node node) {
 
         try {
 
@@ -139,14 +146,57 @@ public class MetadataUtils {
                     .getInstance("DOM");
             XMLSignature signature = factory.unmarshalXMLSignature(context);
 
-            return signature.validate(context);
+            boolean coreValidation = signature.validate(context);
 
-        } catch (MarshalException consumed) {
-            return false;
+            if (coreValidation) {
 
-        } catch (XMLSignatureException consumed) {
-            return false;
+                KeyInfo keyInfo = signature.getKeyInfo();
+                X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
+
+                return new Object[] { Boolean.TRUE, cert.toString() };
+
+            } else {
+
+                StringBuilder sb = new StringBuilder();
+
+                boolean sv = signature.getSignatureValue().validate(context);
+                sb.append("signature validation: " + sv);
+
+                List<?> refs = signature.getSignedInfo().getReferences();
+                for (Object oref : refs) {
+                    Reference ref = (Reference) oref;
+                    boolean refValid = ref.validate(context);
+                    sb.append("content (ref='" + ref.getURI() + "') validity: "
+                            + refValid);
+                }
+
+                return new Object[] { Boolean.FALSE, sb.toString() };
+
+            }
+
+        } catch (MarshalException e) {
+            return new Object[] { Boolean.FALSE, e.getMessage() };
+        } catch (XMLSignatureException e) {
+            return new Object[] { Boolean.FALSE, e.getMessage() };
         }
+    }
+
+    public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
+
+        List<?> keyInfoContent = keyInfo.getContent();
+        for (Object o : keyInfoContent) {
+            if (o instanceof X509Data) {
+                X509Data x509Data = (X509Data) o;
+                List<?> x509DataContent = x509Data.getContent();
+                for (Object obj2 : x509DataContent) {
+                    if (obj2 instanceof X509Certificate) {
+                        return (X509Certificate) obj2;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public static void stripSignatureElements(Document doc) {
@@ -161,4 +211,27 @@ public class MetadataUtils {
             doc.normalizeDocument();
         }
     }
+
+    public static void writeStringToFile(String contents, File outputFile) {
+
+        FileWriter os = null;
+        try {
+
+            os = new FileWriter(outputFile);
+            os.write(contents);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
+        }
+
+    }
+
 }

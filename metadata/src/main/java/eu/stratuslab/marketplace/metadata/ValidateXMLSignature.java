@@ -13,31 +13,31 @@ public class ValidateXMLSignature {
 
     }
 
-    public static void validate(Document doc) {
+    public static String validate(Document doc) {
 
         boolean isValid = true;
 
         NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
                 "Signature");
 
-        System.err.println("SIGNATURES: " + nl.getLength());
+        if (nl.getLength() > 0) {
 
-        if (nl.getLength() == 0) {
-            isValid = false;
-        }
+            Node node = nl.item(0);
 
-        for (int i = 0; i < nl.getLength(); i++) {
+            Object[] result = MetadataUtils.isSignatureOK(node);
 
-            Node node = nl.item(i);
+            isValid = ((Boolean) result[0]).booleanValue();
+            String message = (String) result[1];
 
-            if (!MetadataUtils.isSignatureOK(node)) {
-                isValid = false;
+            if (isValid) {
+                return message;
+            } else {
+                throw new MetadataException(message);
             }
+
+        } else {
+            throw new MetadataException("no signature");
         }
 
-        if (!isValid) {
-            throw new MetadataException("invalid signature");
-        }
     }
-
 }

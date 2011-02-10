@@ -46,7 +46,9 @@ public class XMLUtils {
         return db.newDocument();
     }
 
-    public static Transformer newTransformer() {
+    public static Transformer newTransformer(boolean indented) {
+
+        String indentFlag = (indented) ? "yes" : "no";
 
         try {
 
@@ -57,7 +59,7 @@ public class XMLUtils {
             transformer = factory.newTransformer();
             transformer
                     .setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.INDENT, indentFlag);
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 
             return transformer;
@@ -68,10 +70,14 @@ public class XMLUtils {
     }
 
     public static String documentToString(Document doc) {
+        return documentToString(doc, false);
+    }
+
+    public static String documentToString(Document doc, boolean indented) {
 
         try {
 
-            Transformer transformer = XMLUtils.newTransformer();
+            Transformer transformer = XMLUtils.newTransformer(indented);
 
             StringWriter sw = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(sw));
