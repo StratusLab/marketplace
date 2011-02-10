@@ -22,12 +22,16 @@ public class XMLUtils {
     }
 
     public static DocumentBuilder newDocumentBuilder() {
+        return newDocumentBuilder(true);
+    }
+
+    public static DocumentBuilder newDocumentBuilder(boolean validating) {
 
         try {
 
             DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
             dbfac.setNamespaceAware(true);
-            dbfac.setValidating(true);
+            dbfac.setValidating(validating);
 
             return dbfac.newDocumentBuilder();
 

@@ -31,6 +31,7 @@ import org.w3c.dom.NodeList;
  * API. It assumes the key needed to validate the signature is contained in a
  * KeyValue KeyInfo.
  */
+@SuppressWarnings("restriction")
 public class ValidateSign {
 
     //
