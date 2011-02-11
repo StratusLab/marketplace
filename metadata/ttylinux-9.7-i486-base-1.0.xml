@@ -45,7 +45,7 @@
             StratusLab contextualization strategy.</dcterms:description>
 
         <slterms:version>1.0</slterms:version>
-        <slterms:serial-number>0</slterms:serial-number>
+        <slterms:serial-number>xxxxxx</slterms:serial-number>
         <slterms:os>ttylinux</slterms:os>
         <slterms:os-version>9.7</slterms:os-version>
         <slterms:os-arch>i486</slterms:os-arch>
