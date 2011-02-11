@@ -4,7 +4,7 @@
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>metadata</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>StratusLab Marketplace metadata utilities</name>
+  <name>StratusLab Marketplace Metadata Utilities</name>
 
   <packaging>jar</packaging>
 
@@ -14,28 +14,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <repositories>
-   <repository>  
-      <id>maven-restlet</id>  
-      <name>Public online Restlet repository</name>  
-      <url>http://maven.restlet.org</url>  
-   </repository>
-   <repository>
-      <id>openrdf</id>
-      <name>Public online sesame repository</name>                  
-      <url>http://repo.aduna-software.org/maven2/releases</url>
-    </repository>
-  </repositories>
-
   <dependencies>
-    <dependency>
-      <groupId>org.apache.xmlrpc</groupId>
-      <artifactId>xmlrpc-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -43,27 +22,22 @@
     <dependency>
        <groupId>org.openrdf.sesame</groupId>
        <artifactId>sesame-sail-api</artifactId>
-       <version>2.3.2</version>
     </dependency>
     <dependency>
        <groupId>org.openrdf.sesame</groupId>
        <artifactId>sesame-repository-sail</artifactId>
-       <version>2.3.2</version>
     </dependency>
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-sail-memory</artifactId>
-        <version>2.3.2</version>
     </dependency>
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-rio-rdfxml</artifactId>
-        <version>2.3.2</version>
     </dependency>
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.5.8</version>
     </dependency>
   </dependencies>
 
