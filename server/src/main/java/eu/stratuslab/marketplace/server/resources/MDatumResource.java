@@ -28,12 +28,10 @@ import java.util.HashMap;
  */
 public class MDatumResource extends BaseResource {
 
-    //private String iri;
-    private Model datum = null;
+    private  Model datum = null;
     
     @Override
     protected void doInit() throws ResourceException {
-        //String iri = (String) getRequest().getAttributes().get("identifier");
         String iri = getRequest().getResourceRef().toString(); 
         this.datum = getMetadatum(iri);
     }
@@ -47,6 +45,7 @@ public class MDatumResource extends BaseResource {
         datum.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
         RDFWriter writer = datum.getWriter();
         writer.write(datum, out, "");
+        
         StringRepresentation representation =
                 new StringRepresentation(new StringBuffer(bytes.toString()),
                                          MediaType.APPLICATION_RDF_XML);

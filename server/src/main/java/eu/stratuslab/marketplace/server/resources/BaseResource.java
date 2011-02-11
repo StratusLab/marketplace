@@ -4,9 +4,19 @@ import org.restlet.resource.ServerResource;
 
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 
+import org.restlet.data.Form;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -36,6 +46,11 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.URI;
+
+import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+
 
 /**
  *  Base resource class that supports common behaviours or attributes shared by
@@ -96,6 +111,7 @@ public abstract class BaseResource extends ServerResource {
             model.read(new ByteArrayInputStream(bytes.toString().getBytes()), "");
             model.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
             model.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
+            
         }
         catch (OpenRDFException e) {
             e.printStackTrace();
@@ -119,7 +135,31 @@ public abstract class BaseResource extends ServerResource {
             e.printStackTrace();
         }
     }
-    
+   
+    protected String query(String queryString, String format){
+        String resultString = null;
+
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            BufferedOutputStream out = new BufferedOutputStream(bytes);
+            SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(out);
+        
+            RepositoryConnection con = getMetadataStore().getConnection();
+            try {
+                TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+                tupleQuery.evaluate(sparqlWriter);
+                resultString = convertString(bytes.toString(), format);
+            } finally {
+                con.close();
+            }
+        }
+        catch (OpenRDFException e) {
+            e.printStackTrace();
+        }
+
+        return resultString;
+    }
+ 
     protected Collection query(String queryString){
         ArrayList list = new ArrayList();
 
@@ -154,6 +194,66 @@ public abstract class BaseResource extends ServerResource {
           }
 
         return ((Collection) list); 
+    }
+
+    
+    protected String buildSelectQuery(Form form, String[] variables){
+        Query query = QueryFactory.create();
+        query.setQuerySelectType();
+        
+        ElementTriplesBlock triplePattern = new ElementTriplesBlock(); 
+
+        for(int i = 0; i < variables.length; i++){        
+            URI v = new URIImpl(variables[i]);
+            String variable = v.getLocalName();
+            String ns = v.getNamespace();
+            
+            if(form.getFirstValue(variable) == null){
+                query.addResultVar(variable);
+                triplePattern.addTriple(new Triple(Node.createAnon(),
+                    Node.createURI(variables[i]),
+                    Node.createVariable(variable)));
+            } else {
+                triplePattern.addTriple(new Triple(Node.createAnon(),
+                    Node.createURI(variables[i]),
+                    Node.createLiteral(form.getFirstValue(variable))));
+            }
+        }
+
+        query.setQueryPattern(triplePattern);
+
+        return query.toString();
+    }
+
+    private String convertString(String toConvert, String format){
+        String resultString = "";
+
+        if(format == null || format.equals("sse")){
+            resultString = toConvert;
+        } else if (format.equals("xml")) {
+            ResultSet results = ResultSetFactory.fromXML(
+                 new ByteArrayInputStream(toConvert.getBytes()));
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            BufferedOutputStream o = new BufferedOutputStream(b);
+            ResultSetFormatter.outputAsXML(o,results);
+            resultString = b.toString();
+        } else if (format.equals("rdf")) {
+             ResultSet results = ResultSetFactory.fromXML(
+                 new ByteArrayInputStream(toConvert.getBytes()));
+             ByteArrayOutputStream b = new ByteArrayOutputStream();
+             BufferedOutputStream o = new BufferedOutputStream(b);
+             ResultSetFormatter.outputAsRDF(o, "RDF/XML", results);
+             resultString = b.toString();
+        } else if (format.equals("json")){
+             ResultSet results = ResultSetFactory.fromXML(
+                 new ByteArrayInputStream(toConvert.getBytes()));
+             ByteArrayOutputStream b = new ByteArrayOutputStream();
+             BufferedOutputStream o = new BufferedOutputStream(b);
+             ResultSetFormatter.outputAsJSON(o, results);
+             resultString = b.toString();
+        }
+
+        return resultString;
     }
 
 }
