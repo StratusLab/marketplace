@@ -32,7 +32,7 @@ public class CheckRDF {
 
                 Document doc = db.parse(file);
 
-                ValidateRDFModel.validate(doc);
+                ValidateRDFModelSesame.validate(doc);
                 System.out.println("Valid: " + fname);
 
             } catch (MetadataException e) {
