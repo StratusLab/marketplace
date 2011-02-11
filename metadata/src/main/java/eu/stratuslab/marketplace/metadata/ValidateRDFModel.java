@@ -16,9 +16,9 @@ import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.XMLUtils;
 
-public class ValidateRDFModelSesame {
+public class ValidateRDFModel {
 
-    private ValidateRDFModelSesame() {
+    private ValidateRDFModel() {
 
     }
 
