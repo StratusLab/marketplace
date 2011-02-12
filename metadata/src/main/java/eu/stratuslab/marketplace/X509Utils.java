@@ -2,6 +2,7 @@ package eu.stratuslab.marketplace;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -45,16 +46,22 @@ public class X509Utils {
 
     public static KeyStore pkcs12ToKeyStore(File file, String password) {
 
-        InputStream fis = null;
+        try {
+            return pkcs12ToKeyStore(new FileInputStream(file), password);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static KeyStore pkcs12ToKeyStore(InputStream is, String password) {
 
         try {
-
-            fis = new FileInputStream(file);
 
             char[] pwchars = password.toCharArray();
 
             KeyStore ks = KeyStore.getInstance("PKCS12");
-            ks.load(fis, pwchars);
+            ks.load(is, pwchars);
 
             return ks;
 
@@ -67,9 +74,9 @@ public class X509Utils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (fis != null) {
+            if (is != null) {
                 try {
-                    fis.close();
+                    is.close();
                 } catch (IOException consumed) {
                 }
             }
