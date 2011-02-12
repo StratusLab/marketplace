@@ -2,14 +2,21 @@ package eu.stratuslab.marketplace.metadata;
 
 import static org.junit.Assert.fail;
 
+import javax.xml.validation.Schema;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 public class ValidateXMLSchemaTest {
 
+    private static Schema getSchema() {
+        return ValidateXMLSchema.schema;
+    }
+
     @Test
     public void ensureSchemaInitializationWorks() {
-        System.out.println(ValidateXMLSchema.schema);
+        // This is split out, otherwise optimization removes class creation.
+        getSchema();
     }
 
     @Test
