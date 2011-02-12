@@ -3,6 +3,10 @@ package eu.stratuslab.marketplace.metadata;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
@@ -11,7 +15,16 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 
+import eu.stratuslab.marketplace.PatternUtils;
+
 public class ValidateMetadataConstraints {
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    static {
+        DATE_FORMAT.setLenient(false);
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private static final XPathQuery IDENTIFIER_ABOUT = new XPathQuery(
             "//rdf:RDF/rdf:Description/@rdf:about", "", "");
@@ -22,6 +35,13 @@ public class ValidateMetadataConstraints {
     private static final XPathQuery SHA1_CHECKSUM = new XPathQuery(
             "//rdf:RDF/rdf:Description/slreq:checksum/slreq:value[preceding-sibling::slreq:algorithm='SHA-1']",
             "", "");
+
+    private static final XPathQuery VALID_DATE = new XPathQuery(
+            "//rdf:RDF/rdf:Description/dcterms:valid", "", "");
+
+    private static final XPathQuery CREATED_DATE = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slreq:endorsement/dcterms:created", "",
+            "");
 
     private static final XPathQuery[] XPATH_CHECKS = {
 
@@ -86,6 +106,8 @@ public class ValidateMetadataConstraints {
 
         checkConsistentChecksum(doc);
 
+        checkDates(doc);
+
     }
 
     private static void checkConsistentIdentifiers(Document doc) {
@@ -114,6 +136,40 @@ public class ValidateMetadataConstraints {
                     + sha1ChecksumIdentifier + ") and SHA-1 checksum ("
                     + sha1Checksum + ") are not consistent");
 
+        }
+    }
+
+    private static void checkDates(Document doc) {
+
+        String validDate = VALID_DATE.result(doc);
+        if (!isValidDate(validDate)) {
+            throw new MetadataException("dcterms:valid value (" + validDate
+                    + ") is not a valid date");
+        }
+
+        String creationDate = CREATED_DATE.result(doc);
+        if (!isValidDate(creationDate)) {
+            throw new MetadataException("dcterms:created value (" + validDate
+                    + ") is not a valid date");
+        }
+
+    }
+
+    private static boolean isValidDate(String date) {
+        if (date != null && (!"".equals(date))) {
+            Matcher m = PatternUtils.DATE.matcher(date);
+            if (m.matches()) {
+                try {
+                    DATE_FORMAT.parse(date);
+                    return true;
+                } catch (ParseException e) {
+                    throw new MetadataException(e.getMessage());
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
     }
 

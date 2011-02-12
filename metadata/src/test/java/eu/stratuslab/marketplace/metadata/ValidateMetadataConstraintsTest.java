@@ -27,7 +27,8 @@ public class ValidateMetadataConstraintsTest {
                 "invalid-multiple-serial-numbers.xml",
                 "invalid-multiple-versions.xml", "invalid-multiple-os.xml",
                 "invalid-multiple-os-arch.xml",
-                "invalid-multiple-os-version.xml", "invalid-dcterms-type.xml" };
+                "invalid-multiple-os-version.xml", "invalid-dcterms-type.xml",
+                "invalid-created-date-1.xml", "invalid-created-date-2.xml" };
 
         for (String name : names) {
             Document doc = readDocument(name);
