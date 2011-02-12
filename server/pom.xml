@@ -19,6 +19,10 @@
         <groupId>com.hp.hpl.jena</groupId>
         <artifactId>jena</artifactId>
     </dependency>
+    <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>arq</artifactId>
+    </dependency>
     <dependency>  
         <groupId>org.restlet.jee</groupId>  
         <artifactId>org.restlet</artifactId>  
@@ -42,6 +46,10 @@
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-rio-rdfxml</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-queryresultio-sparqlxml</artifactId>
     </dependency>
 
     <dependency>

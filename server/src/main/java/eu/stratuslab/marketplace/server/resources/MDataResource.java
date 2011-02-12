@@ -8,7 +8,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.data.Status;
 import org.restlet.data.Form;
-import org.restlet.data.Parameter;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
@@ -25,6 +24,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import java.io.IOException;
 
@@ -78,67 +78,32 @@ public class MDataResource extends BaseResource {
     @Get("xml")
     public Representation toXml() {
         // Generate the right representation according to its media type.
-        Form form = getRequest().getResourceRef().getQueryAsForm();
-        String id = (form.getFirstValue("identifier") != null) ? "\"" + form.getFirstValue("identifier") + "\"": "?identifier";
-        String email = (form.getFirstValue("email") != null) ? "\"" + form.getFirstValue("email") + "\"": "?endorser";
-        String date = (form.getFirstValue("created") != null) ? "\"" + form.getFirstValue("created") + "\"": "?created";
 
         try {
-            DomRepresentation representation = new DomRepresentation(
-                    MediaType.TEXT_XML);
+            Form form = getRequest().getResourceRef().getQueryAsForm();
+            String format = (form.getFirstValue("format") != null) ? 
+                                form.getFirstValue("format") : "xml";  
 
-            // Generate a DOM document representing the list of
-            // items.
-            Document d = representation.getDocument();
-            Element r = d.createElement("metadata");
-            d.appendChild(r);
-
-            String queryString = "PREFIX slterms: <http://stratuslab.eu/terms#> " +
-                        "SELECT ?created ?description " +
-                        "WHERE {" +
-                        " ?y <http://purl.org/dc/terms/identifier> " + id + " . " +
-                        " ?y <http://purl.org/dc/terms/description> ?description ." + 
-                        " ?z slterms:email " + email + " . " +
-                        " ?x <http://purl.org/dc/terms/created> " + date + " . }";
-           
-            logger.log(Level.INFO, queryString);
- 
-            ArrayList results = (ArrayList)query(queryString);
-
-            for ( int i = 0; i < results.size(); i++ ){
-                Element eltItem = d.createElement("entry");
-                /*
-                Element eltIdentifier = d.createElement("identifier");
-                String identifier = (String)(((HashMap)results.get(i))).get("identifier");
-                eltIdentifier.appendChild(d.createTextNode(identifier));
-                eltItem.appendChild(eltIdentifier);
-                
-                Element eltEndorser = d.createElement("endorser");
-                String endorser = (String)(((HashMap)results.get(i))).get("endorser");
-                eltEndorser.appendChild(d.createTextNode(endorser));
-                eltItem.appendChild(eltEndorser);
-                */
-                Element eltCreated = d.createElement("created");
-                String created = (String)(((HashMap)results.get(i))).get("created");
-                eltCreated.appendChild(d.createTextNode(created));
-                eltItem.appendChild(eltCreated);
-
-                Element eltDescription = d.createElement("description");
-                String description = (String)(((HashMap)results.get(i))).get("description");
-                eltDescription.appendChild(d.createTextNode(description));
-                eltItem.appendChild(eltDescription);
-
-                r.appendChild(eltItem);
+            String[] variables = {"http://purl.org/dc/terms/identifier",
+                                  "http://purl.org/dc/terms/created",
+                                  "http://purl.org/dc/terms/description",
+                                  "http://stratuslab.eu/terms#email"};
+            String queryString = buildSelectQuery(form, variables);
+            String results = query(queryString, format);
+            StringRepresentation representation;
+            if(format.equals("json")){
+                representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);
+            } else {
+                representation = new StringRepresentation(results, MediaType.APPLICATION_XML);
             }
- 
-            d.normalizeDocument();
-
+            
             // Returns the XML representation of this document.
             return representation;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
     }
+
 }
