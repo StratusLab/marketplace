@@ -25,7 +25,7 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="dcterms:created" />
-				<xs:element name="endorser" type="endorser-type" />
+				<xs:element ref="endorser" />
 			</xs:sequence>
 			<xs:anyAttribute namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
 		</xs:complexType>
@@ -33,15 +33,17 @@
 
 	<!-- Required information for the endorser. -->
 
-	<xs:complexType name="endorser-type">
-		<xs:sequence>
-			<xs:element name="full-name" minOccurs="0" />
-			<xs:element name="email" minOccurs="1" />
-			<xs:element name="subject" minOccurs="0" />
-			<xs:element name="issuer" minOccurs="0" maxOccurs="unbounded" />
-		</xs:sequence>
-		<xs:anyAttribute namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
-	</xs:complexType>
+	<xs:element name="endorser">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="full-name" minOccurs="0" />
+				<xs:element ref="email" minOccurs="1" />
+				<xs:element ref="subject" minOccurs="0" />
+				<xs:element ref="issuer" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+			<xs:anyAttribute namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
+		</xs:complexType>
+	</xs:element>
 
 	<!-- Restricted type definitions for simple values. -->
 

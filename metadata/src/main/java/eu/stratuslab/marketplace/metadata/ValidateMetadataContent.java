@@ -29,14 +29,6 @@ public class ValidateMetadataContent {
                     "root element must have xml:base attribute with value "
                             + MARKETPLACE_URI),
 
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/dcterms:identifier)", "1",
-                    "description must have exactly 1 dcterms:identifier element"),
-
-            new XPathQuery("count(//rdf:RDF/rdf:Description/slreq:checksum)>0",
-                    "true",
-                    "description must have at least one slreq:checksum element"),
-
             new XPathQuery("count(//rdf:RDF/rdf:Description/dcterms:type)=1",
                     "true",
                     "description must have exactly 1 dcterms:type element"),
@@ -45,13 +37,14 @@ public class ValidateMetadataContent {
                     "true", "dcterms:type cannot have child elements"),
 
             new XPathQuery(
+                    "count(//rdf:RDF/rdf:Description/slreq:checksum/slreq:algorithm[text()='SHA-1'])=1",
+                    "true",
+                    "description must have exactly 1 slterms:checksum element using SHA-1 algorithm"),
+
+            new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:serial-number)>1",
                     "false",
                     "description must have at most 1 slterms:serial-number element"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:serial-number/*)=0",
-                    "true", "slterms:serial-number cannot have child elements"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:version)>1",
@@ -59,33 +52,18 @@ public class ValidateMetadataContent {
                     "description must have at most 1 slterms:version element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:version/*)=0",
-                    "true", "slterms:version cannot have child elements"),
-
-            new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:hypervisor)>1",
                     "false",
                     "description must have at most 1 slterms:hypervisor element"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:hypervisor/*)=0",
-                    "true", "slterms:hypervisor cannot have child elements"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:deprecated)>1",
                     "false",
                     "description must have at most 1 slterms:deprecated element"),
 
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:deprecated/*)=0",
-                    "true", "slterms:deprecated cannot have child elements"),
-
             new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os)>1",
                     "false",
                     "description must have at most 1 slterms:os element"),
-
-            new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os/*)=0",
-                    "true", "slterms:os cannot have child elements"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:os-arch)>1",
@@ -93,17 +71,9 @@ public class ValidateMetadataContent {
                     "description must have at most 1 slterms:os-arch element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-arch/*)=0",
-                    "true", "slterms:os-arch cannot have child elements"),
-
-            new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:os-version)>1",
                     "false",
                     "description must have at most 1 slterms:os-version element"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-version/*)=0",
-                    "true", "slterms:os-version cannot have child elements"),
 
     };
 
