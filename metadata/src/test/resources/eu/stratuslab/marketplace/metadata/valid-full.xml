@@ -49,6 +49,13 @@
 
 		<ex:other-info>additional metadata</ex:other-info>
 		<ex:yet-more>still more info</ex:yet-more>
-		
+
+		<ex:relatedImages rdf:parseType="Resource">
+			<dcterms:identifier>MMZu9WvwKIro-rtBQfDk4PsKO7_</dcterms:identifier>
+			<dcterms:identifier>NMZu9WvwKIro-rtBQfDk4PsKO7_</dcterms:identifier>
+			<dcterms:identifier>OMZu9WvwKIro-rtBQfDk4PsKO7_</dcterms:identifier>
+			<dcterms:identifier>PMZu9WvwKIro-rtBQfDk4PsKO7_</dcterms:identifier>
+		</ex:relatedImages>
+
 	</rdf:Description>
 </rdf:RDF>
