@@ -15,9 +15,9 @@
 		</slreq:checksum>
 
 		<slreq:endorsement rdf:parseType="Resource">
-			<dcterms:created>2011-01-24T99:59:42Z</dcterms:created>
+			<dcterms:created>2011-01-24T09:59:42Z</dcterms:created>
 			<slreq:endorser rdf:parseType="Resource">
-                <slreq:email>jane.tester@example.org</slreq:email>
+                <slreq:email>jane.tester@example.COM</slreq:email>
                 <slreq:subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</slreq:subject>
                 <slreq:issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</slreq:issuer>
 			</slreq:endorser>

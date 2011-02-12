@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.metadata;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,15 +25,15 @@ import eu.stratuslab.marketplace.XMLUtils;
  */
 public class SignValidateCycleTest {
 
-    @Test
-    public void testNormalCycleOK() throws SAXException, IOException {
+    private static void signAndValidate(String name) throws SAXException,
+            IOException {
 
         InputStream is = null;
 
         try {
 
             // Read, sign, and put into string.
-            String signedContents = signDocument("valid-minimal.xml");
+            String signedContents = signDocument(name);
 
             // Recreate signed document.
             is = new ByteArrayInputStream(signedContents.getBytes());
@@ -53,6 +55,11 @@ public class SignValidateCycleTest {
 
     }
 
+    @Test
+    public void testNormalCycleOK() throws SAXException, IOException {
+        signAndValidate("valid-minimal.xml");
+    }
+
     @Test(expected = MetadataException.class)
     public void testModifiedDocFails() throws SAXException, IOException {
 
@@ -63,6 +70,7 @@ public class SignValidateCycleTest {
             // Read, sign, and put into string.
             String signedContents = signDocument("valid-minimal.xml");
 
+            // CORRUPT THE INFORMATION.
             signedContents = signedContents.replace(">SHA-1", ">SHA-2");
 
             // Recreate signed document.
@@ -83,6 +91,22 @@ public class SignValidateCycleTest {
             }
         }
 
+    }
+
+    @Test
+    public void testBadEndorserInfo() throws SAXException, IOException {
+
+        String[] names = new String[] { "invalid-email-mismatch.xml",
+                "invalid-subject-mismatch.xml", "invalid-issuer-mismatch.xml" };
+
+        for (String name : names) {
+            try {
+                signAndValidate(name);
+                fail(name + " passed validation but should have failed");
+            } catch (MetadataException e) {
+                // OK, exception is expected.
+            }
+        }
     }
 
     private static String signDocument(String name) throws SAXException,

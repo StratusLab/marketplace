@@ -17,7 +17,9 @@
 		<slreq:endorsement rdf:parseType="Resource">
 			<dcterms:created>2011-01-24T09:59:42Z</dcterms:created>
 			<slreq:endorser rdf:parseType="Resource">
-				<slreq:email>missing-at-symbol</slreq:email>
+                <slreq:email>jane.tester_at_example.org</slreq:email>
+                <slreq:subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</slreq:subject>
+                <slreq:issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</slreq:issuer>
 			</slreq:endorser>
 		</slreq:endorsement>
 

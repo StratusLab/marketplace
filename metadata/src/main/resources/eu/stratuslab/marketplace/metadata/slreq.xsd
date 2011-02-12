@@ -13,7 +13,6 @@
 	<xs:element name="bytes" type="xs:nonNegativeInteger" />
 	<xs:element name="checksum" type="checksum-type" />
 
-	<xs:element name="full-name" type="xs:string" />
 	<xs:element name="email" type="email-type" />
 	<xs:element name="subject" type="xs:string" />
 	<xs:element name="issuer" type="xs:string" />
@@ -36,10 +35,9 @@
 	<xs:element name="endorser">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="full-name" minOccurs="0" />
 				<xs:element ref="email" minOccurs="1" />
-				<xs:element ref="subject" minOccurs="0" />
-				<xs:element ref="issuer" minOccurs="0" maxOccurs="unbounded" />
+				<xs:element ref="subject" minOccurs="1" />
+				<xs:element ref="issuer" minOccurs="1" maxOccurs="unbounded" />
 			</xs:sequence>
 			<xs:anyAttribute namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
 		</xs:complexType>
