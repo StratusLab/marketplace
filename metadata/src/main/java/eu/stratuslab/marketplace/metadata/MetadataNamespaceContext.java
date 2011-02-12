@@ -26,7 +26,7 @@ public class MetadataNamespaceContext implements NamespaceContext {
 
     public static final String DCTERMS_NS_URI = "http://purl.org/dc/terms/";
 
-    public static final String SLTERMS_NS_URI = MARKETPLACE_URI + "terms#";
+    public static final String SLTERMS_NS_URI = MARKETPLACE_URI + "slterms#";
 
     public static final String SLREQ_NS_URI = MARKETPLACE_URI + "slreq#";
 

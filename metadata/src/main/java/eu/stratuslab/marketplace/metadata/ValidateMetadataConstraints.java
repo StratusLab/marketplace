@@ -11,7 +11,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 
-public class ValidateMetadataContent {
+public class ValidateMetadataConstraints {
 
     private static final XPathQuery IDENTIFIER_ABOUT = new XPathQuery(
             "//rdf:RDF/rdf:Description/@rdf:about", "", "");
@@ -42,42 +42,37 @@ public class ValidateMetadataContent {
                     "description must have exactly 1 slterms:checksum element using SHA-1 algorithm"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:serial-number)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:serial-number)<=1",
+                    "true",
                     "description must have at most 1 slterms:serial-number element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:version)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:version)<=1",
+                    "true",
                     "description must have at most 1 slterms:version element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:hypervisor)>1",
-                    "false",
-                    "description must have at most 1 slterms:hypervisor element"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:deprecated)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:deprecated)<=1",
+                    "true",
                     "description must have at most 1 slterms:deprecated element"),
 
-            new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os)>1",
-                    "false",
+            new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os)<=1",
+                    "true",
                     "description must have at most 1 slterms:os element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-arch)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:os-arch)<=1",
+                    "true",
                     "description must have at most 1 slterms:os-arch element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-version)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:os-version)<=1",
+                    "true",
                     "description must have at most 1 slterms:os-version element"),
 
     };
 
-    private ValidateMetadataContent() {
+    private ValidateMetadataConstraints() {
 
     }
 

@@ -19,7 +19,7 @@ public class ValidateMetadata {
         }
         ValidateXMLSchema.validate(doc);
         ValidateRDFModel.validate(doc);
-        ValidateMetadataContent.validate(doc);
+        ValidateMetadataConstraints.validate(doc);
 
     }
 
