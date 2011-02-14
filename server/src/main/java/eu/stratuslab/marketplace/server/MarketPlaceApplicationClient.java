@@ -1,22 +1,16 @@
 package eu.stratuslab.marketplace.server;
 
 import java.io.IOException;
-import java.io.File;
 
-import org.restlet.representation.Representation;
+import org.restlet.data.MediaType;
 import org.restlet.representation.FileRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
-import org.restlet.data.MediaType;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.SimpleSelector;
-import com.hp.hpl.jena.vocabulary.DCTerms;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.rdf.model.ModelMaker;
 
 public class MarketPlaceApplicationClient {
 
@@ -43,19 +37,7 @@ public class MarketPlaceApplicationClient {
         ModelMaker mk = ModelFactory.createMemModelMaker();
         Model image = mk.createDefaultModel();
         image.read(rdf.getStream(), "");
-
-        /*
-        String identifier = ((image.listStatements(
-                              new SimpleSelector(null, DCTerms.identifier,
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
         
-        String endorser = ((image.listStatements(
-                              new SimpleSelector(null, image.createProperty("http://stratuslab.eu/terms#", "email"),
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
-        String created = ((image.listStatements(
-                              new SimpleSelector(null, DCTerms.created,
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
-        */
         ClientResource metadatumResource = null;
 
         try {

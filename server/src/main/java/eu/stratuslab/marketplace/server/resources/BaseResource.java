@@ -1,73 +1,66 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import org.restlet.resource.ServerResource;
-
-import eu.stratuslab.marketplace.server.MarketPlaceApplication;
-
-import org.restlet.data.Form;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
 
 import org.openrdf.OpenRDFException;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.RDFHandler;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.URI;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.restlet.resource.ServerResource;
 
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
+
+import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 
 
 /**
  *  Base resource class that supports common behaviours or attributes shared by
  *  all resources.
  */
+/**
+ * @author stkenny
+ *
+ */
 public abstract class BaseResource extends ServerResource {
 
     protected Logger logger = getLogger();
 
     /**
-     * Returns the map of images managed by this application.
-     * @return the map of images managed by this application.
+     * Returns the store of metadata managed by this application.
+     * 
+     * @return the store of metadata managed by this application.
     */
     protected Repository getMetadataStore(){
 		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
 
+    /**
+     * Stores a new metadata entry
+     * 
+     * @param iri identifier of the metadata entry
+     * @param rdf the metadata entry to store
+     */
     protected void storeMetadatum(String iri, Model rdf) {
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
@@ -92,6 +85,12 @@ public abstract class BaseResource extends ServerResource {
         }
     }
 
+    /**
+     * Retrieve a particular metadata entry
+     * 
+     * @param iri identifier of the metadata entry
+     * @return metadata entry as a Jena model
+     */
     protected Model getMetadatum(String iri) {
         Model model = null;
         try {
@@ -120,6 +119,11 @@ public abstract class BaseResource extends ServerResource {
         return model;
     }
 
+    /**
+     * Remove a metadata entry
+     * 
+     * @param iri identifier of the metadata entry
+     */
     protected void removeMetadatum(String iri) {
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
@@ -136,7 +140,16 @@ public abstract class BaseResource extends ServerResource {
         }
     }
    
-    protected String query(String queryString, String format){
+    
+    /**
+     * Query the metadata
+     * 
+     * @param queryString query string
+     * @param syntax the syntax of the query
+     * @param format the output format of the resultset
+     * @return
+     */
+    protected String query(String queryString, QueryLanguage syntax, String format){
         String resultString = null;
 
         try {
@@ -146,7 +159,7 @@ public abstract class BaseResource extends ServerResource {
         
             RepositoryConnection con = getMetadataStore().getConnection();
             try {
-                TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+                TupleQuery tupleQuery = con.prepareTupleQuery(syntax, queryString);
                 tupleQuery.evaluate(sparqlWriter);
                 resultString = convertString(bytes.toString(), format);
             } finally {
@@ -160,8 +173,14 @@ public abstract class BaseResource extends ServerResource {
         return resultString;
     }
  
-    protected Collection query(String queryString){
-        ArrayList list = new ArrayList();
+    /**
+     * Query the metadata
+     * 
+     * @param queryString the query
+     * @return the resultset as a Java Collection
+     */
+    protected Collection<HashMap<String, String>> query(String queryString){
+        ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
@@ -174,7 +193,7 @@ public abstract class BaseResource extends ServerResource {
 
                     while(results.hasNext()){
 		        BindingSet solution = results.next();
-		        HashMap row = new HashMap(cols,1);
+		        HashMap<String, String> row = new HashMap<String, String>(cols,1);
                         for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
                            String columnName = namesIter.next();
                            row.put(columnName, (solution.getValue(columnName)).stringValue());
@@ -193,38 +212,32 @@ public abstract class BaseResource extends ServerResource {
               e.printStackTrace();
           }
 
-        return ((Collection) list); 
+        return ((Collection<HashMap<String, String>>) list); 
     }
-
     
-    protected String buildSelectQuery(Form form, String[] variables){
-        Query query = QueryFactory.create();
-        query.setQuerySelectType();
+    /**
+     * Convert a Jena model to an RDF String
+     * 
+     * @param model the model to convert
+     * @return the model as a String in RDF format
+     */
+    protected String modelToString(Model model){
+    	ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        BufferedOutputStream out = new BufferedOutputStream(bytes);
+
+        RDFWriter writer = model.getWriter();
+        writer.write(model, out, "");
         
-        ElementTriplesBlock triplePattern = new ElementTriplesBlock(); 
-
-        for(int i = 0; i < variables.length; i++){        
-            URI v = new URIImpl(variables[i]);
-            String variable = v.getLocalName();
-            String ns = v.getNamespace();
-            
-            if(form.getFirstValue(variable) == null){
-                query.addResultVar(variable);
-                triplePattern.addTriple(new Triple(Node.createAnon(),
-                    Node.createURI(variables[i]),
-                    Node.createVariable(variable)));
-            } else {
-                triplePattern.addTriple(new Triple(Node.createAnon(),
-                    Node.createURI(variables[i]),
-                    Node.createLiteral(form.getFirstValue(variable))));
-            }
-        }
-
-        query.setQueryPattern(triplePattern);
-
-        return query.toString();
+        return bytes.toString();
     }
-
+    
+    /**
+     * Convert a String to various output formats
+     * 
+     * @param toConvert the string to convert
+     * @param format the output format
+     * @return the String in the chosen format
+     */
     private String convertString(String toConvert, String format){
         String resultString = "";
 

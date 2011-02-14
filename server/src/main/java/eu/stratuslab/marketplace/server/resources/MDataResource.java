@@ -1,40 +1,31 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import java.io.IOException;
+import java.util.logging.Level;
+
+import org.openrdf.query.QueryLanguage;
+import org.restlet.data.Form;
 import org.restlet.data.MediaType;
-import org.restlet.ext.xml.DomRepresentation;
+import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-import org.restlet.data.Status;
-import org.restlet.data.Form;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.SimpleSelector;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import java.io.IOException;
-
 /**
- * This resource represents all races in the appliction
+ * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
 
     /**
-     * Handle POST requests: create a new item.
+     * Handle POST requests: register new Metadata entry.
      */
     @Post
     public Representation acceptMetadatum(Representation entity) throws IOException {
@@ -73,7 +64,7 @@ public class MDataResource extends BaseResource {
     }
     
     /**
-     * Returns a listing of all registered images.
+     * Returns a listing of all registered metadata or a particular entry if specified.
      */
     @Get("xml")
     public Representation toXml() {
@@ -82,21 +73,76 @@ public class MDataResource extends BaseResource {
         try {
             Form form = getRequest().getResourceRef().getQueryAsForm();
             String format = (form.getFirstValue("format") != null) ? 
-                                form.getFirstValue("format") : "xml";  
-
-            String[] variables = {"http://purl.org/dc/terms/identifier",
-                                  "http://purl.org/dc/terms/created",
-                                  "http://purl.org/dc/terms/description",
-                                  "http://stratuslab.eu/terms#email"};
-            String queryString = buildSelectQuery(form, variables);
-            String results = query(queryString, format);
-            StringRepresentation representation;
-            if(format.equals("json")){
-                representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);
+                                form.getFirstValue("format") : "xml";
+            
+            boolean metadataQuery = true;
+            boolean where = false;
+            StringBuffer wherePredicate = new StringBuffer();
+            
+            String identifier = form.getFirstValue("identifier");
+            if (identifier != null){
+            	if(!where){
+            	    wherePredicate.append(" WHERE identifier = \"" + identifier + "\" ");
+            	} else {
+            		wherePredicate.append(" AND identifier = \"" + identifier + "\" ");
+            	}
+            	where = true;
             } else {
-                representation = new StringRepresentation(results, MediaType.APPLICATION_XML);
+            	metadataQuery = false;
             }
             
+            String endorser = form.getFirstValue("email");
+            if (endorser != null){
+            	if(!where){
+            	    wherePredicate.append(" WHERE email = \"" + endorser + "\" ");
+            	} else {
+            		wherePredicate.append(" AND email = \"" + endorser + "\" ");
+            	}
+            	where = true;
+            } else {
+            	metadataQuery = false;
+            }
+            
+            String created = form.getFirstValue("created");
+            if (created != null){
+            	if(!where){
+            	    wherePredicate.append(" WHERE created = \"" + created + "\" ");
+            	} else {
+            		wherePredicate.append(" AND created = \"" + created + "\" ");
+            	}
+            } else {
+            	metadataQuery = false;
+            }
+                             
+            StringBuffer queryString = new StringBuffer("SELECT identifier, created, description, email " +
+                                 " FROM {} dcterms:identifier {identifier}, " +
+                                 " {} dcterms:created {created}, " +
+                                 " {} dcterms:description {description}, " +
+                                 " {} slterms:email {email} ");
+            
+            if(where){
+            	queryString.append(wherePredicate.toString());
+            }
+            
+            queryString.append(" USING NAMESPACE dcterms = <http://purl.org/dc/terms/>, " +
+                                 " slterms = <http://stratuslab.eu/terms#>");
+            
+            StringRepresentation representation;
+            if(metadataQuery){
+            	String ref = getRequest().getRootRef().toString();
+            	String iri = ref + "/metadata/" + identifier + "/" + endorser + "/" + created;
+
+            	representation = new StringRepresentation(new StringBuffer(modelToString(getMetadatum(iri))), 
+            			MediaType.APPLICATION_RDF_XML);
+            } else {
+            	String results = query(queryString.toString(), QueryLanguage.SERQL, format);
+
+            	if(format.equals("json")){
+            		representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);
+            	} else {
+            		representation = new StringRepresentation(results, MediaType.APPLICATION_XML);
+            	}
+            }
             // Returns the XML representation of this document.
             return representation;
         } catch (Exception e) {
