@@ -135,6 +135,11 @@
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-sail-rdbms</artifactId>
+        <version>2.3.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-rio-rdfxml</artifactId>
         <version>2.3.2</version>
       </dependency>
