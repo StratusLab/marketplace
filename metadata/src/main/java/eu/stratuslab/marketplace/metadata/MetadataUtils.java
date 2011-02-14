@@ -145,9 +145,19 @@ public class MetadataUtils {
             DOMValidateContext context = new DOMValidateContext(
                     new X509KeySelector(), node);
 
+            System.err.println("DEBUG: " + context);
+
             XMLSignatureFactory factory = XMLSignatureFactory
                     .getInstance("DOM");
-            XMLSignature signature = factory.unmarshalXMLSignature(context);
+
+            // This can throw a NPE when the signature element is empty or
+            // malformed. Catch this explicitly.
+            XMLSignature signature = null;
+            try {
+                signature = factory.unmarshalXMLSignature(context);
+            } catch (NullPointerException e) {
+                throw new MetadataException("invalid signature element");
+            }
 
             boolean coreValidation = signature.validate(context);
 
