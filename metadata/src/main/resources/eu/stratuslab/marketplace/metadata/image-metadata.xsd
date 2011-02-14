@@ -1,9 +1,9 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
 	targetNamespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-	xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xmldsig="http://www.w3.org/2000/09/xmldsig#"
-	xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" elementFormDefault="qualified"
-	attributeFormDefault="qualified">
+	xmlns:slterms="http://mp.stratuslab.eu/slterms#" xmlns:dcterms="http://purl.org/dc/terms/"
+	xmlns:xmldsig="http://www.w3.org/2000/09/xmldsig#" xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	elementFormDefault="qualified" attributeFormDefault="qualified">
 
 	<!-- Import referenced schemas. -->
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
@@ -11,6 +11,9 @@
 
 	<xs:import namespace="http://mp.stratuslab.eu/slreq#"
 		schemaLocation="slreq.xsd" />
+
+    <xs:import namespace="http://mp.stratuslab.eu/slterms#"
+        schemaLocation="slterms.xsd" />
 
 	<xs:import namespace="http://purl.org/dc/terms/"
 		schemaLocation="dcterms.xsd" />
@@ -36,16 +39,14 @@
 
 			<xs:element ref="slreq:endorsement" />
 
-			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax" />
 		</xs:sequence>
-		<xs:attribute name="about" use="required" />
+		<xs:attribute name="about" type="id-frag-type" use="required" />
 	</xs:complexType>
 
 	<!-- Define some RDF elements and attributes that are used. -->
 
 	<xs:element name="type" type="xs:string" />
-
-	<xs:attribute name="about" type="id-frag-type" />
 
 	<xs:simpleType name="id-frag-type">
 		<xs:restriction base="xs:string">

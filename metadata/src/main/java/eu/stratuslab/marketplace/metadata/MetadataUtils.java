@@ -26,6 +26,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import eu.stratuslab.marketplace.X509Info;
+
 @SuppressWarnings("restriction")
 public class MetadataUtils {
 
@@ -135,16 +137,27 @@ public class MetadataUtils {
         return sha1;
     }
 
-    public static Object[] isSignatureOK(Node node) {
+    public static Object[] isSignatureOK(Map<String, String> docEndorserInfo,
+            Node node) {
 
         try {
 
             DOMValidateContext context = new DOMValidateContext(
                     new X509KeySelector(), node);
 
+            System.err.println("DEBUG: " + context);
+
             XMLSignatureFactory factory = XMLSignatureFactory
                     .getInstance("DOM");
-            XMLSignature signature = factory.unmarshalXMLSignature(context);
+
+            // This can throw a NPE when the signature element is empty or
+            // malformed. Catch this explicitly.
+            XMLSignature signature = null;
+            try {
+                signature = factory.unmarshalXMLSignature(context);
+            } catch (NullPointerException e) {
+                throw new MetadataException("invalid signature element");
+            }
 
             boolean coreValidation = signature.validate(context);
 
@@ -152,8 +165,15 @@ public class MetadataUtils {
 
                 KeyInfo keyInfo = signature.getKeyInfo();
                 X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
+                Map<String, String> certEndorserInfo = extractEndorserInfoFromCert(cert);
 
-                return new Object[] { Boolean.TRUE, cert.toString() };
+                String errorString = isEndorserInfoConsistent(certEndorserInfo,
+                        docEndorserInfo);
+                if (errorString == null) {
+                    return new Object[] { Boolean.TRUE, cert.toString() };
+                } else {
+                    return new Object[] { Boolean.FALSE, errorString };
+                }
 
             } else {
 
@@ -197,6 +217,48 @@ public class MetadataUtils {
         }
 
         return null;
+    }
+
+    /*
+     * All of the keys extracted from the certificate must be match the values
+     * in the metadata description, if present. Returns an error string; null
+     * means everything's OK.
+     */
+    private static String isEndorserInfoConsistent(
+            Map<String, String> certEndorserInfo,
+            Map<String, String> docEndorserInfo) {
+
+        for (Map.Entry<String, String> certEntry : certEndorserInfo.entrySet()) {
+            String certKey = certEntry.getKey();
+            String certValue = certEntry.getValue();
+            String docValue = docEndorserInfo.get(certKey);
+            if (!certValue.equals(docValue)) {
+                if (docValue == null) {
+                    docValue = "null";
+                }
+                return "endorser inconsistency (" + certKey + "): " + certValue
+                        + " != " + docValue;
+            }
+        }
+
+        return null;
+    }
+
+    public static Map<String, String> extractEndorserInfoFromCert(
+            X509Certificate cert) {
+
+        String subject = cert.getSubjectX500Principal().getName();
+        String issuer = cert.getIssuerX500Principal().getName();
+        String email = X509Info.extractEmailAddress(cert);
+
+        Map<String, String> info = new HashMap<String, String>();
+        info.put("subject", subject);
+        info.put("issuer", issuer);
+        if (email != null) {
+            info.put("email", email);
+        }
+
+        return info;
     }
 
     public static void stripSignatureElements(Document doc) {

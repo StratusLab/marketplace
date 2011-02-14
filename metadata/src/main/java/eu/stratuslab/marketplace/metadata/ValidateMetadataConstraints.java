@@ -3,6 +3,10 @@ package eu.stratuslab.marketplace.metadata;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
@@ -11,7 +15,16 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 
-public class ValidateMetadataContent {
+import eu.stratuslab.marketplace.PatternUtils;
+
+public class ValidateMetadataConstraints {
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    static {
+        DATE_FORMAT.setLenient(false);
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private static final XPathQuery IDENTIFIER_ABOUT = new XPathQuery(
             "//rdf:RDF/rdf:Description/@rdf:about", "", "");
@@ -23,19 +36,18 @@ public class ValidateMetadataContent {
             "//rdf:RDF/rdf:Description/slreq:checksum/slreq:value[preceding-sibling::slreq:algorithm='SHA-1']",
             "", "");
 
+    private static final XPathQuery VALID_DATE = new XPathQuery(
+            "//rdf:RDF/rdf:Description/dcterms:valid", "", "");
+
+    private static final XPathQuery CREATED_DATE = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slreq:endorsement/dcterms:created", "",
+            "");
+
     private static final XPathQuery[] XPATH_CHECKS = {
 
             new XPathQuery("//rdf:RDF/@xml:base", MARKETPLACE_URI,
                     "root element must have xml:base attribute with value "
                             + MARKETPLACE_URI),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/dcterms:identifier)", "1",
-                    "description must have exactly 1 dcterms:identifier element"),
-
-            new XPathQuery("count(//rdf:RDF/rdf:Description/slreq:checksum)>0",
-                    "true",
-                    "description must have at least one slreq:checksum element"),
 
             new XPathQuery("count(//rdf:RDF/rdf:Description/dcterms:type)=1",
                     "true",
@@ -45,69 +57,42 @@ public class ValidateMetadataContent {
                     "true", "dcterms:type cannot have child elements"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:serial-number)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slreq:checksum/slreq:algorithm[text()='SHA-1'])=1",
+                    "true",
+                    "description must have exactly 1 slterms:checksum element using SHA-1 algorithm"),
+
+            new XPathQuery(
+                    "count(//rdf:RDF/rdf:Description/slterms:serial-number)<=1",
+                    "true",
                     "description must have at most 1 slterms:serial-number element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:serial-number/*)=0",
-                    "true", "slterms:serial-number cannot have child elements"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:version)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:version)<=1",
+                    "true",
                     "description must have at most 1 slterms:version element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:version/*)=0",
-                    "true", "slterms:version cannot have child elements"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:hypervisor)>1",
-                    "false",
-                    "description must have at most 1 slterms:hypervisor element"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:hypervisor/*)=0",
-                    "true", "slterms:hypervisor cannot have child elements"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:deprecated)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:deprecated)<=1",
+                    "true",
                     "description must have at most 1 slterms:deprecated element"),
 
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:deprecated/*)=0",
-                    "true", "slterms:deprecated cannot have child elements"),
-
-            new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os)>1",
-                    "false",
+            new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os)<=1",
+                    "true",
                     "description must have at most 1 slterms:os element"),
 
-            new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os/*)=0",
-                    "true", "slterms:os cannot have child elements"),
-
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-arch)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:os-arch)<=1",
+                    "true",
                     "description must have at most 1 slterms:os-arch element"),
 
             new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-arch/*)=0",
-                    "true", "slterms:os-arch cannot have child elements"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-version)>1",
-                    "false",
+                    "count(//rdf:RDF/rdf:Description/slterms:os-version)<=1",
+                    "true",
                     "description must have at most 1 slterms:os-version element"),
-
-            new XPathQuery(
-                    "count(//rdf:RDF/rdf:Description/slterms:os-version/*)=0",
-                    "true", "slterms:os-version cannot have child elements"),
 
     };
 
-    private ValidateMetadataContent() {
+    private ValidateMetadataConstraints() {
 
     }
 
@@ -120,6 +105,8 @@ public class ValidateMetadataContent {
         checkConsistentIdentifiers(doc);
 
         checkConsistentChecksum(doc);
+
+        checkDates(doc);
 
     }
 
@@ -149,6 +136,40 @@ public class ValidateMetadataContent {
                     + sha1ChecksumIdentifier + ") and SHA-1 checksum ("
                     + sha1Checksum + ") are not consistent");
 
+        }
+    }
+
+    private static void checkDates(Document doc) {
+
+        String validDate = VALID_DATE.result(doc);
+        if (!isValidDate(validDate)) {
+            throw new MetadataException("dcterms:valid value (" + validDate
+                    + ") is not a valid date");
+        }
+
+        String creationDate = CREATED_DATE.result(doc);
+        if (!isValidDate(creationDate)) {
+            throw new MetadataException("dcterms:created value (" + validDate
+                    + ") is not a valid date");
+        }
+
+    }
+
+    private static boolean isValidDate(String date) {
+        if (date != null && (!"".equals(date))) {
+            Matcher m = PatternUtils.DATE.matcher(date);
+            if (m.matches()) {
+                try {
+                    DATE_FORMAT.parse(date);
+                    return true;
+                } catch (ParseException e) {
+                    throw new MetadataException(e.getMessage());
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
     }
 

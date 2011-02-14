@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:dcterms="http://purl.org/dc/terms/" xmlns:slreq="http://mp.stratuslab.eu/slreq#"
+	xmlns:slterms="http://mp.stratuslab.eu/slterms#" xml:base="http://mp.stratuslab.eu/">
+
+	<rdf:Description rdf:about="#MMZu9WvwKIro-rtBQfDk4PsKO7_">
+
+		<dcterms:identifier>MMZu9WvwKIro-rtBQfDk4PsKO7_</dcterms:identifier>
+
+		<slreq:bytes>100</slreq:bytes>
+
+		<slreq:checksum rdf:parseType="Resource">
+			<slreq:algorithm>SHA-1</slreq:algorithm>
+			<slreq:value>c319bbd5afc0a22ba3eaed0507c39383ec28eeff</slreq:value>
+		</slreq:checksum>
+
+		<slreq:endorsement rdf:parseType="Resource">
+			<dcterms:created>2011-01-24T09:59:42Z</dcterms:created>
+			<slreq:endorser rdf:parseType="Resource">
+                <slreq:email>jane.tester@example.org</slreq:email>
+                <slreq:subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</slreq:subject>
+                <slreq:issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</slreq:issuer>
+			</slreq:endorser>
+		</slreq:endorsement>
+
+		<dcterms:type>machine</dcterms:type>
+
+		<slterms:os-version>0</slterms:os-version>
+		<slterms:os-version>0</slterms:os-version>
+
+	</rdf:Description>
+</rdf:RDF>

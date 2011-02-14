@@ -8,17 +8,8 @@
   -->
   <Match>
     <Or>
-      <Class name="eu.stratuslab.marketplace.metadata.CheckRDF" />
-      <Class name="eu.stratuslab.marketplace.metadata.CheckSchema" />
-      <Class name="eu.stratuslab.marketplace.metadata.CheckXMLSignatures" />
-      <Class name="eu.stratuslab.marketplace.metadata.CreateMetadata" />
-      <Class name="eu.stratuslab.marketplace.metadata.CreateChecksums" />
+      <Class name="eu.stratuslab.marketplace.metadata.CheckMetadata" />
       <Class name="eu.stratuslab.marketplace.metadata.SignMetadata" />
-      <Class name="eu.stratuslab.marketplace.metadata.ValidateXMLSignature" />
-      <Class name="eu.stratuslab.marketplace.metadata.ValidateXMLSignatureTest" />
-      <Class name="eu.stratuslab.metadata.GenXmlSign" />
-      <Class name="eu.stratuslab.metadata.ValidateSign" />
-      <Class name="eu.stratuslab.metadata.ValidateSign$X509KeySelector" />
     </Or>
     <Bug pattern="NP_ALWAYS_NULL" />
   </Match>
