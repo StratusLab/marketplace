@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:slreq="http://mp.stratuslab.eu/slreq#" xmlns:ex="http://example.org/">
+
+	<rdf:Description rdf:about="#MMZu9WvwKIro-rtBQfDk4PsKO7_">
+
+		<slreq:endorsement rdf:parseType="Resource">
+			<ex:marker>2011-01-24T09:59:42Z</ex:marker>
+		</slreq:endorsement>
+
+	</rdf:Description>
+
+</rdf:RDF>

@@ -120,6 +120,9 @@ public class X509Utils {
 
         try {
 
+            // Fully normalize the document before trying to sign it.
+            doc.normalizeDocument();
+
             XMLSignatureFactory factory = newXMLSignatureFactory();
 
             SignedInfo si = newSignedInfo(factory);
