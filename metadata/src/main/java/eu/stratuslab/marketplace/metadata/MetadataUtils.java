@@ -145,8 +145,6 @@ public class MetadataUtils {
             DOMValidateContext context = new DOMValidateContext(
                     new X509KeySelector(), node);
 
-            System.err.println("DEBUG: " + context);
-
             XMLSignatureFactory factory = XMLSignatureFactory
                     .getInstance("DOM");
 
