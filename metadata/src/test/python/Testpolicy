@@ -1,0 +1,21 @@
+import ...policy 
+
+if __name__ == "__main__":
+    metadata = ["valid-full.xml", "hackers-full.xml"]
+    
+    WhiteListEndorsers=[]
+    BlackListEndorsers=[]
+    BlackListChecksums=[]
+    
+    xmltree = ElementTree()
+    xmltree2 = ElementTree()
+    xmltree.parse("valid-full.xml")
+    xmltree2.parse("hackers-full.xml")
+    
+    xmltrees = [xmltree, xmltree2]
+    
+    init('policy.cfg') 
+    
+    print 'len(xmltrees)=',len(xmltrees)
+    filter(xmltrees)
+    print 'len(xmltrees)=',len(xmltrees)
