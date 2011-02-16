@@ -1,6 +1,6 @@
 package eu.stratuslab.marketplace.metadata;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -58,6 +58,12 @@ public class SignValidateCycleTest {
     @Test
     public void testNormalCycleOK() throws SAXException, IOException {
         signAndValidate("valid-minimal.xml");
+    }
+
+    @Test
+    public void testNormalCycleOKFillingEndorsement() throws SAXException,
+            IOException {
+        signAndValidate("valid-minimal-empty-endorsement.xml");
     }
 
     @Test(expected = MetadataException.class)
@@ -126,6 +132,9 @@ public class SignValidateCycleTest {
 
             // Instantiate the document to be signed
             Document doc = readDocument(name);
+
+            // Fill in the endorsement if necessary.
+            MetadataUtils.fillEndorsementElement(doc, x509Info);
 
             // Sign the document. The document is directly modified by method.
             X509Utils.signDocument(x509Info, doc);

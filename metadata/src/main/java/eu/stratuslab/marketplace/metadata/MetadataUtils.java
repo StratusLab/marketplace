@@ -1,5 +1,8 @@
 package eu.stratuslab.marketplace.metadata;
 
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.DCTERMS_NS_URI;
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,10 +11,13 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.Reference;
@@ -23,6 +29,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -56,6 +63,13 @@ public class MetadataUtils {
 
     final static private BigInteger divisor = BigInteger.valueOf(2L).pow(
             fieldBits);
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    static {
+        DATE_FORMAT.setLenient(false);
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private MetadataUtils() {
 
@@ -144,8 +158,6 @@ public class MetadataUtils {
 
             DOMValidateContext context = new DOMValidateContext(
                     new X509KeySelector(), node);
-
-            System.err.println("DEBUG: " + context);
 
             XMLSignatureFactory factory = XMLSignatureFactory
                     .getInstance("DOM");
@@ -294,6 +306,57 @@ public class MetadataUtils {
             }
         }
 
+    }
+
+    public static void fillEndorsementElement(Document doc, X509Info x509info) {
+
+        NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement");
+        if (nl.getLength() != 1) {
+            throw new MetadataException(
+                    "document must contain exactly 1 slreq:endorsement element");
+        }
+
+        if (x509info.email == null) {
+            throw new MetadataException(
+                    "cannot generate slreq:endorsement; no email address in cert");
+        }
+
+        Node endorsement = nl.item(0);
+
+        if (!endorsement.hasChildNodes()) {
+
+            endorsement.appendChild(createTimestampElement(doc));
+
+            Element email = createSlreqElement(doc, "email");
+            email.setTextContent(x509info.email);
+
+            Element subject = createSlreqElement(doc, "subject");
+            subject.setTextContent(x509info.subject);
+
+            Element issuer = createSlreqElement(doc, "issuer");
+            issuer.setTextContent(x509info.issuer);
+
+            Element endorser = createSlreqElement(doc, "endorser");
+            endorser.appendChild(email);
+            endorser.appendChild(subject);
+            endorser.appendChild(issuer);
+
+            endorsement.appendChild(endorser);
+        }
+
+        doc.normalizeDocument();
+    }
+
+    private static Element createSlreqElement(Document doc, String name) {
+        return doc.createElementNS(SLREQ_NS_URI, name);
+
+    }
+
+    private static Element createTimestampElement(Document doc) {
+        Element e = doc.createElementNS(DCTERMS_NS_URI, "created");
+        String datetime = DATE_FORMAT.format(new Date());
+        e.setTextContent(datetime);
+        return e;
     }
 
 }

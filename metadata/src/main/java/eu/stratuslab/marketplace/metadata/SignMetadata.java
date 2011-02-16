@@ -43,6 +43,9 @@ public class SignMetadata {
         DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
         Document doc = db.parse(metadataFile);
 
+        // Fill in the endorsement element if it is empty.
+        MetadataUtils.fillEndorsementElement(doc, x509Info);
+
         // Sign the document. The document is directly modified by method.
         X509Utils.signDocument(x509Info, doc);
 
