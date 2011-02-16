@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import java.util.logging.Level;
+
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -17,15 +19,12 @@ public class MDatumResource extends BaseResource {
     
     @Override
     protected void doInit() throws ResourceException {
-        String iri = getRequest().getResourceRef().toString(); 
+        String iri = getRequest().getResourceRef().toString();
         this.datum = getMetadatum(iri);
     }
     
     @Get("xml")
     public Representation toXml() {
-        datum.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
-        datum.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
-                
         StringRepresentation representation =
                 new StringRepresentation(new StringBuffer(modelToString(datum)),
                                          MediaType.APPLICATION_RDF_XML);

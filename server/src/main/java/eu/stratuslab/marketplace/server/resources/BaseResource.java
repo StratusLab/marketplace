@@ -3,6 +3,7 @@ package eu.stratuslab.marketplace.server.resources;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
@@ -70,8 +72,10 @@ public abstract class BaseResource extends ServerResource {
             rdf.getWriter().write(rdf, out, "");
 
             try {
-                con.add(new ByteArrayInputStream(bytes.toString().getBytes()), "", RDFFormat.RDFXML, 
-                               vf.createURI(iri));
+            	con.clear(vf.createURI(iri));
+                con.add(new ByteArrayInputStream(bytes.toString().getBytes()), 
+                		"http://mp.stratuslab.eu/", RDFFormat.RDFXML, 
+                        vf.createURI(iri));
             }
             finally {
                 con.close();
@@ -106,11 +110,9 @@ public abstract class BaseResource extends ServerResource {
             finally {
                 con.close();
             }
-            model = ModelFactory.createMemModelMaker().createDefaultModel();
-            model.read(new ByteArrayInputStream(bytes.toString().getBytes()), "");
-            model.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
-            model.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
             
+            model = createModel(new ByteArrayInputStream(bytes.toString().getBytes()), 
+            		"http://mp.stratuslab.eu/");           
         }
         catch (OpenRDFException e) {
             e.printStackTrace();
@@ -229,6 +231,18 @@ public abstract class BaseResource extends ServerResource {
         writer.write(model, out, "");
         
         return bytes.toString();
+    }
+    
+    protected Model createModel(InputStream in, String base){
+    	ModelMaker mk = ModelFactory.createMemModelMaker();
+        Model model = mk.createDefaultModel();
+        model.read(in, base);
+        model.setNsPrefix( "slterms", "http://mp.stratuslab.eu/slterms#" );
+        model.setNsPrefix( "dcterms", "http://purl.org/dc/terms/" );
+        model.setNsPrefix( "slreq", "http://mp.stratuslab.eu/slreq#" );
+        model.setNsPrefix( "ex", "http://example.org/" );
+        
+        return model;
     }
     
     /**

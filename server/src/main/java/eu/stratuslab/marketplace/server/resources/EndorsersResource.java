@@ -23,10 +23,14 @@ public class EndorsersResource extends BaseResource {
 		String format = (form.getFirstValue("format") != null) ? 
 				form.getFirstValue("format") : "xml";
 
-		String queryString = "SELECT email FROM {} slterms:email {email} " +
-				"USING NAMESPACE slterms = <http://stratuslab.eu/terms#>";
+		String queryString = "SELECT ?email " +
+                " WHERE {" +
+                " ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
+                " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
+                " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . " +
+                " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email . }";
 		
-		String results = query(queryString, QueryLanguage.SERQL, format);
+		String results = query(queryString, QueryLanguage.SPARQL, format);
 		StringRepresentation representation;
 		if(format.equals("json")){
 			representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);

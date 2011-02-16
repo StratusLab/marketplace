@@ -13,10 +13,10 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.SimpleSelector;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 /**
@@ -31,17 +31,20 @@ public class MDataResource extends BaseResource {
     public Representation acceptMetadatum(Representation entity) throws IOException {
         Representation result = null;
 
-        ModelMaker mk = ModelFactory.createMemModelMaker();
-        Model datum = mk.createDefaultModel();
-        datum.read(entity.getStream(), "");
-        datum.setNsPrefix( "slterm", "http://stratuslab.eu/terms#" );
-        datum.setNsPrefix( "dcterm", "http://purl.org/dc/terms/" );
-
-        String identifier = ((datum.listStatements(
-                              new SimpleSelector(null, DCTerms.identifier,
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
+        Model datum = createModel(entity.getStream(), "http://mp.stratuslab.eu/");
+        
+        String identifier = "";
+        StmtIterator iter = datum.listStatements(new SimpleSelector(null, DCTerms.identifier, (RDFNode) null));
+        while (iter.hasNext()) {
+        	Statement s = iter.nextStatement();
+        	if(s.getSubject().getNameSpace() != null 
+        			&& s.getSubject().getNameSpace().startsWith("http://mp.stratuslab.eu/#")){
+        		identifier = (s.getObject().toString());
+        	}
+        }
+        
         String endorser = ((datum.listStatements(
-                              new SimpleSelector(null, datum.createProperty("http://stratuslab.eu/terms#", "email"),
+                              new SimpleSelector(null, datum.createProperty("http://mp.stratuslab.eu/slreq#", "email"),
                                                  (RDFNode)null))).nextStatement()).getObject().toString();
         String created = ((datum.listStatements(
                               new SimpleSelector(null, DCTerms.created,
@@ -76,57 +79,47 @@ public class MDataResource extends BaseResource {
                                 form.getFirstValue("format") : "xml";
             
             boolean metadataQuery = true;
-            boolean where = false;
-            StringBuffer wherePredicate = new StringBuffer();
+            boolean filter = false;
+            StringBuffer filterPredicate = new StringBuffer();
             
             String identifier = form.getFirstValue("identifier");
             if (identifier != null){
-            	if(!where){
-            	    wherePredicate.append(" WHERE identifier = \"" + identifier + "\" ");
-            	} else {
-            		wherePredicate.append(" AND identifier = \"" + identifier + "\" ");
-            	}
-            	where = true;
+            	filterPredicate.append(" FILTER (?identifier = \"" + identifier + "\"). ");
+            	filter = true;
             } else {
             	metadataQuery = false;
             }
             
             String endorser = form.getFirstValue("email");
             if (endorser != null){
-            	if(!where){
-            	    wherePredicate.append(" WHERE email = \"" + endorser + "\" ");
-            	} else {
-            		wherePredicate.append(" AND email = \"" + endorser + "\" ");
-            	}
-            	where = true;
+            	filterPredicate.append(" FILTER (?email = \"" + endorser + "\"). ");
+            	filter = true;
             } else {
             	metadataQuery = false;
             }
             
             String created = form.getFirstValue("created");
             if (created != null){
-            	if(!where){
-            	    wherePredicate.append(" WHERE created = \"" + created + "\" ");
-            	} else {
-            		wherePredicate.append(" AND created = \"" + created + "\" ");
-            	}
+            	filterPredicate.append(" FILTER (?created = \"" + created + "\"). ");
+            	filter = true;
             } else {
             	metadataQuery = false;
             }
-                             
-            StringBuffer queryString = new StringBuffer("SELECT identifier, created, description, email " +
-                                 " FROM {} dcterms:identifier {identifier}, " +
-                                 " {} dcterms:created {created}, " +
-                                 " {} dcterms:description {description}, " +
-                                 " {} slterms:email {email} ");
+                       
+            StringBuffer queryString = new StringBuffer("SELECT ?identifier ?email ?created " +
+                    " WHERE {" +
+                    " ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
+                    " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
+                    " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . " +
+                    " ?endorsement <http://purl.org/dc/terms/created> ?created ." +
+                    " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
             
-            if(where){
-            	queryString.append(wherePredicate.toString());
+            if(filter){
+            	queryString.append(filterPredicate.toString() + "}");
+            } else {
+            	queryString.append("}");
             }
-            
-            queryString.append(" USING NAMESPACE dcterms = <http://purl.org/dc/terms/>, " +
-                                 " slterms = <http://stratuslab.eu/terms#>");
-            
+                         
             StringRepresentation representation;
             if(metadataQuery){
             	String ref = getRequest().getRootRef().toString();
@@ -135,7 +128,7 @@ public class MDataResource extends BaseResource {
             	representation = new StringRepresentation(new StringBuffer(modelToString(getMetadatum(iri))), 
             			MediaType.APPLICATION_RDF_XML);
             } else {
-            	String results = query(queryString.toString(), QueryLanguage.SERQL, format);
+            	String results = query(queryString.toString(), QueryLanguage.SPARQL, format);
 
             	if(format.equals("json")){
             		representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);

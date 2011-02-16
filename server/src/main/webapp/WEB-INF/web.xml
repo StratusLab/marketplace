@@ -6,28 +6,7 @@
             version="2.5">
 
     <display-name>StratusLab Market-Place</display-name>
-
-    <context-param>
-        <param-name>mysql.dbname</param-name>
-        <param-value>marketplace</param-value>
-    </context-param>
-    <context-param>
-        <param-name>mysql.dbuser</param-name>
-        <param-value>sesame</param-value>
-    </context-param>
-    <context-param>
-        <param-name>mysql.dbpass</param-name>
-        <param-value>sesame</param-value>
-    </context-param>
-    <context-param>
-        <param-name>mysql.host</param-name>
-        <param-value>localhost</param-value>
-    </context-param>
-    <context-param>
-        <param-name>mysql.port</param-name>
-        <param-value>3306</param-value>
-    </context-param>
-
+    
     <servlet>
         <servlet-name>RestletServlet</servlet-name>
         <servlet-class>

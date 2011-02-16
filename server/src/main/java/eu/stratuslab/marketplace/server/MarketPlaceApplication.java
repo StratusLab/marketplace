@@ -1,5 +1,9 @@
 package eu.stratuslab.marketplace.server;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,21 +32,35 @@ public class MarketPlaceApplication extends Application {
         setName("StratusLab Market-Place");
         setDescription("Market-Place for StratusLab images");
         setOwner("StratusLab");
-        setAuthor("Stuart Kenny");
-        /*
-        String mysqlDb = getCurrent().getContext().getParameters().getFirstValue("mysql.dbname");
-        String mysqlHost = getContext().getParameters().getFirstValue("mysql.host");
-        int mysqlPort = Integer.parseInt(getContext().getParameters().getFirstValue("mysql.port"));
-        String mysqlUser = getContext().getParameters().getFirstValue("mysql.dbuser");
-        String mysqlPass = getContext().getParameters().getFirstValue("mysql.dbpass");
-        */
-                
+        setAuthor("Stuart Kenny");      
+
+        InputStream input = null;
+        
+        // Read properties file.
+        Properties properties = new Properties();
+        try {
+            properties.load(input = new FileInputStream("/etc/stratuslab/marketplace.cfg"));
+            input.close();
+        } catch (IOException e) {
+        	try {
+				input.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+        }
+      
+        String mysqlDb = properties.getProperty("mysql.dbname", "marketplace"); 
+    	String mysqlHost = properties.getProperty("mysql.host", "localhost");
+        int mysqlPort = Integer.parseInt(properties.getProperty("mysql.port", "3306"));
+        String mysqlUser = properties.getProperty("mysql.dbuser", "sesame"); 
+        String mysqlPass = properties.getProperty("mysql.dbpass", "sesame");
+                        
         this.sqlStore = new MySqlStore();
-		sqlStore.setDatabaseName("marketplace");
-		sqlStore.setServerName("localhost");
-		sqlStore.setPortNumber(3306);
-		sqlStore.setUser("sesame");
-		sqlStore.setPassword("sesame");
+		sqlStore.setDatabaseName(mysqlDb);
+		sqlStore.setServerName(mysqlHost);
+		sqlStore.setPortNumber(mysqlPort);
+		sqlStore.setUser(mysqlUser);
+		sqlStore.setPassword(mysqlPass);
 	    
         this.metadata = new SailRepository(sqlStore);
         try {
