@@ -41,7 +41,8 @@ public class SignValidateCycleTest {
             Document signedDoc = db.parse(is);
 
             // Check that all's OK.
-            ValidateXMLSignature.validate(signedDoc);
+            // ValidateXMLSignature.validate(signedDoc);
+            ValidateMetadata.validate(signedDoc);
 
         } finally {
             if (is != null) {
