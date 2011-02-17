@@ -1,9 +1,15 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,6 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.openrdf.OpenRDFException;
+import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
@@ -120,6 +127,43 @@ public abstract class BaseResource extends ServerResource {
        
         return model;
     }
+    
+    /**
+     * Retrieve metadata
+     * 
+     * @param iri identifiers of the metadata entries
+     * @return metadata entries as a Jena model
+     */
+    protected Model getMetadata(String[] iri) {
+        Model model = null;
+        try {
+            RepositoryConnection con = getMetadataStore().getConnection();
+            ValueFactory vf = con.getValueFactory();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            BufferedOutputStream out = new BufferedOutputStream(bytes);
+            RDFHandler rdfxmlWriter = new RDFXMLWriter(out);
+            
+            Resource[] uris = new Resource[iri.length];
+            for(int i = 0; i < iri.length; i++){
+            	uris[i] = vf.createURI(iri[i]);
+            }
+            
+            try {
+                con.export(rdfxmlWriter, uris);
+            }
+            finally {
+                con.close();
+            }
+            
+            model = createModel(new ByteArrayInputStream(bytes.toString().getBytes()), 
+            		"http://mp.stratuslab.eu/");           
+        }
+        catch (OpenRDFException e) {
+            e.printStackTrace();
+        }
+       
+        return model;
+    }
 
     /**
      * Remove a metadata entry
@@ -194,14 +238,14 @@ public abstract class BaseResource extends ServerResource {
                     int cols = columnNames.size();
 
                     while(results.hasNext()){
-		        BindingSet solution = results.next();
-		        HashMap<String, String> row = new HashMap<String, String>(cols,1);
-                        for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
-                           String columnName = namesIter.next();
-                           row.put(columnName, (solution.getValue(columnName)).stringValue());
-                        }
-                        list.add(row);
-                     }   
+                    	BindingSet solution = results.next();
+                    	HashMap<String, String> row = new HashMap<String, String>(cols,1);
+                    	for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
+                    		String columnName = namesIter.next();
+                    		row.put(columnName, (solution.getValue(columnName)).stringValue());
+                    	}
+                    	list.add(row);
+                    }
                   } finally {
                       results.close();
                   }
@@ -214,7 +258,7 @@ public abstract class BaseResource extends ServerResource {
               e.printStackTrace();
           }
 
-        return ((Collection<HashMap<String, String>>) list); 
+        return (list); 
     }
     
     /**
@@ -236,7 +280,9 @@ public abstract class BaseResource extends ServerResource {
     protected Model createModel(InputStream in, String base){
     	ModelMaker mk = ModelFactory.createMemModelMaker();
         Model model = mk.createDefaultModel();
-        model.read(in, base);
+        if(in != null){
+            model.read(in, base);
+        }
         model.setNsPrefix( "slterms", "http://mp.stratuslab.eu/slterms#" );
         model.setNsPrefix( "dcterms", "http://purl.org/dc/terms/" );
         model.setNsPrefix( "slreq", "http://mp.stratuslab.eu/slreq#" );
@@ -244,6 +290,35 @@ public abstract class BaseResource extends ServerResource {
         
         return model;
     }
+    
+    protected  String convertStreamToString(InputStream is)
+    throws IOException {
+    	/*
+    	 * To convert the InputStream to String we use the
+    	 * Reader.read(char[] buffer) method. We iterate until the
+    	 * Reader return -1 which means there's no more data to
+    	 * read. We use the StringWriter class to produce the string.
+    	 */
+    	if (is != null) {
+    		Writer writer = new StringWriter();
+
+    		char[] buffer = new char[1024];
+    		try {
+    			Reader reader = new BufferedReader(
+    					new InputStreamReader(is, "UTF-8"));
+    			int n;
+    			while ((n = reader.read(buffer)) != -1) {
+    				writer.write(buffer, 0, n);
+    			}
+    		} finally {
+    			is.close();
+    		}
+    		return writer.toString();
+    	} else {       
+    		return "";
+    	}
+    }
+
     
     /**
      * Convert a String to various output formats

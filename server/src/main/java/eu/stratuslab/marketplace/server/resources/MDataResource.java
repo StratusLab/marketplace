@@ -1,9 +1,9 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import java.io.IOException;
-import java.util.logging.Level;
-
-import org.openrdf.query.QueryLanguage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -30,7 +30,7 @@ public class MDataResource extends BaseResource {
     @Post
     public Representation acceptMetadatum(Representation entity) throws IOException {
         Representation result = null;
-
+        
         Model datum = createModel(entity.getStream(), "http://mp.stratuslab.eu/");
         
         String identifier = "";
@@ -75,10 +75,7 @@ public class MDataResource extends BaseResource {
 
         try {
             Form form = getRequest().getResourceRef().getQueryAsForm();
-            String format = (form.getFirstValue("format") != null) ? 
-                                form.getFirstValue("format") : "xml";
             
-            boolean metadataQuery = true;
             boolean filter = false;
             StringBuffer filterPredicate = new StringBuffer();
             
@@ -86,24 +83,18 @@ public class MDataResource extends BaseResource {
             if (identifier != null){
             	filterPredicate.append(" FILTER (?identifier = \"" + identifier + "\"). ");
             	filter = true;
-            } else {
-            	metadataQuery = false;
             }
             
             String endorser = form.getFirstValue("email");
             if (endorser != null){
             	filterPredicate.append(" FILTER (?email = \"" + endorser + "\"). ");
             	filter = true;
-            } else {
-            	metadataQuery = false;
             }
             
             String created = form.getFirstValue("created");
             if (created != null){
             	filterPredicate.append(" FILTER (?created = \"" + created + "\"). ");
             	filter = true;
-            } else {
-            	metadataQuery = false;
             }
                        
             StringBuffer queryString = new StringBuffer("SELECT ?identifier ?email ?created " +
@@ -119,23 +110,29 @@ public class MDataResource extends BaseResource {
             } else {
             	queryString.append("}");
             }
-                         
-            StringRepresentation representation;
-            if(metadataQuery){
-            	String ref = getRequest().getRootRef().toString();
-            	String iri = ref + "/metadata/" + identifier + "/" + endorser + "/" + created;
-
-            	representation = new StringRepresentation(new StringBuffer(modelToString(getMetadatum(iri))), 
-            			MediaType.APPLICATION_RDF_XML);
-            } else {
-            	String results = query(queryString.toString(), QueryLanguage.SPARQL, format);
-
-            	if(format.equals("json")){
-            		representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);
-            	} else {
-            		representation = new StringRepresentation(results, MediaType.APPLICATION_XML);
-            	}
+            
+            ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString.toString());
+            String[] uris = new String[results.size()];
+            int i = 0;
+            for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
+            	HashMap<String, String> resultRow = resultsIter.next();
+                String ref = getRequest().getRootRef().toString();
+                String iri = ref + "/metadata/" + resultRow.get("identifier") + "/" + resultRow.get("email")
+                             + "/" + resultRow.get("created");
+                uris[i] = iri;
+                i++;
             }
+            
+            Model metadata;
+            if(uris.length > 0){
+                metadata = getMetadata(uris);
+            } else {
+            	metadata = createModel(null, "");
+            }
+            StringRepresentation representation =
+                new StringRepresentation(new StringBuffer(modelToString(metadata)),
+                                         MediaType.APPLICATION_RDF_XML);
+            
             // Returns the XML representation of this document.
             return representation;
         } catch (Exception e) {
