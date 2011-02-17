@@ -1,6 +1,7 @@
 package eu.stratuslab.marketplace.metadata;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.DCTERMS_NS_URI;
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.RDF_NS_URI;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
 
 import java.io.File;
@@ -28,6 +29,7 @@ import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -337,6 +339,9 @@ public class MetadataUtils {
             issuer.setTextContent(x509info.issuer);
 
             Element endorser = createSlreqElement(doc, "endorser");
+            Attr attr = doc.createAttributeNS(RDF_NS_URI, "parseType");
+            attr.setTextContent("Resource");
+            endorser.setAttributeNodeNS(attr);
             endorser.appendChild(email);
             endorser.appendChild(subject);
             endorser.appendChild(issuer);
