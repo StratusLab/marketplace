@@ -8,10 +8,6 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-
 public class MarketPlaceApplicationClient {
 
     public static void main(String[] args) throws IOException,
@@ -34,10 +30,7 @@ public class MarketPlaceApplicationClient {
 
         // Create a new item
         Representation rdf = new FileRepresentation(metadata, MediaType.APPLICATION_RDF_XML);
-        ModelMaker mk = ModelFactory.createMemModelMaker();
-        Model image = mk.createDefaultModel();
-        image.read(rdf.getStream(), "");
-        
+               
         ClientResource metadatumResource = null;
 
         try {

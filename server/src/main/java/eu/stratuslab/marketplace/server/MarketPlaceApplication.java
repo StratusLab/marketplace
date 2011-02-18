@@ -11,6 +11,8 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.SailException;
+import org.openrdf.sail.helpers.SailBase;
+import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.sail.rdbms.mysql.MySqlStore;
 import org.restlet.Application;
 import org.restlet.Restlet;
@@ -25,7 +27,7 @@ public class MarketPlaceApplication extends Application {
 
     /** The image metadata is stored in a database. */
     private Repository metadata = null;   
-    private MySqlStore sqlStore = null;    
+    private SailBase store = null;    
     protected Logger logger = getLogger();
     
     public MarketPlaceApplication() {
@@ -49,20 +51,26 @@ public class MarketPlaceApplication extends Application {
 			}
         }
       
-        String mysqlDb = properties.getProperty("mysql.dbname", "marketplace"); 
-    	String mysqlHost = properties.getProperty("mysql.host", "localhost");
-        int mysqlPort = Integer.parseInt(properties.getProperty("mysql.port", "3306"));
-        String mysqlUser = properties.getProperty("mysql.dbuser", "sesame"); 
-        String mysqlPass = properties.getProperty("mysql.dbpass", "sesame");
-                        
-        this.sqlStore = new MySqlStore();
-		sqlStore.setDatabaseName(mysqlDb);
-		sqlStore.setServerName(mysqlHost);
-		sqlStore.setPortNumber(mysqlPort);
-		sqlStore.setUser(mysqlUser);
-		sqlStore.setPassword(mysqlPass);
-	    
-        this.metadata = new SailRepository(sqlStore);
+        String storeType = properties.getProperty("store.type", "memory");
+        
+        if(storeType.equals("memory")){
+        	this.store = new MemoryStore();	
+        } else {
+        	String mysqlDb = properties.getProperty("mysql.dbname", "marketplace"); 
+        	String mysqlHost = properties.getProperty("mysql.host", "localhost");
+        	int mysqlPort = Integer.parseInt(properties.getProperty("mysql.port", "3306"));
+        	String mysqlUser = properties.getProperty("mysql.dbuser", "sesame"); 
+        	String mysqlPass = properties.getProperty("mysql.dbpass", "sesame");
+
+        	store = new MySqlStore();
+        	((MySqlStore)store).setDatabaseName(mysqlDb);
+        	((MySqlStore)store).setServerName(mysqlHost);
+        	((MySqlStore)store).setPortNumber(mysqlPort);
+        	((MySqlStore)store).setUser(mysqlUser);
+        	((MySqlStore)store).setPassword(mysqlPass);
+        }
+        
+        this.metadata = new SailRepository(store);
         try {
             this.metadata.initialize();
         } catch(RepositoryException r){
@@ -96,9 +104,9 @@ public class MarketPlaceApplication extends Application {
 
     @Override
     public void stop(){
-        if(this.sqlStore != null){
+        if(this.store != null){
         	try {
-				this.sqlStore.shutDown();
+				this.store.shutDown();
 			} catch (SailException e) {
 				e.printStackTrace();
 			}

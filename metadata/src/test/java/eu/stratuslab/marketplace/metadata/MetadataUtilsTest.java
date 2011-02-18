@@ -1,5 +1,6 @@
 package eu.stratuslab.marketplace.metadata;
 
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.RDF_NS_URI;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
 import static org.junit.Assert.fail;
 
@@ -9,6 +10,8 @@ import java.security.KeyStore;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -53,6 +56,33 @@ public class MetadataUtilsTest {
             }
         } else {
             fail("wrong number of endorsement elements\n"
+                    + XMLUtils.documentToString(doc));
+        }
+
+    }
+
+    @Test
+    public void endorserHasParseTypeAttr() {
+
+        Document doc = readDocument("autogen-endorsement-done.xml");
+        X509Info x509info = getX509Info();
+        MetadataUtils.fillEndorsementElement(doc, x509info);
+
+        NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorser");
+        if (nl.getLength() == 1) {
+            NamedNodeMap map = nl.item(0).getAttributes();
+            Node value = map.getNamedItemNS(RDF_NS_URI, "parseType");
+            if (value != null) {
+                if (!"Resource".equals(value.getTextContent())) {
+                    fail("endorser rdf:parseType attribute has incorrect value\n"
+                            + XMLUtils.documentToString(doc));
+                }
+            } else {
+                fail("endorser did not have rdf:parseType attribute\n"
+                        + XMLUtils.documentToString(doc));
+            }
+        } else {
+            fail("wrong number of endorser elements\n"
                     + XMLUtils.documentToString(doc));
         }
 
