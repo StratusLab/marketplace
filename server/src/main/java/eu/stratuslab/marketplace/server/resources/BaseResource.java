@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Resource;
@@ -30,6 +32,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.restlet.data.Form;
 import org.restlet.resource.ServerResource;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -54,6 +57,10 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 public abstract class BaseResource extends ServerResource {
 
     protected Logger logger = getLogger();
+    
+    protected static final int ARG_EMAIL = 1;
+    protected static final int ARG_DATE = 2;
+    protected static final int ARG_OTHER = 3;
 
     /**
      * Returns the store of metadata managed by this application.
@@ -319,7 +326,49 @@ public abstract class BaseResource extends ServerResource {
     	}
     }
 
+    protected StringBuffer formToString(Form form){
+        StringBuffer predicate = new StringBuffer();
+        
+        for ( Iterator<String> formIter = form.getNames().iterator(); formIter.hasNext(); ){
+        	String key = formIter.next();
+        	predicate.append(" FILTER (?" + key + " = \"" + form.getFirstValue(key) + "\" ). ");
+        }
+        
+        return predicate;
+        
+    }
     
+    protected int classifyArg(String arg){
+    	if(arg == null || arg.equals("null") || arg.equals("")){
+    		return -1;
+    	}else if(isEmail(arg)){
+    		return ARG_EMAIL;
+    	} else if (isDate(arg)){
+    	    return ARG_DATE;
+    	} else {
+    		return ARG_OTHER;
+    	}
+    }
+        
+    private boolean isEmail(String test){
+    	String  expression="^[\\w\\-]([\\.\\w])+[\\w]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";  
+    	CharSequence inputStr = test;  
+    	Pattern pattern = Pattern.compile(expression,Pattern.CASE_INSENSITIVE);  
+    	Matcher matcher = pattern.matcher(inputStr);  
+    	return matcher.matches();  
+    }
+    
+    private boolean isDate(String test){
+    	String  expression="^(\\d{4}((-)?(0[1-9]|1[0-2])((-)?(0[1-9]|[1-2][0-9]|3[0-1])" +
+    			"(T(24:00(:00(\\.[0]+)?)?|(([0-1][0-9]|2[0-3])(:)[0-5][0-9])" +
+    			"((:)[0-5][0-9](\\.[\\d]+)?)?)((\\+|-)(14:00|(0[0-9]|1[0-3])" +
+    			"(:)[0-5][0-9])|Z))?)?)?)$";  
+    	CharSequence inputStr = test;  
+    	Pattern pattern = Pattern.compile(expression,Pattern.CASE_INSENSITIVE);  
+    	Matcher matcher = pattern.matcher(inputStr);  
+    	return matcher.matches();  
+    }
+        
     /**
      * Convert a String to various output formats
      * 

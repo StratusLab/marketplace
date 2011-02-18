@@ -1,9 +1,15 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -74,61 +80,64 @@ public class MDataResource extends BaseResource {
         // Generate the right representation according to its media type.
 
         try {
-            Form form = getRequest().getResourceRef().getQueryAsForm();
-            
-            boolean filter = false;
+            Form queryForm = getRequest().getResourceRef().getQueryAsForm();
+            Map<String, Object> requestAttr =  getRequest().getAttributes();
+                                   
             StringBuffer filterPredicate = new StringBuffer();
-            
-            String identifier = form.getFirstValue("identifier");
-            if (identifier != null){
-            	filterPredicate.append(" FILTER (?identifier = \"" + identifier + "\"). ");
-            	filter = true;
+                        
+            for ( Iterator<Map.Entry<String,Object>> argsIter = requestAttr.entrySet().iterator(); argsIter.hasNext(); ){
+            	Map.Entry<String,Object> arg = argsIter.next();
+            	String key = arg.getKey();
+            	if(!key.startsWith("org.restlet")){
+            		switch(classifyArg((String)arg.getValue())){
+            		case ARG_EMAIL:
+            			filterPredicate.append(" FILTER (?email = \"" + arg.getValue() + "\"). ");
+            			break;
+            		case ARG_DATE:
+            			filterPredicate.append(" FILTER (?date = \"" + arg.getValue() + "\"). ");
+            			break;
+            		case ARG_OTHER:
+            			filterPredicate.append(" FILTER (?identifier = \"" + arg.getValue() + "\"). ");
+            			break;
+            		default:
+            			break;
+            		}
+            	}
             }
             
-            String endorser = form.getFirstValue("email");
-            if (endorser != null){
-            	filterPredicate.append(" FILTER (?email = \"" + endorser + "\"). ");
-            	filter = true;
-            }
-            
-            String created = form.getFirstValue("created");
-            if (created != null){
-            	filterPredicate.append(" FILTER (?created = \"" + created + "\"). ");
-            	filter = true;
-            }
-                       
-            StringBuffer queryString = new StringBuffer("SELECT ?identifier ?email ?created " +
+            filterPredicate.append(formToString(queryForm));
+                      
+            StringBuffer queryString = new StringBuffer("SELECT DISTINCT ?identifier ?email ?created " +
                     " WHERE {" +
-                    " ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
-                    " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
-                    " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . " +
+                    " ?x <http://purl.org/dc/terms/identifier>  ?identifier ." +
+                    " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ." +
+                    " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser ." +
                     " ?endorsement <http://purl.org/dc/terms/created> ?created ." +
                     " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
             
-            if(filter){
-            	queryString.append(filterPredicate.toString() + "}");
-            } else {
-            	queryString.append("}");
-            }
+            queryString.append(filterPredicate.toString() + " }");
             
             ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString.toString());
             String[] uris = new String[results.size()];
             int i = 0;
+            
             for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
             	HashMap<String, String> resultRow = resultsIter.next();
                 String ref = getRequest().getRootRef().toString();
-                String iri = ref + "/metadata/" + resultRow.get("identifier") + "/" + resultRow.get("email")
-                             + "/" + resultRow.get("created");
+                String iri = ref + "/metadata/" + resultRow.get("identifier") 
+                + "/" + resultRow.get("email") + "/" + resultRow.get("created");
+                logger.log(Level.INFO, iri);
                 uris[i] = iri;
                 i++;
             }
-            
+                                    
             Model metadata;
             if(uris.length > 0){
                 metadata = getMetadata(uris);
             } else {
             	metadata = createModel(null, "");
             }
+                                   
             StringRepresentation representation =
                 new StringRepresentation(new StringBuffer(modelToString(metadata)),
                                          MediaType.APPLICATION_RDF_XML);
@@ -138,7 +147,7 @@ public class MDataResource extends BaseResource {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
         return null;
     }
 

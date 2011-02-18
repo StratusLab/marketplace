@@ -23,7 +23,7 @@ public class EndorsersResource extends BaseResource {
 		String format = (form.getFirstValue("format") != null) ? 
 				form.getFirstValue("format") : "xml";
 
-		String queryString = "SELECT ?email " +
+		String queryString = "SELECT DISTINCT ?email " +
                 " WHERE {" +
                 " ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
                 " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +

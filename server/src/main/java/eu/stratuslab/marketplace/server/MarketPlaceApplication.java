@@ -89,7 +89,8 @@ public class MarketPlaceApplication extends Application {
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
         router.attach("/metadata/", MDataResource.class);
-        
+        router.attach("/metadata/{arg1}", MDataResource.class);
+        router.attach("/metadata/{arg1}/{arg2}", MDataResource.class);
         // Defines a route for the resource "metadatum"
         router.attach("/metadata/{identifier}/{email}/{date}", MDatumResource.class);
         // Defines a route for the resource "endorsers"
