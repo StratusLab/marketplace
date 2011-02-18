@@ -126,21 +126,25 @@ public class MDataResource extends BaseResource {
                 String ref = getRequest().getRootRef().toString();
                 String iri = ref + "/metadata/" + resultRow.get("identifier") 
                 + "/" + resultRow.get("email") + "/" + resultRow.get("created");
-                logger.log(Level.INFO, iri);
                 uris[i] = iri;
                 i++;
             }
                                     
-            Model metadata;
+            StringBuffer output = new StringBuffer("<Metadata>");
+            
             if(uris.length > 0){
-                metadata = getMetadata(uris);
+            	for(int j = 0; j < uris.length; j++){
+            		output.append(modelToString(getMetadatum(uris[j])));
+            	}
             } else {
-            	metadata = createModel(null, "");
+            	output.append(modelToString(createModel(null, "")));
             }
                                    
+            output.append("</Metadata>");
+            
             StringRepresentation representation =
-                new StringRepresentation(new StringBuffer(modelToString(metadata)),
-                                         MediaType.APPLICATION_RDF_XML);
+                new StringRepresentation(output,
+                                         MediaType.APPLICATION_XML);
             
             // Returns the XML representation of this document.
             return representation;
