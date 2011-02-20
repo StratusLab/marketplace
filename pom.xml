@@ -6,7 +6,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>StratusLab Marketplace</name>
 
-  <url>http://hudson.stratuslab.eu/${artifactId}</url>
+  <url>http://hudson.stratuslab.eu/marketplace</url>
 
   <description>
 The Marketplace contains signed descriptions of available (or formally
