@@ -1,6 +1,8 @@
 package eu.stratuslab.marketplace.metadata;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
+import java.math.BigInteger;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -10,7 +12,8 @@ public class ValidateMetadataConstraintsTest {
     @Test
     public void checkValidDocuments() {
 
-        String[] names = { "valid-minimal.xml", "valid-minimal-signature.xml" };
+        String[] names = { "valid-minimal.xml", "valid-minimal-signature.xml",
+                "valid-minimal-leading-zero-sha1.xml" };
 
         for (String name : names) {
             Document doc = readDocument(name);
@@ -40,6 +43,13 @@ public class ValidateMetadataConstraintsTest {
                 // OK, expected problem.
             }
         }
+    }
+
+    public void checkLeadingZerosOK() {
+        String s = "024a8581d43fbf76d96ae3ec53b260bcddddad46";
+        BigInteger v1 = ValidateMetadataConstraints.hexToBigInteger(s);
+        BigInteger v2 = ValidateMetadataConstraints.hexToBigInteger("0" + s);
+        assertEquals(v1, v2);
     }
 
     private static Document readDocument(String name) {
