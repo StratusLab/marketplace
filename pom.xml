@@ -6,6 +6,15 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>StratusLab Marketplace</name>
 
+  <url>http://hudson.stratuslab.eu/marketplace</url>
+
+  <description>
+The Marketplace contains signed descriptions of available (or formally
+available) machine and disk images.  This project contains the code
+for the Marketplace server as well as various utilities related to the
+metadata. 
+</description>
+
   <packaging>pom</packaging>
 
   <modules>
@@ -17,23 +26,32 @@
     <jetty.version>7.2.2.v20101205</jetty.version>
   </properties>
 
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>StratusLab</name>
+    <url>http://stratuslab.eu/</url>
+  </organization>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://jira.stratuslab.eu:8080/</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Hudson</system>
+    <url>http://hudson.stratuslab.eu:8080/</url>
+  </ciManagement>
+
   <scm>
     <connection>scm:git:ssh://apache@code.stratuslab.eu/ext/git/stratuslab-marketplace.git</connection>
     <developerConnection>scm:git:ssh://apache@code.stratuslab.eu/ext/git/stratuslab-marketplace.git</developerConnection>
   </scm>
-
-  <distributionManagement>
-    <repository>
-      <id>stratuslab.releases</id>
-      <name>Releases</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/releases/</url>
-    </repository>
-    <snapshotRepository>
-      <id>stratuslab.snapshots</id>
-      <name>Snapshots</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <repositories>
     <repository>
@@ -65,6 +83,23 @@
     </repository>
     
   </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>stratuslab.releases</id>
+      <name>Releases</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>stratuslab.snapshots</id>
+      <name>Snapshots</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots/</url>
+    </snapshotRepository>
+    <site>
+      <id>hudson.webserver</id>
+      <url>scp://hudson.stratuslab.eu/var/www/marketplace</url>
+    </site>
+  </distributionManagement>
 
   <dependencyManagement>
     <dependencies>
@@ -161,6 +196,26 @@
     </dependencies>
   </dependencyManagement>
   
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <show>public</show>
+        </configuration>
+      </plugin>
+      <plugin>
+	<groupId>org.codehaus.mojo</groupId>
+	<artifactId>jdepend-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
+  
   <build>
 
     <pluginManagement>
@@ -211,7 +266,7 @@
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-surefire-plugin</artifactId>
-	  <version>2.6</version>
+	  <version>2.7.2</version>
 	</plugin>
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
@@ -223,6 +278,14 @@
 	    <source>1.5</source>
 	  </configuration>
 	</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.7</version>
+	  <configuration>
+	    <encoding>UTF-8</encoding>
+	  </configuration>
+        </plugin>
 	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-assembly-plugin</artifactId>
@@ -240,10 +303,17 @@
 	  <artifactId>exec-maven-plugin</artifactId>
 	  <version>1.2</version>
 	</plugin>
+
 	<plugin>
 	  <groupId>org.codehaus.mojo</groupId>
 	  <artifactId>findbugs-maven-plugin</artifactId>
 	  <version>2.3.1</version>
+	</plugin>
+
+	<plugin>
+	  <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>jdepend-maven-plugin</artifactId>
+	  <version>2.0-beta-2</version>
 	</plugin>
 
       </plugins>
