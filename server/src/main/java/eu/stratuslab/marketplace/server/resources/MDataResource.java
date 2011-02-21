@@ -1,10 +1,7 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -71,18 +68,28 @@ public class MDataResource extends BaseResource {
 
         return result;
     }
-    
+        
     /**
      * Returns a listing of all registered metadata or a particular entry if specified.
      */
     @Get("xml")
     public Representation toXml() {
-        // Generate the right representation according to its media type.
+        StringRepresentation representation =
+                new StringRepresentation(getMetadata(),
+                                         MediaType.APPLICATION_XML);
+            
+            // Returns the XML representation of this document.
+            return representation;
+    }
+
+    private StringBuffer getMetadata() {
+    	// Generate the right representation according to its media type.
 
         try {
             Form queryForm = getRequest().getResourceRef().getQueryAsForm();
             Map<String, Object> requestAttr =  getRequest().getAttributes();
-                                   
+            boolean dateSearch = false;          
+            
             StringBuffer filterPredicate = new StringBuffer();
                         
             for ( Iterator<Map.Entry<String,Object>> argsIter = requestAttr.entrySet().iterator(); argsIter.hasNext(); ){
@@ -94,7 +101,8 @@ public class MDataResource extends BaseResource {
             			filterPredicate.append(" FILTER (?email = \"" + arg.getValue() + "\"). ");
             			break;
             		case ARG_DATE:
-            			filterPredicate.append(" FILTER (?date = \"" + arg.getValue() + "\"). ");
+            			dateSearch = true;
+            			filterPredicate.append(" FILTER (?created = \"" + arg.getValue() + "\"). ");
             			break;
             		case ARG_OTHER:
             			filterPredicate.append(" FILTER (?identifier = \"" + arg.getValue() + "\"). ");
@@ -109,14 +117,28 @@ public class MDataResource extends BaseResource {
                       
             StringBuffer queryString = new StringBuffer("SELECT DISTINCT ?identifier ?email ?created " +
                     " WHERE {" +
-                    " ?x <http://purl.org/dc/terms/identifier>  ?identifier ." +
-                    " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ." +
-                    " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser ." +
-                    " ?endorsement <http://purl.org/dc/terms/created> ?created ." +
+                    " ?x <http://purl.org/dc/terms/identifier>  ?identifier; " +
+                    " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ." +
+                    " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;" +
+                    " <http://purl.org/dc/terms/created> ?created ." +
                     " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
             
-            queryString.append(filterPredicate.toString() + " }");
+            queryString.append(filterPredicate.toString());
+                        
+            if(!dateSearch && !queryForm.getNames().contains("created")) {
+            	queryString.append(" OPTIONAL { " +
+            			" ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; " +
+            			" <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ." +
+            			" ?lendorsement <http://mp.stratuslab.eu/slreq#endorser> ?lendorser;" +
+            			" <http://purl.org/dc/terms/created> ?latestcreated ." +
+            			" ?lendorser <http://mp.stratuslab.eu/slreq#email> ?lemail ." +
+            			" FILTER (?lidentifier = ?identifier) ." +
+            			" FILTER (?lemail = ?email) ." +
+            	" FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement))");
+            }
             
+            queryString.append(" }");
+                         
             ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString.toString());
             String[] uris = new String[results.size()];
             int i = 0;
@@ -141,18 +163,13 @@ public class MDataResource extends BaseResource {
             }
                                    
             output.append("</Metadata>");
-            
-            StringRepresentation representation =
-                new StringRepresentation(output,
-                                         MediaType.APPLICATION_XML);
-            
+                        
             // Returns the XML representation of this document.
-            return representation;
+            return output;
         } catch (Exception e) {
             e.printStackTrace();
         }
         
         return null;
     }
-
 }
