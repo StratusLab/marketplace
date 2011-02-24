@@ -1,7 +1,6 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import org.openrdf.query.QueryLanguage;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -25,12 +24,7 @@ public class EndorserResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-        // Generate the right representation according to its media type.
-    	Form form = getRequest().getResourceRef().getQueryAsForm();
-		String format = (form.getFirstValue("format") != null) ? 
-				form.getFirstValue("format") : "xml";
-    	    	    	
-    	String queryString = "SELECT DISTINCT ?email ?subject ?issuer " +
+        String queryString = "SELECT DISTINCT ?email ?subject ?issuer " +
         " WHERE {" +
         " ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
         " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
@@ -40,14 +34,10 @@ public class EndorserResource extends BaseResource {
         " ?endorser <http://mp.stratuslab.eu/slreq#issuer> ?issuer . " +
         " FILTER (?email = \"" + this.email + "\"). }";
     	
-        String results = query(queryString, QueryLanguage.SPARQL, format);
-    	StringRepresentation representation;
-    	if(format.equals("json")){
-    	    representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);
-    	} else {
-    	    representation = new StringRepresentation(results, MediaType.APPLICATION_XML);
-    	}
-
+        String results = query(queryString, QueryLanguage.SPARQL);
+    	StringRepresentation representation = new StringRepresentation(results, 
+    			MediaType.APPLICATION_XML);
+    	
     	// Returns the XML representation of this document.
     	return representation;
     }

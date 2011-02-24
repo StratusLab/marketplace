@@ -1,11 +1,16 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.DCTERMS_NS_URI;
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -14,13 +19,11 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.SimpleSelector;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.DCTerms;
+import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.metadata.MetadataUtils;
 
 /**
  * This resource represents a list of all Metadata entries
@@ -34,29 +37,40 @@ public class MDataResource extends BaseResource {
     public Representation acceptMetadatum(Representation entity) throws IOException {
         Representation result = null;
         
-        Model datum = createModel(entity.getStream(), "http://mp.stratuslab.eu/");
+        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+        Document datumDoc = null;
+        String rdfEntry = "";
+        try {
+			datumDoc = db.parse(entity.getStream());
+			
+			// Create a deep copy of the document and strip signature elements.
+            Document copy = (Document) datumDoc.cloneNode(true);
+            MetadataUtils.stripSignatureElements(copy);
+            rdfEntry = XMLUtils.documentToString(copy);
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
-        String identifier = "";
-        StmtIterator iter = datum.listStatements(new SimpleSelector(null, DCTerms.identifier, (RDFNode) null));
-        while (iter.hasNext()) {
-        	Statement s = iter.nextStatement();
-        	if(s.getSubject().getNameSpace() != null 
-        			&& s.getSubject().getNameSpace().startsWith("http://mp.stratuslab.eu/#")){
-        		identifier = (s.getObject().toString());
-        	}
-        }
-        
-        String endorser = ((datum.listStatements(
-                              new SimpleSelector(null, datum.createProperty("http://mp.stratuslab.eu/slreq#", "email"),
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
-        String created = ((datum.listStatements(
-                              new SimpleSelector(null, DCTerms.created,
-                                                 (RDFNode)null))).nextStatement()).getObject().toString();
-
+		String identifier = extractTextContent(datumDoc, DCTERMS_NS_URI, "identifier");
+		String endorser = extractTextContent(datumDoc, SLREQ_NS_URI, "email");
+		String created = extractTextContent(datumDoc, DCTERMS_NS_URI, "created");
+		         
         String ref = getRequest().getResourceRef().toString();
         String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
-        storeMetadatum(iri, datum);
+        File rdfFileParent = new File(getDataDir(), identifier + File.separatorChar + endorser);
+        File rdfFile = new File(rdfFileParent, created + ".xml");
+        
+        if(!rdfFileParent.exists()){
+        	if(rdfFileParent.mkdirs()){
+        		MetadataUtils.writeStringToFile(rdfEntry, rdfFile);	
+        	}
+        } else {
+        	MetadataUtils.writeStringToFile(XMLUtils.documentToString(datumDoc), rdfFile);
+        }
+                
+        storeMetadatum(iri, rdfEntry);
         // Set the response's status and entity
         setStatus(Status.SUCCESS_CREATED);
         Representation rep = new StringRepresentation("Metadata entry created",
@@ -74,15 +88,28 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-        StringRepresentation representation =
-                new StringRepresentation(getMetadata(),
+    	String[] uris = getMetadata();  
+        StringBuffer output = new StringBuffer(XML_HEADER);
+        
+        if(uris.length > 0){
+        	for(String uri : uris ){
+        		String datum = getMetadatum(uri);
+        		if(datum.startsWith(XML_HEADER)){
+        			datum = datum.substring(XML_HEADER.length());
+        		}
+        		output.append(datum);
+        	}
+        }
+                    
+        // Returns the XML representation of this document.
+    	StringRepresentation representation =
+                new StringRepresentation(output,
                                          MediaType.APPLICATION_XML);
             
-            // Returns the XML representation of this document.
-            return representation;
+        return representation;
     }
 
-    private StringBuffer getMetadata() {
+    private String[] getMetadata() {
     	// Generate the right representation according to its media type.
 
         try {
@@ -145,27 +172,14 @@ public class MDataResource extends BaseResource {
             
             for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
             	HashMap<String, String> resultRow = resultsIter.next();
-                String ref = getRequest().getRootRef().toString();
-                String iri = ref + "/metadata/" + resultRow.get("identifier") 
-                + "/" + resultRow.get("email") + "/" + resultRow.get("created");
-                uris[i] = iri;
+                String iri = resultRow.get("identifier") 
+                + "/" + resultRow.get("email") + "/" 
+                + resultRow.get("created");
+                uris[i] = getDataDir() + File.separatorChar + iri + ".xml";
                 i++;
             }
-                                    
-            StringBuffer output = new StringBuffer("<Metadata>");
-            
-            if(uris.length > 0){
-            	for(int j = 0; j < uris.length; j++){
-            		output.append(modelToString(getMetadatum(uris[j])));
-            	}
-            } else {
-            	output.append(modelToString(createModel(null, "")));
-            }
-                                   
-            output.append("</Metadata>");
-                        
-            // Returns the XML representation of this document.
-            return output;
+                       
+            return uris;
         } catch (Exception e) {
             e.printStackTrace();
         }

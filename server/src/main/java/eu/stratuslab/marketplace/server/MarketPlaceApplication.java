@@ -28,6 +28,7 @@ public class MarketPlaceApplication extends Application {
     /** The image metadata is stored in a database. */
     private Repository metadata = null;   
     private SailBase store = null;    
+    private String dataDir = null;
     protected Logger logger = getLogger();
     
     public MarketPlaceApplication() {
@@ -52,6 +53,7 @@ public class MarketPlaceApplication extends Application {
         }
       
         String storeType = properties.getProperty("store.type", "memory");
+        this.dataDir = properties.getProperty("data.dir", "/var/lib/stratuslab/metadata");
         
         if(storeType.equals("memory")){
         	this.store = new MemoryStore();	
@@ -121,6 +123,10 @@ public class MarketPlaceApplication extends Application {
     */
     public Repository getMetadataStore() {
            return this.metadata;
+    }
+    
+    public String getDataDir() {
+    	return this.dataDir;
     }
 
 }
