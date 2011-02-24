@@ -54,7 +54,7 @@
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryresultio-sparqlxml</artifactId>
-    </dependency>
+    </dependency>    
 
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
