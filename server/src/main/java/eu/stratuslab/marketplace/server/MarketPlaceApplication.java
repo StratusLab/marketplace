@@ -22,6 +22,7 @@ import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
+import eu.stratuslab.marketplace.server.resources.QueryResource;
 
 public class MarketPlaceApplication extends Application {
 
@@ -101,6 +102,10 @@ public class MarketPlaceApplication extends Application {
         
         // Defines a route for the resource "endorser"
         router.attach("/endorsers/{email}", EndorserResource.class); 
+        
+        //Defines a route for queries
+        router.attach("/query", QueryResource.class);
+        router.attach("/query/", QueryResource.class);
 
         return router;
     }

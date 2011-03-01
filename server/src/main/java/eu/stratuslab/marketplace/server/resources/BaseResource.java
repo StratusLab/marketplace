@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.openrdf.OpenRDFException;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
@@ -28,8 +29,12 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.ext.xml.DomRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import eu.stratuslab.marketplace.PatternUtils;
@@ -189,7 +194,12 @@ public abstract class BaseResource extends ServerResource {
                     	HashMap<String, String> row = new HashMap<String, String>(cols,1);
                     	for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
                     		String columnName = namesIter.next();
-                    		row.put(columnName, (solution.getValue(columnName)).stringValue());
+                    		Value columnValue = solution.getValue(columnName);
+                    		if(columnValue != null){
+                    		    row.put(columnName, (solution.getValue(columnName)).stringValue());
+                    		} else {
+                    			row.put(columnName, "null");
+                    		}
                     	}
                     	list.add(row);
                     }
@@ -206,6 +216,41 @@ public abstract class BaseResource extends ServerResource {
           }
 
         return (list); 
+    }
+     
+    /**
+     * Generate an XML representation of an error response.
+     * 
+     * @param errorMessage
+     *            the error message.
+     * @param errorCode
+     *            the error code.
+     */
+    protected Representation generateErrorRepresentation(String errorMessage,
+            String errorCode) {
+        DomRepresentation result = null;
+        // This is an error
+        // Generate the output representation
+        try {
+            result = new DomRepresentation(MediaType.TEXT_XML);
+            // Generate a DOM document representing the list of
+            // items.
+            Document d = result.getDocument();
+
+            Element eltError = d.createElement("error");
+
+            Element eltCode = d.createElement("code");
+            eltCode.appendChild(d.createTextNode(errorCode));
+            eltError.appendChild(eltCode);
+
+            Element eltMessage = d.createElement("message");
+            eltMessage.appendChild(d.createTextNode(errorMessage));
+            eltError.appendChild(eltMessage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
     
     protected StringBuffer formToString(Form form){

@@ -15,27 +15,26 @@ import javax.xml.parsers.DocumentBuilder;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
+import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
 import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
 
 /**
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-
-    /**
+	
+	/**
      * Handle POST requests: register new Metadata entry.
      */
     @Post
@@ -61,6 +60,7 @@ public class MDataResource extends BaseResource {
 			try {
 				ValidateXMLSignature.validate(datumDoc);
 				ValidateMetadataConstraints.validate(datumDoc);
+				ValidateRDFModel.validate(datumDoc);
 				
 				String identifier = extractTextContent(datumDoc, DCTERMS_NS_URI, "identifier");
 				String endorser = extractTextContent(datumDoc, SLREQ_NS_URI, "email");
@@ -99,41 +99,6 @@ public class MDataResource extends BaseResource {
         return result;
     }
         
-    /**
-     * Generate an XML representation of an error response.
-     * 
-     * @param errorMessage
-     *            the error message.
-     * @param errorCode
-     *            the error code.
-     */
-    private Representation generateErrorRepresentation(String errorMessage,
-            String errorCode) {
-        DomRepresentation result = null;
-        // This is an error
-        // Generate the output representation
-        try {
-            result = new DomRepresentation(MediaType.TEXT_XML);
-            // Generate a DOM document representing the list of
-            // items.
-            Document d = result.getDocument();
-
-            Element eltError = d.createElement("error");
-
-            Element eltCode = d.createElement("code");
-            eltCode.appendChild(d.createTextNode(errorCode));
-            eltError.appendChild(eltCode);
-
-            Element eltMessage = d.createElement("message");
-            eltMessage.appendChild(d.createTextNode(errorMessage));
-            eltError.appendChild(eltMessage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-    
     @Get("html")
     public Representation toHtml() {
     	String base = getRequest().getResourceRef().toString();
