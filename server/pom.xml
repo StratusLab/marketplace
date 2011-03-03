@@ -28,6 +28,10 @@
          <artifactId>org.restlet.ext.servlet</artifactId>
     </dependency>
     <dependency>
+         <groupId>org.restlet.jee</groupId>
+         <artifactId>org.restlet.ext.freemarker</artifactId>
+    </dependency>
+    <dependency>
        <groupId>org.openrdf.sesame</groupId>
        <artifactId>sesame-repository-sail</artifactId>
     </dependency>

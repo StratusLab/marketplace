@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.restlet.data.Form;
+import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -21,6 +22,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import org.restlet.resource.ClientResource;
+import org.restlet.ext.freemarker.TemplateRepresentation;
 
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataException;
@@ -91,6 +94,7 @@ public class MDataResource extends BaseResource {
 				result = rep;
 
 			} catch (MetadataException m){
+				m.printStackTrace();
 				setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
 	            result = generateErrorRepresentation(m.getMessage(), "1");
 			}
@@ -108,11 +112,6 @@ public class MDataResource extends BaseResource {
     	String[] uris = getMetadata();
     	StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("<html>");
-        stringBuilder
-                .append("<head><title>Metadata</title></head>");
-        stringBuilder.append("<body bgcolor=white>");
-
         stringBuilder.append("<table border=\"0\">");
         for (String uri : uris){
             stringBuilder.append("<tr>");
@@ -122,11 +121,18 @@ public class MDataResource extends BaseResource {
             stringBuilder.append("</tr>");
         }
         stringBuilder.append("</table>");
-        stringBuilder.append("</body>");
-        stringBuilder.append("</html>");
-
-        Representation representation = (new StringRepresentation(stringBuilder
-                .toString(), MediaType.TEXT_HTML));
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("title", "Metadata");
+        data.put("content", stringBuilder.toString());
+        
+        // Load the FreeMarker template
+    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/List.ftl")).get();
+    	// Wraps the bean with a FreeMarker representation
+    	Representation representation = new TemplateRepresentation(listFtl, 
+    			data, MediaType.TEXT_HTML);
+    	
+        //Representation representation = (new StringRepresentation(stringBuilder
+         //       .toString(), MediaType.TEXT_HTML));
         
         return representation;
     }

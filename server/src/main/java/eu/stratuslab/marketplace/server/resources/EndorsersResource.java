@@ -3,13 +3,16 @@ package eu.stratuslab.marketplace.server.resources;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.openrdf.query.QueryLanguage;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
-
+import org.restlet.resource.ClientResource;
+import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.data.LocalReference;
 
 /**
  * This resource represents a list of endorsers
@@ -33,11 +36,6 @@ public class EndorsersResource extends BaseResource {
 		
     	StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("<html>");
-        stringBuilder
-                .append("<head><title>Endorsers</title></head>");
-        stringBuilder.append("<body bgcolor=white>");
-
         stringBuilder.append("<table border=\"0\">");
         for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
         	HashMap<String, String> resultRow = resultsIter.next();
@@ -50,12 +48,17 @@ public class EndorsersResource extends BaseResource {
             stringBuilder.append("</tr>");
         }
         stringBuilder.append("</table>");
-        stringBuilder.append("</body>");
-        stringBuilder.append("</html>");
-
-        Representation representation = (new StringRepresentation(stringBuilder
-                .toString(), MediaType.TEXT_HTML));
         
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("title", "Endorsers");
+        data.put("content", stringBuilder.toString());
+        
+        // Load the FreeMarker template
+    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/List.ftl")).get();
+    	// Wraps the bean with a FreeMarker representation
+    	Representation representation = new TemplateRepresentation(listFtl, 
+    			data, MediaType.TEXT_HTML);
+    	              
         return representation;
     }
 	

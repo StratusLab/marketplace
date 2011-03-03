@@ -3,6 +3,7 @@ package eu.stratuslab.marketplace.server.resources;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.openrdf.query.QueryLanguage;
 import org.restlet.data.MediaType;
@@ -10,6 +11,9 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.data.LocalReference;
+import org.restlet.resource.ClientResource;
 
 /**
  * This resource represents a single endorser
@@ -38,12 +42,7 @@ public class EndorserResource extends BaseResource {
 	   ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString);
 
 	   StringBuilder stringBuilder = new StringBuilder();
-
-	   stringBuilder.append("<html>");
-	   stringBuilder
-	   .append("<head><title>Endorser</title></head>");
-	   stringBuilder.append("<body bgcolor=white>");
-
+	   
 	   stringBuilder.append("<table border=\"0\">");
 	   for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
 		   HashMap<String, String> resultRow = resultsIter.next();
@@ -68,11 +67,16 @@ public class EndorserResource extends BaseResource {
 	   }
 
 	   stringBuilder.append("</table>");
-	   stringBuilder.append("</body>");
-	   stringBuilder.append("</html>");
 
-	   Representation representation = (new StringRepresentation(stringBuilder
-			   .toString(), MediaType.TEXT_HTML));
+	   Map<String, String> data = new HashMap<String, String>();
+	   data.put("title", "Endorser");
+	   data.put("content", stringBuilder.toString());
+
+	   // Load the FreeMarker template
+	   Representation listFtl = new ClientResource(LocalReference.createClapReference("/List.ftl")).get();
+	   // Wraps the bean with a FreeMarker representation
+	   Representation representation = new TemplateRepresentation(listFtl, 
+			   data, MediaType.TEXT_HTML);
 
 	   return representation;
    }
