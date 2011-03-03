@@ -78,7 +78,7 @@
                <groupId>org.mortbay.jetty</groupId>
                <artifactId>jetty-maven-plugin</artifactId>
                <configuration>
-                  <webApp>${basedir}/target/server-0.0.2-SNAPSHOT.war</webApp>
+                  <webApp>${basedir}/target/server-0.0.6-SNAPSHOT.war</webApp>
                </configuration>
                <executions>
                <execution>
