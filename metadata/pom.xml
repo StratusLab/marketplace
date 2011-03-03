@@ -3,7 +3,7 @@
 
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>metadata</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6-SNAPSHOT</version>
   <name>StratusLab Marketplace Metadata Utilities</name>
 
   <packaging>jar</packaging>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
     <artifactId>marketplace</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6-SNAPSHOT</version>
   </parent>
 
   <dependencies>
