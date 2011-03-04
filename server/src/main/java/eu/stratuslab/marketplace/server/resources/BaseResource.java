@@ -35,7 +35,6 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
@@ -276,15 +275,7 @@ public abstract class BaseResource extends ServerResource {
     		return ARG_OTHER;
     	}
     }
-        
-    protected String extractTextContent(Document doc, String namespace, String name) {
-        NodeList nl = doc.getElementsByTagNameNS(namespace, name);
-        if (nl.getLength() > 0) {
-            return nl.item(0).getTextContent();
-        }
-        return null;
-    }
-      
+         
     private static String readFileAsString(String filePath) throws java.io.IOException{
         byte[] buffer = new byte[(int) new File(filePath).length()];
         BufferedInputStream f = null;

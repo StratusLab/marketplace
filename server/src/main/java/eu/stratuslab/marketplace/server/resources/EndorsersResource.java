@@ -2,7 +2,6 @@ package eu.stratuslab.marketplace.server.resources;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.openrdf.query.QueryLanguage;
@@ -28,33 +27,14 @@ public class EndorsersResource extends BaseResource {
 	
 	@Get("html")
     public Representation toHtml() {
-		String base = getRequest().getResourceRef().toString();
-    	if(base.endsWith("/")){
-    		base = base.substring(0, base.length() - 1);
-    	}
 		ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString);
-		
-    	StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("<table border=\"0\">");
-        for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
-        	HashMap<String, String> resultRow = resultsIter.next();
-        	
-            stringBuilder.append("<tr>");
-            stringBuilder.append("<td>");
-            stringBuilder.append("<a href=\"" + base + "/" + resultRow.get("email") + "\">" 
-            		+ resultRow.get("email") + "</a>");
-            stringBuilder.append("</td>");
-            stringBuilder.append("</tr>");
-        }
-        stringBuilder.append("</table>");
-        
-        Map<String, String> data = new HashMap<String, String>();
+		    	        
+        Map<String, Object> data = new HashMap<String, Object>();
         data.put("title", "Endorsers");
-        data.put("content", stringBuilder.toString());
+        data.put("content", results);
         
         // Load the FreeMarker template
-    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/List.ftl")).get();
+    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/endorsers.ftl")).get();
     	// Wraps the bean with a FreeMarker representation
     	Representation representation = new TemplateRepresentation(listFtl, 
     			data, MediaType.TEXT_HTML);

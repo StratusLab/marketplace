@@ -2,15 +2,20 @@ package eu.stratuslab.marketplace.server.resources;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
+import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
+import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
@@ -44,11 +49,6 @@ public class MDatumResource extends BaseResource {
     	TransformerFactory tFactory = TransformerFactory.newInstance();
     	
     	StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("<html>");
-        stringBuilder
-                .append("<head><title>Metadata</title></head>");
-        stringBuilder.append("<body bgcolor=white>");
     	
         try {
 			 Transformer transformer =
@@ -73,11 +73,16 @@ public class MDatumResource extends BaseResource {
 			e.printStackTrace();
 		}
     	
-    	stringBuilder.append("</body>");
-        stringBuilder.append("</html>");
+		Map<String, Object> data = new HashMap<String, Object>();
+        data.put("title", "Metadata");
+        data.put("content", stringBuilder.toString());
         
-        Representation representation = (new StringRepresentation(stringBuilder
-                .toString(), MediaType.TEXT_HTML));
+        // Load the FreeMarker template
+    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/mdatum.ftl")).get();
+    	// Wraps the bean with a FreeMarker representation
+    	Representation representation = new TemplateRepresentation(listFtl, 
+    			data, MediaType.TEXT_HTML);
+       
 		return representation;
     }
     

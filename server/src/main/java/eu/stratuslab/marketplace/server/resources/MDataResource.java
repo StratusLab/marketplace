@@ -1,8 +1,5 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.DCTERMS_NS_URI;
-import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,10 +62,10 @@ public class MDataResource extends BaseResource {
 				ValidateMetadataConstraints.validate(datumDoc);
 				ValidateRDFModel.validate(datumDoc);
 				
-				String identifier = extractTextContent(datumDoc, DCTERMS_NS_URI, "identifier");
-				String endorser = extractTextContent(datumDoc, SLREQ_NS_URI, "email");
-				String created = extractTextContent(datumDoc, DCTERMS_NS_URI, "created");
-
+				String identifier = XPathUtils.getValue(datumDoc, XPathUtils.IDENTIFIER_ELEMENT);
+				String endorser = XPathUtils.getValue(datumDoc, XPathUtils.EMAIL);
+                String created = XPathUtils.getValue(datumDoc, XPathUtils.CREATED_DATE);
+				
 				String ref = getRequest().getResourceRef().toString();
 				String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
@@ -105,36 +102,18 @@ public class MDataResource extends BaseResource {
         
     @Get("html")
     public Representation toHtml() {
-    	String base = getRequest().getResourceRef().toString();
-    	if(base.endsWith("/")){
-    		base = base.substring(0, base.length() - 1);
-    	}
     	String[] uris = getMetadata();
-    	StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("<table border=\"0\">");
-        for (String uri : uris){
-            stringBuilder.append("<tr>");
-            stringBuilder.append("<td>");
-            stringBuilder.append("<a href=\"" + base + "/" + uri + "\">" + uri + "</a>");
-            stringBuilder.append("</td>");
-            stringBuilder.append("</tr>");
-        }
-        stringBuilder.append("</table>");
-        Map<String, String> data = new HashMap<String, String>();
+    	Map<String, Object> data = new HashMap<String, Object>();
         data.put("title", "Metadata");
-        data.put("content", stringBuilder.toString());
+        data.put("content", uris);
         
         // Load the FreeMarker template
-    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/List.ftl")).get();
+    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/metadata.ftl")).get();
     	// Wraps the bean with a FreeMarker representation
     	Representation representation = new TemplateRepresentation(listFtl, 
     			data, MediaType.TEXT_HTML);
     	
-        //Representation representation = (new StringRepresentation(stringBuilder
-         //       .toString(), MediaType.TEXT_HTML));
-        
-        return representation;
+       return representation;
     }
     
     /**

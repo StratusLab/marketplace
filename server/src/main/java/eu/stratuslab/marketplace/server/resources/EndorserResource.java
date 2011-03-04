@@ -41,39 +41,18 @@ public class EndorserResource extends BaseResource {
    public Representation toHtml() {
 	   ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString);
 
-	   StringBuilder stringBuilder = new StringBuilder();
+	  Map<String, Object> data = new HashMap<String, Object>();
 	   
-	   stringBuilder.append("<table border=\"0\">");
 	   for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
 		   HashMap<String, String> resultRow = resultsIter.next();
 
-		   stringBuilder.append("<tr>");
-		   stringBuilder.append("<td>");
-		   stringBuilder.append("<h1>" + resultRow.get("email") + "<h1>");
-		   stringBuilder.append("</td>");
-		   stringBuilder.append("</tr>");
-
-		   stringBuilder.append("<tr>");
-		   stringBuilder.append("<td>");
-		   stringBuilder.append(resultRow.get("issuer"));
-		   stringBuilder.append("</td>");
-		   stringBuilder.append("</tr>");
-
-		   stringBuilder.append("<tr>");
-		   stringBuilder.append("<td>");
-		   stringBuilder.append(resultRow.get("subject"));
-		   stringBuilder.append("</td>");
-		   stringBuilder.append("</tr>");
+		   data.put("email", resultRow.get("email"));
+		   data.put("issuer", resultRow.get("issuer"));
+		   data.put("subject", resultRow.get("subject"));
 	   }
-
-	   stringBuilder.append("</table>");
-
-	   Map<String, String> data = new HashMap<String, String>();
-	   data.put("title", "Endorser");
-	   data.put("content", stringBuilder.toString());
-
+  
 	   // Load the FreeMarker template
-	   Representation listFtl = new ClientResource(LocalReference.createClapReference("/List.ftl")).get();
+	   Representation listFtl = new ClientResource(LocalReference.createClapReference("/endorser.ftl")).get();
 	   // Wraps the bean with a FreeMarker representation
 	   Representation representation = new TemplateRepresentation(listFtl, 
 			   data, MediaType.TEXT_HTML);
