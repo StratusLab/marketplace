@@ -13,7 +13,7 @@
      </div>
   </div>
 <div class="Content">
-
+<h1>${title}</h1>
 <table border=0>
    <#list content as emails>
   <tr>
