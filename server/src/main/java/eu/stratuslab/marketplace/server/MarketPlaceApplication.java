@@ -30,6 +30,7 @@ public class MarketPlaceApplication extends Application {
     private Repository metadata = null;   
     private SailBase store = null;    
     private String dataDir = null;
+    private long timeRange = 60000;
     protected Logger logger = getLogger();
     
     public MarketPlaceApplication() {
@@ -55,6 +56,7 @@ public class MarketPlaceApplication extends Application {
       
         String storeType = properties.getProperty("store.type", "memory");
         this.dataDir = properties.getProperty("data.dir", "/var/lib/stratuslab/metadata");
+        this.timeRange =  Long.parseLong(properties.getProperty("time.range", "10")) * 60000;
         
         if(storeType.equals("memory")){
         	this.store = new MemoryStore();	
@@ -132,6 +134,10 @@ public class MarketPlaceApplication extends Application {
     
     public String getDataDir() {
     	return this.dataDir;
+    }
+    
+    public long getTimeRange() {
+        return this.timeRange;
     }
 
 }

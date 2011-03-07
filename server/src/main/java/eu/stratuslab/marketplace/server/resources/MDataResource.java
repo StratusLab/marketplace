@@ -2,10 +2,15 @@ package eu.stratuslab.marketplace.server.resources;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -34,6 +39,13 @@ import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
  */
 public class MDataResource extends BaseResource {
 	
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+	"yyyy-MM-dd'T'HH:mm:ss'Z'");
+	static {
+		DATE_FORMAT.setLenient(false);
+		DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+	
 	/**
      * Handle POST requests: register new Metadata entry.
      */
@@ -58,14 +70,30 @@ public class MDataResource extends BaseResource {
         
 		if(datumDoc != null){
 			try {
+				//Make sure metadata is valid before continuing
 				ValidateXMLSignature.validate(datumDoc);
 				ValidateMetadataConstraints.validate(datumDoc);
 				ValidateRDFModel.validate(datumDoc);
-				
+
+				//Get key for metadata
 				String identifier = XPathUtils.getValue(datumDoc, XPathUtils.IDENTIFIER_ELEMENT);
 				String endorser = XPathUtils.getValue(datumDoc, XPathUtils.EMAIL);
                 String created = XPathUtils.getValue(datumDoc, XPathUtils.CREATED_DATE);
 				
+                //Check that date is within valid range
+                try {
+					Date endorsementDate = DATE_FORMAT.parse(created);
+					Date now = new Date(System.currentTimeMillis() - getTimeRange());
+					
+					if(endorsementDate.compareTo(now) < 0){
+						logger.log(Level.SEVERE, "Endorsement date outside allowed range.");
+						throw new MetadataException("Metadata endorsement creation date outside allowed range.");
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                
 				String ref = getRequest().getResourceRef().toString();
 				String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
@@ -92,7 +120,7 @@ public class MDataResource extends BaseResource {
 
 			} catch (MetadataException m){
 				m.printStackTrace();
-				setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+				setStatus(Status.CLIENT_ERROR_BAD_REQUEST, m.getMessage());
 	            result = generateErrorRepresentation(m.getMessage(), "1");
 			}
 		}

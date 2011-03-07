@@ -70,6 +70,10 @@ public abstract class BaseResource extends ServerResource {
     	return ((MarketPlaceApplication) getApplication()).getDataDir();
     }
     
+    protected long getTimeRange(){
+    	return ((MarketPlaceApplication) getApplication()).getTimeRange();
+    }
+    
     /**
      * Stores a new metadata entry
      * 
