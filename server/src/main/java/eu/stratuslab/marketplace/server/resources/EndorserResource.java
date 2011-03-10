@@ -1,12 +1,19 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.openrdf.query.QueryLanguage;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.data.LocalReference;
+import org.restlet.resource.ClientResource;
 
 /**
  * This resource represents a single endorser
@@ -14,23 +21,12 @@ import org.restlet.resource.ResourceException;
 public class EndorserResource extends BaseResource {
     
     private String email = null;
-
+    private String queryString = null;
+    
    @Override
     protected void doInit() throws ResourceException {
         this.email = (String) getRequest().getAttributes().get("email");
-    } 
-
-    /**
-     * Returns endorser details.
-     */
-    @Get("xml")
-    public Representation toXml() {
-        // Generate the right representation according to its media type.
-    	Form form = getRequest().getResourceRef().getQueryAsForm();
-		String format = (form.getFirstValue("format") != null) ? 
-				form.getFirstValue("format") : "xml";
-    	    	    	
-    	String queryString = "SELECT ?email ?subject ?issuer " +
+        this.queryString = "SELECT DISTINCT ?email ?subject ?issuer " +
         " WHERE {" +
         " ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
         " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
@@ -39,15 +35,40 @@ public class EndorserResource extends BaseResource {
         " ?endorser <http://mp.stratuslab.eu/slreq#subject> ?subject . " +
         " ?endorser <http://mp.stratuslab.eu/slreq#issuer> ?issuer . " +
         " FILTER (?email = \"" + this.email + "\"). }";
-    	
-        String results = query(queryString, QueryLanguage.SPARQL, format);
-    	StringRepresentation representation;
-    	if(format.equals("json")){
-    	    representation = new StringRepresentation(results, MediaType.APPLICATION_JSON);
-    	} else {
-    	    representation = new StringRepresentation(results, MediaType.APPLICATION_XML);
-    	}
+    } 
 
+   @Get("html")
+   public Representation toHtml() {
+	   ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString);
+
+	  Map<String, Object> data = new HashMap<String, Object>();
+	   
+	   for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
+		   HashMap<String, String> resultRow = resultsIter.next();
+
+		   data.put("email", resultRow.get("email"));
+		   data.put("issuer", resultRow.get("issuer"));
+		   data.put("subject", resultRow.get("subject"));
+	   }
+  
+	   // Load the FreeMarker template
+	   Representation listFtl = new ClientResource(LocalReference.createClapReference("/endorser.ftl")).get();
+	   // Wraps the bean with a FreeMarker representation
+	   Representation representation = new TemplateRepresentation(listFtl, 
+			   data, MediaType.TEXT_HTML);
+
+	   return representation;
+   }
+    
+    /**
+     * Returns endorser details.
+     */
+    @Get("xml")
+    public Representation toXml() {
+        String results = query(queryString, QueryLanguage.SPARQL);
+    	StringRepresentation representation = new StringRepresentation(results, 
+    			MediaType.APPLICATION_XML);
+    	
     	// Returns the XML representation of this document.
     	return representation;
     }

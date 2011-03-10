@@ -1,15 +1,15 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.openrdf.OpenRDFException;
-import org.openrdf.model.Resource;
+import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
@@ -28,22 +28,18 @@ import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.ext.xml.DomRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
-
+import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
-
-
 /**
+
  *  Base resource class that supports common behaviours or attributes shared by
  *  all resources.
  */
@@ -54,7 +50,13 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 public abstract class BaseResource extends ServerResource {
 
     protected Logger logger = getLogger();
+    
+    protected static final int ARG_EMAIL = 1;
+    protected static final int ARG_DATE = 2;
+    protected static final int ARG_OTHER = 3;
 
+    protected final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+    
     /**
      * Returns the store of metadata managed by this application.
      * 
@@ -64,24 +66,28 @@ public abstract class BaseResource extends ServerResource {
 		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
 
+    protected String getDataDir(){
+    	return ((MarketPlaceApplication) getApplication()).getDataDir();
+    }
+    
+    protected long getTimeRange(){
+    	return ((MarketPlaceApplication) getApplication()).getTimeRange();
+    }
+    
     /**
      * Stores a new metadata entry
      * 
      * @param iri identifier of the metadata entry
      * @param rdf the metadata entry to store
      */
-    protected void storeMetadatum(String iri, Model rdf) {
+    protected void storeMetadatum(String iri, String rdf) {
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
             ValueFactory vf = con.getValueFactory();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bytes);
-            rdf.getWriter().write(rdf, out, "");
-
+            Reader reader = new StringReader(rdf);
             try {
             	con.clear(vf.createURI(iri));
-                con.add(new ByteArrayInputStream(bytes.toString().getBytes()), 
-                		"http://mp.stratuslab.eu/", RDFFormat.RDFXML, 
+                con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML, 
                         vf.createURI(iri));
             }
             finally {
@@ -102,69 +108,18 @@ public abstract class BaseResource extends ServerResource {
      * @param iri identifier of the metadata entry
      * @return metadata entry as a Jena model
      */
-    protected Model getMetadatum(String iri) {
-        Model model = null;
+    protected String getMetadatum(String iri) {
+        String model = null;
         try {
-            RepositoryConnection con = getMetadataStore().getConnection();
-            ValueFactory vf = con.getValueFactory();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bytes);
-            RDFHandler rdfxmlWriter = new RDFXMLWriter(out);
-            
-            try {
-                con.export(rdfxmlWriter, vf.createURI(iri));
-            }
-            finally {
-                con.close();
-            }
-            
-            model = createModel(new ByteArrayInputStream(bytes.toString().getBytes()), 
-            		"http://mp.stratuslab.eu/");           
+            model = readFileAsString(iri);
         }
-        catch (OpenRDFException e) {
+        catch (IOException e) {
             e.printStackTrace();
         }
        
         return model;
     }
-    
-    /**
-     * Retrieve metadata
-     * 
-     * @param iri identifiers of the metadata entries
-     * @return metadata entries as a Jena model
-     */
-    protected Model getMetadata(String[] iri) {
-        Model model = null;
-        try {
-            RepositoryConnection con = getMetadataStore().getConnection();
-            ValueFactory vf = con.getValueFactory();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bytes);
-            RDFHandler rdfxmlWriter = new RDFXMLWriter(out);
-            
-            Resource[] uris = new Resource[iri.length];
-            for(int i = 0; i < iri.length; i++){
-            	uris[i] = vf.createURI(iri[i]);
-            }
-            
-            try {
-                con.export(rdfxmlWriter, uris);
-            }
-            finally {
-                con.close();
-            }
-            
-            model = createModel(new ByteArrayInputStream(bytes.toString().getBytes()), 
-            		"http://mp.stratuslab.eu/");           
-        }
-        catch (OpenRDFException e) {
-            e.printStackTrace();
-        }
-       
-        return model;
-    }
-
+        
     /**
      * Remove a metadata entry
      * 
@@ -195,7 +150,7 @@ public abstract class BaseResource extends ServerResource {
      * @param format the output format of the resultset
      * @return
      */
-    protected String query(String queryString, QueryLanguage syntax, String format){
+    protected String query(String queryString, QueryLanguage syntax){
         String resultString = null;
 
         try {
@@ -207,7 +162,7 @@ public abstract class BaseResource extends ServerResource {
             try {
                 TupleQuery tupleQuery = con.prepareTupleQuery(syntax, queryString);
                 tupleQuery.evaluate(sparqlWriter);
-                resultString = convertString(bytes.toString(), format);
+                resultString = bytes.toString();
             } finally {
                 con.close();
             }
@@ -242,7 +197,12 @@ public abstract class BaseResource extends ServerResource {
                     	HashMap<String, String> row = new HashMap<String, String>(cols,1);
                     	for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
                     		String columnName = namesIter.next();
-                    		row.put(columnName, (solution.getValue(columnName)).stringValue());
+                    		Value columnValue = solution.getValue(columnName);
+                    		if(columnValue != null){
+                    		    row.put(columnName, (solution.getValue(columnName)).stringValue());
+                    		} else {
+                    			row.put(columnName, "null");
+                    		}
                     	}
                     	list.add(row);
                     }
@@ -260,102 +220,76 @@ public abstract class BaseResource extends ServerResource {
 
         return (list); 
     }
-    
+     
     /**
-     * Convert a Jena model to an RDF String
+     * Generate an XML representation of an error response.
      * 
-     * @param model the model to convert
-     * @return the model as a String in RDF format
+     * @param errorMessage
+     *            the error message.
+     * @param errorCode
+     *            the error code.
      */
-    protected String modelToString(Model model){
-    	ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        BufferedOutputStream out = new BufferedOutputStream(bytes);
+    protected Representation generateErrorRepresentation(String errorMessage,
+            String errorCode) {
+        DomRepresentation result = null;
+        // This is an error
+        // Generate the output representation
+        try {
+            result = new DomRepresentation(MediaType.TEXT_XML);
+            // Generate a DOM document representing the list of
+            // items.
+            Document d = result.getDocument();
 
-        RDFWriter writer = model.getWriter();
-        writer.write(model, out, "");
-        
-        return bytes.toString();
-    }
-    
-    protected Model createModel(InputStream in, String base){
-    	ModelMaker mk = ModelFactory.createMemModelMaker();
-        Model model = mk.createDefaultModel();
-        if(in != null){
-            model.read(in, base);
+            Element eltError = d.createElement("error");
+
+            Element eltCode = d.createElement("code");
+            eltCode.appendChild(d.createTextNode(errorCode));
+            eltError.appendChild(eltCode);
+
+            Element eltMessage = d.createElement("message");
+            eltMessage.appendChild(d.createTextNode(errorMessage));
+            eltError.appendChild(eltMessage);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        model.setNsPrefix( "slterms", "http://mp.stratuslab.eu/slterms#" );
-        model.setNsPrefix( "dcterms", "http://purl.org/dc/terms/" );
-        model.setNsPrefix( "slreq", "http://mp.stratuslab.eu/slreq#" );
-        model.setNsPrefix( "ex", "http://example.org/" );
-        
-        return model;
+
+        return result;
     }
     
-    protected  String convertStreamToString(InputStream is)
-    throws IOException {
-    	/*
-    	 * To convert the InputStream to String we use the
-    	 * Reader.read(char[] buffer) method. We iterate until the
-    	 * Reader return -1 which means there's no more data to
-    	 * read. We use the StringWriter class to produce the string.
-    	 */
-    	if (is != null) {
-    		Writer writer = new StringWriter();
-
-    		char[] buffer = new char[1024];
-    		try {
-    			Reader reader = new BufferedReader(
-    					new InputStreamReader(is, "UTF-8"));
-    			int n;
-    			while ((n = reader.read(buffer)) != -1) {
-    				writer.write(buffer, 0, n);
-    			}
-    		} finally {
-    			is.close();
-    		}
-    		return writer.toString();
-    	} else {       
-    		return "";
+    protected StringBuffer formToString(Form form){
+        StringBuffer predicate = new StringBuffer();
+        
+        for ( Iterator<String> formIter = form.getNames().iterator(); formIter.hasNext(); ){
+        	String key = formIter.next();
+        	predicate.append(" FILTER (?" + key + " = \"" + form.getFirstValue(key) + "\" ). ");
+        }
+        
+        return predicate;
+        
+    }
+    
+    protected int classifyArg(String arg){
+    	if(arg == null || arg.equals("null") || arg.equals("")){
+    		return -1;
+    	}else if(PatternUtils.isEmail(arg)){
+    		return ARG_EMAIL;
+    	} else if (PatternUtils.isDate(arg)){
+    	    return ARG_DATE;
+    	} else {
+    		return ARG_OTHER;
     	}
     }
-
-    
-    /**
-     * Convert a String to various output formats
-     * 
-     * @param toConvert the string to convert
-     * @param format the output format
-     * @return the String in the chosen format
-     */
-    private String convertString(String toConvert, String format){
-        String resultString = "";
-
-        if(format == null || format.equals("sse")){
-            resultString = toConvert;
-        } else if (format.equals("xml")) {
-            ResultSet results = ResultSetFactory.fromXML(
-                 new ByteArrayInputStream(toConvert.getBytes()));
-            ByteArrayOutputStream b = new ByteArrayOutputStream();
-            BufferedOutputStream o = new BufferedOutputStream(b);
-            ResultSetFormatter.outputAsXML(o,results);
-            resultString = b.toString();
-        } else if (format.equals("rdf")) {
-             ResultSet results = ResultSetFactory.fromXML(
-                 new ByteArrayInputStream(toConvert.getBytes()));
-             ByteArrayOutputStream b = new ByteArrayOutputStream();
-             BufferedOutputStream o = new BufferedOutputStream(b);
-             ResultSetFormatter.outputAsRDF(o, "RDF/XML", results);
-             resultString = b.toString();
-        } else if (format.equals("json")){
-             ResultSet results = ResultSetFactory.fromXML(
-                 new ByteArrayInputStream(toConvert.getBytes()));
-             ByteArrayOutputStream b = new ByteArrayOutputStream();
-             BufferedOutputStream o = new BufferedOutputStream(b);
-             ResultSetFormatter.outputAsJSON(o, results);
-             resultString = b.toString();
+         
+    private static String readFileAsString(String filePath) throws java.io.IOException{
+        byte[] buffer = new byte[(int) new File(filePath).length()];
+        BufferedInputStream f = null;
+        try {
+            f = new BufferedInputStream(new FileInputStream(new File(filePath)));
+            f.read(buffer);
+        } finally {
+            if (f != null) try { f.close(); } catch (IOException ignored) { }
         }
-
-        return resultString;
+        return new String(buffer);
     }
 
 }

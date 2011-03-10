@@ -127,15 +127,22 @@ public class ValidateMetadataConstraints {
         String identifier = IDENTIFIER_ELEMENT.result(doc);
         BigInteger checksumIdentifier = MetadataUtils
                 .identifierToSha1(identifier);
-        String sha1ChecksumIdentifier = checksumIdentifier.toString(16);
 
-        String sha1Checksum = SHA1_CHECKSUM.result(doc);
+        BigInteger sha1Checksum = hexToBigInteger(SHA1_CHECKSUM.result(doc));
 
-        if (!sha1Checksum.equals(sha1ChecksumIdentifier)) {
+        if (!sha1Checksum.equals(checksumIdentifier)) {
             throw new MetadataException("checksum from identifier ("
-                    + sha1ChecksumIdentifier + ") and SHA-1 checksum ("
+                    + checksumIdentifier + ") and SHA-1 checksum ("
                     + sha1Checksum + ") are not consistent");
 
+        }
+    }
+
+    public static BigInteger hexToBigInteger(String hex) {
+        try {
+            return new BigInteger(hex, 16);
+        } catch (NumberFormatException e) {
+            throw new MetadataException(hex + " is not a valid SHA-1 checksum");
         }
     }
 

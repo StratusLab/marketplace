@@ -6,6 +6,11 @@
             version="2.5">
 
     <display-name>StratusLab Market-Place</display-name>
+
+    <context-param>
+      <param-name>org.restlet.clients</param-name>
+      <param-value>HTTP HTTPS CLAP FILE</param-value>
+    </context-param>
     
     <servlet>
         <servlet-name>RestletServlet</servlet-name>
