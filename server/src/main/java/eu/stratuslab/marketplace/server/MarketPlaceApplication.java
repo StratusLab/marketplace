@@ -1,5 +1,6 @@
 package eu.stratuslab.marketplace.server;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,17 +43,22 @@ public class MarketPlaceApplication extends Application {
 
         InputStream input = null;
         
+        File configFile = new File("/etc/stratuslab/marketplace.cfg");
+        
+              
         // Read properties file.
         Properties properties = new Properties();
-        try {
-            properties.load(input = new FileInputStream("/etc/stratuslab/marketplace.cfg"));
-            input.close();
-        } catch (IOException e) {
+        if(configFile.exists()){  
         	try {
-				input.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+        		properties.load(input = new FileInputStream("/etc/stratuslab/marketplace.cfg"));
+        		input.close();
+        	} catch (IOException e) {
+        		try {
+        			input.close();
+        		} catch (IOException e1) {
+        			e1.printStackTrace();
+        		}
+        	}
         }
       
         String storeType = properties.getProperty("store.type", "memory");

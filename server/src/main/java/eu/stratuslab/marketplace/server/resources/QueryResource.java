@@ -93,10 +93,14 @@ public class QueryResource extends BaseResource {
 		String queryString = queryForm.getFirstValue("query");
 				
 		try {
-			QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-			parser.parseQuery(queryString, MARKETPLACE_URI);
+			String results = "";
+			
+			if(queryString != null && queryString != ""){
+			    QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+			    parser.parseQuery(queryString, MARKETPLACE_URI);
 
-			String results = getResults(queryString, "sparql");
+			    results = getResults(queryString, "sparql");
+			}
 
 			representation = new StringRepresentation(results, 
 					MediaType.APPLICATION_XML);

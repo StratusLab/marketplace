@@ -26,6 +26,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.restlet.resource.ClientResource;
 import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.resource.ResourceException;
 
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataException;
@@ -50,7 +51,7 @@ public class MDataResource extends BaseResource {
      * Handle POST requests: register new Metadata entry.
      */
     @Post
-    public Representation acceptMetadatum(Representation entity) throws IOException {
+    public Representation acceptMetadatum(Representation entity) throws ResourceException {
         Representation result = null;
         
         DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
@@ -64,76 +65,95 @@ public class MDataResource extends BaseResource {
             MetadataUtils.stripSignatureElements(copy);
             rdfEntry = XMLUtils.documentToString(copy);
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unable to parse metadata: " 
+					+ e.getMessage());
+		} catch (IOException e){
+			throw new ResourceException(e);
 		}
         
-		if(datumDoc != null){
+		try {
+			//Make sure metadata is valid before continuing
+			ValidateXMLSignature.validate(datumDoc);
+			ValidateMetadataConstraints.validate(datumDoc);
+			ValidateRDFModel.validate(datumDoc);
+
+			//Get key for metadata
+			String identifier = XPathUtils.getValue(datumDoc, XPathUtils.IDENTIFIER_ELEMENT);
+			String endorser = XPathUtils.getValue(datumDoc, XPathUtils.EMAIL);
+			String created = XPathUtils.getValue(datumDoc, XPathUtils.CREATED_DATE);
+
+			//Check that date is within valid range
 			try {
-				//Make sure metadata is valid before continuing
-				ValidateXMLSignature.validate(datumDoc);
-				ValidateMetadataConstraints.validate(datumDoc);
-				ValidateRDFModel.validate(datumDoc);
+				Date endorsementDate = DATE_FORMAT.parse(created);
+				Date now = new Date(System.currentTimeMillis() - getTimeRange());
 
-				//Get key for metadata
-				String identifier = XPathUtils.getValue(datumDoc, XPathUtils.IDENTIFIER_ELEMENT);
-				String endorser = XPathUtils.getValue(datumDoc, XPathUtils.EMAIL);
-                String created = XPathUtils.getValue(datumDoc, XPathUtils.CREATED_DATE);
-				
-                //Check that date is within valid range
-                try {
-					Date endorsementDate = DATE_FORMAT.parse(created);
-					Date now = new Date(System.currentTimeMillis() - getTimeRange());
-					
-					if(endorsementDate.compareTo(now) < 0){
-						logger.log(Level.SEVERE, "Endorsement date outside allowed range.");
-						throw new MetadataException("Metadata endorsement creation date outside allowed range.");
-					}
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(endorsementDate.compareTo(now) < 0){
+					logger.log(Level.SEVERE, "Endorsement date outside allowed range.");
+					throw new MetadataException("Metadata endorsement creation date outside allowed range.");
 				}
-                
-				String ref = getRequest().getResourceRef().toString();
-				String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
-
-				File rdfFileParent = new File(getDataDir(), identifier + File.separatorChar + endorser);
-				File rdfFile = new File(rdfFileParent, created + ".xml");
-
-				if(!rdfFileParent.exists()){
-					if(rdfFileParent.mkdirs()){
-						MetadataUtils.writeStringToFile(rdfEntry, rdfFile);	
-					}
-				} else {
-					MetadataUtils.writeStringToFile(XMLUtils.documentToString(datumDoc), rdfFile);
-				}
-
-				storeMetadatum(iri, rdfEntry);
-				// Set the response's status and entity
-				setStatus(Status.SUCCESS_CREATED);
-				Representation rep = new StringRepresentation("Metadata entry created",
-						MediaType.TEXT_PLAIN);
-				// Indicates where is located the new resource.
-				rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
-						+ identifier + "/" + endorser + "/" + created);
-				result = rep;
-
-			} catch (MetadataException m){
-				m.printStackTrace();
-				setStatus(Status.CLIENT_ERROR_BAD_REQUEST, m.getMessage());
-	            result = generateErrorRepresentation(m.getMessage(), "1");
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+
+			String ref = getRequest().getResourceRef().toString();
+			String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
+
+			File rdfFileParent = new File(getDataDir(), identifier + File.separatorChar + endorser);
+			File rdfFile = new File(rdfFileParent, created + ".xml");
+
+			if(!rdfFileParent.exists()){
+				if(rdfFileParent.mkdirs()){
+					MetadataUtils.writeStringToFile(rdfEntry, rdfFile);	
+				}
+			} else {
+				MetadataUtils.writeStringToFile(XMLUtils.documentToString(datumDoc), rdfFile);
+			}
+
+			storeMetadatum(iri, rdfEntry);
+			// Set the response's status and entity
+			setStatus(Status.SUCCESS_CREATED);
+			Representation rep = new StringRepresentation("Metadata entry created",
+					MediaType.TEXT_PLAIN);
+			// Indicates where is located the new resource.
+			rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
+					+ identifier + "/" + endorser + "/" + created);
+			result = rep;
+
+		} catch (MetadataException m){
+			m.printStackTrace();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,m.getMessage());
 		}
-						
+				
         return result;
     }
         
     @Get("html")
     public Representation toHtml() {
-    	String[] uris = getMetadata();
-    	Map<String, Object> data = new HashMap<String, Object>();
+    	ArrayList<HashMap<String, String>> results = getMetadata();
+    	HashMap<String, Object> data = new HashMap<String, Object>();
+    	HashMap<String, Object> root = new HashMap<String, Object>();
+    	
+    	for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
+        	HashMap<String, String> resultRow = resultsIter.next();
+    	
+    	    String identifier = resultRow.get("identifier");
+    	    String endorser = resultRow.get("email");
+    	    String created = resultRow.get("created");
+    	    logger.log(Level.INFO, identifier + "  " + endorser + " " + created);
+    	    if(root.containsKey(identifier)){
+    	    	HashMap<String, String> endorserMap = (HashMap<String, String>)root.get(identifier);
+    	    	endorserMap.put(endorser, created);
+    	    	root.put(identifier, endorserMap);
+    	    } else {
+    	    	HashMap<String, Object> endorserMap = new HashMap<String, Object>();
+    	    	endorserMap.put(endorser, created);
+    	    	root.put(identifier, endorserMap);
+    	    }
+    	}
+                	
         data.put("title", "Metadata");
-        data.put("content", uris);
+        data.put("content", root);
         
         // Load the FreeMarker template
     	Representation listFtl = new ClientResource(LocalReference.createClapReference("/metadata.ftl")).get();
@@ -149,8 +169,19 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-    	String[] uris = getMetadata();  
-        StringBuffer output = new StringBuffer(XML_HEADER);
+    	ArrayList<HashMap<String, String>> results = getMetadata();
+    	String[] uris = new String[results.size()];
+        int i = 0;
+    	for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
+        	HashMap<String, String> resultRow = resultsIter.next();
+        	String iri = resultRow.get("identifier") 
+            + "/" + resultRow.get("email") + "/" 
+            + resultRow.get("created");
+            uris[i] = iri;
+            i++;
+        }
+    	
+    	StringBuffer output = new StringBuffer(XML_HEADER);
         
         if(uris.length > 0){
         	for(String uri : uris ){
@@ -170,10 +201,8 @@ public class MDataResource extends BaseResource {
         return representation;
     }
 
-    private String[] getMetadata() {
-    	// Generate the right representation according to its media type.
-
-        try {
+    private ArrayList<HashMap<String, String>> getMetadata() {
+    	try {
             Form queryForm = getRequest().getResourceRef().getQueryAsForm();
             Map<String, Object> requestAttr =  getRequest().getAttributes();
             boolean dateSearch = false;          
@@ -228,19 +257,8 @@ public class MDataResource extends BaseResource {
             queryString.append(" }");
                          
             ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>)query(queryString.toString());
-            String[] uris = new String[results.size()];
-            int i = 0;
-            
-            for ( Iterator<HashMap<String, String>> resultsIter = results.listIterator(); resultsIter.hasNext(); ){
-            	HashMap<String, String> resultRow = resultsIter.next();
-                String iri = resultRow.get("identifier") 
-                + "/" + resultRow.get("email") + "/" 
-                + resultRow.get("created");
-                uris[i] = iri;
-                i++;
-            }
-                       
-            return uris;
+                                 
+            return results;
         } catch (Exception e) {
             e.printStackTrace();
         }
