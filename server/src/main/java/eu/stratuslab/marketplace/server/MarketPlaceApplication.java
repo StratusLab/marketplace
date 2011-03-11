@@ -17,6 +17,7 @@ import org.openrdf.sail.rdbms.mysql.MySqlStore;
 import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
+import org.restlet.resource.Directory;
 
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
@@ -91,6 +92,10 @@ public class MarketPlaceApplication extends Application {
         // Create a router Restlet that defines routes.
         Router router = new Router(getContext());
 
+        Directory indexDir = new Directory(getContext(), "war:///");
+        indexDir.setNegotiatingContent(false);
+        indexDir.setIndexName("index.html");
+                
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
         router.attach("/metadata/", MDataResource.class);
@@ -109,6 +114,8 @@ public class MarketPlaceApplication extends Application {
         router.attach("/query", QueryResource.class);
         router.attach("/query/", QueryResource.class);
 
+        router.attach("/", indexDir);
+        
         return router;
     }
 
