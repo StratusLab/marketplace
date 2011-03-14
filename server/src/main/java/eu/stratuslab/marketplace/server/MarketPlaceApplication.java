@@ -41,6 +41,8 @@ public class MarketPlaceApplication extends Application {
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");      
 
+        getTunnelService().setUserAgentTunnel(true);
+        
         InputStream input = null;
         
         File configFile = new File("/etc/stratuslab/marketplace.cfg");
@@ -88,6 +90,7 @@ public class MarketPlaceApplication extends Application {
         } catch(RepositoryException r){
             r.printStackTrace();
         }
+               
     }
 
     /**

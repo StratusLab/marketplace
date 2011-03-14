@@ -50,7 +50,15 @@
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryresultio-sparqlxml</artifactId>
-    </dependency>    
+    </dependency>   
+    <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>jena</artifactId>
+    </dependency> 
+    <dependency>
+        <groupId>com.talis.jena</groupId>
+        <artifactId>rdf-json</artifactId>
+    </dependency>
     <dependency>
         <groupId>eu.stratuslab.marketplace</groupId>
         <artifactId>metadata</artifactId>

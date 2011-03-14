@@ -1,10 +1,14 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -12,12 +16,23 @@ import javax.xml.transform.TransformerFactory;
 
 import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.talis.rdfwriters.json.JSONJenaWriter;
+
+import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.metadata.MetadataUtils;
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
 /**
  * This resource represents a metadata entry
@@ -41,6 +56,39 @@ public class MDatumResource extends BaseResource {
 
         // Returns the XML representation of this document.
         return representation;
+    }
+    
+    @Get("json")
+    public Representation toJSON() {
+    	DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+        Document datumDoc = null;
+        String rdfEntry = "";
+        try {
+			datumDoc = db.parse(new ByteArrayInputStream(datum.getBytes("UTF-8")));
+			
+			// Create a deep copy of the document and strip signature elements.
+            Document copy = (Document) datumDoc.cloneNode(true);
+            MetadataUtils.stripSignatureElements(copy);
+            rdfEntry = XMLUtils.documentToString(copy);
+		} catch (SAXException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unable to parse metadata: " 
+					+ e.getMessage());
+		} catch (IOException e){
+			throw new ResourceException(e);
+		}
+		
+		Model rdfModel = ModelFactory.createMemModelMaker().createDefaultModel();
+		rdfModel.read(new ByteArrayInputStream(rdfEntry.getBytes()), MARKETPLACE_URI);
+		
+		JSONJenaWriter jenaWriter = new JSONJenaWriter();
+		ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
+		jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);
+		
+		StringRepresentation representation =
+            new StringRepresentation(new StringBuffer(jsonOut.toString()),
+            		MediaType.APPLICATION_JSON);
+		
+		return representation;
     }
     
     @Get("html")

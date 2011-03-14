@@ -81,6 +81,11 @@ metadata.
       <name>Public online sesame repository</name>                  
       <url>http://repo.aduna-software.org/maven2/releases</url>
     </repository>
+    <repository>
+    <id>talis</id>
+    <name>Public online talis repository</name>
+    <url>http://oss.talisplatform.com/content/repositories/talis-releases</url>
+    </repository>
     
   </repositories>
 
@@ -192,6 +197,11 @@ metadata.
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryresultio-sparqlxml</artifactId>
         <version>2.3.2</version>
+      </dependency>
+      <dependency>
+         <groupId>com.talis.jena</groupId>
+         <artifactId>rdf-json</artifactId>
+         <version>0.3</version>
       </dependency>
       <dependency>
         <groupId>mysql</groupId>
