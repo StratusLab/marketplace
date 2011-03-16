@@ -156,7 +156,8 @@ public class MDataResource extends BaseResource {
         data.put("content", root);
         
         // Load the FreeMarker template
-    	Representation listFtl = new ClientResource(LocalReference.createClapReference("/metadata.ftl")).get();
+    	Representation listFtl = new ClientResource(
+    			LocalReference.createClapReference("/metadata.ftl")).get();
     	// Wraps the bean with a FreeMarker representation
     	Representation representation = new TemplateRepresentation(listFtl, 
     			data, MediaType.TEXT_HTML);

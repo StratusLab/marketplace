@@ -4,6 +4,7 @@ import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKET
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Value;
@@ -30,13 +33,18 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
+import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import eu.stratuslab.marketplace.PatternUtils;
+import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 /**
 
@@ -279,7 +287,28 @@ public abstract class BaseResource extends ServerResource {
     		return ARG_OTHER;
     	}
     }
-         
+      
+    protected String stripSignature(String signedString){
+    	DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+        Document datumDoc = null;
+        String rdfEntry = "";
+        try {
+			datumDoc = db.parse(new ByteArrayInputStream(signedString.getBytes("UTF-8")));
+			
+			// Create a deep copy of the document and strip signature elements.
+            Document copy = (Document) datumDoc.cloneNode(true);
+            MetadataUtils.stripSignatureElements(copy);
+            rdfEntry = XMLUtils.documentToString(copy);
+		} catch (SAXException e) {
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unable to parse metadata: " 
+					+ e.getMessage());
+		} catch (IOException e){
+			throw new ResourceException(e);
+		}
+		
+		return rdfEntry;
+    }
+    
     private static String readFileAsString(String filePath) throws java.io.IOException{
         byte[] buffer = new byte[(int) new File(filePath).length()];
         BufferedInputStream f = null;
