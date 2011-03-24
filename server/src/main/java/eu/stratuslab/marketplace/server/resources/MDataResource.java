@@ -83,6 +83,7 @@ public class MDataResource extends BaseResource {
 			String created = XPathUtils.getValue(datumDoc, XPathUtils.CREATED_DATE);
 
 			//Check that date is within valid range
+			/*
 			try {
 				Date endorsementDate = DATE_FORMAT.parse(created);
 				Date now = new Date(System.currentTimeMillis() - getTimeRange());
@@ -92,9 +93,8 @@ public class MDataResource extends BaseResource {
 					throw new MetadataException("Metadata endorsement creation date outside allowed range.");
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 
 			String ref = getRequest().getResourceRef().toString();
 			String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
@@ -113,7 +113,7 @@ public class MDataResource extends BaseResource {
 			storeMetadatum(iri, rdfEntry);
 			// Set the response's status and entity
 			setStatus(Status.SUCCESS_CREATED);
-			Representation rep = new StringRepresentation("Metadata entry created",
+			Representation rep = new StringRepresentation("Metadata entry created.\n",
 					MediaType.TEXT_PLAIN);
 			// Indicates where is located the new resource.
 			rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + "/"
@@ -122,7 +122,10 @@ public class MDataResource extends BaseResource {
 
 		} catch (MetadataException m){
 			m.printStackTrace();
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,m.getMessage());
+			setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+			Representation rep = new StringRepresentation(m.getMessage() + "\n",
+					MediaType.TEXT_PLAIN);
+			result = rep;
 		}
 				
         return result;

@@ -11,7 +11,15 @@
 <xsl:strip-space elements="*"/>
 
 <xsl:template match="rdf:Description">
-<h1><xsl:value-of select="dcterms:title"/></h1>
+<xsl:choose>
+   <xsl:when test="string(dcterms:title)">
+    <h1><xsl:value-of select="dcterms:title"/></h1>
+   </xsl:when>
+
+   <xsl:otherwise>
+    <h1><xsl:value-of select="dcterms:identifier"/></h1>
+   </xsl:otherwise>
+</xsl:choose>
 <p><xsl:value-of select="dcterms:description"/></p>
 <table>
 <tr><td><b>type:</b></td><td><xsl:value-of select="dcterms:type"/></td></tr>
@@ -25,7 +33,7 @@
 </tr>
 <tr>
 <td><b>endorser:</b></td>
-<td><a><xsl:attribute name="href">/endorsers/<xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></xsl:attribute><xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></a>
+<td><a><xsl:attribute name="href">../../../endorsers/<xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></xsl:attribute><xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></a>
 </td>
 </tr>
 
