@@ -1,10 +1,14 @@
 package eu.stratuslab.marketplace.server;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBNAME;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBPASS;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBUSER;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.TIME_RANGE;
+
 import java.util.logging.Logger;
 
 import org.openrdf.repository.Repository;
@@ -21,6 +25,7 @@ import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
 
+import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
@@ -38,6 +43,7 @@ public class MarketPlaceApplication extends Application {
     protected Logger logger = getLogger();
 
     public MarketPlaceApplication() {
+
         setName("StratusLab Market-Place");
         setDescription("Market-Place for StratusLab images");
         setOwner("StratusLab");
@@ -45,55 +51,21 @@ public class MarketPlaceApplication extends Application {
 
         getTunnelService().setUserAgentTunnel(true);
 
-        InputStream input = null;
+        String storeType = Configuration.getParameterValue(STORE_TYPE);
 
-        File configFile = new File("/etc/stratuslab/marketplace.cfg");
+        dataDir = Configuration.getParameterValue(DATA_DIR);
 
-        // Read properties file.
-        Properties properties = new Properties();
-        if (configFile.exists()) {
-            try {
-                properties.load(input = new FileInputStream(
-                        "/etc/stratuslab/marketplace.cfg"));
-                input.close();
-            } catch (IOException e) {
-                try {
-                    input.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-
-        String storeType = properties.getProperty("store.type", "memory");
-        this.dataDir = properties.getProperty("data.dir",
-                "/var/lib/stratuslab/metadata");
-        this.timeRange = Long.parseLong(properties.getProperty("time.range",
-                "10")) * 60000;
+        timeRange = Long.parseLong(Configuration.getParameterValue(TIME_RANGE)) * 60000;
 
         if (storeType.equals("memory")) {
-            this.store = new MemoryStore();
+            store = new MemoryStore();
         } else {
-            String mysqlDb = properties.getProperty("mysql.dbname",
-                    "marketplace");
-            String mysqlHost = properties
-                    .getProperty("mysql.host", "localhost");
-            int mysqlPort = Integer.parseInt(properties.getProperty(
-                    "mysql.port", "3306"));
-            String mysqlUser = properties.getProperty("mysql.dbuser", "sesame");
-            String mysqlPass = properties.getProperty("mysql.dbpass", "sesame");
-
-            store = new MySqlStore();
-            ((MySqlStore) store).setDatabaseName(mysqlDb);
-            ((MySqlStore) store).setServerName(mysqlHost);
-            ((MySqlStore) store).setPortNumber(mysqlPort);
-            ((MySqlStore) store).setUser(mysqlUser);
-            ((MySqlStore) store).setPassword(mysqlPass);
+            store = createMysqlStore();
         }
 
-        this.metadata = new SailRepository(store);
+        metadata = new SailRepository(store);
         try {
-            this.metadata.initialize();
+            metadata.initialize();
         } catch (RepositoryException r) {
             r.printStackTrace();
         }
@@ -105,6 +77,7 @@ public class MarketPlaceApplication extends Application {
      */
     @Override
     public Restlet createInboundRoot() {
+
         // Create a router Restlet that defines routes.
         Router router = new Router(getContext());
 
@@ -145,9 +118,9 @@ public class MarketPlaceApplication extends Application {
 
     @Override
     public void stop() {
-        if (this.store != null) {
+        if (store != null) {
             try {
-                this.store.shutDown();
+                store.shutDown();
             } catch (SailException e) {
                 e.printStackTrace();
             }
@@ -169,6 +142,25 @@ public class MarketPlaceApplication extends Application {
 
     public long getTimeRange() {
         return this.timeRange;
+    }
+
+    private static MySqlStore createMysqlStore() {
+
+        String mysqlDb = Configuration.getParameterValue(MYSQL_DBNAME);
+        String mysqlHost = Configuration.getParameterValue(MYSQL_HOST);
+        int mysqlPort = Integer.parseInt(Configuration
+                .getParameterValue(MYSQL_PORT));
+        String mysqlUser = Configuration.getParameterValue(MYSQL_DBUSER);
+        String mysqlPass = Configuration.getParameterValue(MYSQL_DBPASS);
+
+        MySqlStore mysqlStore = new MySqlStore();
+        mysqlStore.setDatabaseName(mysqlDb);
+        mysqlStore.setServerName(mysqlHost);
+        mysqlStore.setPortNumber(mysqlPort);
+        mysqlStore.setUser(mysqlUser);
+        mysqlStore.setPassword(mysqlPass);
+
+        return mysqlStore;
     }
 
 }
