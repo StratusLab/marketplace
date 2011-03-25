@@ -28,7 +28,7 @@
     </tbody>
 </table>
 </form>
-<p>Results:</p>
+<h2>Results:</h2>
 ${results}
 
 <div class="Footer">

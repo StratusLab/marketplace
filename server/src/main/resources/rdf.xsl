@@ -21,7 +21,7 @@
    </xsl:otherwise>
 </xsl:choose>
 <p><xsl:value-of select="dcterms:description"/></p>
-<table>
+<table class="inline">
 <tr><td><b>type:</b></td><td><xsl:value-of select="dcterms:type"/></td></tr>
 <tr>
 <td><b>checksum:</b></td>

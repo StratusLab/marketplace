@@ -2,10 +2,8 @@ package eu.stratuslab.marketplace.server.resources;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -81,20 +79,6 @@ public class MDataResource extends BaseResource {
 			String identifier = XPathUtils.getValue(datumDoc, XPathUtils.IDENTIFIER_ELEMENT);
 			String endorser = XPathUtils.getValue(datumDoc, XPathUtils.EMAIL);
 			String created = XPathUtils.getValue(datumDoc, XPathUtils.CREATED_DATE);
-
-			//Check that date is within valid range
-			/*
-			try {
-				Date endorsementDate = DATE_FORMAT.parse(created);
-				Date now = new Date(System.currentTimeMillis() - getTimeRange());
-
-				if(endorsementDate.compareTo(now) < 0){
-					logger.log(Level.SEVERE, "Endorsement date outside allowed range.");
-					throw new MetadataException("Metadata endorsement creation date outside allowed range.");
-				}
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}*/
 
 			String ref = getRequest().getResourceRef().toString();
 			String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
