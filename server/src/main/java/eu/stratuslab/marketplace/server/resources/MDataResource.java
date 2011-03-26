@@ -306,8 +306,8 @@ public class MDataResource extends BaseResource {
     public Representation toHtml() {
 
         ArrayList<HashMap<String, String>> results = getMetadata();
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        HashMap<String, Object> root = new HashMap<String, Object>();
+
+        HashMap<String, HashMap<String, Object>> root = new HashMap<String, HashMap<String, Object>>();
 
         for (HashMap<String, String> resultRow : results) {
 
@@ -318,19 +318,19 @@ public class MDataResource extends BaseResource {
                     .log(Level.INFO, identifier + "  " + endorser + " "
                             + created);
 
+            HashMap<String, Object> endorserMap;
             if (root.containsKey(identifier)) {
-                HashMap<String, String> endorserMap = (HashMap<String, String>) root
-                        .get(identifier);
-                endorserMap.put(endorser, created);
-                root.put(identifier, endorserMap);
+                endorserMap = root.get(identifier);
             } else {
-                HashMap<String, Object> endorserMap = new HashMap<String, Object>();
-                endorserMap.put(endorser, created);
-                root.put(identifier, endorserMap);
+                endorserMap = new HashMap<String, Object>();
             }
+
+            endorserMap.put(endorser, created);
+            root.put(identifier, endorserMap);
 
         }
 
+        HashMap<String, Object> data = new HashMap<String, Object>();
         data.put("title", "Metadata");
         data.put("content", root);
 

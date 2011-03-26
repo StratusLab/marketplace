@@ -36,6 +36,19 @@ public enum Parameter {
         }
     },
 
+    PENDING_DIR(true, "/var/lib/stratuslab/pending",
+            "Directory for pending (unconfirmed) entries.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            File datadir = new File(value);
+            if (!datadir.isAbsolute()) {
+                throw new IllegalArgumentException(getKey()
+                        + " must be an absolute directory");
+            }
+        }
+    },
+
     TIME_RANGE(true, "10", "Directory containing raw metadata data entries.") {
         @Override
         public void validate(String value) {
