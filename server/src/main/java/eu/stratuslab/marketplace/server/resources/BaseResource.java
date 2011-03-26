@@ -46,6 +46,7 @@ import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
+
 /**
 
  *  Base resource class that supports common behaviours or attributes shared by
@@ -53,40 +54,42 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
  */
 /**
  * @author stkenny
- *
+ * 
  */
 public abstract class BaseResource extends ServerResource {
 
     protected Logger logger = getLogger();
-    
+
     protected static final int ARG_EMAIL = 1;
     protected static final int ARG_DATE = 2;
     protected static final int ARG_OTHER = 3;
 
     protected final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
-    
+
     /**
      * Returns the store of metadata managed by this application.
      * 
      * @return the store of metadata managed by this application.
-    */
-    protected Repository getMetadataStore(){
-		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
+     */
+    protected Repository getMetadataStore() {
+        return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
 
-    protected String getDataDir(){
-    	return ((MarketPlaceApplication) getApplication()).getDataDir();
+    protected String getDataDir() {
+        return ((MarketPlaceApplication) getApplication()).getDataDir();
     }
-    
-    protected long getTimeRange(){
-    	return ((MarketPlaceApplication) getApplication()).getTimeRange();
+
+    protected long getTimeRange() {
+        return ((MarketPlaceApplication) getApplication()).getTimeRange();
     }
-    
+
     /**
      * Stores a new metadata entry
      * 
-     * @param iri identifier of the metadata entry
-     * @param rdf the metadata entry to store
+     * @param iri
+     *            identifier of the metadata entry
+     * @param rdf
+     *            the metadata entry to store
      */
     protected void storeMetadatum(String iri, String rdf) {
         try {
@@ -94,18 +97,15 @@ public abstract class BaseResource extends ServerResource {
             ValueFactory vf = con.getValueFactory();
             Reader reader = new StringReader(rdf);
             try {
-            	con.clear(vf.createURI(iri));
-                con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML, 
-                        vf.createURI(iri));
-            }
-            finally {
+                con.clear(vf.createURI(iri));
+                con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML, vf
+                        .createURI(iri));
+            } finally {
                 con.close();
             }
-        }
-        catch (OpenRDFException e) {
+        } catch (OpenRDFException e) {
             e.printStackTrace();
-        }
-        catch (java.io.IOException e) {
+        } catch (java.io.IOException e) {
             e.printStackTrace();
         }
     }
@@ -113,25 +113,26 @@ public abstract class BaseResource extends ServerResource {
     /**
      * Retrieve a particular metadata entry
      * 
-     * @param iri identifier of the metadata entry
+     * @param iri
+     *            identifier of the metadata entry
      * @return metadata entry as a Jena model
      */
     protected String getMetadatum(String iri) {
         String model = null;
         try {
             model = readFileAsString(iri);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-       
+
         return model;
     }
-        
+
     /**
      * Remove a metadata entry
      * 
-     * @param iri identifier of the metadata entry
+     * @param iri
+     *            identifier of the metadata entry
      */
     protected void removeMetadatum(String iri) {
         try {
@@ -139,96 +140,100 @@ public abstract class BaseResource extends ServerResource {
             ValueFactory vf = con.getValueFactory();
             try {
                 con.clear(vf.createURI(iri));
-            }
-            finally {
+            } finally {
                 con.close();
             }
-        }
-        catch (OpenRDFException e) {
+        } catch (OpenRDFException e) {
             e.printStackTrace();
         }
     }
-   
-    
+
     /**
      * Query the metadata
      * 
-     * @param queryString query string
-     * @param syntax the syntax of the query
-     * @param format the output format of the resultset
+     * @param queryString
+     *            query string
+     * @param syntax
+     *            the syntax of the query
+     * @param format
+     *            the output format of the resultset
      * @return
      */
-    protected String query(String queryString, QueryLanguage syntax){
+    protected String query(String queryString, QueryLanguage syntax) {
         String resultString = null;
 
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             BufferedOutputStream out = new BufferedOutputStream(bytes);
-            SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(out);
-        
+            SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
+                    out);
+
             RepositoryConnection con = getMetadataStore().getConnection();
             try {
-                TupleQuery tupleQuery = con.prepareTupleQuery(syntax, queryString);
+                TupleQuery tupleQuery = con.prepareTupleQuery(syntax,
+                        queryString);
                 tupleQuery.evaluate(sparqlWriter);
                 resultString = bytes.toString();
             } finally {
                 con.close();
             }
-        }
-        catch (OpenRDFException e) {
+        } catch (OpenRDFException e) {
             e.printStackTrace();
         }
 
         return resultString;
     }
- 
+
     /**
      * Query the metadata
      * 
-     * @param queryString the query
+     * @param queryString
+     *            the query
      * @return the resultset as a Java Collection
      */
-    protected Collection<HashMap<String, String>> query(String queryString){
+    protected Collection<HashMap<String, String>> query(String queryString) {
         ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
             try {
-                TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+                TupleQuery tupleQuery = con.prepareTupleQuery(
+                        QueryLanguage.SPARQL, queryString);
                 TupleQueryResult results = tupleQuery.evaluate();
                 try {
                     List<String> columnNames = results.getBindingNames();
                     int cols = columnNames.size();
 
-                    while(results.hasNext()){
-                    	BindingSet solution = results.next();
-                    	HashMap<String, String> row = new HashMap<String, String>(cols,1);
-                    	for ( Iterator<String> namesIter = columnNames.listIterator(); namesIter.hasNext(); ){
-                    		String columnName = namesIter.next();
-                    		Value columnValue = solution.getValue(columnName);
-                    		if(columnValue != null){
-                    		    row.put(columnName, (solution.getValue(columnName)).stringValue());
-                    		} else {
-                    			row.put(columnName, "null");
-                    		}
-                    	}
-                    	list.add(row);
+                    while (results.hasNext()) {
+                        BindingSet solution = results.next();
+                        HashMap<String, String> row = new HashMap<String, String>(
+                                cols, 1);
+                        for (Iterator<String> namesIter = columnNames
+                                .listIterator(); namesIter.hasNext();) {
+                            String columnName = namesIter.next();
+                            Value columnValue = solution.getValue(columnName);
+                            if (columnValue != null) {
+                                row.put(columnName, (solution
+                                        .getValue(columnName)).stringValue());
+                            } else {
+                                row.put(columnName, "null");
+                            }
+                        }
+                        list.add(row);
                     }
-                  } finally {
-                      results.close();
-                  }
-              }
-              finally {
-                  con.close();
-              }
-          }
-          catch (OpenRDFException e) {
-              e.printStackTrace();
-          }
+                } finally {
+                    results.close();
+                }
+            } finally {
+                con.close();
+            }
+        } catch (OpenRDFException e) {
+            e.printStackTrace();
+        }
 
-        return (list); 
+        return (list);
     }
-     
+
     /**
      * Generate an XML representation of an error response.
      * 
@@ -263,60 +268,66 @@ public abstract class BaseResource extends ServerResource {
 
         return result;
     }
-    
-    protected StringBuffer formToString(Form form){
+
+    protected StringBuffer formToString(Form form) {
         StringBuffer predicate = new StringBuffer();
-        
-        for ( Iterator<String> formIter = form.getNames().iterator(); formIter.hasNext(); ){
-        	String key = formIter.next();
-        	predicate.append(" FILTER (?" + key + " = \"" + form.getFirstValue(key) + "\" ). ");
+
+        for (String key : form.getNames()) {
+            predicate.append(" FILTER (?" + key + " = \""
+                    + form.getFirstValue(key) + "\" ). ");
         }
-        
+
         return predicate;
-        
+
     }
-    
-    protected int classifyArg(String arg){
-    	if(arg == null || arg.equals("null") || arg.equals("")){
-    		return -1;
-    	}else if(PatternUtils.isEmail(arg)){
-    		return ARG_EMAIL;
-    	} else if (PatternUtils.isDate(arg)){
-    	    return ARG_DATE;
-    	} else {
-    		return ARG_OTHER;
-    	}
+
+    protected int classifyArg(String arg) {
+        if (arg == null || arg.equals("null") || arg.equals("")) {
+            return -1;
+        } else if (PatternUtils.isEmail(arg)) {
+            return ARG_EMAIL;
+        } else if (PatternUtils.isDate(arg)) {
+            return ARG_DATE;
+        } else {
+            return ARG_OTHER;
+        }
     }
-      
-    protected String stripSignature(String signedString){
-    	DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+
+    protected String stripSignature(String signedString) {
+        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
         Document datumDoc = null;
         String rdfEntry = "";
         try {
-			datumDoc = db.parse(new ByteArrayInputStream(signedString.getBytes("UTF-8")));
-			
-			// Create a deep copy of the document and strip signature elements.
+            datumDoc = db.parse(new ByteArrayInputStream(signedString
+                    .getBytes("UTF-8")));
+
+            // Create a deep copy of the document and strip signature elements.
             Document copy = (Document) datumDoc.cloneNode(true);
             MetadataUtils.stripSignatureElements(copy);
             rdfEntry = XMLUtils.documentToString(copy);
-		} catch (SAXException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unable to parse metadata: " 
-					+ e.getMessage());
-		} catch (IOException e){
-			throw new ResourceException(e);
-		}
-		
-		return rdfEntry;
+        } catch (SAXException e) {
+            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                    "Unable to parse metadata: " + e.getMessage());
+        } catch (IOException e) {
+            throw new ResourceException(e);
+        }
+
+        return rdfEntry;
     }
-    
-    private static String readFileAsString(String filePath) throws java.io.IOException{
+
+    private static String readFileAsString(String filePath)
+            throws java.io.IOException {
         byte[] buffer = new byte[(int) new File(filePath).length()];
         BufferedInputStream f = null;
         try {
             f = new BufferedInputStream(new FileInputStream(new File(filePath)));
             f.read(buffer);
         } finally {
-            if (f != null) try { f.close(); } catch (IOException ignored) { }
+            if (f != null)
+                try {
+                    f.close();
+                } catch (IOException ignored) {
+                }
         }
         return new String(buffer);
     }
