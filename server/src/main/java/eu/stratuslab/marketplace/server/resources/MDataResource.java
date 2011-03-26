@@ -3,23 +3,35 @@ package eu.stratuslab.marketplace.server.resources;
 import static eu.stratuslab.marketplace.server.resources.XPathUtils.CREATED_DATE;
 import static eu.stratuslab.marketplace.server.resources.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.resources.XPathUtils.IDENTIFIER_ELEMENT;
+import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -58,24 +70,96 @@ public class MDataResource extends BaseResource {
 
         Representation result = null;
 
-        Document datumDoc = extractXmlDocument(entity);
+        List<File> files = new ArrayList<File>();
 
-        result = validateMetadata(datumDoc);
-
-        if (result == null) {
-
-            writeMetadataToDisk(getDataDir(), datumDoc);
-            String iri = writeMetadataToStore(datumDoc);
-
-            setStatus(Status.SUCCESS_CREATED);
-            Representation rep = new StringRepresentation(
-                    "Metadata entry created.\n", MediaType.TEXT_PLAIN);
-            rep.setLocationRef(getRequest().getResourceRef().getIdentifier()
-                    + iri);
-            result = rep;
+        if (entity != null) {
+            if (MULTIPART_FORM_DATA.equals(entity.getMediaType(), true)) {
+                processMultipartForm(files);
+            } else {
+                writeContentsToDisk(files, entity);
+            }
+        } else {
+            // POST request with no entity.
+            getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         }
 
+        // Process all of the uploaded files.
+        for (File file : files) {
+
+            InputStream stream = null;
+
+            try {
+
+                stream = new FileInputStream(file);
+
+                Document doc = extractXmlDocument(stream);
+
+                result = validateMetadata(doc);
+
+                if (result == null) {
+
+                    writeMetadataToDisk(getDataDir(), doc);
+                    String iri = writeMetadataToStore(doc);
+
+                    setStatus(Status.SUCCESS_CREATED);
+                    Representation rep = new StringRepresentation(
+                            "Metadata entry created.\n", MediaType.TEXT_PLAIN);
+                    rep.setLocationRef(getRequest().getResourceRef()
+                            .getIdentifier()
+                            + iri);
+                    result = rep;
+                }
+
+            } catch (FileNotFoundException e) {
+                // FIXME: Log this. It shouldn't happen.
+            } finally {
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException consumed) {
+
+                    }
+                }
+            }
+
+        }
+
+        getResponse().setEntity(result);
+
         return result;
+    }
+
+    private void processMultipartForm(List<File> files) {
+
+        File storeDirectory = new File("/tmp/");
+
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(102400000);
+
+        RestletFileUpload upload = new RestletFileUpload(factory);
+
+        List<FileItem> items;
+
+        try {
+            Request request = getRequest();
+            items = upload.parseRequest(request);
+        } catch (FileUploadException e) {
+            e.printStackTrace();
+            items = new ArrayList<FileItem>();
+        }
+
+        for (FileItem fi : items) {
+            if (fi.getName() != null) {
+                String uuid = UUID.randomUUID().toString();
+                File file = new File(storeDirectory, uuid);
+                try {
+                    fi.write(file);
+                    files.add(file);
+                } catch (Exception consumed) {
+                }
+            }
+        }
+
     }
 
     private static void writeMetadataToDisk(String dataDir, Document doc)
@@ -157,13 +241,15 @@ public class MDataResource extends BaseResource {
         return XMLUtils.documentToString(copy);
     }
 
-    private static Document extractXmlDocument(Representation entity) {
+    private static Document extractXmlDocument(InputStream stream) {
 
         DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
         Document datumDoc = null;
 
         try {
-            datumDoc = db.parse(entity.getStream());
+
+            datumDoc = db.parse(stream);
+
         } catch (SAXException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                     "Unable to parse metadata: " + e.getMessage());
@@ -172,6 +258,48 @@ public class MDataResource extends BaseResource {
         }
 
         return datumDoc;
+    }
+
+    private static void writeContentsToDisk(List<File> files,
+            Representation entity) {
+
+        char[] buffer = new char[4096];
+
+        File output = new File("/tmp", UUID.randomUUID().toString());
+
+        Reader reader = null;
+
+        FileWriter writer = null;
+
+        try {
+
+            writer = new FileWriter(output);
+
+            reader = entity.getReader();
+
+            int nchars = reader.read(buffer);
+            while (nchars >= 0) {
+                writer.write(buffer, 0, nchars);
+                nchars = reader.read(buffer);
+            }
+
+            files.add(output);
+
+        } catch (IOException consumed) {
+
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException consumed) {
+
+            }
+            try {
+                writer.close();
+            } catch (IOException consumed) {
+
+            }
+        }
+
     }
 
     @Get("html")
