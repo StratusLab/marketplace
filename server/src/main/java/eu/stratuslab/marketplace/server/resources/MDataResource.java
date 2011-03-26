@@ -1,9 +1,11 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import static eu.stratuslab.marketplace.server.resources.XPathUtils.CREATED_DATE;
-import static eu.stratuslab.marketplace.server.resources.XPathUtils.EMAIL;
-import static eu.stratuslab.marketplace.server.resources.XPathUtils.IDENTIFIER_ELEMENT;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.METADATA_MAX_BYTES;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
+import static org.restlet.data.MediaType.APPLICATION_RDF_XML;
 import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
+import static org.restlet.data.MediaType.TEXT_PLAIN;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +23,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -40,14 +41,14 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataException;
-import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
 import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
 import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
+import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.utils.MessageUtils;
+import eu.stratuslab.marketplace.server.utils.Notifier;
 
 /**
  * This resource represents a list of all Metadata entries
@@ -68,73 +69,79 @@ public class MDataResource extends BaseResource {
     public Representation acceptMetadatum(Representation entity)
             throws ResourceException {
 
-        Representation result = null;
+        if (entity == null) {
+            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                    "post with null entity");
+        }
 
-        List<File> files = new ArrayList<File>();
+        MediaType mediaType = entity.getMediaType();
 
-        if (entity != null) {
-            if (MULTIPART_FORM_DATA.equals(entity.getMediaType(), true)) {
-                processMultipartForm(files);
-            } else {
-                writeContentsToDisk(files, entity);
-            }
+        File uploadedFile = null;
+        if (MULTIPART_FORM_DATA.equals(mediaType, true)) {
+            uploadedFile = processMultipartForm();
+        } else if (APPLICATION_RDF_XML.equals(mediaType, true)) {
+            uploadedFile = writeContentsToDisk(entity);
         } else {
-            // POST request with no entity.
-            getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+            throw new ResourceException(
+                    Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE, mediaType
+                            .getName());
         }
 
-        // Process all of the uploaded files.
-        for (File file : files) {
+        boolean validateEmail = Configuration
+                .getParameterValueAsBoolean(VALIDATE_EMAIL);
 
-            InputStream stream = null;
+        Document doc = validateMetadata(uploadedFile);
 
-            try {
+        if (!validateEmail) {
 
-                stream = new FileInputStream(file);
+            String iri = commitMetadataEntry(uploadedFile, doc);
 
-                Document doc = extractXmlDocument(stream);
+            setStatus(Status.SUCCESS_CREATED);
+            Representation rep = new StringRepresentation(
+                    "metadata entry created.\n", TEXT_PLAIN);
+            rep.setLocationRef(getRequest().getResourceRef().getIdentifier()
+                    + iri);
 
-                result = validateMetadata(doc);
+            return rep;
 
-                if (result == null) {
+        } else {
 
-                    writeMetadataToDisk(getDataDir(), doc);
-                    String iri = writeMetadataToStore(doc);
+            confirmMetadataEntry(uploadedFile, doc);
 
-                    setStatus(Status.SUCCESS_CREATED);
-                    Representation rep = new StringRepresentation(
-                            "Metadata entry created.\n", MediaType.TEXT_PLAIN);
-                    rep.setLocationRef(getRequest().getResourceRef()
-                            .getIdentifier()
-                            + iri);
-                    result = rep;
-                }
-
-            } catch (FileNotFoundException e) {
-                // FIXME: Log this. It shouldn't happen.
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException consumed) {
-
-                    }
-                }
-            }
-
+            setStatus(Status.SUCCESS_ACCEPTED);
+            return new StringRepresentation(
+                    "confirmation email sent for new metadata entry\n",
+                    TEXT_PLAIN);
         }
 
-        getResponse().setEntity(result);
-
-        return result;
     }
 
-    private void processMultipartForm(List<File> files) {
+    private static void confirmMetadataEntry(File uploadedFile, Document doc) {
 
-        File storeDirectory = new File("/tmp/");
+        try {
+            String[] coords = getMetadataEntryCoordinates(doc);
+            sendEmailConfirmation(coords[1], uploadedFile);
+        } catch (Exception e) {
+            // TODO: Log this.
+            e.printStackTrace();
+            throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
+                    "error sending confirmation email");
+        }
+    }
+
+    // Currently this method will only process the first uploaded file. This is
+    // done to simplify the logic for treating a post request. This should be
+    // extended in the future to handle multiple files.
+    private File processMultipartForm() {
+
+        File storeDirectory = Configuration
+                .getParameterValueAsFile(PENDING_DIR);
+
+        int fileSizeLimit = Configuration
+                .getParameterValueAsInt(METADATA_MAX_BYTES);
 
         DiskFileItemFactory factory = new DiskFileItemFactory();
-        factory.setSizeThreshold(102400000);
+        factory.setSizeThreshold(fileSizeLimit);
 
         RestletFileUpload upload = new RestletFileUpload(factory);
 
@@ -144,8 +151,8 @@ public class MDataResource extends BaseResource {
             Request request = getRequest();
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
-            e.printStackTrace();
-            items = new ArrayList<FileItem>();
+            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
+                    .getMessage());
         }
 
         for (FileItem fi : items) {
@@ -154,136 +161,81 @@ public class MDataResource extends BaseResource {
                 File file = new File(storeDirectory, uuid);
                 try {
                     fi.write(file);
-                    files.add(file);
+                    return file;
                 } catch (Exception consumed) {
                 }
             }
         }
 
+        throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                "no valid file uploaded");
     }
 
-    private static void writeMetadataToDisk(String dataDir, Document doc)
-            throws ResourceException {
+    private static void sendEmailConfirmation(String email, File file)
+            throws Exception {
 
-        String[] coordinates = getMetadataEntryCoordinates(doc);
-
-        String identifier = coordinates[0];
-        String endorser = coordinates[1];
-        String created = coordinates[2];
-
-        File rdfFile = new File(dataDir, identifier + File.separator + endorser
-                + File.separator + created + ".xml");
-
-        File rdfFileParent = rdfFile.getParentFile();
-        if (!rdfFileParent.exists()) {
-            if (!rdfFileParent.mkdirs()) {
-                throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-            }
-        }
-
-        String contents = XMLUtils.documentToString(doc);
-        MetadataUtils.writeStringToFile(contents, rdfFile);
-
+        String baseUrl = "http://localhost:8080/";
+        String message = MessageUtils.createNotification(baseUrl, file);
+        Notifier.sendNotification(email, message);
     }
 
-    private String writeMetadataToStore(Document datumDoc) {
+    private Document validateMetadata(File uploadedFile) {
 
-        String[] coordinates = getMetadataEntryCoordinates(datumDoc);
-
-        String identifier = coordinates[0];
-        String endorser = coordinates[1];
-        String created = coordinates[2];
-
-        String ref = getRequest().getResourceRef().toString();
-        String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
-
-        String rdfEntry = createRdfEntry(datumDoc);
-        storeMetadatum(iri, rdfEntry);
-
-        return iri;
-    }
-
-    private static String[] getMetadataEntryCoordinates(Document doc) {
-
-        String[] coords = new String[3];
-
-        coords[0] = XPathUtils.getValue(doc, IDENTIFIER_ELEMENT);
-        coords[1] = XPathUtils.getValue(doc, EMAIL);
-        coords[2] = XPathUtils.getValue(doc, CREATED_DATE);
-
-        return coords;
-    }
-
-    private Representation validateMetadata(Document doc) {
+        InputStream stream = null;
+        Document doc = null;
 
         try {
+
+            stream = new FileInputStream(uploadedFile);
+
+            doc = extractXmlDocument(stream);
 
             ValidateXMLSignature.validate(doc);
             ValidateMetadataConstraints.validate(doc);
             ValidateRDFModel.validate(doc);
 
-            return null;
-
-        } catch (MetadataException m) {
-            m.printStackTrace();
-            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
-            return new StringRepresentation(m.getMessage() + "\n",
-                    MediaType.TEXT_PLAIN);
-
-        }
-
-    }
-
-    // Create a deep copy of the document and strip signature elements.
-    private static String createRdfEntry(Document doc) {
-        Document copy = (Document) doc.cloneNode(true);
-        MetadataUtils.stripSignatureElements(copy);
-        return XMLUtils.documentToString(copy);
-    }
-
-    private static Document extractXmlDocument(InputStream stream) {
-
-        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
-        Document datumDoc = null;
-
-        try {
-
-            datumDoc = db.parse(stream);
-
-        } catch (SAXException e) {
+        } catch (MetadataException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-                    "Unable to parse metadata: " + e.getMessage());
-        } catch (IOException e) {
-            throw new ResourceException(e);
+                    "invalid metadata: " + e.getMessage());
+        } catch (FileNotFoundException e) {
+            // TODO: Log this.
+            throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
+                    "unable to read metadata file");
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException consumed) {
+
+                }
+            }
         }
 
-        return datumDoc;
+        return doc;
     }
 
-    private static void writeContentsToDisk(List<File> files,
-            Representation entity) {
+    private static File writeContentsToDisk(Representation entity) {
 
         char[] buffer = new char[4096];
 
-        File output = new File("/tmp", UUID.randomUUID().toString());
+        File storeDirectory = Configuration
+                .getParameterValueAsFile(PENDING_DIR);
+
+        File output = new File(storeDirectory, UUID.randomUUID().toString());
 
         Reader reader = null;
-
-        FileWriter writer = null;
+        Writer writer = null;
 
         try {
 
-            writer = new FileWriter(output);
-
             reader = entity.getReader();
+            writer = new FileWriter(output);
 
             int nchars = reader.read(buffer);
             while (nchars >= 0) {
                 writer.write(buffer, 0, nchars);
                 nchars = reader.read(buffer);
             }
-
-            files.add(output);
 
         } catch (IOException consumed) {
 
@@ -299,7 +251,7 @@ public class MDataResource extends BaseResource {
 
             }
         }
-
+        return output;
     }
 
     @Get("html")

@@ -25,7 +25,7 @@
       <#list endorsers?keys as email>
       <li>${email}
         <ul>
-          <li><a href="${identifier}/${email}/${endorsers[email]}">${endorsers[email]}</a></li>
+          <li><a href="metadata/${identifier}/${email}/${endorsers[email]}">${endorsers[email]}</a></li>
         </ul>
       </li>
       </#list>

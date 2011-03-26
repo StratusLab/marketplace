@@ -19,18 +19,31 @@
  */
 package eu.stratuslab.marketplace.server.resources;
 
+import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
+import static org.restlet.data.MediaType.TEXT_PLAIN;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import org.restlet.Request;
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+import org.w3c.dom.Document;
 
-public class ActionResource extends ServerResource {
+import eu.stratuslab.marketplace.server.cfg.Configuration;
 
-    private String metadata;
+public class ActionResource extends BaseResource {
+
+    private Document doc;
+
+    private String uuid;
 
     private String command;
 
@@ -41,27 +54,93 @@ public class ActionResource extends ServerResource {
 
         Map<String, Object> attributes = request.getAttributes();
 
-        String uuid = attributes.get("uuid").toString();
+        uuid = attributes.get("uuid").toString();
         command = attributes.get("command").toString();
 
-        metadata = retrieveMetadata(uuid);
+        doc = retrieveMetadata(uuid);
 
     }
 
     @Get("txt")
     public Representation toText() {
-        return doAction(getRequest());
+        return doAction();
     }
 
-    private Representation doAction(Request request) {
-        // FIXME: Add correct action here; need to provide error returns.
-        String msg = command + " " + metadata;
-        Representation representation = new StringRepresentation(msg);
+    private Representation doAction() {
+
+        Representation representation = null;
+
+        if ("confirm".equals(command)) {
+            representation = confirmEntry();
+        } else if ("abort".equals(command)) {
+            representation = abortEntry();
+        } else if ("abuse".equals(command)) {
+            representation = reportAbuse();
+        }
+
         return representation;
     }
 
-    private String retrieveMetadata(String uuid) {
-        // FIXME: Add implementation to retrieve metadata from disk.
-        return "fake metadata";
+    private Representation confirmEntry() {
+        File uploadedFile = getUploadedFile(uuid);
+
+        String iri = commitMetadataEntry(uploadedFile, doc);
+
+        setStatus(Status.SUCCESS_CREATED);
+        Representation rep = new StringRepresentation(
+                "metadata entry created\n", TEXT_PLAIN);
+        rep.setLocationRef(getRequest().getResourceRef().getIdentifier() + iri);
+
+        return rep;
+
+    }
+
+    private Representation abortEntry() {
+        // The file was deleted from disk when it was read, so no cleanup is
+        // necessary here.
+        return new StringRepresentation("aborted addition of metadata entry "
+                + uuid, MediaType.TEXT_PLAIN);
+    }
+
+    private Representation reportAbuse() {
+        // FIXME: This needs to be logged with an email sent.
+        return new StringRepresentation(
+                "administrators have been notified of the problem and may contact you during the investigation",
+                MediaType.TEXT_PLAIN);
+    }
+
+    private static File getUploadedFile(String uuid) {
+        String dir = Configuration.getParameterValue(PENDING_DIR);
+        return new File(dir, uuid);
+    }
+
+    private static Document retrieveMetadata(String uuid) {
+
+        InputStream stream = null;
+
+        try {
+
+            File file = getUploadedFile(uuid);
+
+            stream = new FileInputStream(file);
+            Document doc = extractXmlDocument(stream);
+
+            if (!file.delete()) {
+                // FIXME: Add logging about this.
+                System.err.println("file could not be delete: " + file);
+            }
+            return doc;
+
+        } catch (IOException e) {
+            throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, e
+                    .getMessage());
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException consumed) {
+                }
+            }
+        }
     }
 }

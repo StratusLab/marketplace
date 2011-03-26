@@ -49,20 +49,20 @@ public enum Parameter {
         }
     },
 
+    METADATA_MAX_BYTES(true, "10240000",
+            "Size limit for a single metadata entry.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            isPositiveInt(getKey(), value);
+        }
+    },
+
     TIME_RANGE(true, "10", "Directory containing raw metadata data entries.") {
         @Override
         public void validate(String value) {
             super.validate(value);
-            try {
-                int i = Integer.parseInt(value);
-                if (i <= 0) {
-                    throw new IllegalArgumentException(getKey()
-                            + " must be a positive integer");
-                }
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(getKey()
-                        + " must be a positive integer: " + e.getMessage());
-            }
+            isPositiveInt(getKey(), value);
         }
     },
 
@@ -208,6 +208,19 @@ public enum Parameter {
         if (!("true".equals(s) || "false".equals(s))) {
             throw new IllegalArgumentException(
                     "value must be 'true' or 'false'");
+        }
+    }
+
+    private static void isPositiveInt(String key, String s) {
+        try {
+            int i = Integer.parseInt(s);
+            if (i <= 0) {
+                throw new IllegalArgumentException(key
+                        + " must be a positive integer");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(key
+                    + " must be a positive integer: " + e.getMessage());
         }
     }
 

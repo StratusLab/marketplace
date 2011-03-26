@@ -84,6 +84,22 @@ public class Configuration {
         return parameter.getProperty(properties);
     }
 
+    public static boolean getParameterValueAsBoolean(Parameter parameter) {
+        return Boolean.parseBoolean(parameter.getProperty(properties));
+    }
+
+    public static int getParameterValueAsInt(Parameter parameter) {
+        return Integer.parseInt(parameter.getProperty(properties));
+    }
+
+    public static long getParameterValueAsLong(Parameter parameter) {
+        return Long.parseLong(parameter.getProperty(properties));
+    }
+
+    public static File getParameterValueAsFile(Parameter parameter) {
+        return new File(parameter.getProperty(properties));
+    }
+
     private static void validateConfiguration(Properties properties) {
         checkAllParametersAreValid(properties);
         checkAllParametersAreKnown(properties);

@@ -52,12 +52,11 @@ public class MarketPlaceApplication extends Application {
 
         getTunnelService().setUserAgentTunnel(true);
 
-        String storeType = Configuration.getParameterValue(STORE_TYPE);
-
         dataDir = Configuration.getParameterValue(DATA_DIR);
 
-        timeRange = Long.parseLong(Configuration.getParameterValue(TIME_RANGE)) * 60000;
+        timeRange = Configuration.getParameterValueAsLong(TIME_RANGE) * 60000;
 
+        String storeType = Configuration.getParameterValue(STORE_TYPE);
         if (storeType.equals("memory")) {
             store = new MemoryStore();
         } else {
@@ -153,8 +152,7 @@ public class MarketPlaceApplication extends Application {
 
         String mysqlDb = Configuration.getParameterValue(MYSQL_DBNAME);
         String mysqlHost = Configuration.getParameterValue(MYSQL_HOST);
-        int mysqlPort = Integer.parseInt(Configuration
-                .getParameterValue(MYSQL_PORT));
+        int mysqlPort = Configuration.getParameterValueAsInt(MYSQL_PORT);
         String mysqlUser = Configuration.getParameterValue(MYSQL_DBUSER);
         String mysqlPass = Configuration.getParameterValue(MYSQL_DBPASS);
 

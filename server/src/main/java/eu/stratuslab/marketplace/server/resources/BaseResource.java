@@ -1,6 +1,9 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
+import static eu.stratuslab.marketplace.server.resources.XPathUtils.CREATED_DATE;
+import static eu.stratuslab.marketplace.server.resources.XPathUtils.EMAIL;
+import static eu.stratuslab.marketplace.server.resources.XPathUtils.IDENTIFIER_ELEMENT;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -9,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -81,6 +85,96 @@ public abstract class BaseResource extends ServerResource {
 
     protected long getTimeRange() {
         return ((MarketPlaceApplication) getApplication()).getTimeRange();
+    }
+
+    protected static Document extractXmlDocument(InputStream stream) {
+
+        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+        Document datumDoc = null;
+
+        try {
+
+            datumDoc = db.parse(stream);
+
+        } catch (SAXException e) {
+            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                    "unable to parse metadata: " + e.getMessage());
+        } catch (IOException e) {
+            throw new ResourceException(e);
+        }
+
+        return datumDoc;
+    }
+
+    protected String commitMetadataEntry(File uploadedFile, Document doc) {
+        writeMetadataToDisk(getDataDir(), doc);
+        String iri = writeMetadataToStore(doc);
+
+        if (!uploadedFile.delete()) {
+            // FIXME: Add logging for this.
+            System.err.println("file could not be deleted: " + uploadedFile);
+        }
+
+        return iri;
+    }
+
+    protected static void writeMetadataToDisk(String dataDir, Document doc)
+            throws ResourceException {
+
+        String[] coordinates = getMetadataEntryCoordinates(doc);
+
+        String identifier = coordinates[0];
+        String endorser = coordinates[1];
+        String created = coordinates[2];
+
+        File rdfFile = new File(dataDir, identifier + File.separator + endorser
+                + File.separator + created + ".xml");
+
+        File rdfFileParent = rdfFile.getParentFile();
+        if (!rdfFileParent.exists()) {
+            if (!rdfFileParent.mkdirs()) {
+                throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+            }
+        }
+
+        String contents = XMLUtils.documentToString(doc);
+        MetadataUtils.writeStringToFile(contents, rdfFile);
+
+    }
+
+    // Create a deep copy of the document and strip signature elements.
+    protected static String createRdfEntry(Document doc) {
+        Document copy = (Document) doc.cloneNode(true);
+        MetadataUtils.stripSignatureElements(copy);
+        return XMLUtils.documentToString(copy);
+    }
+
+    protected static String[] getMetadataEntryCoordinates(Document doc) {
+
+        String[] coords = new String[3];
+
+        coords[0] = XPathUtils.getValue(doc, IDENTIFIER_ELEMENT);
+        coords[1] = XPathUtils.getValue(doc, EMAIL);
+        coords[2] = XPathUtils.getValue(doc, CREATED_DATE);
+
+        return coords;
+    }
+
+    protected String writeMetadataToStore(Document datumDoc) {
+
+        String[] coordinates = getMetadataEntryCoordinates(datumDoc);
+
+        String identifier = coordinates[0];
+        String endorser = coordinates[1];
+        String created = coordinates[2];
+
+        String ref = getRequest().getResourceRef().toString();
+        String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
+
+        String rdfEntry = createRdfEntry(datumDoc);
+        storeMetadatum(iri, rdfEntry);
+
+        return iri;
     }
 
     /**
@@ -315,7 +409,7 @@ public abstract class BaseResource extends ServerResource {
         return rdfEntry;
     }
 
-    private static String readFileAsString(String filePath)
+    protected static String readFileAsString(String filePath)
             throws java.io.IOException {
         byte[] buffer = new byte[(int) new File(filePath).length()];
         BufferedInputStream f = null;
