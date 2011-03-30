@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -18,6 +20,12 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.talis.rdfwriters.json.JSONJenaWriter;
+
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
 /**
  * This resource represents a metadata entry
@@ -43,6 +51,22 @@ public class MDatumResource extends BaseResource {
         return representation;
     }
     
+    @Get("json")
+    public Representation toJSON() {
+    	Model rdfModel = ModelFactory.createMemModelMaker().createDefaultModel();
+		rdfModel.read(new ByteArrayInputStream((stripSignature(datum)).getBytes()), MARKETPLACE_URI);
+		
+		JSONJenaWriter jenaWriter = new JSONJenaWriter();
+		ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
+		jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);
+		
+		StringRepresentation representation =
+            new StringRepresentation(new StringBuffer(jsonOut.toString()),
+            		MediaType.APPLICATION_JSON);
+		
+		return representation;
+    }
+    
     @Get("html")
     public Representation toHtml() {
     	// Retrieve resource
@@ -60,7 +84,7 @@ public class MDatumResource extends BaseResource {
 			 
 			 transformer.transform
 		      (new javax.xml.transform.stream.StreamSource
-		            (new StringReader(datum)),
+		            (new StringReader(stripSignature(datum))),
 		       new javax.xml.transform.stream.StreamResult
 		            ( xmlOutWriter ));
 			 
@@ -85,5 +109,5 @@ public class MDatumResource extends BaseResource {
        
 		return representation;
     }
-    
+       
 }

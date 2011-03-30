@@ -32,6 +32,10 @@
          <artifactId>org.restlet.ext.freemarker</artifactId>
     </dependency>
     <dependency>
+         <groupId>org.restlet.jee</groupId>
+         <artifactId>org.restlet.ext.fileupload</artifactId>
+    </dependency>
+    <dependency>
        <groupId>org.openrdf.sesame</groupId>
        <artifactId>sesame-repository-sail</artifactId>
     </dependency>
@@ -50,12 +54,24 @@
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryresultio-sparqlxml</artifactId>
-    </dependency>    
+    </dependency>   
+    <dependency>
+        <groupId>com.hp.hpl.jena</groupId>
+        <artifactId>jena</artifactId>
+    </dependency> 
+    <dependency>
+        <groupId>com.talis.jena</groupId>
+        <artifactId>rdf-json</artifactId>
+    </dependency>
     <dependency>
         <groupId>eu.stratuslab.marketplace</groupId>
         <artifactId>metadata</artifactId>
         <version>0.0.6-SNAPSHOT</version>
         <type>jar</type>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-io</artifactId>
     </dependency>
 
     <dependency>
@@ -68,6 +84,18 @@
         <artifactId>mysql-connector-java</artifactId>
         <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.1</version>
+      <scope>compile</scope>
+    </dependency>       
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <scope>compile</scope>
+    </dependency> 
+    
   </dependencies>
  
 

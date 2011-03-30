@@ -9,30 +9,31 @@
 <body>
 <div class="Page">
   <div class="Header">
-     <div class="Banner">
-     </div>
+     <div class="Banner" />
   </div>
-<div class="Content">
 
-<form method="GET">
-<table>
-    <tbody>
-        <tr>
-            <td>Query</td>
-            <td><textarea name="query" rows="10" cols="80">${query}</textarea></td>
-        </tr>
-        <tr>
-            <td/>
+  <div class="Content">
+
+    <form action="../metadata/" enctype="multipart/form-data" method="POST">
+      <table>
+        <tbody>
+          <tr>
+            <td><input type="file" name="Metadata File" size="40"></td>
+          </tr>
+          <tr>
             <td><input type="submit" value="Submit"></td>
-        </tr>
-    </tbody>
-</table>
-</form>
-<h2>Results:</h2>
-${results}
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
 
-<div class="Footer">
-                StratusLab is co-funded by the European Community's<br/>Seventh Framework Programme (Capacities)<br/>Grant Agreement INFSO-RI-261552            </div>
+  <div class="Footer">
+    StratusLab is co-funded by the European Community's<br/>
+    Seventh Framework Programme (Capacities)<br/>
+    Grant Agreement INFSO-RI-261552
+  </div>
+
 </div>
 
 </body>
