@@ -4,6 +4,7 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.METADATA_MAX_BYTES;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
 import static org.restlet.data.MediaType.APPLICATION_RDF_XML;
+import static org.restlet.data.MediaType.APPLICATION_XML;
 import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
 import static org.restlet.data.MediaType.TEXT_PLAIN;
 
@@ -79,7 +80,8 @@ public class MDataResource extends BaseResource {
         File uploadedFile = null;
         if (MULTIPART_FORM_DATA.equals(mediaType, true)) {
             uploadedFile = processMultipartForm();
-        } else if (APPLICATION_RDF_XML.equals(mediaType, true)) {
+        } else if (APPLICATION_RDF_XML.equals(mediaType, true)
+                || (APPLICATION_XML.equals(mediaType, true))) {
             uploadedFile = writeContentsToDisk(entity);
         } else {
             throw new ResourceException(
