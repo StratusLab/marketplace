@@ -33,7 +33,7 @@
       </modules>
     </profile>
 
-    <profile>
+    <!--<profile>
       <id>build-deb</id>
       <activation>
         <file>
@@ -45,6 +45,6 @@
       </modules>
     </profile>
     
-  </profiles>
+  --></profiles>
 
 </project>
