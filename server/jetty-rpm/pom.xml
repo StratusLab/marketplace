@@ -175,44 +175,6 @@
 							</sources>
 						</mapping>
 
-						<mapping>
-							<directory>/opt/jetty-7/</directory>
-							<filemode>644</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<sources>
-								<source>
-									<location>target/jetty-config</location>
-									<includes>
-										<include>**/*</include>
-									</includes>
-									<excludes>
-										<exclude>etc/login/*</exclude>
-										<exclude>etc/overrides/*</exclude>
-									</excludes>
-								</source>
-							</sources>
-						</mapping>
-
-						<mapping>
-							<directory>/opt/jetty-7/</directory>
-							<filemode>644</filemode>
-							<username>root</username>
-							<groupname>root</groupname>
-							<directoryIncluded>false</directoryIncluded>
-							<configuration>noreplace</configuration>
-							<sources>
-								<source>
-									<location>target/jetty-config</location>
-									<includes>
-										<include>etc/login/*</include>
-										<include>etc/overrides/*</include>
-									</includes>
-								</source>
-							</sources>
-						</mapping>
-
 					</mappings>
 				</configuration>
 			</plugin>
