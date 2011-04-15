@@ -179,27 +179,10 @@ fi
 ##################################################
 if [ -z "$JETTY_HOME" ] ; then
   STANDARD_LOCATIONS=(
-        "/usr/share"
-        "/usr/share/java"
-        "${HOME}"
-        "${HOME}/src"
-        "${HOME}/opt"
-        "/opt"
-        "/java"
-        "/usr/local"
-        "/usr/local/share"
-        "/usr/local/share/java"
-        "/home"
+        "/opt/stratuslab"
         )
   JETTY_DIR_NAMES=(
-        "jetty-7"
-        "jetty7"
-        "jetty-7.*"
-        "jetty"
-        "Jetty-7"
-        "Jetty7"
-        "Jetty-7.*"
-        "Jetty"
+        "marketplace"
         )
         
   for L in "${STANDARD_LOCATIONS[@]}"
@@ -315,7 +298,7 @@ fi
 #####################################################
 if [ -z "$JETTY_PID" ] 
 then
-  JETTY_PID="$JETTY_RUN/jetty.pid"
+  JETTY_PID="$JETTY_RUN/marketplace.pid"
 fi
 
 ##################################################
@@ -554,9 +537,9 @@ case "$ACTION" in
     echo "RUN_CMD        =  ${RUN_CMD[*]}"
     echo
     
-    if [ -f "$JETTY_RUN/jetty.pid" ]
+    if [ -f "$JETTY_RUN/marketplace.pid" ]
     then
-      echo "Jetty running pid=$(< "$JETTY_RUN/jetty.pid")"
+      echo "Jetty running pid=$(< "$JETTY_RUN/marketplace.pid")"
       exit 0
     fi
     exit 1

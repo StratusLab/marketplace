@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+<Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
+
+  <Set name="contextPath">/marketplace</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/${marketplace-war}</Set>
+<!--
+  <Set name="overrideDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/overrides/web-cert.xml</Set>
+-->
+
+<!--
+  <Set name="securityHandler">
+    <New class="org.eclipse.jetty.security.ConstraintSecurityHandler">
+      <Set name="loginService">
+        <New class="org.eclipse.jetty.plus.jaas.JAASLoginService">
+          <Set name="name">StratusLab Certificate Realm</Set>
+          <Set name="loginModuleName">stratuslab-cert</Set>
+        </New>
+      </Set>
+    </New>
+  </Set>
+-->
+
+</Configure>
