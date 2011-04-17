@@ -1,9 +1,10 @@
 <classpath>
-  <classpathentry kind="src" path="src/test/java" output="target/test-classes" including="**/*.java"/>
-  <classpathentry kind="src" path="src/test/resources" output="target/test-classes" excluding="**/*.java"/>
   <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
   <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
   <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/javax/mail/mail/1.4.1/mail-1.4.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar"/>
   <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-collections/2.7.0/aduna-commons-collections-2.7.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-concurrent/2.6.0/aduna-commons-concurrent-2.6.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-i18n/1.3.0/aduna-commons-i18n-1.3.0.jar"/>
@@ -13,13 +14,34 @@
   <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-net/2.6.0/aduna-commons-net-2.6.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-text/2.6.0/aduna-commons-text-2.6.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-xml/2.6.0/aduna-commons-xml-2.6.0.jar"/>
+  <classpathentry kind="var" path="M2_REPO/commons-dbcp/commons-dbcp/1.2.2/commons-dbcp-1.2.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/commons-fileupload/commons-fileupload/1.2.1/commons-fileupload-1.2.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/commons/commons-io/1.3.2/commons-io-1.3.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/commons-pool/commons-pool/1.3/commons-pool-1.3.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/freemarker/freemarker/2.3.16/freemarker-2.3.16.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/ibm/icu/icu4j/3.4.4/icu4j-3.4.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/hp/hpl/jena/iri/0.8/iri-0.8.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/hp/hpl/jena/jena/2.6.4/jena-2.6.4.jar"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/4.8.2/junit-4.8.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar"/>
+  <classpathentry kind="src" path="/metadata"/>
+  <classpathentry kind="var" path="M2_REPO/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/osgi/org.osgi.core/4.0.0/org.osgi.core-4.0.0.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet/2.0.4/org.restlet-2.0.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet.ext.fileupload/2.0.4/org.restlet.ext.fileupload-2.0.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet.ext.freemarker/2.0.4/org.restlet.ext.freemarker-2.0.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet.ext.servlet/2.0.4/org.restlet.ext.servlet-2.0.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet.ext.xml/2.0.4/org.restlet.ext.xml-2.0.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/talis/jena/rdf-json/0.3/rdf-json-0.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-model/2.3.2/sesame-model-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-query/2.3.2/sesame-query-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryalgebra-evaluation/2.3.2/sesame-queryalgebra-evaluation-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryalgebra-model/2.3.2/sesame-queryalgebra-model-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryparser-api/2.3.2/sesame-queryparser-api-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryparser-serql/2.3.2/sesame-queryparser-serql-2.3.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryparser-sparql/2.3.2/sesame-queryparser-sparql-2.3.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryresultio-api/2.3.2/sesame-queryresultio-api-2.3.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-queryresultio-sparqlxml/2.3.2/sesame-queryresultio-sparqlxml-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-repository-api/2.3.2/sesame-repository-api-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-repository-sail/2.3.2/sesame-repository-sail-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-rio-api/2.3.2/sesame-rio-api-2.3.2.jar"/>
@@ -27,7 +49,10 @@
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-sail-api/2.3.2/sesame-sail-api-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-sail-inferencer/2.3.2/sesame-sail-inferencer-2.3.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-sail-memory/2.3.2/sesame-sail-memory-2.3.2.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.5.10/slf4j-api-1.5.10.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-sail-rdbms/2.3.2/sesame-sail-rdbms-2.3.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.5.8/slf4j-api-1.5.8.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-log4j12/1.5.8/slf4j-log4j12-1.5.8.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-simple/1.5.8/slf4j-simple-1.5.8.jar"/>
+  <classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.7.1/xercesImpl-2.7.1.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 </classpath>
