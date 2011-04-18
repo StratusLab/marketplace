@@ -20,6 +20,7 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
+import org.restlet.resource.ResourceException;
 
 /**
  * This resource represents a query on the rdf data
@@ -35,6 +36,13 @@ public class QueryResource extends BaseResource {
     	String resultString = "";
     	try {
     		if(queryString != null && queryString != ""){
+    			if((queryString.indexOf("FROM") > 0) ||
+    					(queryString.indexOf("GRAPH") > 0) ||
+    					(queryString.indexOf("INSERT") > 0) ||
+    					(queryString.indexOf("CONSTRUCT") > 0)){
+    				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "query not allowed.");
+    			}
+    							
     			QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
     			parser.parseQuery(queryString, MARKETPLACE_URI);
 

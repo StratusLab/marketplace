@@ -12,5 +12,22 @@
     </Or>
     <Bug pattern="NP_ALWAYS_NULL" />
   </Match>
-  
+  <Match>
+    <Or>
+      <Class name="eu.stratuslab.marketplace.server.MarketPlaceApplication" />
+    </Or>
+    <Bug pattern="UUF_UNUSED_FIELD" />
+   </Match>
+   <Match>
+     <Or>
+       <Class name="eu.stratuslab.marketplace.server.resources.ActionResource" />
+     </Or>
+     <Bug pattern="UUF_UNUSED_FIELD" />
+   </Match>
+   <Match>
+     <Or>
+      <Class name="eu.stratuslab.marketplace.server.resources.MDatumResource" />
+     </Or>
+     <Bug pattern="UUF_UNUSED_FIELD" />
+    </Match> 
 </FindBugsFilter>
