@@ -20,6 +20,7 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.restlet.data.Status;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -53,6 +54,10 @@ public class MDatumResource extends BaseResource {
     
     @Get("json")
     public Representation toJSON() {
+    	if (this.datum == null) {
+            throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+            		"metadata entry not found.\n");
+        }
     	Model rdfModel = ModelFactory.createMemModelMaker().createDefaultModel();
 		rdfModel.read(new ByteArrayInputStream((stripSignature(datum)).getBytes()), MARKETPLACE_URI);
 		
@@ -69,7 +74,10 @@ public class MDatumResource extends BaseResource {
     
     @Get("html")
     public Representation toHtml() {
-    	// Retrieve resource
+    	if (this.datum == null) {
+            throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+            		"metadata entry not found.\n");
+        }
     	TransformerFactory tFactory = TransformerFactory.newInstance();
     	
     	StringBuilder stringBuilder = new StringBuilder();
