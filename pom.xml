@@ -23,7 +23,7 @@ metadata.
   </modules>
 
   <properties>
-    <jetty.version>7.2.2.v20101205</jetty.version>
+    <jetty.version>7.4.0.v20110414</jetty.version>
   </properties>
 
   <licenses>
