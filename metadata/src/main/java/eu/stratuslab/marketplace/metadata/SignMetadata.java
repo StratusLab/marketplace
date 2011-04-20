@@ -4,7 +4,6 @@ import static eu.stratuslab.marketplace.metadata.MetadataUtils.writeStringToFile
 
 import java.io.File;
 import java.security.KeyStore;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -20,8 +19,9 @@ public class SignMetadata {
             + "  java eu.stratuslab.marketplace.metadata.SignMetadata \\\n"
             + "    [metadata file] [signed metadata file] [P12 Certificate] [Password]";
 
-    public static final Pattern cnExtractionPattern = Pattern
-            .compile(".*CN=([^,]*?),.*");
+    private SignMetadata() {
+
+    }
 
     public static void main(String[] args) throws Exception {
 

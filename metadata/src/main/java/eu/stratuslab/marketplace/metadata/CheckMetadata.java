@@ -12,6 +12,10 @@ import eu.stratuslab.marketplace.XMLUtils;
 
 public class CheckMetadata {
 
+    private CheckMetadata() {
+
+    }
+
     public static void main(String[] args) {
 
         int rc = 0;

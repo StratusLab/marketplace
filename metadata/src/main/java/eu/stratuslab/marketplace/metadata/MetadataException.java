@@ -8,6 +8,11 @@ public class MetadataException extends RuntimeException {
     }
 
     public MetadataException(Exception cause) {
-        super(cause);
+        super(cause.getMessage(), cause);
     }
+
+    public MetadataException(String message, Exception cause) {
+        super(message, cause);
+    }
+
 }
