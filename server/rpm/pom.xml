@@ -3,22 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>eu.stratuslab.marketplace.server</groupId>
-  <artifactId>server-rpm</artifactId>
+  <artifactId>marketplace-server-rpm</artifactId>
   <version>0.0.6-SNAPSHOT</version>
-  <name>StratusLab Marketplace (Jetty) Packaging</name>
+  <name>Marketplace Server (RPM)</name>
 
   <packaging>rpm</packaging>
 
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
-    <artifactId>server</artifactId>
+    <artifactId>marketplace-server</artifactId>
     <version>0.0.6-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>eu.stratuslab.marketplace</groupId>
-      <artifactId>stratuslab-marketplace</artifactId>
+      <artifactId>marketplace-server-war</artifactId>
       <type>war</type>
       <version>0.0.6-SNAPSHOT</version>
     </dependency>
