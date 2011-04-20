@@ -26,7 +26,7 @@
   
   <properties> 
     <installation.dir>/opt/stratuslab/marketplace</installation.dir>
-    <marketplace-war>stratuslab-marketplace-${project.version}.war</marketplace-war>
+    <marketplace-war>marketplace-server-war-${project.version}.war</marketplace-war>
     <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format> 
     <RELEASE>0.${maven.build.timestamp}</RELEASE>
   </properties>
@@ -91,7 +91,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>eu.stratuslab.marketplace</groupId>
-                  <artifactId>stratuslab-marketplace</artifactId>
+                  <artifactId>marketplace-server-war</artifactId>
                   <type>war</type>
                 </artifactItem>
               </artifactItems>
