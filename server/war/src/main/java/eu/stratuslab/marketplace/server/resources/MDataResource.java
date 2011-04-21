@@ -101,8 +101,7 @@ public class MDataResource extends BaseResource {
             setStatus(Status.SUCCESS_CREATED);
             Representation rep = new StringRepresentation(
                     "metadata entry created.\n", TEXT_PLAIN);
-            rep.setLocationRef(getRequest().getResourceRef().getIdentifier()
-                    + iri);
+            rep.setLocationRef(iri);
 
             return rep;
 
