@@ -2,11 +2,15 @@ package eu.stratuslab.marketplace.metadata;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.RDF_NS_URI;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.KeyStore;
+import java.util.Map;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -28,12 +32,59 @@ public class MetadataUtilsTest {
         ValidateXMLSignature.validate(doc);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void checkInvalidSHA1Checksum1() {
+        MetadataUtils.sha1ToIdentifier(BigInteger.valueOf(-1L));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkInvalidSHA1Checksum2() {
+        BigInteger value = BigInteger.TEN;
+        while (value.bitLength() <= MetadataUtils.SHA1_BITS) {
+            value = value.multiply(BigInteger.TEN);
+        }
+        MetadataUtils.sha1ToIdentifier(value);
+    }
+
+    @Test
+    public void checkInvalidIdentifier1() {
+        String[] invalidIds = new String[] { "A",
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAA", "AAAAAAAAAAAAAAAAAA:AAAAAAAA" };
+
+        for (String id : invalidIds) {
+            try {
+                MetadataUtils.identifierToSha1(id);
+                fail(id + " is illegal but did not raise exception");
+            } catch (IllegalArgumentException consumed) {
+                // OK
+            }
+        }
+    }
+
+    public void checkIdEncodeDecodeCycle() {
+        String data = "data for SHA1 digest";
+        byte[] buffer = data.getBytes();
+
+        ByteArrayInputStream is = new ByteArrayInputStream(buffer);
+
+        Map<String, BigInteger> info = MetadataUtils.streamInfo(is);
+
+        BigInteger sha1Digest = info.get("SHA-1");
+
+        String identifier = MetadataUtils.sha1ToIdentifier(sha1Digest);
+
+        BigInteger sha1DigestCheck = MetadataUtils.identifierToSha1(identifier);
+
+        assertEquals(sha1Digest, sha1DigestCheck);
+
+    }
+
     @Test
     public void endorsementNotReplaced() {
 
         Document doc = readDocument("autogen-endorsement-not-done.xml");
         X509Info x509info = getX509Info();
-        MetadataUtils.fillEndorsementElement(doc, x509info);
+        MetadataUtils.fillEndorsementElement(doc, x509info, null);
         NodeList nl = doc.getElementsByTagNameNS("http://example.org/",
                 "marker");
         if (nl.getLength() != 1) {
@@ -47,7 +98,7 @@ public class MetadataUtilsTest {
 
         Document doc = readDocument("autogen-endorsement-done.xml");
         X509Info x509info = getX509Info();
-        MetadataUtils.fillEndorsementElement(doc, x509info);
+        MetadataUtils.fillEndorsementElement(doc, x509info, null);
         NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement");
         if (nl.getLength() == 1) {
             if (!nl.item(0).hasChildNodes()) {
@@ -66,7 +117,7 @@ public class MetadataUtilsTest {
 
         Document doc = readDocument("autogen-endorsement-done.xml");
         X509Info x509info = getX509Info();
-        MetadataUtils.fillEndorsementElement(doc, x509info);
+        MetadataUtils.fillEndorsementElement(doc, x509info, null);
 
         NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorser");
         if (nl.getLength() == 1) {

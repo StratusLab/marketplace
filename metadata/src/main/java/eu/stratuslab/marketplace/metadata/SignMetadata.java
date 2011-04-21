@@ -17,7 +17,7 @@ public class SignMetadata {
 
     final static private String USAGE = "Usage:\n"
             + "  java eu.stratuslab.marketplace.metadata.SignMetadata \\\n"
-            + "    [metadata file] [signed metadata file] [P12 Certificate] [Password]";
+            + "    [metadata file] [signed metadata file] [P12 Certificate] [Password] [Default email]";
 
     private SignMetadata() {
 
@@ -25,7 +25,7 @@ public class SignMetadata {
 
     public static void main(String[] args) throws Exception {
 
-        if (args.length != 4) {
+        if (args.length != 4 && args.length != 5) {
             System.err.println(USAGE);
             System.exit(1);
         }
@@ -34,24 +34,35 @@ public class SignMetadata {
         File outputFile = new File(args[1]);
         File pkcs12File = new File(args[2]);
         String passwd = args[3];
+        String email = null;
+        if (args.length == 5) {
+            email = args[4];
+        }
 
-        // Read the PKCS12 information.
-        KeyStore keyStore = X509Utils.pkcs12ToKeyStore(pkcs12File, passwd);
-        X509Info x509Info = X509Utils.x509FromKeyStore(keyStore, passwd);
+        try {
 
-        // Instantiate the document to be signed
-        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
-        Document doc = db.parse(metadataFile);
+            // Read the PKCS12 information.
+            KeyStore keyStore = X509Utils.pkcs12ToKeyStore(pkcs12File, passwd);
+            X509Info x509Info = X509Utils.x509FromKeyStore(keyStore, passwd);
 
-        // Fill in the endorsement element if it is empty.
-        MetadataUtils.fillEndorsementElement(doc, x509Info);
+            // Instantiate the document to be signed
+            DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+            Document doc = db.parse(metadataFile);
 
-        // Sign the document. The document is directly modified by method.
-        X509Utils.signDocument(x509Info, doc);
+            // Fill in the endorsement element if it is empty.
+            MetadataUtils.fillEndorsementElement(doc, x509Info, email);
 
-        // Write the signed output to disk.
-        String signedContents = XMLUtils.documentToString(doc);
-        writeStringToFile(signedContents, outputFile);
+            // Sign the document. The document is directly modified by method.
+            X509Utils.signDocument(x509Info, doc);
+
+            // Write the signed output to disk.
+            String signedContents = XMLUtils.documentToString(doc);
+            writeStringToFile(signedContents, outputFile);
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
     }
 
 }

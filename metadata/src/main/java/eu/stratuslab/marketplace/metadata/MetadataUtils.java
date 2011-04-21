@@ -40,31 +40,31 @@ import eu.stratuslab.marketplace.X509Info;
 @SuppressWarnings("restriction")
 public class MetadataUtils {
 
-    final static private String[] algorithms = { "MD5", "SHA-1", "SHA-256",
+    static private final String[] ALGORITHMS = { "MD5", "SHA-1", "SHA-256",
             "SHA-512" };
 
-    final static private String[] encoding = { "A", "B", "C", "D", "E", "F",
+    static private final String[] ENCODING = { "A", "B", "C", "D", "E", "F",
             "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
             "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f",
             "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
             "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5",
             "6", "7", "8", "9", "-", "_" };
 
-    final static private Map<String, BigInteger> decoding = new HashMap<String, BigInteger>();
+    static private final Map<String, BigInteger> DECODING = new HashMap<String, BigInteger>();
     static {
-        for (int i = 0; i < encoding.length; i++) {
-            decoding.put(encoding[i], BigInteger.valueOf(i));
+        for (int i = 0; i < ENCODING.length; i++) {
+            DECODING.put(ENCODING[i], BigInteger.valueOf(i));
         }
     }
 
-    final static private int sha1Bits = 160;
+    static public final int SHA1_BITS = 160;
 
-    final static private int fieldBits = 6;
+    static private final int FIELD_BITS = 6;
 
-    final static private int identifierChars = sha1Bits / fieldBits + 1;
+    static private final int NUM_ID_CHARS = SHA1_BITS / FIELD_BITS + 1;
 
-    final static private BigInteger divisor = BigInteger.valueOf(2L).pow(
-            fieldBits);
+    static private final BigInteger DIVISOR = BigInteger.valueOf(2L).pow(
+            FIELD_BITS);
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -87,7 +87,7 @@ public class MetadataUtils {
         try {
 
             ArrayList<MessageDigest> mds = new ArrayList<MessageDigest>();
-            for (String algorithm : algorithms) {
+            for (String algorithm : ALGORITHMS) {
                 try {
                     mds.add(MessageDigest.getInstance(algorithm));
                 } catch (NoSuchAlgorithmException consumed) {
@@ -121,30 +121,30 @@ public class MetadataUtils {
 
     public static String sha1ToIdentifier(BigInteger sha1) {
 
-        if (sha1.compareTo(BigInteger.ZERO) < 0 || sha1.bitLength() > sha1Bits) {
+        if (sha1.compareTo(BigInteger.ZERO) < 0 || sha1.bitLength() > SHA1_BITS) {
             throw new IllegalArgumentException("invalid SHA-1 checksum");
         }
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < identifierChars; i++) {
-            BigInteger[] values = sha1.divideAndRemainder(divisor);
+        for (int i = 0; i < NUM_ID_CHARS; i++) {
+            BigInteger[] values = sha1.divideAndRemainder(DIVISOR);
             sha1 = values[0];
-            sb.append(encoding[values[1].intValue()]);
+            sb.append(ENCODING[values[1].intValue()]);
         }
         return sb.reverse().toString();
     }
 
     public static BigInteger identifierToSha1(String identifier) {
 
-        if (identifier.length() != identifierChars) {
+        if (identifier.length() != NUM_ID_CHARS) {
             throw new IllegalArgumentException("invalid identifier");
         }
 
         BigInteger sha1 = BigInteger.ZERO;
 
         for (int i = 0; i < identifier.length(); i++) {
-            sha1 = sha1.shiftLeft(fieldBits);
-            BigInteger bits = decoding.get(identifier.substring(i, i + 1));
+            sha1 = sha1.shiftLeft(FIELD_BITS);
+            BigInteger bits = DECODING.get(identifier.substring(i, i + 1));
             if (bits == null) {
                 throw new IllegalArgumentException("invalid identifier");
             }
@@ -310,7 +310,10 @@ public class MetadataUtils {
 
     }
 
-    public static void fillEndorsementElement(Document doc, X509Info x509info) {
+    public static void fillEndorsementElement(Document doc, X509Info x509info,
+            String defaultEmail) {
+
+        String emailAddress = defaultEmail;
 
         NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement");
         if (nl.getLength() != 1) {
@@ -318,9 +321,13 @@ public class MetadataUtils {
                     "document must contain exactly 1 slreq:endorsement element");
         }
 
-        if (x509info.email == null) {
+        if (x509info.email != null) {
+            emailAddress = x509info.email;
+        }
+
+        if (emailAddress == null) {
             throw new MetadataException(
-                    "cannot generate slreq:endorsement; no email address in cert");
+                    "cannot generate slreq:endorsement; email address not in cert or not provided");
         }
 
         Node endorsement = nl.item(0);
@@ -330,7 +337,7 @@ public class MetadataUtils {
             endorsement.appendChild(createTimestampElement(doc));
 
             Element email = createSlreqElement(doc, "email");
-            email.setTextContent(x509info.email);
+            email.setTextContent(emailAddress);
 
             Element subject = createSlreqElement(doc, "subject");
             subject.setTextContent(x509info.subject);
