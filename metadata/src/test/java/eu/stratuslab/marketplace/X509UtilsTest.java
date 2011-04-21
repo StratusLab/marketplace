@@ -45,6 +45,12 @@ public class X509UtilsTest {
 
     public static final String SIGNATURE_ALGORITHM = "SHA256WithRSAEncryption";
 
+    public static final String ISSUER_DN = "CN=TEST_CA";
+
+    public static final String USER_CN = "TEST_USER";
+
+    public static final String USER_DN = "CN=" + USER_CN;
+
     static {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
@@ -53,7 +59,7 @@ public class X509UtilsTest {
 
     @Test
     public void checkCertificateGenWithoutEmail() throws Exception {
-        X509Certificate[] certs = getSignedCert(null);
+        X509Certificate[] certs = getCertificateChain(null);
         X509Certificate caCert = certs[0];
         X509Certificate userCert = certs[1];
         assertNotNull(userCert);
@@ -67,7 +73,7 @@ public class X509UtilsTest {
 
     @Test
     public void checkCertificateGenWithEmail() throws Exception {
-        X509Certificate[] certs = getSignedCert("example@example.org");
+        X509Certificate[] certs = getCertificateChain("example@example.org");
         X509Certificate caCert = certs[0];
         X509Certificate userCert = certs[1];
         assertNotNull(userCert);
@@ -79,15 +85,15 @@ public class X509UtilsTest {
         assertNotNull(altNames);
     }
 
-    public static X509Certificate[] getSignedCert(String email)
+    public static X509Certificate[] getCertificateChain(String email)
             throws Exception {
 
         KeyPair caKeyPair = createKeyPair();
         KeyPair userKeyPair = createKeyPair();
 
-        X509Certificate caCert = generateV1Certificate("CN=TEST_CA", caKeyPair);
-        X509Certificate userCert = generateV3Certificate("CN=TEST_USER",
-                caCert, caKeyPair.getPrivate(), userKeyPair, email);
+        X509Certificate caCert = generateV1Certificate(ISSUER_DN, caKeyPair);
+        X509Certificate userCert = generateV3Certificate(USER_DN, caCert,
+                caKeyPair.getPrivate(), userKeyPair, email);
 
         return new X509Certificate[] { caCert, userCert };
     }

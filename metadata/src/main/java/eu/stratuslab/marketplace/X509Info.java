@@ -19,7 +19,7 @@ import javax.xml.crypto.dsig.keyinfo.X509Data;
 public class X509Info {
 
     public static final Pattern COMMON_NAME = Pattern
-            .compile(".*CN=(.*?),[A-Z]{1,2}=.*");
+            .compile("^.*CN=(.*?)(,[A-Z]{1,2}=.*)?$");
 
     public static final int RFC822_NAME = 1;
 
