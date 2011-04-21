@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.XMLSignature;
@@ -325,9 +327,14 @@ public class MetadataUtils {
             emailAddress = x509info.email;
         }
 
-        if (emailAddress == null) {
+        if (emailAddress == null || "".equals(emailAddress)) {
             throw new MetadataException(
                     "cannot generate slreq:endorsement; email address not in cert or not provided");
+        }
+
+        if (!isValidEmailAddress(emailAddress)) {
+            throw new MetadataException("invalid email address: "
+                    + emailAddress);
         }
 
         Node endorsement = nl.item(0);
@@ -357,6 +364,18 @@ public class MetadataUtils {
         }
 
         doc.normalizeDocument();
+    }
+
+    public static boolean isValidEmailAddress(String email) {
+
+        try {
+            new InternetAddress(email);
+            String[] parts = email.split("@");
+            return parts.length == 2 && !"".equals(parts[0])
+                    && !"".equals(parts[1]);
+        } catch (AddressException e) {
+            return false;
+        }
     }
 
     private static Element createSlreqElement(Document doc, String name) {

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import org.junit.Test;
@@ -21,9 +22,12 @@ import org.xml.sax.SAXException;
 
 import eu.stratuslab.marketplace.X509Info;
 import eu.stratuslab.marketplace.X509Utils;
+import eu.stratuslab.marketplace.X509UtilsTest;
 import eu.stratuslab.marketplace.XMLUtils;
 
 public class MetadataUtilsTest {
+
+    public static final String EXAMPLE_EMAIL = "example@example.org";
 
     @Test(expected = MetadataException.class)
     public void checkNoNPE() throws SAXException, IOException {
@@ -84,7 +88,7 @@ public class MetadataUtilsTest {
 
         Document doc = readDocument("autogen-endorsement-not-done.xml");
         X509Info x509info = getX509Info();
-        MetadataUtils.fillEndorsementElement(doc, x509info, null);
+        MetadataUtils.fillEndorsementElement(doc, x509info, EXAMPLE_EMAIL);
         NodeList nl = doc.getElementsByTagNameNS("http://example.org/",
                 "marker");
         if (nl.getLength() != 1) {
@@ -98,7 +102,7 @@ public class MetadataUtilsTest {
 
         Document doc = readDocument("autogen-endorsement-done.xml");
         X509Info x509info = getX509Info();
-        MetadataUtils.fillEndorsementElement(doc, x509info, null);
+        MetadataUtils.fillEndorsementElement(doc, x509info, EXAMPLE_EMAIL);
         NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement");
         if (nl.getLength() == 1) {
             if (!nl.item(0).hasChildNodes()) {
@@ -112,12 +116,31 @@ public class MetadataUtilsTest {
 
     }
 
+    @Test(expected = MetadataException.class)
+    public void endorsementWithoutEmail() throws Exception {
+
+        Document doc = readDocument("autogen-endorsement-done.xml");
+        X509Info x509info = getX509InfoWithoutEmail();
+        MetadataUtils.fillEndorsementElement(doc, x509info, null);
+
+    }
+
+    @Test(expected = MetadataException.class)
+    public void endorsementWithInvalidEmail() throws Exception {
+
+        Document doc = readDocument("autogen-endorsement-done.xml");
+        X509Info x509info = getX509InfoWithoutEmail();
+        MetadataUtils.fillEndorsementElement(doc, x509info,
+                "not@a@valid@address");
+
+    }
+
     @Test
     public void endorserHasParseTypeAttr() {
 
         Document doc = readDocument("autogen-endorsement-done.xml");
         X509Info x509info = getX509Info();
-        MetadataUtils.fillEndorsementElement(doc, x509info, null);
+        MetadataUtils.fillEndorsementElement(doc, x509info, EXAMPLE_EMAIL);
 
         NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorser");
         if (nl.getLength() == 1) {
@@ -147,6 +170,11 @@ public class MetadataUtilsTest {
 
         KeyStore keyStore = X509Utils.pkcs12ToKeyStore(is, password);
         return X509Utils.x509FromKeyStore(keyStore, password);
+    }
+
+    private static X509Info getX509InfoWithoutEmail() throws Exception {
+        X509Certificate[] certs = X509UtilsTest.getCertificateChain(null);
+        return new X509Info(certs[1]);
     }
 
     private static Document readDocument(String name) {
