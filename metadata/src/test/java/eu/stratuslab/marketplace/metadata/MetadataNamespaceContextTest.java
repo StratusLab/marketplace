@@ -19,7 +19,6 @@ import javax.xml.crypto.dsig.XMLSignature;
 
 import org.junit.Test;
 
-@SuppressWarnings("restriction")
 public class MetadataNamespaceContextTest {
 
     @Test(expected = IllegalArgumentException.class)

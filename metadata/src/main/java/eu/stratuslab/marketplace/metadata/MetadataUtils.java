@@ -39,7 +39,6 @@ import org.w3c.dom.NodeList;
 
 import eu.stratuslab.marketplace.X509Info;
 
-@SuppressWarnings("restriction")
 public class MetadataUtils {
 
     static private final String[] ALGORITHMS = { "MD5", "SHA-1", "SHA-256",

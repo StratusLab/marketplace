@@ -35,6 +35,7 @@ import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.junit.Test;
 
+@SuppressWarnings("deprecation")
 public class X509UtilsTest {
 
     public static final long ONE_MINUTE_MILLIS = 60L * 1000;

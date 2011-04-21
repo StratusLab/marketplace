@@ -37,7 +37,6 @@ import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 
 import org.w3c.dom.Document;
 
-@SuppressWarnings("restriction")
 public class X509Utils {
 
     private X509Utils() {
