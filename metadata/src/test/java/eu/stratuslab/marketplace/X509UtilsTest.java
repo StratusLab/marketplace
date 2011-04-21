@@ -1,6 +1,8 @@
 package eu.stratuslab.marketplace;
 
 import static org.bouncycastle.asn1.x509.X509Extensions.AuthorityKeyIdentifier;
+import static org.bouncycastle.asn1.x509.X509Extensions.BasicConstraints;
+import static org.bouncycastle.asn1.x509.X509Extensions.ExtendedKeyUsage;
 import static org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName;
 import static org.bouncycastle.asn1.x509.X509Extensions.SubjectKeyIdentifier;
 import static org.junit.Assert.assertNotNull;
@@ -11,6 +13,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
@@ -18,17 +21,20 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class X509UtilsTest {
 
     public static final long ONE_MINUTE_MILLIS = 60L * 1000;
@@ -37,34 +43,53 @@ public class X509UtilsTest {
 
     public static final String KEYGEN_ALGORITHM = "RSA";
 
-    public static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
+    public static final String SIGNATURE_ALGORITHM = "SHA256WithRSAEncryption";
 
-    // @Test
-    // public void checkCertificateGenWithoutEmail() throws Exception {
-    // X509Certificate userCert = getSignedCert(null);
-    // assertNotNull(userCert);
-    //
-    // Collection<List<?>> altNames = userCert.getSubjectAlternativeNames();
-    // assertNull(altNames);
-    // }
-    //
-    // @Test
-    // public void checkCertificateGenWithEmail() throws Exception {
-    // X509Certificate userCert = getSignedCert("example@example.org");
-    // assertNotNull(userCert);
-    //
-    // Collection<List<?>> altNames = userCert.getSubjectAlternativeNames();
-    // assertNotNull(altNames);
-    // }
+    static {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+    }
 
-    public static X509Certificate getSignedCert(String email) throws Exception {
+    @Test
+    public void checkCertificateGenWithoutEmail() throws Exception {
+        X509Certificate[] certs = getSignedCert(null);
+        X509Certificate caCert = certs[0];
+        X509Certificate userCert = certs[1];
+        assertNotNull(userCert);
+
+        userCert.checkValidity(new Date());
+        userCert.verify(caCert.getPublicKey());
+
+        Collection<List<?>> altNames = userCert.getSubjectAlternativeNames();
+        assertNull(altNames);
+    }
+
+    @Test
+    public void checkCertificateGenWithEmail() throws Exception {
+        X509Certificate[] certs = getSignedCert("example@example.org");
+        X509Certificate caCert = certs[0];
+        X509Certificate userCert = certs[1];
+        assertNotNull(userCert);
+
+        userCert.checkValidity(new Date());
+        userCert.verify(caCert.getPublicKey());
+
+        Collection<List<?>> altNames = userCert.getSubjectAlternativeNames();
+        assertNotNull(altNames);
+    }
+
+    public static X509Certificate[] getSignedCert(String email)
+            throws Exception {
 
         KeyPair caKeyPair = createKeyPair();
         KeyPair userKeyPair = createKeyPair();
 
         X509Certificate caCert = generateV1Certificate("CN=TEST_CA", caKeyPair);
-        return generateV3Certificate("CN=TEST_USER", caCert, caKeyPair
-                .getPrivate(), userKeyPair, email);
+        X509Certificate userCert = generateV3Certificate("CN=TEST_USER",
+                caCert, caKeyPair.getPrivate(), userKeyPair, email);
+
+        return new X509Certificate[] { caCert, userCert };
     }
 
     public static KeyPair createKeyPair() throws NoSuchAlgorithmException {
@@ -97,8 +122,8 @@ public class X509UtilsTest {
         certGen.setPublicKey(keyPair.getPublic());
         certGen.setSignatureAlgorithm(SIGNATURE_ALGORITHM);
 
-        // X509Certificate cert = certGen.generate(keyPair.getPrivate(), "BC");
-        return certGen.generate(keyPair.getPrivate());
+        // MUST use the BC provider to get a valid certificate.
+        return certGen.generate(keyPair.getPrivate(), "BC");
     }
 
     public static X509Certificate generateV3Certificate(String dn,
@@ -118,15 +143,25 @@ public class X509UtilsTest {
         certGen.setPublicKey(keyPair.getPublic());
         certGen.setSignatureAlgorithm(SIGNATURE_ALGORITHM);
 
+        certGen.addExtension(BasicConstraints, true,
+                new BasicConstraints(false));
+
+        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(
+                KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+
+        certGen.addExtension(ExtendedKeyUsage, true, new ExtendedKeyUsage(
+                KeyPurposeId.id_kp_serverAuth));
+
         certGen.addExtension(AuthorityKeyIdentifier, false,
                 new AuthorityKeyIdentifierStructure(caCert));
+
         certGen.addExtension(SubjectKeyIdentifier, false,
                 new SubjectKeyIdentifierStructure(keyPair.getPublic()));
 
         addSubjectAltName(certGen, email);
 
-        // return certGen.generate(caKey, "BC"); // note: private key of CA
-        return certGen.generate(caKey); // note: private key of CA
+        // MUST use the BC provider to get a valid certificate.
+        return certGen.generate(caKey, "BC");
     }
 
     public static void addSubjectAltName(X509V3CertificateGenerator certGen,
@@ -136,11 +171,7 @@ public class X509UtilsTest {
             GeneralName rfc822 = new GeneralName(GeneralName.rfc822Name, email);
             GeneralNames subjectAltName = new GeneralNames(rfc822);
 
-            X509Extension extension = new X509Extension(false,
-                    new DEROctetString(subjectAltName));
-
-            certGen.addExtension(SubjectAlternativeName, false, extension
-                    .getValue());
+            certGen.addExtension(SubjectAlternativeName, false, subjectAltName);
         }
     }
 

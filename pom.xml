@@ -111,7 +111,7 @@ metadata.
       <dependency>
 	<groupId>org.bouncycastle</groupId>
 	<artifactId>bcprov-jdk16</artifactId>
-	<version>1.40</version>
+	<version>1.46</version>
       </dependency>
       <dependency>
         <groupId>com.hp.hpl.jena</groupId>

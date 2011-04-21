@@ -89,15 +89,15 @@ public class X509Info {
 
             // Unfortunately, if there are no entries then null is returned
             // rather than an empty collection.
-            // if (entries != null) {
-            for (List<?> entry : entries) {
-                int type = ((Integer) entry.get(0)).intValue();
-                if (type == RFC822_NAME) {
-                    email = (String) entry.get(1);
-                    break;
+            if (entries != null) {
+                for (List<?> entry : entries) {
+                    int type = ((Integer) entry.get(0)).intValue();
+                    if (type == RFC822_NAME) {
+                        email = (String) entry.get(1);
+                        break;
+                    }
                 }
             }
-            // }
 
         } catch (CertificateParsingException consumed) {
             // do nothing; return the default value that's already set
