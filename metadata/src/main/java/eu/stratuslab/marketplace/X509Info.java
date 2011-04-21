@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,19 +19,21 @@ import javax.xml.crypto.dsig.keyinfo.X509Data;
 public class X509Info {
 
     public static final Pattern COMMON_NAME = Pattern
-            .compile(".*CN=(.*?),[A-Z]{1,2}=.*");
+            .compile("^.*CN=(.*?)(,[A-Z]{1,2}=.*)?$");
 
-    final public X509Certificate cert;
+    public static final int RFC822_NAME = 1;
 
-    final public PrivateKey privateKey;
+    public final X509Certificate cert;
 
-    final public String subject;
+    public final PrivateKey privateKey;
 
-    final public String issuer;
+    public final String subject;
 
-    final public String email;
+    public final String issuer;
 
-    final public String commonName;
+    public final String email;
+
+    public final String commonName;
 
     public X509Info(X509Certificate cert) {
         this(cert, null);
@@ -67,34 +70,39 @@ public class X509Info {
     }
 
     public static String extractCommonName(String dn) {
-
         Matcher m = COMMON_NAME.matcher(dn);
-
         return (m.matches()) ? m.group(1) : null;
     }
 
     public static String extractEmailAddress(X509Certificate cert) {
+        return extractEmailAddress(cert, null);
+    }
+
+    public static String extractEmailAddress(X509Certificate cert,
+            String defaultEmail) {
+
+        String email = defaultEmail;
 
         try {
 
-            String email = null;
+            Collection<List<?>> entries = cert.getSubjectAlternativeNames();
 
-            for (List<?> entry : cert.getSubjectAlternativeNames()) {
-
-                int type = ((Integer) entry.get(0)).intValue();
-                if (type == 1) {
-                    email = (String) entry.get(1);
-                    break;
+            // Unfortunately, if there are no entries then null is returned
+            // rather than an empty collection.
+            if (entries != null) {
+                for (List<?> entry : entries) {
+                    int type = ((Integer) entry.get(0)).intValue();
+                    if (type == RFC822_NAME) {
+                        email = (String) entry.get(1);
+                        break;
+                    }
                 }
             }
 
-            return email;
-
-        } catch (CertificateParsingException e) {
-
-            // Unable to parse information, so must be no email address.
-            return null;
+        } catch (CertificateParsingException consumed) {
+            // do nothing; return the default value that's already set
         }
-    }
 
+        return email;
+    }
 }

@@ -1,5 +1,5 @@
 <projectDescription>
-  <name>metadata</name>
+  <name>marketplace-metadata</name>
   <comment>The Marketplace contains signed descriptions of available (or formally
 available) machine and disk images.  This project contains the code
 for the Marketplace server as well as various utilities related to the

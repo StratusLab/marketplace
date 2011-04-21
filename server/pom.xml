@@ -2,9 +2,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>eu.stratuslab.marketplace</groupId>
-  <artifactId>server</artifactId>
+  <artifactId>marketplace-server</artifactId>
   <version>0.0.6-SNAPSHOT</version>
-  <name>StratusLab Marketplace Server parent POM</name>
+  <name>Marketplace Server (POM)</name>
 
   <packaging>pom</packaging>
 
@@ -16,7 +16,6 @@
 
   <modules>
   	<module>war</module>
-  	<module>jetty-rpm</module>
   </modules>
 
   <profiles>
@@ -29,7 +28,7 @@
         </file>
       </activation>
       <modules>
-        <module>jetty-rpm</module>
+        <module>rpm</module>
       </modules>
     </profile>
 

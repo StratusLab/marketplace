@@ -37,20 +37,16 @@ import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 
 import org.w3c.dom.Document;
 
-@SuppressWarnings("restriction")
 public class X509Utils {
 
     private X509Utils() {
 
     }
 
-    public static KeyStore pkcs12ToKeyStore(File file, String password) {
+    public static KeyStore pkcs12ToKeyStore(File file, String password)
+            throws FileNotFoundException {
 
-        try {
-            return pkcs12ToKeyStore(new FileInputStream(file), password);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return pkcs12ToKeyStore(new FileInputStream(file), password);
 
     }
 

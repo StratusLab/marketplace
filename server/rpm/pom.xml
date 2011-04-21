@@ -3,22 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>eu.stratuslab.marketplace.server</groupId>
-  <artifactId>server-rpm</artifactId>
+  <artifactId>marketplace-server-rpm</artifactId>
   <version>0.0.6-SNAPSHOT</version>
-  <name>StratusLab Marketplace (Jetty) Packaging</name>
+  <name>Marketplace Server (RPM)</name>
 
   <packaging>rpm</packaging>
 
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
-    <artifactId>server</artifactId>
+    <artifactId>marketplace-server</artifactId>
     <version>0.0.6-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>eu.stratuslab.marketplace</groupId>
-      <artifactId>stratuslab-marketplace</artifactId>
+      <artifactId>marketplace-server-war</artifactId>
       <type>war</type>
       <version>0.0.6-SNAPSHOT</version>
     </dependency>
@@ -26,7 +26,7 @@
   
   <properties> 
     <installation.dir>/opt/stratuslab/marketplace</installation.dir>
-    <marketplace-war>stratuslab-marketplace-${project.version}.war</marketplace-war>
+    <marketplace-war>marketplace-server-war-${project.version}.war</marketplace-war>
     <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format> 
     <RELEASE>0.${maven.build.timestamp}</RELEASE>
   </properties>
@@ -91,7 +91,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>eu.stratuslab.marketplace</groupId>
-                  <artifactId>stratuslab-marketplace</artifactId>
+                  <artifactId>marketplace-server-war</artifactId>
                   <type>war</type>
                 </artifactItem>
               </artifactItems>

@@ -2,9 +2,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>eu.stratuslab.marketplace</groupId>
-  <artifactId>metadata</artifactId>
+  <artifactId>marketplace-metadata</artifactId>
   <version>0.0.6-SNAPSHOT</version>
-  <name>StratusLab Marketplace Metadata Utilities</name>
+  <name>Marketplace Metadata (JAR)</name>
 
   <packaging>jar</packaging>
 
@@ -18,6 +18,15 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
     </dependency>
 <!--
     <dependency>

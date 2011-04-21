@@ -135,7 +135,7 @@ public class SignValidateCycleTest {
             Document doc = readDocument(name);
 
             // Fill in the endorsement if necessary.
-            MetadataUtils.fillEndorsementElement(doc, x509Info);
+            MetadataUtils.fillEndorsementElement(doc, x509Info, null);
 
             // Sign the document. The document is directly modified by method.
             X509Utils.signDocument(x509Info, doc);
