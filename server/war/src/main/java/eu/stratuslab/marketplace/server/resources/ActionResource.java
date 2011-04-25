@@ -48,7 +48,7 @@ public class ActionResource extends BaseResource {
     private String command;
 
     @Override
-    protected void doInit() throws ResourceException {
+    protected void doInit() {
 
         Request request = getRequest();
 

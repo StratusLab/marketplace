@@ -10,7 +10,7 @@ import org.xml.sax.SAXException;
 
 import eu.stratuslab.marketplace.XMLUtils;
 
-public class CheckMetadata {
+public final class CheckMetadata {
 
     private CheckMetadata() {
 

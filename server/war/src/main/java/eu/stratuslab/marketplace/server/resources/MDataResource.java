@@ -67,8 +67,7 @@ public class MDataResource extends BaseResource {
      * Handle POST requests: register new Metadata entry.
      */
     @Post
-    public Representation acceptMetadatum(Representation entity)
-            throws ResourceException {
+    public Representation acceptMetadatum(Representation entity) {
 
         if (entity == null) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
@@ -258,11 +257,11 @@ public class MDataResource extends BaseResource {
     @Get("html")
     public Representation toHtml() {
 
-        ArrayList<HashMap<String, String>> results = getMetadata();
+        List<Map<String, String>> results = getMetadata();
 
         HashMap<String, HashMap<String, Object>> root = new HashMap<String, HashMap<String, Object>>();
 
-        for (HashMap<String, String> resultRow : results) {
+        for (Map<String, String> resultRow : results) {
 
             String identifier = resultRow.get("identifier");
             String endorser = resultRow.get("email");
@@ -304,10 +303,10 @@ public class MDataResource extends BaseResource {
     @Get("xml")
     public Representation toXml() {
 
-        ArrayList<HashMap<String, String>> results = getMetadata();
+        List<Map<String, String>> results = getMetadata();
 
         ArrayList<String> uris = new ArrayList<String>();
-        for (HashMap<String, String> resultRow : results) {
+        for (Map<String, String> resultRow : results) {
 
             String iri = resultRow.get("identifier") + "/"
                     + resultRow.get("email") + "/" + resultRow.get("created");
@@ -332,7 +331,7 @@ public class MDataResource extends BaseResource {
         return representation;
     }
 
-    private ArrayList<HashMap<String, String>> getMetadata() {
+    private List<Map<String, String>> getMetadata() {
         try {
             Form queryForm = getRequest().getResourceRef().getQueryAsForm();
             Map<String, Object> requestAttr = getRequest().getAttributes();
@@ -392,10 +391,8 @@ public class MDataResource extends BaseResource {
 
             queryString.append(" }");
 
-            ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>) query(queryString
-                    .toString());
+            return query(queryString.toString());
 
-            return results;
         } catch (Exception e) {
             e.printStackTrace();
         }

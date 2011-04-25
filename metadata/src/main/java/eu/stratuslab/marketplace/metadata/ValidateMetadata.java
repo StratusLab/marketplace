@@ -2,7 +2,7 @@ package eu.stratuslab.marketplace.metadata;
 
 import org.w3c.dom.Document;
 
-public class ValidateMetadata {
+public final class ValidateMetadata {
 
     private ValidateMetadata() {
 

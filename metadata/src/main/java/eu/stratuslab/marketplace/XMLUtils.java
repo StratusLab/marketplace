@@ -15,7 +15,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 
-public class XMLUtils {
+public final class XMLUtils {
 
     private XMLUtils() {
 

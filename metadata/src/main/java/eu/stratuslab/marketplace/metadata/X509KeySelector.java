@@ -15,7 +15,6 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 
-@SuppressWarnings("restriction")
 public class X509KeySelector extends KeySelector {
 
     public KeySelectorResult select(KeyInfo keyInfo,

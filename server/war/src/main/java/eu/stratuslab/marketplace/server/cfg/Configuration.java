@@ -10,15 +10,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-public class Configuration {
+public final class Configuration {
 
-    private static final String configFileName = "marketplace.cfg";
+    private static final String CONFIG_FILENAME = "marketplace.cfg";
 
-    private static final Properties properties;
+    private static final Properties PROPERTIES;
 
     static {
         List<File> configFileLocations = getConfigurationFileLocations();
-        properties = getConfigurationProperties(configFileLocations);
+        PROPERTIES = getConfigurationProperties(configFileLocations);
     }
 
     private Configuration() {
@@ -37,7 +37,7 @@ public class Configuration {
                 new File("/etc/stratuslab/") };
 
         for (File dir : dirs) {
-            locations.add(new File(dir, configFileName));
+            locations.add(new File(dir, CONFIG_FILENAME));
         }
 
         return Collections.unmodifiableList(locations);
@@ -81,23 +81,23 @@ public class Configuration {
     }
 
     public static String getParameterValue(Parameter parameter) {
-        return parameter.getProperty(properties);
+        return parameter.getProperty(PROPERTIES);
     }
 
     public static boolean getParameterValueAsBoolean(Parameter parameter) {
-        return Boolean.parseBoolean(parameter.getProperty(properties));
+        return Boolean.parseBoolean(parameter.getProperty(PROPERTIES));
     }
 
     public static int getParameterValueAsInt(Parameter parameter) {
-        return Integer.parseInt(parameter.getProperty(properties));
+        return Integer.parseInt(parameter.getProperty(PROPERTIES));
     }
 
     public static long getParameterValueAsLong(Parameter parameter) {
-        return Long.parseLong(parameter.getProperty(properties));
+        return Long.parseLong(parameter.getProperty(PROPERTIES));
     }
 
     public static File getParameterValueAsFile(Parameter parameter) {
-        return new File(parameter.getProperty(properties));
+        return new File(parameter.getProperty(PROPERTIES));
     }
 
     private static void validateConfiguration(Properties properties) {

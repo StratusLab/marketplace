@@ -16,10 +16,10 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -68,7 +68,7 @@ public abstract class BaseResource extends ServerResource {
     protected static final int ARG_DATE = 2;
     protected static final int ARG_OTHER = 3;
 
-    protected final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+    protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 
     /**
      * Returns the store of metadata managed by this application.
@@ -118,8 +118,7 @@ public abstract class BaseResource extends ServerResource {
         return iri;
     }
 
-    protected static void writeMetadataToDisk(String dataDir, Document doc)
-            throws ResourceException {
+    protected static void writeMetadataToDisk(String dataDir, Document doc) {
 
         String[] coordinates = getMetadataEntryCoordinates(doc);
 
@@ -285,8 +284,8 @@ public abstract class BaseResource extends ServerResource {
      *            the query
      * @return the resultset as a Java Collection
      */
-    protected Collection<HashMap<String, String>> query(String queryString) {
-        ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+    protected List<Map<String, String>> query(String queryString) {
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
@@ -325,7 +324,7 @@ public abstract class BaseResource extends ServerResource {
             e.printStackTrace();
         }
 
-        return (list);
+        return list;
     }
 
     /**
@@ -410,18 +409,30 @@ public abstract class BaseResource extends ServerResource {
     }
 
     protected static String readFileAsString(String filePath)
-            throws java.io.IOException {
-        byte[] buffer = new byte[(int) new File(filePath).length()];
+            throws IOException {
+
+        File file = new File(filePath);
+        int bytes = (int) file.length();
+
+        byte[] buffer = new byte[bytes];
+
         BufferedInputStream f = null;
         try {
-            f = new BufferedInputStream(new FileInputStream(new File(filePath)));
-            f.read(buffer);
+            f = new BufferedInputStream(new FileInputStream(file));
+            int remaining = bytes;
+            int offset = 0;
+            while (remaining > 0) {
+                int readBytes = f.read(buffer, offset, remaining);
+                offset += readBytes;
+                remaining -= readBytes;
+            }
         } finally {
-            if (f != null)
+            if (f != null) {
                 try {
                     f.close();
                 } catch (IOException ignored) {
                 }
+            }
         }
         return new String(buffer);
     }
