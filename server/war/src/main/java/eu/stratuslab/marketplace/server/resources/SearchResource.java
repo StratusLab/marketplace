@@ -3,6 +3,7 @@ package eu.stratuslab.marketplace.server.resources;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Iterator;
@@ -42,10 +43,10 @@ public class SearchResource extends BaseResource {
     public Representation toHtml() {
 		String query = createQuery();
     	
-		ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>) query(query);
+		List<Map<String, String>> results = query(query);
 		HashMap<String, HashMap<String, Object>> root = new HashMap<String, HashMap<String, Object>>();
 
-		for (HashMap<String, String> resultRow : results) {
+		for (Map<String, String> resultRow : results) {
 
 			String identifier = resultRow.get("identifier");
 			String endorser = resultRow.get("email");
@@ -86,9 +87,9 @@ public class SearchResource extends BaseResource {
     public Representation toXml() {
     	String query = createQuery();
     	
-		ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>) query(query);
-		ArrayList<String> uris = new ArrayList<String>();
-        for (HashMap<String, String> resultRow : results) {
+		List<Map<String, String>> results = query(query);
+		List<String> uris = new ArrayList<String>();
+        for (Map<String, String> resultRow : results) {
 
             String iri = resultRow.get("identifier") + "/"
                     + resultRow.get("email") + "/" + resultRow.get("created");
