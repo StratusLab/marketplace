@@ -13,15 +13,15 @@ import javax.xml.validation.Validator;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class ValidateXMLSchema {
+public final class ValidateXMLSchema {
 
-    static final private String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+    private static final String W3C_XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
-    static final private String[] xsdFiles = { "xml.xsd", "dcmitype.xsd",
+    private static final String[] XSD_FILES = { "xml.xsd", "dcmitype.xsd",
             "dc.xsd", "dcterms.xsd", "slreq.xsd", "image-metadata.xsd",
             "slterms.xsd" };
 
-    static final public Schema schema;
+    public static final Schema SCHEMA;
 
     static {
 
@@ -29,15 +29,15 @@ public class ValidateXMLSchema {
 
             SchemaFactory factory = SchemaFactory.newInstance(W3C_XML_SCHEMA);
 
-            Source[] sources = new Source[xsdFiles.length];
+            Source[] sources = new Source[XSD_FILES.length];
 
-            for (int i = 0; i < xsdFiles.length; i++) {
+            for (int i = 0; i < XSD_FILES.length; i++) {
                 InputStream is;
-                is = ValidateXMLSchema.class.getResourceAsStream(xsdFiles[i]);
+                is = ValidateXMLSchema.class.getResourceAsStream(XSD_FILES[i]);
                 sources[i] = new StreamSource(is);
             }
 
-            schema = factory.newSchema(sources);
+            SCHEMA = factory.newSchema(sources);
 
         } catch (SAXException e) {
             throw new ExceptionInInitializerError(e);
@@ -51,7 +51,7 @@ public class ValidateXMLSchema {
 
     public static void validate(Document doc) {
 
-        Validator validator = schema.newValidator();
+        Validator validator = SCHEMA.newValidator();
 
         Source source = new DOMSource(doc);
 

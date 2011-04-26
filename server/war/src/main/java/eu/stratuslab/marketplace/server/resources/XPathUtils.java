@@ -10,21 +10,25 @@ import org.w3c.dom.Document;
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.MetadataNamespaceContext;
 
-public class XPathUtils {
-	public static final XPathQuery IDENTIFIER_ELEMENT = new XPathQuery(
+public final class XPathUtils {
+    public static final XPathQuery IDENTIFIER_ELEMENT = new XPathQuery(
             "//rdf:RDF/rdf:Description/dcterms:identifier", "", "");
-	public static final XPathQuery EMAIL = new XPathQuery(
-            "//rdf:RDF/rdf:Description/slreq:endorsement/slreq:endorser/slreq:email", "",
-            "");
-	public static final XPathQuery CREATED_DATE = new XPathQuery(
+    public static final XPathQuery EMAIL = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slreq:endorsement/slreq:endorser/slreq:email",
+            "", "");
+    public static final XPathQuery CREATED_DATE = new XPathQuery(
             "//rdf:RDF/rdf:Description/slreq:endorsement/dcterms:created", "",
             "");
-	
-	public static String getValue(Document doc, XPathQuery query){
-		return query.result(doc);
-	}
-	
-	private static XPath createXpath() {
+
+    private XPathUtils() {
+
+    }
+
+    public static String getValue(Document doc, XPathQuery query) {
+        return query.result(doc);
+    }
+
+    private static XPath createXpath() {
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
         xpath.setNamespaceContext(MetadataNamespaceContext.getInstance());
@@ -68,5 +72,5 @@ public class XPathUtils {
             }
         }
     }
-	
+
 }

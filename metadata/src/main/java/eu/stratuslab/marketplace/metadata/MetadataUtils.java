@@ -39,32 +39,32 @@ import org.w3c.dom.NodeList;
 
 import eu.stratuslab.marketplace.X509Info;
 
-public class MetadataUtils {
+public final class MetadataUtils {
 
-    static private final String[] ALGORITHMS = { "MD5", "SHA-1", "SHA-256",
+    private static final String[] ALGORITHMS = { "MD5", "SHA-1", "SHA-256",
             "SHA-512" };
 
-    static private final String[] ENCODING = { "A", "B", "C", "D", "E", "F",
+    private static final String[] ENCODING = { "A", "B", "C", "D", "E", "F",
             "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
             "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f",
             "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
             "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5",
             "6", "7", "8", "9", "-", "_" };
 
-    static private final Map<String, BigInteger> DECODING = new HashMap<String, BigInteger>();
+    private static final Map<String, BigInteger> DECODING = new HashMap<String, BigInteger>();
     static {
         for (int i = 0; i < ENCODING.length; i++) {
             DECODING.put(ENCODING[i], BigInteger.valueOf(i));
         }
     }
 
-    static public final int SHA1_BITS = 160;
+    public static final int SHA1_BITS = 160;
 
-    static private final int FIELD_BITS = 6;
+    private static final int FIELD_BITS = 6;
 
-    static private final int NUM_ID_CHARS = SHA1_BITS / FIELD_BITS + 1;
+    private static final int NUM_ID_CHARS = SHA1_BITS / FIELD_BITS + 1;
 
-    static private final BigInteger DIVISOR = BigInteger.valueOf(2L).pow(
+    private static final BigInteger DIVISOR = BigInteger.valueOf(2L).pow(
             FIELD_BITS);
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(

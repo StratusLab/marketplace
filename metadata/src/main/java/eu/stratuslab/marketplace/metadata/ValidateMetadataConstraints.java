@@ -17,7 +17,7 @@ import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.PatternUtils;
 
-public class ValidateMetadataConstraints {
+public final class ValidateMetadataConstraints {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -25,6 +25,8 @@ public class ValidateMetadataConstraints {
         DATE_FORMAT.setLenient(false);
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    private static final String TRUE = "true";
 
     private static final XPathQuery IDENTIFIER_ABOUT = new XPathQuery(
             "//rdf:RDF/rdf:Description/@rdf:about", "", "");
@@ -50,44 +52,43 @@ public class ValidateMetadataConstraints {
                             + MARKETPLACE_URI),
 
             new XPathQuery("count(//rdf:RDF/rdf:Description/dcterms:type)=1",
-                    "true",
+                    TRUE,
                     "description must have exactly 1 dcterms:type element"),
 
             new XPathQuery("count(//rdf:RDF/rdf:Description/dcterms:type/*)=0",
-                    "true", "dcterms:type cannot have child elements"),
+                    TRUE, "dcterms:type cannot have child elements"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slreq:checksum/slreq:algorithm[text()='SHA-1'])=1",
-                    "true",
+                    TRUE,
                     "description must have exactly 1 slterms:checksum element using SHA-1 algorithm"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:serial-number)<=1",
-                    "true",
+                    TRUE,
                     "description must have at most 1 slterms:serial-number element"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:version)<=1",
-                    "true",
+                    TRUE,
                     "description must have at most 1 slterms:version element"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:deprecated)<=1",
-                    "true",
+                    TRUE,
                     "description must have at most 1 slterms:deprecated element"),
 
             new XPathQuery("count(//rdf:RDF/rdf:Description/slterms:os)<=1",
-                    "true",
-                    "description must have at most 1 slterms:os element"),
+                    TRUE, "description must have at most 1 slterms:os element"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:os-arch)<=1",
-                    "true",
+                    TRUE,
                     "description must have at most 1 slterms:os-arch element"),
 
             new XPathQuery(
                     "count(//rdf:RDF/rdf:Description/slterms:os-version)<=1",
-                    "true",
+                    TRUE,
                     "description must have at most 1 slterms:os-version element"),
 
     };

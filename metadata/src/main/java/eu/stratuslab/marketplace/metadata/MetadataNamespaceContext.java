@@ -17,8 +17,7 @@ import java.util.Map;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.namespace.NamespaceContext;
 
-@SuppressWarnings("restriction")
-public class MetadataNamespaceContext implements NamespaceContext {
+public final class MetadataNamespaceContext implements NamespaceContext {
 
     public static final String MARKETPLACE_URI = "http://mp.stratuslab.eu/";
 
@@ -44,7 +43,7 @@ public class MetadataNamespaceContext implements NamespaceContext {
 
     private static final Map<String, String> NS_TO_PREFIX = new HashMap<String, String>();
 
-    private static final MetadataNamespaceContext instance = new MetadataNamespaceContext();
+    private static final MetadataNamespaceContext INSTANCE = new MetadataNamespaceContext();
 
     static {
         PREFIX_TO_NS.put(DEFAULT_NS_PREFIX, NULL_NS_URI);
@@ -71,7 +70,7 @@ public class MetadataNamespaceContext implements NamespaceContext {
     }
 
     public static MetadataNamespaceContext getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     public String getNamespaceURI(String prefix) {

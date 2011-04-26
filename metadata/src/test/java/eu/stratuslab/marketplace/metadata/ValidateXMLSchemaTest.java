@@ -10,7 +10,7 @@ import org.w3c.dom.Document;
 public class ValidateXMLSchemaTest {
 
     private static Schema getSchema() {
-        return ValidateXMLSchema.schema;
+        return ValidateXMLSchema.SCHEMA;
     }
 
     @Test

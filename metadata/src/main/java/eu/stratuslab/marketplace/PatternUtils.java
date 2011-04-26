@@ -3,15 +3,15 @@ package eu.stratuslab.marketplace;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PatternUtils {
+public final class PatternUtils {
 
-    final public static Pattern IDENTIFIER = Pattern
+    public static final Pattern IDENTIFIER = Pattern
             .compile("^[A-Za-z0-9_-]{27}$");
 
-    final public static Pattern EMAIL = Pattern
+    public static final Pattern EMAIL = Pattern
             .compile("[A-Za-z0-9\\._%+-]+@[A-Za-z0-9\\.-]+");
 
-    final public static Pattern DATE = Pattern
+    public static final Pattern DATE = Pattern
             .compile("\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z");
 
     private PatternUtils() {

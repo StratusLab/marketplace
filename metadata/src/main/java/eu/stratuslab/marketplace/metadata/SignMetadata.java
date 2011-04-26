@@ -14,9 +14,9 @@ import eu.stratuslab.marketplace.X509Info;
 import eu.stratuslab.marketplace.X509Utils;
 import eu.stratuslab.marketplace.XMLUtils;
 
-public class SignMetadata {
+public final class SignMetadata {
 
-    final static private String USAGE = "Usage:\n"
+    private static final String USAGE = "Usage:\n"
             + "  java eu.stratuslab.marketplace.metadata.SignMetadata \\\n"
             + "    [metadata file] [signed metadata file] [P12 Certificate] [Password] [Default email]";
 

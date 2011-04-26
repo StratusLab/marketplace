@@ -2,7 +2,7 @@ package eu.stratuslab.marketplace.server.utils;
 
 import java.io.File;
 
-public class MessageUtils {
+public final class MessageUtils {
 
     private static final String CONFIRM_MSG = "\n"
             + "A new metadata entry has been uploaded to the StratusLab\n"

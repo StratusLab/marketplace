@@ -15,7 +15,6 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 
-@SuppressWarnings("restriction")
 public class X509Info {
 
     public static final Pattern COMMON_NAME = Pattern
@@ -43,15 +42,15 @@ public class X509Info {
         this.cert = cert;
         this.privateKey = privateKey;
 
-        X500Principal subject = cert.getSubjectX500Principal();
-        this.subject = subject.getName();
+        X500Principal x500Subject = cert.getSubjectX500Principal();
+        subject = x500Subject.getName();
 
-        X500Principal issuer = cert.getIssuerX500Principal();
-        this.issuer = issuer.getName();
+        X500Principal x500Issuer = cert.getIssuerX500Principal();
+        issuer = x500Issuer.getName();
 
         email = extractEmailAddress(cert);
 
-        commonName = extractCommonName(this.subject);
+        commonName = extractCommonName(subject);
 
     }
 

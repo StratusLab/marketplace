@@ -43,7 +43,7 @@ import javax.mail.internet.MimeMessage;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
-public class Notifier {
+public final class Notifier {
 
     private static Logger logger = Logger.getLogger("org.restlet");
 
