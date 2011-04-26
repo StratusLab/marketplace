@@ -32,6 +32,7 @@ import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
+import eu.stratuslab.marketplace.server.resources.SearchResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
@@ -109,6 +110,10 @@ public class MarketPlaceApplication extends Application {
         // Defines a route for the upload form
         router.attach("/upload", UploadResource.class);
         router.attach("/upload/", UploadResource.class);
+        
+        // Defines a route for the search resource
+        router.attach("/search", SearchResource.class);
+        router.attach("/search/", SearchResource.class);
 
         // Defines a router for actions
         TemplateRoute route;

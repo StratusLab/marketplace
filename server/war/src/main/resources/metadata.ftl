@@ -17,6 +17,20 @@
 <div class="Content">
 <h1>${title}</h1>
 
+<form method="get" action="/search" target="_top">
+<table border="0" bgcolor="#ffffff">
+<tr><td nowrap="nowrap" valign="top" align="left" height="32"></td>
+<td nowrap="nowrap">
+<label for="sbi" style="display: none">Enter your search terms</label>
+<input type="text" name="q" size="31" maxlength="255" value="" id="sbi"></input>
+<label for="sbb" style="display: none">Submit search form</label>
+<input type="submit" value="Search" id="sbb"></input>
+</td></tr>
+<tr>
+<td>&nbsp;</td>
+<td nowrap="nowrap">
+<table>
+
 <ul class="mktree" id="tree1">
   <#list content?keys as identifier>
     <li>${identifier}
@@ -25,7 +39,7 @@
       <#list endorsers?keys as email>
       <li>${email}
         <ul>
-          <li><a href="metadata/${identifier}/${email}/${endorsers[email]}">${endorsers[email]}</a></li>
+          <li><a href="/metadata/${identifier}/${email}/${endorsers[email]}">${endorsers[email]}</a></li>
         </ul>
       </li>
       </#list>
