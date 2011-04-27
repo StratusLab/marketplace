@@ -51,8 +51,7 @@ public class SearchResource extends BaseResource {
 			String identifier = resultRow.get("identifier");
 			String endorser = resultRow.get("email");
 			String created = resultRow.get("created");
-			logger.log(Level.INFO, identifier + "  " + endorser + " " + created);
-
+			
 			HashMap<String, Object> endorserMap;
 			if (root.containsKey(identifier)) {
 				endorserMap = root.get(identifier);
