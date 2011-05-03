@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.restlet.Request;
 import org.restlet.data.MediaType;
@@ -40,6 +41,8 @@ import org.w3c.dom.Document;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
 public class ActionResource extends BaseResource {
+
+    private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
     private Document doc;
 
@@ -104,6 +107,7 @@ public class ActionResource extends BaseResource {
 
     private Representation reportAbuse() {
         // FIXME: This needs to be logged with an email sent.
+        LOGGER.severe("abuse reported:" + uuid);
         return new StringRepresentation(
                 "administrators have been notified of the problem and may contact you during the investigation",
                 MediaType.TEXT_PLAIN);
@@ -126,8 +130,7 @@ public class ActionResource extends BaseResource {
             Document doc = extractXmlDocument(stream);
 
             if (!file.delete()) {
-                // FIXME: Add logging about this.
-                System.err.println("file could not be delete: " + file);
+                LOGGER.severe("cannot delete file: " + file);
             }
             return doc;
 

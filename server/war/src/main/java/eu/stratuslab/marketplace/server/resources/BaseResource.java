@@ -111,8 +111,9 @@ public abstract class BaseResource extends ServerResource {
         String iri = writeMetadataToStore(doc);
 
         if (!uploadedFile.delete()) {
-            // FIXME: Add logging for this.
-            System.err.println("file could not be deleted: " + uploadedFile);
+            logger
+                    .severe("uploaded file could not be deleted: "
+                            + uploadedFile);
         }
 
         return iri;
