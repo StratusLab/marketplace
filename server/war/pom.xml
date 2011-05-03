@@ -146,6 +146,7 @@
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<configuration>
 					<excludeFilterFile>${basedir}/test/findbugs/findbugs-exclude.xml</excludeFilterFile>
+                                        <xmlOutput>true</xmlOutput>
 				</configuration>
 				<executions>
 					<execution>
