@@ -83,7 +83,7 @@ public class QueryResource extends BaseResource {
 
             // Load the FreeMarker template
             // Wraps the bean with a FreeMarker representation
-            representation = createTemplateRepresentation("/Query.ftl", query,
+            representation = createTemplateRepresentation("Query.ftl", query,
                     MediaType.TEXT_HTML);
         } catch (MalformedQueryException e) {
             setStatus(Status.CLIENT_ERROR_BAD_REQUEST);

@@ -33,7 +33,7 @@ public class EndorsersResource extends BaseResource {
         // Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation
         Representation representation = createTemplateRepresentation(
-                "/endorsers.ftl", data, MediaType.TEXT_HTML);
+                "endorsers.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
     }

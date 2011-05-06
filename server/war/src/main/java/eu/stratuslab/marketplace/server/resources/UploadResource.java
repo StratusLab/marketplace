@@ -15,7 +15,7 @@ public class UploadResource extends BaseResource {
     @Get("html")
     public Representation toHtml() {
 
-        return createTemplateRepresentation("/upload.ftl",
+        return createTemplateRepresentation("upload.ftl",
                 new HashMap<String, Object>(), MediaType.TEXT_HTML);
     }
 

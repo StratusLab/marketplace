@@ -107,7 +107,7 @@ public class MDatumResource extends BaseResource {
         // Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation
         Representation representation = createTemplateRepresentation(
-                "/mdatum.ftl", data, MediaType.TEXT_HTML);
+                "mdatum.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
     }
