@@ -11,13 +11,10 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.restlet.data.Form;
-import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
@@ -79,16 +76,14 @@ public class QueryResource extends BaseResource {
                 resultString = "";
             }
             // return representation;
-            Map<String, String> query = new HashMap<String, String>();
+            Map<String, Object> query = new HashMap<String, Object>();
 
             query.put("query", queryString);
             query.put("results", resultString);
 
             // Load the FreeMarker template
-            Representation queryFtl = new ClientResource(LocalReference
-                    .createClapReference("/Query.ftl")).get();
             // Wraps the bean with a FreeMarker representation
-            representation = new TemplateRepresentation(queryFtl, query,
+            representation = createTemplateRepresentation("/Query.ftl", query,
                     MediaType.TEXT_HTML);
         } catch (MalformedQueryException e) {
             setStatus(Status.CLIENT_ERROR_BAD_REQUEST);

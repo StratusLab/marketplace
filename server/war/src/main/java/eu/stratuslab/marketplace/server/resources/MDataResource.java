@@ -30,14 +30,11 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.restlet.Request;
 import org.restlet.data.Form;
-import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.fileupload.RestletFileUpload;
-import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
@@ -287,11 +284,9 @@ public class MDataResource extends BaseResource {
         data.put("content", root);
 
         // Load the FreeMarker template
-        Representation listFtl = new ClientResource(LocalReference
-                .createClapReference("/metadata.ftl")).get();
         // Wraps the bean with a FreeMarker representation
-        Representation representation = new TemplateRepresentation(listFtl,
-                data, MediaType.TEXT_HTML);
+        Representation representation = createTemplateRepresentation(
+                "/metadata.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
     }

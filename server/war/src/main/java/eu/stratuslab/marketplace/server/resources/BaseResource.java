@@ -36,10 +36,13 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
 import org.restlet.data.Form;
+import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.ext.xml.DomRepresentation;
 import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
@@ -85,6 +88,22 @@ public abstract class BaseResource extends ServerResource {
 
     protected long getTimeRange() {
         return ((MarketPlaceApplication) getApplication()).getTimeRange();
+    }
+
+    protected freemarker.template.Configuration getFreeMarkerConfiguration() {
+        return ((MarketPlaceApplication) getApplication())
+                .getFreeMarkerConfiguration();
+    }
+
+    protected TemplateRepresentation createTemplateRepresentation(
+            String templateName, Map<String, Object> data, MediaType mediaType) {
+
+        // Load the FreeMarker template
+        Representation listFtl = new ClientResource(LocalReference
+                .createClapReference(templateName)).get();
+        // Wraps the bean with a FreeMarker representation
+        return new TemplateRepresentation(listFtl, data, MediaType.TEXT_HTML);
+
     }
 
     protected static Document extractXmlDocument(InputStream stream) {

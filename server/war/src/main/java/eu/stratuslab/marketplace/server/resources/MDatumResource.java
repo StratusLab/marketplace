@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
@@ -12,21 +14,16 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
-import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
-import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
-import org.restlet.data.Status;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.talis.rdfwriters.json.JSONJenaWriter;
-
-import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
 /**
  * This resource represents a metadata entry
@@ -108,11 +105,9 @@ public class MDatumResource extends BaseResource {
         data.put("content", stringBuilder.toString());
 
         // Load the FreeMarker template
-        Representation listFtl = new ClientResource(LocalReference
-                .createClapReference("/mdatum.ftl")).get();
         // Wraps the bean with a FreeMarker representation
-        Representation representation = new TemplateRepresentation(listFtl,
-                data, MediaType.TEXT_HTML);
+        Representation representation = createTemplateRepresentation(
+                "/mdatum.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
     }

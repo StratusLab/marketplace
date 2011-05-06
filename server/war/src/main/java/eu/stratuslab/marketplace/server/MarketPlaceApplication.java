@@ -19,7 +19,10 @@ import org.openrdf.sail.helpers.SailBase;
 import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.sail.rdbms.mysql.MySqlStore;
 import org.restlet.Application;
+import org.restlet.Context;
 import org.restlet.Restlet;
+import org.restlet.data.LocalReference;
+import org.restlet.ext.freemarker.ContextTemplateLoader;
 import org.restlet.resource.Directory;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
@@ -31,8 +34,8 @@ import eu.stratuslab.marketplace.server.resources.EndorsersResource;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
-import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.SearchResource;
+import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
@@ -43,6 +46,8 @@ public class MarketPlaceApplication extends Application {
     private String dataDir = null;
     private long timeRange = 60000;
     protected Logger logger = getLogger();
+
+    private freemarker.template.Configuration freeMarkerConfiguration = null;
 
     public MarketPlaceApplication() {
 
@@ -79,8 +84,14 @@ public class MarketPlaceApplication extends Application {
     @Override
     public Restlet createInboundRoot() {
 
+        Context context = getContext();
+
+        // Create the FreeMarker configuration.
+        freeMarkerConfiguration = MarketPlaceApplication
+                .createFreeMarkerConfig(context);
+
         // Create a router Restlet that defines routes.
-        Router router = new Router(getContext());
+        Router router = new Router(context);
 
         Directory indexDir = new Directory(getContext(), "war:///");
         indexDir.setNegotiatingContent(false);
@@ -110,7 +121,7 @@ public class MarketPlaceApplication extends Application {
         // Defines a route for the upload form
         router.attach("/upload", UploadResource.class);
         router.attach("/upload/", UploadResource.class);
-        
+
         // Defines a route for the search resource
         router.attach("/search", SearchResource.class);
         router.attach("/search/", SearchResource.class);
@@ -153,6 +164,10 @@ public class MarketPlaceApplication extends Application {
         return this.timeRange;
     }
 
+    public freemarker.template.Configuration getFreeMarkerConfiguration() {
+        return freeMarkerConfiguration;
+    }
+
     private static MySqlStore createMysqlStore() {
 
         String mysqlDb = Configuration.getParameterValue(MYSQL_DBNAME);
@@ -169,6 +184,19 @@ public class MarketPlaceApplication extends Application {
         mysqlStore.setPassword(mysqlPass);
 
         return mysqlStore;
+    }
+
+    private static freemarker.template.Configuration createFreeMarkerConfig(
+            Context context) {
+
+        freemarker.template.Configuration cfg = new freemarker.template.Configuration();
+        cfg.setLocalizedLookup(false);
+
+        LocalReference fmBaseRef = LocalReference
+                .createClapReference("/freemarker/");
+        cfg.setTemplateLoader(new ContextTemplateLoader(context, fmBaseRef));
+
+        return cfg;
     }
 
 }

@@ -48,11 +48,9 @@ public class EndorserResource extends BaseResource {
         }
 
         // Load the FreeMarker template
-        Representation listFtl = new ClientResource(LocalReference
-                .createClapReference("/endorser.ftl")).get();
         // Wraps the bean with a FreeMarker representation
-        Representation representation = new TemplateRepresentation(listFtl,
-                data, MediaType.TEXT_HTML);
+        Representation representation = createTemplateRepresentation(
+                "/endorser.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
     }

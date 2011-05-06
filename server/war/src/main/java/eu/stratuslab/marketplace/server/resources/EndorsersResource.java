@@ -5,12 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.openrdf.query.QueryLanguage;
-import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
-import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 
 /**
@@ -34,11 +31,9 @@ public class EndorsersResource extends BaseResource {
         data.put("content", results);
 
         // Load the FreeMarker template
-        Representation listFtl = new ClientResource(LocalReference
-                .createClapReference("/endorsers.ftl")).get();
         // Wraps the bean with a FreeMarker representation
-        Representation representation = new TemplateRepresentation(listFtl,
-                data, MediaType.TEXT_HTML);
+        Representation representation = createTemplateRepresentation(
+                "/endorsers.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
     }
