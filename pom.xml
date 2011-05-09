@@ -24,6 +24,8 @@ metadata.
 
   <properties>
     <jetty.version>7.4.0.v20110414</jetty.version>
+    <nexus.release.repository.name>releases</nexus.release.repository.name>
+    <nexus.snapshot.repository.name>snapshots</nexus.snapshot.repository.name>
   </properties>
 
   <licenses>
@@ -105,11 +107,6 @@ metadata.
       <url>scp://hudson.stratuslab.eu/var/www/one</url>
     </site>
   </distributionManagement>
-
-  <properties>
-    <nexus.release.repository.name>releases</nexus.release.repository.name>
-    <nexus.snapshot.repository.name>snapshots</nexus.snapshot.repository.name>
-  </properties>
 
   <dependencyManagement>
     <dependencies>
