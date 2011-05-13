@@ -18,7 +18,7 @@ import eu.stratuslab.marketplace.server.utils.Schema;
 public class SearchResource extends BaseResource {
 
     private final static String BASE_QUERY = "SELECT DISTINCT ?identifier ?email ?created "
-            + "WHERE { ?description <http://purl.org/dc/terms/identifier>  ?identifier; "
+            + "WHERE { ?main <http://purl.org/dc/terms/identifier>  ?identifier; "
             + "<http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
             + "?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; "
             + "<http://purl.org/dc/terms/created> ?created . "
