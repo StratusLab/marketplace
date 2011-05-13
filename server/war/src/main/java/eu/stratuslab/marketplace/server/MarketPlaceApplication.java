@@ -55,9 +55,9 @@ public class MarketPlaceApplication extends Application {
         setDescription("Market-Place for StratusLab images");
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
-
+        
         getTunnelService().setUserAgentTunnel(true);
-
+        
         dataDir = Configuration.getParameterValue(DATA_DIR);
 
         timeRange = Configuration.getParameterValueAsLong(TIME_RANGE) * 60000;

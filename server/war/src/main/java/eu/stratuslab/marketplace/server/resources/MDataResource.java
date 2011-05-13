@@ -52,14 +52,7 @@ import eu.stratuslab.marketplace.server.utils.Notifier;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-        DATE_FORMAT.setLenient(false);
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
+   
     /**
      * Handle POST requests: register new Metadata entry.
      */
