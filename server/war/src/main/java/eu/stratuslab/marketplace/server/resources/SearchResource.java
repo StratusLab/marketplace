@@ -100,30 +100,50 @@ public class SearchResource extends BaseResource {
         String query = BASE_QUERY;
         StringBuffer where = new StringBuffer();
         StringBuffer filter = new StringBuffer();
+        String queryString = "";
 
         Form queryForm = getRequest().getResourceRef().getQueryAsForm();
-        String queryString = queryForm.getFirstValue("q");
 
-        if (queryString != null && queryString != "") {
-            StringTokenizer st = new StringTokenizer(queryString, "+");
-            while (st.hasMoreTokens()) {
-                String searchTerm = st.nextToken();
-                StringTokenizer term = new StringTokenizer(searchTerm, ":");
-
-                if (term.countTokens() == 2) {
-                    String qname = term.nextToken();
-                    String value = term.nextToken();
-
-                    for (Schema s : Schema.values()) {
-                        if (s.getQName().equals(qname)) {
-                            where.append(" " + s.getWhere());
-                            filter.append(" " + s.getFilter(value));
+        if(queryForm.getNames().contains("q")) {
+           queryString = queryForm.getFirstValue("q");
+        } else {
+                for ( int i = 0; i < (queryForm.size() / 2); i++){
+                        if (i > 0) {
+                            queryString += "+" + queryForm.getFirstValue("qname" + i).trim()
+                            + ":" + queryForm.getFirstValue("value" + i, "null").trim();
+                        } else {
+                                queryString = queryForm.getFirstValue("qname").trim()
+                                + ":" + queryForm.getFirstValue("value", "null").trim();
                         }
-                    }
                 }
-            }
+        }
 
-            query += where.toString() + filter.toString();
+        if(queryString != null && queryString != ""){
+                StringTokenizer st=new StringTokenizer(queryString,"+");
+                while(st.hasMoreTokens()){
+                        String searchTerm = st.nextToken();
+                        StringTokenizer term = new StringTokenizer(searchTerm, ":");
+
+                        if(term.countTokens() == 2){
+                            String qname = term.nextToken().trim();
+                            String value = term.nextToken().trim();
+                            if (!value.equals("null")){
+                                for(Schema s: Schema.values()){
+                                       if(s.getQName().equals(qname)){
+                                                where.append(" " + s.getWhere());
+                                                filter.append(" " + s.getFilter(value));
+                                       }
+                                }
+                           }
+                        } else { //text search
+                                String value = term.nextToken();
+                                where.append(" " + Schema.DESCRIPTION.getWhere());
+                                filter.append(" " + "FILTER REGEX(str(?" + Schema.DESCRIPTION.getQName()
+                                    + "), \"" + value + "\", \"i\") .");
+                        }
+                }
+
+                query += where.toString() + filter.toString();
         }
 
         query = query + "}";

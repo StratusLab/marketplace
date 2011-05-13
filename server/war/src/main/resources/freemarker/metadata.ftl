@@ -7,6 +7,34 @@
  <link rel="stylesheet" media="screen" type="text/css" href="http://cagnode56.cs.tcd.ie/images/include/mmkanso/css/design.css" />
  <link rel="stylesheet" media="screen" type="text/css" href="http://cagnode56.cs.tcd.ie/images/include/mmkanso/css/menu.css" />
  <link rel="stylesheet" media="screen" type="text/css" href="http://cagnode56.cs.tcd.ie/images/include/mmkanso/css/gallery.css" />
+
+<script type="text/javascript">
+function removeLast() {
+   var aFieldset=document.queryform.getElementsByTagName('fieldset');
+   var count=aFieldset.length;
+   if(count>1) {
+      aFieldset[0].parentNode.removeChild(aFieldset[count-1]);
+   }
+}
+
+function addMore() {
+   var aFieldset=document.queryform.getElementsByTagName('fieldset');
+   var count=aFieldset.length;
+   var cloned=aFieldset[0].cloneNode(true); // fieldset containing select, input & input
+   var parent=aFieldset[0].parentNode; // form
+   // re-name
+   var oSel=parent.getElementsByTagName('select')[0];
+   cloned.getElementsByTagName('select')[0].name=oSel.name+count;
+   var aInput=parent.getElementsByTagName('input');
+   var cInput=cloned.getElementsByTagName('input');
+   cInput[0].name=aInput[0].name+count;
+   count++;
+   // insert clone
+   var oDiv=parent.getElementsByTagName('div')[0];
+   parent.insertBefore(cloned, oDiv);
+}
+</script>
+
 </head>
 <body>
 <div class="Page">
@@ -17,19 +45,52 @@
 <div class="Content">
 <h1>${title}</h1>
 
-<form method="get" action="/search" target="_top">
-<table border="0" bgcolor="#ffffff">
-<tr><td nowrap="nowrap" valign="top" align="left" height="32"></td>
-<td nowrap="nowrap">
-<label for="sbi" style="display: none">Enter your search terms</label>
-<input type="text" name="q" size="31" maxlength="255" value="" id="sbi"></input>
-<label for="sbb" style="display: none">Submit search form</label>
-<input type="submit" value="Search" id="sbb"></input>
-</td></tr>
-<tr>
-<td>&nbsp;</td>
-<td nowrap="nowrap">
+<form action="/search" method="get" name="queryform">
+<fieldset>
 <table>
+<tr>
+<td>
+<select name="qname">
+<option value="identifier">identifier</option>
+<option value="isReplacedBy">isReplacedBy</option>
+<option value="replaces">replaces</option>
+<option value="isVersionOf">isVersionOf</option>
+<option value="valid">valid</option>
+<option value="title">title</option>
+<option value="description">description</option>
+<option value="type">type</option>
+<option value="creator">creator</option>
+<option value="created">created</option>
+<option value="publisher">publisher</option>
+<option value="format">format</option>
+<option value="email">email</option>
+<option value="bytes">bytes</option>
+<option value="checksum">checksum</option>
+<option value="replaces">replaces</option>
+<option value="subject">subject</option>
+<option value="issuer">issuer</option>
+<option value="location">location</option>
+<option value="serial-number">serial-number</option>
+<option value="version">version</option>
+<option value="hypervisor">hypervisor</option>
+<option value="os-arch">os-arch</option>
+<option value="os-version">os-version</option>
+<option value="os">os</option>
+</select>
+</td>
+<td>
+<input type="value" name="value">
+</td>
+</tr>
+</table>
+</fieldset>
+<div>
+<button type="button" onclick="addMore();">+</button><button type="button" onclick="removeLast();">-</button>
+<button type="submit">search</button>
+</div>
+</form>
+
+<br/>
 
 <ul class="mktree" id="tree1">
   <#list content?keys as identifier>
