@@ -18,11 +18,7 @@ import eu.stratuslab.marketplace.server.utils.Schema;
 public class SearchResource extends BaseResource {
 
     private final static String BASE_QUERY = "SELECT DISTINCT ?identifier ?email ?created "
-            + "WHERE { ?main <http://purl.org/dc/terms/identifier>  ?identifier; "
-            + "<http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
-            + "?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; "
-            + "<http://purl.org/dc/terms/created> ?created . "
-            + "?endorser <http://mp.stratuslab.eu/slreq#email> ?email .";
+            + "WHERE { ";
 
     @Get("html")
     public Representation toHtml() {
@@ -98,10 +94,16 @@ public class SearchResource extends BaseResource {
 
     private String createQuery() {
         String query = BASE_QUERY;
-        StringBuffer where = new StringBuffer();
+        HashMap<String, String> where = new HashMap<String, String>();
         StringBuffer filter = new StringBuffer();
         String queryString = "";
 
+        where.put("identifier", Schema.IDENTIFIER.getWhere());
+        where.put("endorsement", Schema.ENDORSEMENT.getWhere());
+        where.put("endorser", Schema.ENDORSER.getWhere());
+        where.put("created", Schema.ENDORSEMENT_CREATED.getWhere());
+        where.put("email", Schema.EMAIL.getWhere());
+        
         Form queryForm = getRequest().getResourceRef().getQueryAsForm();
 
         if(queryForm.getNames().contains("q")) {
@@ -130,20 +132,25 @@ public class SearchResource extends BaseResource {
                             if (!value.equals("null")){
                                 for(Schema s: Schema.values()){
                                        if(s.getQName().equals(qname)){
-                                                where.append(" " + s.getWhere());
+                                                where.put(qname, s.getWhere());
                                                 filter.append(" " + s.getFilter(value));
                                        }
                                 }
                            }
                         } else { //text search
                                 String value = term.nextToken();
-                                where.append(" " + Schema.DESCRIPTION.getWhere());
+                                where.put(Schema.DESCRIPTION.getQName(), Schema.DESCRIPTION.getWhere());
                                 filter.append(" " + "FILTER REGEX(str(?" + Schema.DESCRIPTION.getQName()
                                     + "), \"" + value + "\", \"i\") .");
                         }
                 }
 
-                query += where.toString() + filter.toString();
+                StringBuffer whereString = new StringBuffer();
+                for (Map.Entry<String, String> entry : where.entrySet()){
+                	whereString.append(" " + entry.getValue());
+                }
+                	                	
+                query += whereString.toString() + filter.toString();
         }
 
         query = query + "}";

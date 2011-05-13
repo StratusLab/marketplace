@@ -32,6 +32,8 @@ public enum Schema {
 			"string", "format of machine or disk image", "main"),
 	ENDORSEMENT("endorsement",SLREQ_NS_URI,
 			"complex", "endorsement information", "main"),
+    ENDORSEMENT_CREATED("created",DCTERMS_NS_URI,
+					"string", "date when endorsement was created", "endorsement"),
 	ENDORSER("endorser",SLREQ_NS_URI,
 			"complex", "endorser information", "endorsement"),
 	BYTES("bytes",SLREQ_NS_URI,
@@ -108,7 +110,7 @@ public enum Schema {
 	}
 	
 	public String getFilter(String value){
-		String filter = "FILTER (?" + this.qname + " = \"" + value + "\") .";
+		String filter = "FILTER REGEX(str(?" + this.qname + "), \"" + value + "\", \"i\") .";
 		return filter;
 	}
 }
