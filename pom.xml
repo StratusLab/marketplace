@@ -3,7 +3,7 @@
  
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>marketplace</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7-SNAPSHOT</version>
   <name>Marketplace (POM)</name>
 
   <url>http://hudson.stratuslab.eu/marketplace</url>
