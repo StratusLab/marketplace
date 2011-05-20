@@ -24,8 +24,8 @@ metadata.
 
   <properties>
     <jetty.version>7.4.0.v20110414</jetty.version>
-    <nexus.release.repository.name>releases</nexus.release.repository.name>
-    <nexus.snapshot.repository.name>snapshots</nexus.snapshot.repository.name>
+    <nexus.release.repository.name>fedora-14-releases</nexus.release.repository.name>
+    <nexus.snapshot.repository.name>fedora-14-snapshots</nexus.snapshot.repository.name>
   </properties>
 
   <licenses>
@@ -69,7 +69,7 @@ metadata.
       </snapshots>
       <id>StratusLabReleases</id>
       <name>StratusLab Releases</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/releases/</url>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/${nexus.release.repository.name}</url>
       <layout>default</layout>
     </repository>
 
