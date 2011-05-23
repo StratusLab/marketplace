@@ -3,7 +3,7 @@
 
 <Configure id='wac' class="org.eclipse.jetty.webapp.WebAppContext">
 
-  <Set name="contextPath">/marketplace</Set>
+  <Set name="contextPath">/</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/${marketplace-war}</Set>
 <!--
   <Set name="overrideDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/overrides/web-cert.xml</Set>
