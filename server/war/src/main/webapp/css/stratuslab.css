@@ -1,0 +1,45 @@
+
+body {
+  margin: 10px 95px;
+  font-family:"Lucida Grande","bitstream vera sans","trebuchet ms",sans-serif,verdana;
+
+  background-image: url('stratuslab-logo-s-vertical.png');
+  background-repeat: no-repeat;
+  background-position: -25px 0px;
+  
+  width: 500px;
+}
+
+.breadcrumbs {
+  background-color: #f0f0f0;
+}
+
+.breadcrumbs a {
+  text-decoration: none;
+  color: black;
+}
+
+/* get rid of those system borders being generated for A tags */
+a:active {
+  outline:none;
+}
+
+:focus {
+  -moz-outline-style:none;
+}
+
+/* tooltips should have dark background and show up to the side */
+.tooltip {
+  background-color:#000;
+  border:1px solid #fff;
+  padding:10px 15px;
+  width:200px;
+  display:none;
+  color:#fff;
+  text-align:left;
+  font-size:12px;
+
+  /* outline radius for mozilla/firefox only */
+  -moz-box-shadow:0 0 10px #000;
+  -webkit-box-shadow:0 0 10px #000;
+}

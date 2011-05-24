@@ -1,12 +1,10 @@
 <html>
-<head>
-<meta http-equiv="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
- <title>  StratusLab :: Combining Grid and Cloud Technologies  </title>
- <SCRIPT SRC="http://cagnode56.cs.tcd.ie/images/include/mktree.js" LANGUAGE="JavaScript"></SCRIPT>
- <LINK REL="stylesheet" HREF="http://cagnode56.cs.tcd.ie/images/include/mktree.css">
- <link rel="stylesheet" media="screen" type="text/css" href="http://cagnode56.cs.tcd.ie/images/include/mmkanso/css/design.css" />
- <link rel="stylesheet" media="screen" type="text/css" href="http://cagnode56.cs.tcd.ie/images/include/mmkanso/css/menu.css" />
- <link rel="stylesheet" media="screen" type="text/css" href="http://cagnode56.cs.tcd.ie/images/include/mmkanso/css/gallery.css" />
+  <#include "header.ftl">
+
+
+<body>
+
+  <#include "breadcrumbs.ftl">
 
 <script type="text/javascript">
 function removeLast() {
@@ -34,9 +32,6 @@ function addMore() {
    parent.insertBefore(cloned, oDiv);
 }
 </script>
-
-</head>
-<body>
 <div class="Page">
   <div class="Header">
      <div class="Banner">
