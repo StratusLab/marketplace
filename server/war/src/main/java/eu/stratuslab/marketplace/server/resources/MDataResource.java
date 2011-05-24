@@ -334,27 +334,31 @@ public class MDataResource extends BaseResource {
     }
 
     private List<Map<String, String>> getMetadata() {
-        try {
-            Map<String, Object> requestAttr = getRequest().getAttributes();
-            boolean dateSearch = false;
+	
+	Map<String, Object> requestAttr = getRequest().getAttributes();
+        boolean dateSearch = false;
 
-            StringBuilder filterPredicate = new StringBuilder();
+        StringBuilder filterPredicate = new StringBuilder();
+	boolean filter = false;
 
-            for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
+        for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
 
-                String key = arg.getKey();
+        	String key = arg.getKey();
                 if (!key.startsWith("org.restlet")) {
                     switch (classifyArg((String) arg.getValue())) {
                     case ARG_EMAIL:
+                        filter = true;
                         filterPredicate.append(" FILTER (?email = \""
                                 + arg.getValue() + "\"). ");
                         break;
                     case ARG_DATE:
+                        filter = true;
                         dateSearch = true;
                         filterPredicate.append(" FILTER (?created = \""
                                 + arg.getValue() + "\"). ");
                         break;
                     case ARG_OTHER:
+                        filter = true;
                         filterPredicate.append(" FILTER (?identifier = \""
                                 + arg.getValue() + "\"). ");
                         break;
@@ -362,9 +366,9 @@ public class MDataResource extends BaseResource {
                         break;
                     }
                 }
-            }
+	}
 
-            StringBuilder queryString = new StringBuilder(
+        StringBuilder queryString = new StringBuilder(
             		"SELECT DISTINCT ?identifier ?email ?created"
             		//" ?os ?osversion ?arch ?location ?description"
                     + " WHERE {"
@@ -379,9 +383,9 @@ public class MDataResource extends BaseResource {
                     + " <http://purl.org/dc/terms/created> ?created ."
                     + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
 
-            queryString.append(filterPredicate.toString());
+        queryString.append(filterPredicate.toString());
 
-            if (!dateSearch) {
+        if (!dateSearch) {
                 queryString
                         .append(" OPTIONAL { "
                                 + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
@@ -392,17 +396,18 @@ public class MDataResource extends BaseResource {
                                 + " FILTER (?lidentifier = ?identifier) ."
                                 + " FILTER (?lemail = ?email) ."
                                 + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement))");
-            }
-
-            queryString.append(" }");
-
-            return query(queryString.toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
-        return null;
+        queryString.append(" }");
+
+        List<Map<String, String>> results = query(queryString.toString());
+
+        if(results.size() <= 0 && filter){
+		throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+                    "no metadata matching query found");
+	} else {
+        	return results;
+        }
     }
 
     private static void closeReliably(Closeable closeable) {
