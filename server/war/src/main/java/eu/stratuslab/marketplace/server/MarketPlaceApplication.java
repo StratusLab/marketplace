@@ -131,6 +131,11 @@ public class MarketPlaceApplication extends Application {
         route = router.attach("/action/", new ActionRouter());
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
+        Directory cssDir = new Directory(getContext(), "war:///css");
+        cssDir.setNegotiatingContent(false);
+        cssDir.setIndexName("index.html");
+        router.attach("/css/", cssDir);
+
         router.attach("/", indexDir);
 
         return router;
