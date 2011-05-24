@@ -239,11 +239,6 @@ public class MDataResource extends BaseResource {
 
         List<Map<String, String>> results = getMetadata();
         
-        if(results == null || results.size() <= 0){
-            throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-                    "No metadata entries found matching request URI");
-        }
-
         HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>> root =
             new HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>>();
         
@@ -309,11 +304,7 @@ public class MDataResource extends BaseResource {
     public Representation toXml() {
 
         List<Map<String, String>> results = getMetadata();
-        if(results == null || results.size() <= 0){
-            throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-                    "No matching metadata entries found for request URI");
-        }
-
+        
         ArrayList<String> uris = new ArrayList<String>();
         for (Map<String, String> resultRow : results) {
 
@@ -372,8 +363,6 @@ public class MDataResource extends BaseResource {
                     }
                 }
             }
-
-            //filterPredicate.append(formToString(queryForm));
 
             StringBuilder queryString = new StringBuilder(
             		"SELECT DISTINCT ?identifier ?email ?created"
