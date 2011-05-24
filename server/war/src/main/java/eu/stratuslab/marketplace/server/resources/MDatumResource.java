@@ -100,8 +100,7 @@ public class MDatumResource extends BaseResource {
             e.printStackTrace();
         }
 
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("title", "Metadata");
+        Map<String, Object> data = createInfoStructure("Metadata");
         data.put("content", stringBuilder.toString());
 
         // Load the FreeMarker template

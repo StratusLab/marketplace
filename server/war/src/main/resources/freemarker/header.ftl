@@ -3,9 +3,9 @@
 
   <title>${title!}</title>
 
-  <!-- <base href="xxx{baseurl}"> -->
+  <base href="${baseurl}"> 
 
-  <script src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js"></script>    
+  <!-- <script src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js"></script> -->
   <link rel="shortcut icon" href="css/favicon.ico"/>
   <link rel="stylesheet" type="text/css" href="css/stratuslab.css"/>
 

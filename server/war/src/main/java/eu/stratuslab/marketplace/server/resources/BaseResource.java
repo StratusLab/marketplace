@@ -70,6 +70,7 @@ public abstract class BaseResource extends ServerResource {
     protected static final int ARG_OTHER = 3;
 
     protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+    protected static final String NO_TITLE = null;
 
     /**
      * Returns the store of metadata managed by this application.
@@ -100,6 +101,21 @@ public abstract class BaseResource extends ServerResource {
 
         return new TemplateRepresentation(tpl, freeMarkerConfig, info,
                 mediaType);
+    }
+    
+    protected Map<String, Object> createInfoStructure(String title) {
+
+        Map<String, Object> info = new HashMap<String, Object>();
+
+        // Add the standard base URL declaration.
+        info.put("baseurl", getRequest().getRootRef().toString());
+
+        // Add the title if appropriate.
+        if (title != null && !"".equals(title)) {
+            info.put("title", title);
+        }
+
+        return info;
     }
 
     protected static Document extractXmlDocument(InputStream stream) {

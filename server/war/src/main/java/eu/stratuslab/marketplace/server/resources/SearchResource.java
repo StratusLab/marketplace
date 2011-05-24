@@ -45,8 +45,7 @@ public class SearchResource extends BaseResource {
 
         }
 
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        data.put("title", "Metadata");
+        Map<String, Object> data = createInfoStructure("Metadata");
         data.put("content", root);
 
         // Load the FreeMarker template

@@ -1,6 +1,6 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
@@ -15,8 +15,10 @@ public class UploadResource extends BaseResource {
     @Get("html")
     public Representation toHtml() {
 
+        Map<String, Object> map = createInfoStructure("Upload");
+
         return createTemplateRepresentation("upload.ftl",
-                new HashMap<String, Object>(), MediaType.TEXT_HTML);
+                map, MediaType.TEXT_HTML);
     }
 
 }

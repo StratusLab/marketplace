@@ -1,10 +1,8 @@
 <html>
   <#include "header.ftl">
-
+  <#include "breadcrumbs.ftl">
 
 <body>
-
-  <#include "breadcrumbs.ftl">
 
 <script type="text/javascript">
 function removeLast() {

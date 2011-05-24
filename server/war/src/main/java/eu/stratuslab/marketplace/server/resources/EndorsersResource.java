@@ -26,8 +26,7 @@ public class EndorsersResource extends BaseResource {
     public Representation toHtml() {
         List<Map<String, String>> results = query(queryString);
 
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("title", "Endorsers");
+        Map<String, Object> data = createInfoStructure("Endorsers");
         data.put("content", results);
 
         // Load the FreeMarker template

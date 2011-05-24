@@ -76,8 +76,7 @@ public class QueryResource extends BaseResource {
                 resultString = "";
             }
             // return representation;
-            Map<String, Object> query = new HashMap<String, Object>();
-
+            Map<String, Object> query = createInfoStructure("Query");
             query.put("query", queryString);
             query.put("results", resultString);
 

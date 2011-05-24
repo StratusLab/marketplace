@@ -39,7 +39,7 @@ public class EndorserResource extends BaseResource {
     public Representation toHtml() {
         List<Map<String, String>> results = query(queryString);
 
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = createInfoStructure("Endorser");
 
         for (Map<String, String> resultRow : results) {
             data.put("email", resultRow.get("email"));

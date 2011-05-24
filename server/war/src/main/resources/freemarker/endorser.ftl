@@ -1,5 +1,6 @@
 <html>
   <#include "header.ftl">
+  <#include "breadcrumbs.ftl">
 <body>
 <div class="Page">
   <div class="Header">
@@ -7,10 +8,9 @@
      </div>
   </div>
   
-  <#include "breadcrumbs.ftl">
-
-  
 <div class="Content">
+
+<h1>${title}</h1>
 
 <table border=0>
    <tr>

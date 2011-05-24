@@ -36,6 +36,7 @@ import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.SearchResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
+import eu.stratuslab.marketplace.server.resources.HomeResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
@@ -93,9 +94,9 @@ public class MarketPlaceApplication extends Application {
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
 
-        Directory indexDir = new Directory(getContext(), "war:///");
-        indexDir.setNegotiatingContent(false);
-        indexDir.setIndexName("index.html");
+        //Directory indexDir = new Directory(getContext(), "war:///");
+        //indexDir.setNegotiatingContent(false);
+        //indexDir.setIndexName("index.html");
 
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
@@ -135,8 +136,10 @@ public class MarketPlaceApplication extends Application {
         cssDir.setNegotiatingContent(false);
         cssDir.setIndexName("index.html");
         router.attach("/css/", cssDir);
+         
+        router.attachDefault(HomeResource.class);
 
-        router.attach("/", indexDir);
+        //router.attach("/", HomeResource.class);
 
         return router;
     }
