@@ -8,6 +8,7 @@ import static org.restlet.data.MediaType.APPLICATION_XML;
 import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
 import static org.restlet.data.MediaType.TEXT_PLAIN;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,12 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -52,7 +51,7 @@ import eu.stratuslab.marketplace.server.utils.Notifier;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-   
+
     /**
      * Handle POST requests: register new Metadata entry.
      */
