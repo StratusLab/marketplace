@@ -192,13 +192,7 @@ public class MDataResource extends BaseResource {
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
                     "unable to read metadata file");
         } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException consumed) {
-
-                }
-            }
+            closeReliably(stream);
         }
 
         return doc;
@@ -230,16 +224,8 @@ public class MDataResource extends BaseResource {
         } catch (IOException consumed) {
 
         } finally {
-            try {
-                reader.close();
-            } catch (IOException consumed) {
-
-            }
-            try {
-                writer.close();
-            } catch (IOException consumed) {
-
-            }
+            closeReliably(reader);
+            closeReliably(writer);
         }
         return output;
     }
@@ -386,4 +372,15 @@ public class MDataResource extends BaseResource {
 
         return null;
     }
+
+    private static void closeReliably(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException consumed) {
+
+            }
+        }
+    }
+
 }
