@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -51,6 +52,8 @@ import eu.stratuslab.marketplace.server.utils.Notifier;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
+
+    private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
     /**
      * Handle POST requests: register new Metadata entry.
@@ -111,8 +114,8 @@ public class MDataResource extends BaseResource {
             String[] coords = getMetadataEntryCoordinates(doc);
             sendEmailConfirmation(coords[1], uploadedFile);
         } catch (Exception e) {
-            // TODO: Log this.
-            e.printStackTrace();
+            String msg = "error sending confirmation email";
+            LOGGER.severe(msg + ": " + e.getMessage());
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
                     "error sending confirmation email");
         }
@@ -187,7 +190,8 @@ public class MDataResource extends BaseResource {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                     "invalid metadata: " + e.getMessage());
         } catch (FileNotFoundException e) {
-            // TODO: Log this.
+            LOGGER.severe("unable to read metadata file: "
+                    + uploadedFile.getAbsolutePath());
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
                     "unable to read metadata file");
         } finally {
