@@ -168,6 +168,7 @@
 		    <include>**/*</include>
 		  </includes>
 		  <excludes>
+                    <exclude>marketplace.cfg</exclude>
 		    <exclude>etc/login/*</exclude>
 		    <exclude>etc/overrides/*</exclude>
 		  </excludes>
