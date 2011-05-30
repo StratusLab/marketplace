@@ -31,15 +31,21 @@ import org.restlet.routing.TemplateRoute;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
+import eu.stratuslab.marketplace.server.resources.HomeResource;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.SearchResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
-import eu.stratuslab.marketplace.server.resources.HomeResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
+
+    private static final Logger LOGGER = Logger.getLogger("org.restlet");
+
+    private static final String MYSQL_URL_MESSAGE = "using mysql datastore: mysql://%s:xxxxxx@%s:%d/%s";
+
+    private static final String MEMORY_STORE_WARNING = "memory store being used; data is NOT persistent";
 
     /** The image metadata is stored in a database. */
     private Repository metadata = null;
@@ -56,15 +62,16 @@ public class MarketPlaceApplication extends Application {
         setDescription("Market-Place for StratusLab images");
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
-        
+
         getTunnelService().setUserAgentTunnel(true);
-        
+
         dataDir = Configuration.getParameterValue(DATA_DIR);
 
         timeRange = Configuration.getParameterValueAsLong(TIME_RANGE) * 60000;
 
         String storeType = Configuration.getParameterValue(STORE_TYPE);
         if (storeType.equals("memory")) {
+            LOGGER.warning(MEMORY_STORE_WARNING);
             store = new MemoryStore();
         } else {
             store = createMysqlStore();
@@ -74,7 +81,7 @@ public class MarketPlaceApplication extends Application {
         try {
             metadata.initialize();
         } catch (RepositoryException r) {
-            r.printStackTrace();
+            LOGGER.severe("error initializing repository: " + r.getMessage());
         }
 
     }
@@ -94,9 +101,9 @@ public class MarketPlaceApplication extends Application {
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
 
-        //Directory indexDir = new Directory(getContext(), "war:///");
-        //indexDir.setNegotiatingContent(false);
-        //indexDir.setIndexName("index.html");
+        // Directory indexDir = new Directory(getContext(), "war:///");
+        // indexDir.setNegotiatingContent(false);
+        // indexDir.setIndexName("index.html");
 
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
@@ -136,10 +143,11 @@ public class MarketPlaceApplication extends Application {
         cssDir.setNegotiatingContent(false);
         cssDir.setIndexName("index.html");
         router.attach("/css/", cssDir);
-         
+
+        // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
 
-        //router.attach("/", HomeResource.class);
+        // router.attach("/", HomeResource.class);
 
         return router;
     }
@@ -150,16 +158,12 @@ public class MarketPlaceApplication extends Application {
             try {
                 store.shutDown();
             } catch (SailException e) {
-                e.printStackTrace();
+                LOGGER.warning("error shutting down repository: "
+                        + e.getMessage());
             }
         }
     }
 
-    /**
-     * Returns the list of registered metadata.
-     * 
-     * @return the list of registered metadata.
-     */
     public Repository getMetadataStore() {
         return this.metadata;
     }
@@ -183,6 +187,9 @@ public class MarketPlaceApplication extends Application {
         int mysqlPort = Configuration.getParameterValueAsInt(MYSQL_PORT);
         String mysqlUser = Configuration.getParameterValue(MYSQL_DBUSER);
         String mysqlPass = Configuration.getParameterValue(MYSQL_DBPASS);
+
+        LOGGER.info(String.format(MYSQL_URL_MESSAGE, mysqlUser, mysqlHost,
+                mysqlPort, mysqlDb));
 
         MySqlStore mysqlStore = new MySqlStore();
         mysqlStore.setDatabaseName(mysqlDb);
