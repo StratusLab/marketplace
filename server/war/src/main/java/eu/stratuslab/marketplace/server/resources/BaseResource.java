@@ -9,6 +9,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -63,7 +64,7 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
  */
 public abstract class BaseResource extends ServerResource {
 
-    protected Logger logger = getLogger();
+    private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
     protected static final int ARG_EMAIL = 1;
     protected static final int ARG_DATE = 2;
@@ -72,11 +73,6 @@ public abstract class BaseResource extends ServerResource {
     protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
     protected static final String NO_TITLE = null;
 
-    /**
-     * Returns the store of metadata managed by this application.
-     * 
-     * @return the store of metadata managed by this application.
-     */
     protected Repository getMetadataStore() {
         return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
@@ -102,7 +98,7 @@ public abstract class BaseResource extends ServerResource {
         return new TemplateRepresentation(tpl, freeMarkerConfig, info,
                 mediaType);
     }
-    
+
     protected Map<String, Object> createInfoStructure(String title) {
 
         Map<String, Object> info = new HashMap<String, Object>();
@@ -142,7 +138,7 @@ public abstract class BaseResource extends ServerResource {
         String iri = writeMetadataToStore(doc);
 
         if (!uploadedFile.delete()) {
-            logger
+            LOGGER
                     .severe("uploaded file could not be deleted: "
                             + uploadedFile);
         }
@@ -394,12 +390,15 @@ public abstract class BaseResource extends ServerResource {
         return result;
     }
 
-    protected StringBuffer formToString(Form form) {
-        StringBuffer predicate = new StringBuffer();
+    protected StringBuilder formToString(Form form) {
+        StringBuilder predicate = new StringBuilder();
 
         for (String key : form.getNames()) {
-            predicate.append(" FILTER (?" + key + " = \""
-                    + form.getFirstValue(key) + "\" ). ");
+            predicate.append(" FILTER (?");
+            predicate.append(key);
+            predicate.append(" = \"");
+            predicate.append(form.getFirstValue(key));
+            predicate.append("\" ). ");
         }
 
         return predicate;
@@ -459,14 +458,19 @@ public abstract class BaseResource extends ServerResource {
                 remaining -= readBytes;
             }
         } finally {
-            if (f != null) {
-                try {
-                    f.close();
-                } catch (IOException ignored) {
-                }
-            }
+            closeReliably(f);
         }
         return new String(buffer);
+    }
+
+    private static void closeReliably(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException consumed) {
+                LOGGER.severe(consumed.getMessage());
+            }
+        }
     }
 
 }

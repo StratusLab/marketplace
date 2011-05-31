@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -42,7 +41,7 @@ public class MDatumResource extends BaseResource {
     @Get("xml")
     public Representation toXml() {
         StringRepresentation representation = new StringRepresentation(
-                new StringBuffer(datum), MediaType.APPLICATION_RDF_XML);
+                new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
 
         // Returns the XML representation of this document.
         return representation;
@@ -63,9 +62,8 @@ public class MDatumResource extends BaseResource {
         ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
         jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);
 
-        StringRepresentation representation = new StringRepresentation(
-                new StringBuffer(jsonOut.toString()),
-                MediaType.APPLICATION_JSON);
+        StringRepresentation representation = new StringRepresentation(jsonOut
+                .toString(), MediaType.APPLICATION_JSON);
 
         return representation;
     }

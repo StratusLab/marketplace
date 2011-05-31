@@ -47,12 +47,12 @@ public class MarketPlaceApplication extends Application {
 
     private static final String MEMORY_STORE_WARNING = "memory store being used; data is NOT persistent";
 
-    /** The image metadata is stored in a database. */
+    private static final long MINUTES_TO_MILLIS = 60000;
+
     private Repository metadata = null;
     private SailBase store = null;
     private String dataDir = null;
-    private long timeRange = 60000;
-    protected Logger logger = getLogger();
+    private long timeRange = 1L * MINUTES_TO_MILLIS;
 
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
@@ -67,7 +67,8 @@ public class MarketPlaceApplication extends Application {
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
 
-        timeRange = Configuration.getParameterValueAsLong(TIME_RANGE) * 60000;
+        timeRange = Configuration.getParameterValueAsLong(TIME_RANGE)
+                * MINUTES_TO_MILLIS;
 
         String storeType = Configuration.getParameterValue(STORE_TYPE);
         if (storeType.equals("memory")) {

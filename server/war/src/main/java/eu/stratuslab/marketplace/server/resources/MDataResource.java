@@ -245,7 +245,7 @@ public class MDataResource extends BaseResource {
             String identifier = resultRow.get("identifier");
             String endorser = resultRow.get("email");
             String created = resultRow.get("created");
-            logger
+            LOGGER
                     .log(Level.INFO, identifier + "  " + endorser + " "
                             + created);
 
@@ -289,7 +289,7 @@ public class MDataResource extends BaseResource {
             uris.add(iri);
         }
 
-        StringBuffer output = new StringBuffer(XML_HEADER);
+        StringBuilder output = new StringBuilder(XML_HEADER);
 
         for (String uri : uris) {
             String datum = getMetadatum(getDataDir() + File.separatorChar + uri
@@ -313,7 +313,7 @@ public class MDataResource extends BaseResource {
             Map<String, Object> requestAttr = getRequest().getAttributes();
             boolean dateSearch = false;
 
-            StringBuffer filterPredicate = new StringBuffer();
+            StringBuilder filterPredicate = new StringBuilder();
 
             for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
 
@@ -341,7 +341,7 @@ public class MDataResource extends BaseResource {
 
             filterPredicate.append(formToString(queryForm));
 
-            StringBuffer queryString = new StringBuffer(
+            StringBuilder queryString = new StringBuilder(
                     "SELECT DISTINCT ?identifier ?email ?created "
                             + " WHERE {"
                             + " ?x <http://purl.org/dc/terms/identifier>  ?identifier; "

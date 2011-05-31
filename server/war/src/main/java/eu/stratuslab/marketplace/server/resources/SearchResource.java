@@ -1,5 +1,12 @@
 package eu.stratuslab.marketplace.server.resources;
 
+import static eu.stratuslab.marketplace.server.utils.Schema.DESCRIPTION;
+import static eu.stratuslab.marketplace.server.utils.Schema.EMAIL;
+import static eu.stratuslab.marketplace.server.utils.Schema.ENDORSEMENT;
+import static eu.stratuslab.marketplace.server.utils.Schema.ENDORSEMENT_CREATED;
+import static eu.stratuslab.marketplace.server.utils.Schema.ENDORSER;
+import static eu.stratuslab.marketplace.server.utils.Schema.IDENTIFIER;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +24,7 @@ import eu.stratuslab.marketplace.server.utils.Schema;
 
 public class SearchResource extends BaseResource {
 
-    private final static String BASE_QUERY = "SELECT DISTINCT ?identifier ?email ?created "
+    private static final String BASE_QUERY = "SELECT DISTINCT ?identifier ?email ?created "
             + "WHERE { ";
 
     @Get("html")
@@ -73,7 +80,7 @@ public class SearchResource extends BaseResource {
             uris.add(iri);
         }
 
-        StringBuffer output = new StringBuffer(XML_HEADER);
+        StringBuilder output = new StringBuilder(XML_HEADER);
 
         for (String uri : uris) {
             String datum = getMetadatum(getDataDir() + File.separatorChar + uri
@@ -94,62 +101,69 @@ public class SearchResource extends BaseResource {
     private String createQuery() {
         String query = BASE_QUERY;
         HashMap<String, String> where = new HashMap<String, String>();
-        StringBuffer filter = new StringBuffer();
+        StringBuilder filter = new StringBuilder();
         String queryString = "";
 
-        where.put("identifier", Schema.IDENTIFIER.getWhere());
-        where.put("endorsement", Schema.ENDORSEMENT.getWhere());
-        where.put("endorser", Schema.ENDORSER.getWhere());
-        where.put("created", Schema.ENDORSEMENT_CREATED.getWhere());
-        where.put("email", Schema.EMAIL.getWhere());
-        
+        where.put("identifier", IDENTIFIER.getWhere());
+        where.put("endorsement", ENDORSEMENT.getWhere());
+        where.put("endorser", ENDORSER.getWhere());
+        where.put("created", ENDORSEMENT_CREATED.getWhere());
+        where.put("email", EMAIL.getWhere());
+
         Form queryForm = getRequest().getResourceRef().getQueryAsForm();
 
-        if(queryForm.getNames().contains("q")) {
-           queryString = queryForm.getFirstValue("q");
+        if (queryForm.getNames().contains("q")) {
+            queryString = queryForm.getFirstValue("q");
         } else {
-                for ( int i = 0; i < (queryForm.size() / 2); i++){
-                        if (i > 0) {
-                            queryString += "+" + queryForm.getFirstValue("qname" + i).trim()
-                            + ":" + queryForm.getFirstValue("value" + i, "null").trim();
-                        } else {
-                                queryString = queryForm.getFirstValue("qname").trim()
-                                + ":" + queryForm.getFirstValue("value", "null").trim();
-                        }
+            for (int i = 0; i < (queryForm.size() / 2); i++) {
+                if (i > 0) {
+                    queryString += "+"
+                            + queryForm.getFirstValue("qname" + i).trim()
+                            + ":"
+                            + queryForm.getFirstValue("value" + i, "null")
+                                    .trim();
+                } else {
+                    queryString = queryForm.getFirstValue("qname").trim() + ":"
+                            + queryForm.getFirstValue("value", "null").trim();
                 }
+            }
         }
 
-        if(queryString != null && queryString != ""){
-                StringTokenizer st=new StringTokenizer(queryString,"+");
-                while(st.hasMoreTokens()){
-                        String searchTerm = st.nextToken();
-                        StringTokenizer term = new StringTokenizer(searchTerm, ":");
+        if (queryString != null && !"".equals(queryString)) {
 
-                        if(term.countTokens() == 2){
-                            String qname = term.nextToken().trim();
-                            String value = term.nextToken().trim();
-                            if (!value.equals("null")){
-                                for(Schema s: Schema.values()){
-                                       if(s.getQName().equals(qname)){
-                                                where.put(qname, s.getWhere());
-                                                filter.append(" " + s.getFilter(value));
-                                       }
-                                }
-                           }
-                        } else { //text search
-                                String value = term.nextToken();
-                                where.put(Schema.DESCRIPTION.getQName(), Schema.DESCRIPTION.getWhere());
-                                filter.append(" " + "FILTER REGEX(str(?" + Schema.DESCRIPTION.getQName()
-                                    + "), \"" + value + "\", \"i\") .");
+            StringTokenizer st = new StringTokenizer(queryString, "+");
+            while (st.hasMoreTokens()) {
+                String searchTerm = st.nextToken();
+                StringTokenizer term = new StringTokenizer(searchTerm, ":");
+
+                if (term.countTokens() == 2) {
+                    String qname = term.nextToken().trim();
+                    String value = term.nextToken().trim();
+                    if (!value.equals("null")) {
+                        for (Schema s : Schema.values()) {
+                            if (s.getQName().equals(qname)) {
+                                where.put(qname, s.getWhere());
+                                filter.append(" ");
+                                filter.append(s.getFilter(value));
+                            }
                         }
+                    }
+                } else { // text search
+                    String value = term.nextToken();
+                    where.put(DESCRIPTION.getQName(), DESCRIPTION.getWhere());
+                    filter.append(" " + "FILTER REGEX(str(?"
+                            + DESCRIPTION.getQName() + "), \"" + value
+                            + "\", \"i\") .");
                 }
+            }
 
-                StringBuffer whereString = new StringBuffer();
-                for (Map.Entry<String, String> entry : where.entrySet()){
-                	whereString.append(" " + entry.getValue());
-                }
-                	                	
-                query += whereString.toString() + filter.toString();
+            StringBuilder whereString = new StringBuilder();
+            for (Map.Entry<String, String> entry : where.entrySet()) {
+                whereString.append(" ");
+                whereString.append(entry.getValue());
+            }
+
+            query += whereString.toString() + filter.toString();
         }
 
         query = query + "}";

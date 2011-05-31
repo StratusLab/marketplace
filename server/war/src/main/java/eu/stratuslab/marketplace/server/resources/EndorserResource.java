@@ -1,16 +1,12 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.openrdf.query.QueryLanguage;
-import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
-import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 
 /**
@@ -18,21 +14,23 @@ import org.restlet.resource.Get;
  */
 public class EndorserResource extends BaseResource {
 
-    private String email = null;
     private String queryString = null;
+
+    private static final String EMAIL_QUERY_TEMPLATE = //
+    "SELECT DISTINCT ?email ?subject ?issuer "
+            + " WHERE {"
+            + " ?x <http://purl.org/dc/terms/identifier>  ?identifier . "
+            + " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
+            + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . "
+            + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email . "
+            + " ?endorser <http://mp.stratuslab.eu/slreq#subject> ?subject . "
+            + " ?endorser <http://mp.stratuslab.eu/slreq#issuer> ?issuer . "
+            + " FILTER (?email = \"%s\"). }";
 
     @Override
     protected void doInit() {
-        this.email = (String) getRequest().getAttributes().get("email");
-        this.queryString = "SELECT DISTINCT ?email ?subject ?issuer "
-                + " WHERE {"
-                + " ?x <http://purl.org/dc/terms/identifier>  ?identifier . "
-                + " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
-                + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . "
-                + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email . "
-                + " ?endorser <http://mp.stratuslab.eu/slreq#subject> ?subject . "
-                + " ?endorser <http://mp.stratuslab.eu/slreq#issuer> ?issuer . "
-                + " FILTER (?email = \"" + this.email + "\"). }";
+        String email = (String) getRequest().getAttributes().get("email");
+        queryString = String.format(EMAIL_QUERY_TEMPLATE, email);
     }
 
     @Get("html")

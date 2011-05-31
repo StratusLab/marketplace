@@ -58,7 +58,7 @@ public enum Parameter {
         }
     },
 
-    TIME_RANGE(true, "10", "Directory containing raw metadata data entries.") {
+    TIME_RANGE(true, "10", "Time difference (in minutes) to accept new entry") {
         @Override
         public void validate(String value) {
             super.validate(value);

@@ -17,6 +17,8 @@ import org.w3c.dom.Document;
 
 public final class XMLUtils {
 
+    private static final Integer DEFAULT_INDENT = Integer.valueOf(4);
+
     private XMLUtils() {
 
     }
@@ -53,7 +55,7 @@ public final class XMLUtils {
         try {
 
             TransformerFactory factory = TransformerFactory.newInstance();
-            factory.setAttribute("indent-number", Integer.valueOf(4));
+            factory.setAttribute("indent-number", DEFAULT_INDENT);
 
             Transformer transformer;
             transformer = factory.newTransformer();

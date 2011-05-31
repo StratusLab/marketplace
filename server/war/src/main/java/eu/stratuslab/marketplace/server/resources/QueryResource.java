@@ -2,7 +2,6 @@ package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

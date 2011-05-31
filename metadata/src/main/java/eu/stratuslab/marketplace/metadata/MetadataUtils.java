@@ -41,6 +41,8 @@ import eu.stratuslab.marketplace.X509Info;
 
 public final class MetadataUtils {
 
+    private static final int BUFFER_SIZE = 1024;
+
     private static final String[] ALGORITHMS = { "MD5", "SHA-1", "SHA-256",
             "SHA-512" };
 
@@ -96,7 +98,7 @@ public final class MetadataUtils {
                 }
             }
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
             for (int length = is.read(buffer); length > 0; length = is
                     .read(buffer)) {
