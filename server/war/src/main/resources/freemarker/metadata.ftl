@@ -4,7 +4,6 @@
 
 <body>
 
-</script>
 <div class="Page">
   <div class="Header">
      <div class="Banner">

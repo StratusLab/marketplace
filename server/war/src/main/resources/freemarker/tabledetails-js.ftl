@@ -7,9 +7,9 @@ function fnFormatDetails ( oTable, nTr )
 	var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 	sOut += '<tr><td>Description:</td><td>'+aData[8]+'</td></tr>';
 	sOut += '<tr><td>Identifier:</td><td>'+aData[5]+'</td></tr>';
-	sOut += '<tr><td>Endorsement date:</td><td>'+aData[6]+'</td></tr>';
-        sOut += '<tr><td>URL:</td><td><a href="'+aData[7]+'">'+aData[7]+'</a></td></tr>';
+	sOut += '<tr><td>URL:</td><td><a href="'+aData[7]+'">'+aData[7]+'</a></td></tr>';
 	sOut += '</table>';
+        sOut += '<br/><p align="right"><a href="/metadata/'+aData[5]+'/'+aData[4]+'/'+aData[6]+'">More...</a></p>';
 	
 	return sOut;
 }
