@@ -237,28 +237,45 @@ public class MDataResource extends BaseResource {
     public Representation toHtml() {
 
         List<Map<String, String>> results = getMetadata();
-
-        HashMap<String, HashMap<String, Object>> root = new HashMap<String, HashMap<String, Object>>();
-
+        
+        HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>> root =
+            new HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>>();
+        
         for (Map<String, String> resultRow : results) {
 
             String identifier = resultRow.get("identifier");
             String endorser = resultRow.get("email");
             String created = resultRow.get("created");
-            LOGGER
-                    .log(Level.INFO, identifier + "  " + endorser + " "
-                            + created);
+            String os = resultRow.get("os");
+            String osversion = resultRow.get("osversion");
+            String arch = resultRow.get("arch");
+            String location = resultRow.get("location");
+            String description = resultRow.get("description");
 
-            HashMap<String, Object> endorserMap;
+            HashMap<String, HashMap<String, HashMap<String, String>>> endorserMap;
             if (root.containsKey(identifier)) {
-                endorserMap = root.get(identifier);
+                    endorserMap = root.get(identifier);
             } else {
-                endorserMap = new HashMap<String, Object>();
+                    endorserMap = new HashMap<String, HashMap<String, HashMap<String, String>>>();
             }
 
-            endorserMap.put(endorser, created);
-            root.put(identifier, endorserMap);
+            HashMap<String, HashMap<String, String>> dataMap;
+            if (endorserMap.containsKey(endorser)) {
+                    dataMap = endorserMap.get(endorser);
+            } else {
+                    dataMap = new HashMap<String, HashMap<String, String>>();
+            }
 
+            HashMap<String, String> dMap = new HashMap<String, String>();
+            dMap.put("os", os);
+            dMap.put("osversion", osversion);
+            dMap.put("arch", arch);
+            dMap.put("location", location);
+            dMap.put("description", description);
+
+            dataMap.put(created, dMap);
+            endorserMap.put(endorser, dataMap);
+            root.put(identifier, endorserMap);
         }
 
         Map<String, Object> data = createInfoStructure("Metadata");
@@ -342,13 +359,19 @@ public class MDataResource extends BaseResource {
             filterPredicate.append(formToString(queryForm));
 
             StringBuilder queryString = new StringBuilder(
-                    "SELECT DISTINCT ?identifier ?email ?created "
-                            + " WHERE {"
-                            + " ?x <http://purl.org/dc/terms/identifier>  ?identifier; "
-                            + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
-                            + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
-                            + " <http://purl.org/dc/terms/created> ?created ."
-                            + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
+            		"SELECT DISTINCT ?identifier ?email ?created ?os " +
+            		"?osversion ?arch ?location ?description"
+                    + " WHERE {"
+                    + " ?x <http://purl.org/dc/terms/identifier>  ?identifier; "
+                    + " <http://mp.stratuslab.eu/slterms#os> ?os; "
+                    + " <http://mp.stratuslab.eu/slterms#os-version> ?osversion;"
+                    + " <http://mp.stratuslab.eu/slterms#os-arch> ?arch;"
+                    + " <http://mp.stratuslab.eu/slterms#location> ?location;"
+                    + " <http://purl.org/dc/terms/description> ?description;"
+                    + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
+                    + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
+                    + " <http://purl.org/dc/terms/created> ?created ."
+                    + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
 
             queryString.append(filterPredicate.toString());
 

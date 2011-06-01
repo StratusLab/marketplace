@@ -4,31 +4,6 @@
 
 <body>
 
-<script type="text/javascript">
-function removeLast() {
-   var aFieldset=document.queryform.getElementsByTagName('fieldset');
-   var count=aFieldset.length;
-   if(count>1) {
-      aFieldset[0].parentNode.removeChild(aFieldset[count-1]);
-   }
-}
-
-function addMore() {
-   var aFieldset=document.queryform.getElementsByTagName('fieldset');
-   var count=aFieldset.length;
-   var cloned=aFieldset[0].cloneNode(true); // fieldset containing select, input & input
-   var parent=aFieldset[0].parentNode; // form
-   // re-name
-   var oSel=parent.getElementsByTagName('select')[0];
-   cloned.getElementsByTagName('select')[0].name=oSel.name+count;
-   var aInput=parent.getElementsByTagName('input');
-   var cInput=cloned.getElementsByTagName('input');
-   cInput[0].name=aInput[0].name+count;
-   count++;
-   // insert clone
-   var oDiv=parent.getElementsByTagName('div')[0];
-   parent.insertBefore(cloned, oDiv);
-}
 </script>
 <div class="Page">
   <div class="Header">
@@ -38,72 +13,60 @@ function addMore() {
 <div class="Content">
 <h1>${title}</h1>
 
-<form action="/search" method="get" name="queryform">
-<fieldset>
-<table>
-<tr>
-<td>
-<select name="qname">
-<option value="identifier">identifier</option>
-<option value="isReplacedBy">isReplacedBy</option>
-<option value="replaces">replaces</option>
-<option value="isVersionOf">isVersionOf</option>
-<option value="valid">valid</option>
-<option value="title">title</option>
-<option value="description">description</option>
-<option value="type">type</option>
-<option value="creator">creator</option>
-<option value="created">created</option>
-<option value="publisher">publisher</option>
-<option value="format">format</option>
-<option value="email">email</option>
-<option value="bytes">bytes</option>
-<option value="checksum">checksum</option>
-<option value="replaces">replaces</option>
-<option value="subject">subject</option>
-<option value="issuer">issuer</option>
-<option value="location">location</option>
-<option value="serial-number">serial-number</option>
-<option value="version">version</option>
-<option value="hypervisor">hypervisor</option>
-<option value="os-arch">os-arch</option>
-<option value="os-version">os-version</option>
-<option value="os">os</option>
-</select>
-</td>
-<td>
-<input type="value" name="value">
-</td>
-</tr>
-</table>
-</fieldset>
-<div>
-<button type="button" onclick="addMore();">+</button><button type="button" onclick="removeLast();">-</button>
-<button type="submit">search</button>
-</div>
-</form>
-
 <br/>
 
-<ul class="mktree" id="tree1">
-  <#list content?keys as identifier>
-    <li>${identifier}
-    <ul>
-      <#assign endorsers = content[identifier]> 
-      <#list endorsers?keys as email>
-      <li>${email}
-        <ul>
-          <li><a href="/metadata/${identifier}/${email}/${endorsers[email]}">${endorsers[email]}</a></li>
-        </ul>
-      </li>
-      </#list>
-    </ul>
-    </li>
-  </#list>
-</ul>
+<table id="form_with_details" class="display">
+    <thead>
+        <tr>
+            <th>os</th>
+            <th>os-version</th>
+            <th>arch</th>
+            <th>email</th>
+            <th>identifier</th>
+            <th>date</th>
+            <th>description</th>
+            <th>location</th>
+        </tr>
+    </thead>
+    <tbody>
+        <#list content?keys as identifier>
+            <#assign endorsers = content[identifier]>
+            <#list endorsers?keys as email>
+               <#assign created = endorsers[email]>
+               <#list created?keys as date>
+                    <#assign data = created[date]>
+                    <tr>
+                        <td>${data.os}</td>
+                        <td>${data.osversion}</td>
+                        <td>${data.arch}</td>
+                        <td>${email}</td>
+                        <td>${identifier}</td>
+                        <td>${date}</td>
+                        <td>${data.location}</td>
+                        <td>${data.description}</td>
+                    </tr>
+                </#list>
+             </#list>
+        </#list>
+     </tbody>
+     <tfoot>
+         <tr>
+             <th></th>
+             <th><input type="text" name="search_os" value="Search os" class="search_init" /></th>
+	     <th><input type="text" name="search_osversion" value="Search os version" class="search_init" /></th>
+	     <th><input type="text" name="search_arch" value="Search architecture" class="search_init" /></th>
+             <th><input type="text" name="search_email" value="Search email" class="search_init" /></th>
+             <th><input type="text" name="search_identifier" value="Search identifier" class="search_init" /></th>
+             <th><input type="text" name="search_date" value="Search date" class="search_init" /></th>
+             <th><input type="text" name="search_location" value="Search location" class="search_init" /></th>
+             <th><input type="text" name="search_description" value="Search description" class="search_init" /></th>
+         </tr>
+      </tfoot>
+</table>
 
-<div class="Footer">
-                StratusLab is co-funded by the European Community's<br/>Seventh Framework Programme (Capacities)<br/>Grant Agreement INFSO-RI-261552            </div>
+<#include "tabledetails-js.ftl">
+
+</div>
 </div>
 
 </body>

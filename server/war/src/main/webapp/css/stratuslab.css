@@ -43,3 +43,61 @@ a:active {
   -moz-box-shadow:0 0 10px #000;
   -webkit-box-shadow:0 0 10px #000;
 }
+
+table.display {
+        margin: 0 auto;
+        clear: both;
+        width: 100%;
+
+        /* Note Firefox 3.5 and before have a bug with border-collapse
+         * ( https://bugzilla.mozilla.org/show%5Fbug.cgi?id=155955 ) 
+         * border-spacing: 0; is one possible option. Conditional-css.com is
+         * useful for this kind of thing
+         *
+         * Further note IE 6/7 has problems when calculating widths with border width.
+         * It subtracts one px relative to the other browsers from the first column, and
+         * adds one to the end...
+         *
+         * If you want that effect I'd suggest setting a border-top/left on th/td's and 
+         * then filling in the gaps with other borders.
+         */
+}
+
+table.display thead th {
+        padding: 3px 18px 3px 10px;
+        border-bottom: 1px solid black;
+        font-weight: bold;
+        cursor: pointer;
+        * cursor: hand;
+}
+
+table.display tfoot th {
+        padding: 3px 18px 3px 10px;
+        border-top: 1px solid black;
+        font-weight: bold;
+}
+
+table.display tr.heading2 td {
+        border-bottom: 1px solid #aaa;
+}
+
+table.display td {
+        padding: 3px 10px;
+}
+
+table.display td.center {
+        text-align: center;
+}
+
+tr.odd {
+        background-color: #E2E4FF;
+}
+
+tr.even {
+        background-color: white;
+}
+
+td.details {
+        background-color: #d1cfd0;
+        border: 2px solid #A19B9E;
+}

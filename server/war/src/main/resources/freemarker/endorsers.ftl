@@ -7,21 +7,20 @@
      </div>
   </div>
 
-<#include "breadcrumbs.ftl">
+  <#include "breadcrumbs.ftl">
 
-<div class="Content">
-<h1>${title}</h1>
+  <div class="Content">
+      <h1>${title}</h1>
 
-<table border=0>
-   <#list content as emails>
-  <tr>
-  <td><a href=endorsers/${emails.email}>${emails.email}</a></td>
-  </tr>
-  </#list>
-</table>
+      <table border=0>
+          <#list content as emails>
+              <tr>
+              <td><a href=endorsers/${emails.email}>${emails.email}</a></td>
+              </tr>
+           </#list>
+      </table>
 
-<div class="Footer">
-                StratusLab is co-funded by the European Community's<br/>Seventh Framework Programme (Capacities)<br/>Grant Agreement INFSO-RI-261552            </div>
+  </div>
 </div>
 
 </body>
