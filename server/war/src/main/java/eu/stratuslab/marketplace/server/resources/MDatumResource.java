@@ -40,6 +40,10 @@ public class MDatumResource extends BaseResource {
 
     @Get("xml")
     public Representation toXml() {
+    	if (this.datum == null) {
+            throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+                    "metadata entry not found.\n");
+        }
         StringRepresentation representation = new StringRepresentation(
                 new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
 
