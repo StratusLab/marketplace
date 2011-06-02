@@ -7,7 +7,6 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBUSER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.TIME_RANGE;
 
 import java.util.logging.Logger;
 
@@ -47,13 +46,10 @@ public class MarketPlaceApplication extends Application {
 
     private static final String MEMORY_STORE_WARNING = "memory store being used; data is NOT persistent";
 
-    private static final long MINUTES_TO_MILLIS = 60000;
-
     private Repository metadata = null;
     private SailBase store = null;
     private String dataDir = null;
-    private long timeRange = 1L * MINUTES_TO_MILLIS;
-
+    
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
     public MarketPlaceApplication() {
@@ -66,10 +62,7 @@ public class MarketPlaceApplication extends Application {
         getTunnelService().setUserAgentTunnel(true);
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
-
-        timeRange = Configuration.getParameterValueAsLong(TIME_RANGE)
-                * MINUTES_TO_MILLIS;
-
+       
         String storeType = Configuration.getParameterValue(STORE_TYPE);
         if (storeType.equals("memory")) {
             LOGGER.warning(MEMORY_STORE_WARNING);
@@ -101,10 +94,6 @@ public class MarketPlaceApplication extends Application {
 
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
-
-        // Directory indexDir = new Directory(getContext(), "war:///");
-        // indexDir.setNegotiatingContent(false);
-        // indexDir.setIndexName("index.html");
 
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
@@ -148,8 +137,6 @@ public class MarketPlaceApplication extends Application {
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
 
-        // router.attach("/", HomeResource.class);
-
         return router;
     }
 
@@ -171,10 +158,6 @@ public class MarketPlaceApplication extends Application {
 
     public String getDataDir() {
         return this.dataDir;
-    }
-
-    public long getTimeRange() {
-        return this.timeRange;
     }
 
     public freemarker.template.Configuration getFreeMarkerConfiguration() {

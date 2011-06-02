@@ -58,14 +58,6 @@ public enum Parameter {
         }
     },
 
-    TIME_RANGE(true, "10", "Time difference (in minutes) to accept new entry") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-            isPositiveInt(getKey(), value);
-        }
-    },
-
     VALIDATE_EMAIL(true, "true", "Flag to determine email must be validated.") {
         @Override
         public void validate(String value) {

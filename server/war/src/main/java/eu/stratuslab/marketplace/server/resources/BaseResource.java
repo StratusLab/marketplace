@@ -64,7 +64,7 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
  */
 public abstract class BaseResource extends ServerResource {
 
-    private static final Logger LOGGER = Logger.getLogger("org.restlet");
+	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
     protected static final int ARG_EMAIL = 1;
     protected static final int ARG_DATE = 2;
@@ -79,10 +79,6 @@ public abstract class BaseResource extends ServerResource {
 
     protected String getDataDir() {
         return ((MarketPlaceApplication) getApplication()).getDataDir();
-    }
-
-    protected long getTimeRange() {
-        return ((MarketPlaceApplication) getApplication()).getTimeRange();
     }
 
     protected freemarker.template.Configuration getFreeMarkerConfiguration() {
