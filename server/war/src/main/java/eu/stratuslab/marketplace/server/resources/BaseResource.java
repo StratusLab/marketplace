@@ -35,6 +35,7 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -131,7 +132,14 @@ public abstract class BaseResource extends ServerResource {
 
     protected String commitMetadataEntry(File uploadedFile, Document doc) {
         writeMetadataToDisk(getDataDir(), doc);
-        String iri = writeMetadataToStore(doc);
+        String iri = null;
+        try {
+           iri = writeMetadataToStore(doc);
+        } catch(ResourceException e){
+        	//transaction has failed, so rollback
+        	deleteMetadataFromDisk(getDataDir(), doc);
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+        }
 
         if (!uploadedFile.delete()) {
             LOGGER
@@ -156,12 +164,32 @@ public abstract class BaseResource extends ServerResource {
         File rdfFileParent = rdfFile.getParentFile();
         if (!rdfFileParent.exists()) {
             if (!rdfFileParent.mkdirs()) {
+            	LOGGER.severe("Unable to create directory structure for file.");
                 throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
             }
         }
 
         String contents = XMLUtils.documentToString(doc);
         MetadataUtils.writeStringToFile(contents, rdfFile);
+
+    }
+    
+    protected static void deleteMetadataFromDisk(String dataDir, Document doc) {
+
+        String[] coordinates = getMetadataEntryCoordinates(doc);
+
+        String identifier = coordinates[0];
+        String endorser = coordinates[1];
+        String created = coordinates[2];
+
+        File rdfFile = new File(dataDir, identifier + File.separator + endorser
+                + File.separator + created + ".xml");
+
+        if (rdfFile.exists()) {
+            if (!rdfFile.delete()) {
+                throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+            }
+        }
 
     }
 
@@ -195,7 +223,9 @@ public abstract class BaseResource extends ServerResource {
         String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
 
         String rdfEntry = createRdfEntry(datumDoc);
-        storeMetadatum(iri, rdfEntry);
+        if(!storeMetadatum(iri, rdfEntry)){
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+        }
 
         return iri;
     }
@@ -208,9 +238,16 @@ public abstract class BaseResource extends ServerResource {
      * @param rdf
      *            the metadata entry to store
      */
-    protected void storeMetadatum(String iri, String rdf) {
+    protected boolean storeMetadatum(String iri, String rdf) {
+    	boolean success = false;
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
+            try{
+            	con.getNamespaces();
+            } catch(RepositoryException e){
+            	LOGGER.warning("JDBC connection inactive.");
+            	e.printStackTrace();
+            }
             ValueFactory vf = con.getValueFactory();
             Reader reader = new StringReader(rdf);
             try {
@@ -220,11 +257,14 @@ public abstract class BaseResource extends ServerResource {
             } finally {
                 con.close();
             }
+            success = true;
         } catch (OpenRDFException e) {
             e.printStackTrace();
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
+        
+        return success;
     }
 
     /**
@@ -286,6 +326,12 @@ public abstract class BaseResource extends ServerResource {
                     out);
 
             RepositoryConnection con = getMetadataStore().getConnection();
+            try{
+            	con.getNamespaces();
+            } catch(RepositoryException e){
+            	LOGGER.warning("JDBC connection inactive.");
+            	e.printStackTrace();
+            }
             try {
                 TupleQuery tupleQuery = con.prepareTupleQuery(syntax,
                         queryString);
@@ -313,6 +359,13 @@ public abstract class BaseResource extends ServerResource {
 
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
+            try{
+            	con.getNamespaces();
+            } catch(RepositoryException e){
+            	LOGGER.warning("JDBC connection inactive.");
+            	e.printStackTrace();
+            }
+            
             try {
                 TupleQuery tupleQuery = con.prepareTupleQuery(
                         QueryLanguage.SPARQL, queryString);
