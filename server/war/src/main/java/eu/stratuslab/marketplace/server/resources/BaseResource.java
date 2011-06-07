@@ -242,12 +242,6 @@ public abstract class BaseResource extends ServerResource {
     	boolean success = false;
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
-            try{
-            	con.getNamespaces();
-            } catch(RepositoryException e){
-            	LOGGER.warning("JDBC connection inactive.");
-            	e.printStackTrace();
-            }
             ValueFactory vf = con.getValueFactory();
             Reader reader = new StringReader(rdf);
             try {
@@ -326,12 +320,6 @@ public abstract class BaseResource extends ServerResource {
                     out);
 
             RepositoryConnection con = getMetadataStore().getConnection();
-            try{
-            	con.getNamespaces();
-            } catch(RepositoryException e){
-            	LOGGER.warning("JDBC connection inactive.");
-            	e.printStackTrace();
-            }
             try {
                 TupleQuery tupleQuery = con.prepareTupleQuery(syntax,
                         queryString);
@@ -359,13 +347,6 @@ public abstract class BaseResource extends ServerResource {
 
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
-            try{
-            	con.getNamespaces();
-            } catch(RepositoryException e){
-            	LOGGER.warning("JDBC connection inactive.");
-            	e.printStackTrace();
-            }
-            
             try {
                 TupleQuery tupleQuery = con.prepareTupleQuery(
                         QueryLanguage.SPARQL, queryString);

@@ -8,8 +8,17 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.openrdf.OpenRDFException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -46,6 +55,10 @@ public class MarketPlaceApplication extends Application {
 
     private static final String MEMORY_STORE_WARNING = "memory store being used; data is NOT persistent";
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
+    private ScheduledFuture pingerHandle;
+    
     private Repository metadata = null;
     private SailBase store = null;
     private String dataDir = null;
@@ -78,6 +91,31 @@ public class MarketPlaceApplication extends Application {
             LOGGER.severe("error initializing repository: " + r.getMessage());
         }
 
+        /*
+         * Set up a task to check the repository connection is alive
+         */
+        final Runnable pinger = new Runnable() {
+            public void run() { 
+            	try {
+                    RepositoryConnection con = getMetadataStore().getConnection();
+                    try {
+                    	TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+                                "SELECT * WHERE { ?s ?p ?o } LIMIT 1");
+                        tupleQuery.evaluate();
+                    } finally {
+                        con.close();
+                    }
+                } catch (OpenRDFException e) {
+                    LOGGER.severe("error pinging repository store: " + e.getMessage());
+                }
+            }
+          };
+          
+          /*
+           * Ping the repository once an hour to make sure MySQL does not close the connection
+           */
+          pingerHandle =
+              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
     }
 
     /**
@@ -150,6 +188,8 @@ public class MarketPlaceApplication extends Application {
                         + e.getMessage());
             }
         }
+        
+        pingerHandle.cancel(true);
     }
 
     public Repository getMetadataStore() {
