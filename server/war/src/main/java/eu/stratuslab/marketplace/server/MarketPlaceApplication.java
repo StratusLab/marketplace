@@ -45,6 +45,7 @@ import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.SearchResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
+import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
@@ -162,6 +163,10 @@ public class MarketPlaceApplication extends Application {
         router.attach("/search", SearchResource.class);
         router.attach("/search/", SearchResource.class);
 
+        // Define a route for the about page
+        router.attach("/about", AboutResource.class);
+        router.attach("/about/", AboutResource.class);
+        
         // Defines a router for actions
         TemplateRoute route;
         route = router.attach("/action/", new ActionRouter());
