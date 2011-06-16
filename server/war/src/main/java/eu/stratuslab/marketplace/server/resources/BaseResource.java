@@ -245,7 +245,7 @@ public abstract class BaseResource extends ServerResource {
             ValueFactory vf = con.getValueFactory();
             Reader reader = new StringReader(rdf);
             try {
-                con.clear(vf.createURI(iri));
+            	con.clear(vf.createURI(iri));
                 con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML, vf
                         .createURI(iri));
             } finally {

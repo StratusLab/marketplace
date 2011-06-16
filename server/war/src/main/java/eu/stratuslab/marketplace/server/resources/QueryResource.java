@@ -21,8 +21,8 @@ import org.restlet.resource.ResourceException;
  * This resource represents a query on the rdf data
  */
 public class QueryResource extends BaseResource {
-
-    @Get("html")
+	
+	@Get("html")
     public Representation toHtml() {
         Representation representation = null;
 
@@ -43,7 +43,7 @@ public class QueryResource extends BaseResource {
                 QueryParser parser = QueryParserUtil
                         .createParser(QueryLanguage.SPARQL);
                 parser.parseQuery(queryString, MARKETPLACE_URI);
-
+                 
                 List<Map<String, String>> results = query(queryString);
                 if (results.size() > 0) {
                     StringBuilder stringBuilder = new StringBuilder();

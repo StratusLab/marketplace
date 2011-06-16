@@ -11,6 +11,7 @@ import static org.restlet.data.MediaType.TEXT_PLAIN;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -245,12 +246,18 @@ public class MDataResource extends BaseResource {
 
             String identifier = resultRow.get("identifier");
             String endorser = resultRow.get("email");
-            String created = resultRow.get("created");
-            String os = resultRow.get("os");
-            String osversion = resultRow.get("osversion");
-            String arch = resultRow.get("arch");
-            String location = resultRow.get("location");
-            String description = resultRow.get("description");
+            String created = resultRow.get("created");  
+            
+            String iri = identifier + "/" + endorser + "/" + created;
+            String datum = getMetadatum(getDataDir() + File.separatorChar + iri
+                    + ".xml");
+            Document doc = extractXmlDocument(new ByteArrayInputStream(datum.getBytes()));
+            
+            String os = XPathUtils.getValue(doc, XPathUtils.OS);
+            String osversion = XPathUtils.getValue(doc, XPathUtils.OS_VERSION);
+            String arch = XPathUtils.getValue(doc, XPathUtils.OS_ARCH);
+            String location = XPathUtils.getValue(doc, XPathUtils.LOCATION);
+            String description = XPathUtils.getValue(doc, XPathUtils.DESCRIPTION);
 
             HashMap<String, HashMap<String, HashMap<String, String>>> endorserMap;
             if (root.containsKey(identifier)) {
@@ -307,7 +314,8 @@ public class MDataResource extends BaseResource {
         }
 
         StringBuilder output = new StringBuilder(XML_HEADER);
-
+        
+        output.append("<metadata>");
         for (String uri : uris) {
             String datum = getMetadatum(getDataDir() + File.separatorChar + uri
                     + ".xml");
@@ -316,7 +324,8 @@ public class MDataResource extends BaseResource {
             }
             output.append(datum);
         }
-
+        output.append("</metadata>");
+        
         // Returns the XML representation of this document.
         StringRepresentation representation = new StringRepresentation(output,
                 MediaType.APPLICATION_XML);
@@ -326,7 +335,6 @@ public class MDataResource extends BaseResource {
 
     private List<Map<String, String>> getMetadata() {
         try {
-            Form queryForm = getRequest().getResourceRef().getQueryAsForm();
             Map<String, Object> requestAttr = getRequest().getAttributes();
             boolean dateSearch = false;
 
@@ -356,18 +364,18 @@ public class MDataResource extends BaseResource {
                 }
             }
 
-            filterPredicate.append(formToString(queryForm));
+            //filterPredicate.append(formToString(queryForm));
 
             StringBuilder queryString = new StringBuilder(
-            		"SELECT DISTINCT ?identifier ?email ?created ?os " +
-            		"?osversion ?arch ?location ?description"
+            		"SELECT DISTINCT ?identifier ?email ?created"
+            		//" ?os ?osversion ?arch ?location ?description"
                     + " WHERE {"
                     + " ?x <http://purl.org/dc/terms/identifier>  ?identifier; "
-                    + " <http://mp.stratuslab.eu/slterms#os> ?os; "
-                    + " <http://mp.stratuslab.eu/slterms#os-version> ?osversion;"
-                    + " <http://mp.stratuslab.eu/slterms#os-arch> ?arch;"
-                    + " <http://mp.stratuslab.eu/slterms#location> ?location;"
-                    + " <http://purl.org/dc/terms/description> ?description;"
+                    //+ " <http://mp.stratuslab.eu/slterms#os> ?os; "
+                    //+ " <http://mp.stratuslab.eu/slterms#os-version> ?osversion;"
+                    //+ " <http://mp.stratuslab.eu/slterms#os-arch> ?arch;"
+                    //+ " <http://mp.stratuslab.eu/slterms#location> ?location;"
+                    //+ " <http://purl.org/dc/terms/description> ?description;"
                     + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
                     + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
                     + " <http://purl.org/dc/terms/created> ?created ."
@@ -375,7 +383,7 @@ public class MDataResource extends BaseResource {
 
             queryString.append(filterPredicate.toString());
 
-            if (!dateSearch && !queryForm.getNames().contains("created")) {
+            if (!dateSearch) {
                 queryString
                         .append(" OPTIONAL { "
                                 + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "

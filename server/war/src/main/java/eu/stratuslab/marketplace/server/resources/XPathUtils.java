@@ -19,7 +19,17 @@ public final class XPathUtils {
     public static final XPathQuery CREATED_DATE = new XPathQuery(
             "//rdf:RDF/rdf:Description/slreq:endorsement/dcterms:created", "",
             "");
-
+    public static final XPathQuery OS = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slterms:os", "", "");
+    public static final XPathQuery OS_VERSION = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slterms:os-version", "", "");
+    public static final XPathQuery OS_ARCH = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slterms:os-arch", "", "");
+    public static final XPathQuery DESCRIPTION = new XPathQuery(
+            "//rdf:RDF/rdf:Description/dcterms:description", "", "");
+    public static final XPathQuery LOCATION = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slterms:location", "", "");
+    
     private XPathUtils() {
 
     }
