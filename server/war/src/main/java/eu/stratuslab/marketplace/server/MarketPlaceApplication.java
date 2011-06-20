@@ -64,6 +64,8 @@ public class MarketPlaceApplication extends Application {
     private SailBase store = null;
     private String dataDir = null;
     
+    private boolean repositoryLock = false;
+    
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
     public MarketPlaceApplication() {
@@ -97,18 +99,9 @@ public class MarketPlaceApplication extends Application {
          */
         final Runnable pinger = new Runnable() {
             public void run() { 
-            	try {
-                    RepositoryConnection con = getMetadataStore().getConnection();
-                    try {
-                    	TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
-                                "SELECT * WHERE { ?s ?p ?o } LIMIT 1");
-                        tupleQuery.evaluate();
-                    } finally {
-                        con.close();
-                    }
-                } catch (OpenRDFException e) {
-                    LOGGER.severe("error pinging repository store: " + e.getMessage());
-                }
+            	lockRepository();
+            	reInitialize();
+            	unlockRepository();
             }
           };
           
@@ -116,7 +109,7 @@ public class MarketPlaceApplication extends Application {
            * Ping the repository once an hour to make sure MySQL does not close the connection
            */
           pingerHandle =
-              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
+              scheduler.scheduleAtFixedRate(pinger, 60, 60, TimeUnit.SECONDS);
     }
 
     /**
@@ -183,6 +176,31 @@ public class MarketPlaceApplication extends Application {
         return router;
     }
 
+    private void reInitialize(){
+    	if (store != null) {
+            try {
+                store.shutDown();
+            } catch (SailException e) {
+                LOGGER.warning("error shutting down repository: "
+                        + e.getMessage());
+            }
+        }
+    	
+    	try {
+            metadata.initialize();
+        } catch (RepositoryException r) {
+            LOGGER.severe("error initializing repository: " + r.getMessage());
+        }
+    }
+    
+    private void lockRepository(){
+    	this.repositoryLock = true;
+    }
+    
+    private void unlockRepository(){
+    	this.repositoryLock = false;
+    }
+    
     @Override
     public void stop() {
         if (store != null) {
@@ -198,6 +216,11 @@ public class MarketPlaceApplication extends Application {
     }
 
     public Repository getMetadataStore() {
+    	while(this.repositoryLock){
+    		try {
+    		    Thread.currentThread().sleep(1000L);
+    		} catch(InterruptedException e){}
+    	}
         return this.metadata;
     }
 
