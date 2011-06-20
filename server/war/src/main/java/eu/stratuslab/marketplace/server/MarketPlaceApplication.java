@@ -109,7 +109,7 @@ public class MarketPlaceApplication extends Application {
            * Ping the repository once an hour to make sure MySQL does not close the connection
            */
           pingerHandle =
-              scheduler.scheduleAtFixedRate(pinger, 60, 60, TimeUnit.SECONDS);
+              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
     }
 
     /**
