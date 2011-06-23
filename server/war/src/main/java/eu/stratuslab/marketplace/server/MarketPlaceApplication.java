@@ -131,11 +131,15 @@ public class MarketPlaceApplication extends Application {
         router.attach("/metadata", MDataResource.class);
         router.attach("/metadata/", MDataResource.class);
         router.attach("/metadata/{arg1}", MDataResource.class);
+        router.attach("/metadata/{arg1}/", MDataResource.class);
         router.attach("/metadata/{arg1}/{arg2}", MDataResource.class);
+        router.attach("/metadata/{arg1}/{arg2}/", MDataResource.class);
 
         // Defines a route for the resource "metadatum"
         router.attach("/metadata/{identifier}/{email}/{date}",
                 MDatumResource.class);
+        router.attach("/metadata/{identifier}/{email}/{date}/",
+		MDatumResource.class);
 
         // Defines a route for the resource "endorsers"
         router.attach("/endorsers", EndorsersResource.class);
@@ -143,6 +147,7 @@ public class MarketPlaceApplication extends Application {
 
         // Defines a route for the resource "endorser"
         router.attach("/endorsers/{email}", EndorserResource.class);
+	router.attach("/endorsers/{email}/", EndorserResource.class);
 
         // Defines a route for queries
         router.attach("/query", QueryResource.class);

@@ -344,41 +344,41 @@ public abstract class BaseResource extends ServerResource {
      */
     protected List<Map<String, String>> query(String queryString) {
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-
+        
         try {
             RepositoryConnection con = getMetadataStore().getConnection();
             try {
-                TupleQuery tupleQuery = con.prepareTupleQuery(
-                        QueryLanguage.SPARQL, queryString);
-                TupleQueryResult results = tupleQuery.evaluate();
-                try {
-                    List<String> columnNames = results.getBindingNames();
-                    int cols = columnNames.size();
+               	TupleQuery tupleQuery = con.prepareTupleQuery(
+                       	QueryLanguage.SPARQL, queryString);
+               	TupleQueryResult results = tupleQuery.evaluate();
+               	try {
+               		List<String> columnNames = results.getBindingNames();
+               		int cols = columnNames.size();
 
-                    while (results.hasNext()) {
-                        BindingSet solution = results.next();
-                        HashMap<String, String> row = new HashMap<String, String>(
-                                cols, 1);
-                        for (Iterator<String> namesIter = columnNames
-                                .listIterator(); namesIter.hasNext();) {
-                            String columnName = namesIter.next();
-                            Value columnValue = solution.getValue(columnName);
-                            if (columnValue != null) {
-                                row.put(columnName, (solution
-                                        .getValue(columnName)).stringValue());
-                            } else {
-                                row.put(columnName, "null");
-                            }
-                        }
-                        list.add(row);
-                    }
+               		while (results.hasNext()) {
+            	   		BindingSet solution = results.next();
+                       		HashMap<String, String> row = new HashMap<String, String>(
+                               		cols, 1);
+                       		for (Iterator<String> namesIter = columnNames
+                               		.listIterator(); namesIter.hasNext();) {
+                       			String columnName = namesIter.next();
+                       			Value columnValue = solution.getValue(columnName);
+                       			if (columnValue != null) {
+                               			row.put(columnName, (solution
+                                       		.getValue(columnName)).stringValue());
+                       			} else {
+                	       			row.put(columnName, "null");
+                       			}
+                        	}
+                        	list.add(row);
+                    	}
                 } finally {
-                    results.close();
+                	results.close();
                 }
-            } finally {
-                con.close();
-            }
-        } catch (OpenRDFException e) {
+            	} finally {
+                	con.close();
+            	}
+	} catch (OpenRDFException e) {
             e.printStackTrace();
         }
 

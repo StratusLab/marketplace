@@ -16,9 +16,9 @@
     
     <h2>Documentation</h2>
       <ul>
-          <li><a href="http://www.stratuslab.eu/lib/exe/fetch.php/documents:marketplace-v3.0.pdf">MarketPlace Technical Note</a>
+          <li><a href="http://www.stratuslab.eu/lib/exe/fetch.php/documents:marketplace-v3.0.pdf">Marketplace Technical Note</a>
           </li>
-          <li><a href="https://www.egi.eu/indico/contributionDisplay.py?sessionId=6&amp;contribId=8&amp;confId=207">Tutorial at EGI UF</a> (see the MarketPlace presentation in the slides link)
+          <li><a href="https://www.egi.eu/indico/contributionDisplay.py?sessionId=6&amp;contribId=8&amp;confId=207">Tutorial at EGI UF</a> (see the Marketplace presentation in the slides link)
           </li>
           <li><a href="http://stratuslab.eu/doku.php/tutorial:marketplace">Tutorial on the StratusLab wiki</a>
           </li>
