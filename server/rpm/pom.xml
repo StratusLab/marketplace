@@ -3,7 +3,7 @@
 
   <groupId>eu.stratuslab.marketplace.server</groupId>
   <artifactId>marketplace-server-rpm</artifactId>
-  <version>0.0.8</version>
+  <version>0.0.9-SNAPSHOT</version>
   <name>Marketplace Server (RPM)</name>
 
   <packaging>rpm</packaging>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
     <artifactId>marketplace-server</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.9-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -19,7 +19,7 @@
       <groupId>eu.stratuslab.marketplace</groupId>
       <artifactId>marketplace-server-war</artifactId>
       <type>war</type>
-      <version>0.0.8</version>
+      <version>0.0.9-SNAPSHOT</version>
     </dependency>
   </dependencies>
   

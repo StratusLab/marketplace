@@ -3,7 +3,7 @@
 
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>marketplace-server</artifactId>
-  <version>0.0.8</version>
+  <version>0.0.9-SNAPSHOT</version>
   <name>Marketplace Server (POM)</name>
 
   <packaging>pom</packaging>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
     <artifactId>marketplace</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.9-SNAPSHOT</version>
   </parent>
 
   <modules>
