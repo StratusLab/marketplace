@@ -17,6 +17,12 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
+import com.hp.hpl.jena.sparql.lang.ParserSPARQL11;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.sparql.syntax.Element;
+import com.hp.hpl.jena.sparql.syntax.ElementGroup;
+import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
+
 /**
  * This resource represents a query on the rdf data
  */
@@ -30,20 +36,21 @@ public class QueryResource extends BaseResource {
         String queryString = queryForm.getFirstValue("query");
         String resultString = "";
         try {
+        	
             if (queryString != null && !"".equals(queryString)) {
-                if ((queryString.indexOf("FROM") >= 0)
-                        || (queryString.indexOf("GRAPH") >= 0)
-                        || (queryString.indexOf("INSERT") >= 0)
-                        || (queryString.indexOf("CONSTRUCT") >= 0)) {
-                    throw new ResourceException(
-                            Status.CLIENT_ERROR_BAD_REQUEST,
-                            "query not allowed.");
-                }
-
+                
+            	//check that query is allowed.
+        	    if(!validQuery(queryString)){
+        	    			throw new ResourceException(
+                                    Status.CLIENT_ERROR_BAD_REQUEST,
+                                    "query not allowed.");
+        	    }
+        	    
+        	    //make sure query is valid for sesame.
                 QueryParser parser = QueryParserUtil
                         .createParser(QueryLanguage.SPARQL);
                 parser.parseQuery(queryString, MARKETPLACE_URI);
-                 
+                                
                 List<Map<String, String>> results = query(queryString);
                 if (results.size() > 0) {
                     StringBuilder stringBuilder = new StringBuilder();
@@ -129,6 +136,30 @@ public class QueryResource extends BaseResource {
         }
 
         return results;
+    }
+    
+    private boolean validQuery(String queryString){
+    	boolean valid = true;
+
+    	ParserSPARQL11 jenaParser = new ParserSPARQL11();
+    	Query selectQuery = jenaParser.parse(new Query(), queryString);
+
+    	if(!selectQuery.isSelectType() || 
+    			selectQuery.hasDatasetDescription()){
+    		valid = false;
+    	} else {
+    		Element queryElement = selectQuery.getQueryPattern();
+    		if(queryElement.getClass() == ElementGroup.class){
+    			List<Element> elements = ((ElementGroup)queryElement).getElements();
+    			for(Element e: elements){
+    				if(e.getClass() == ElementNamedGraph.class){
+    					valid = false;
+    				}
+    			}
+    		}
+    	}
+
+    	return valid;
     }
 
 }
