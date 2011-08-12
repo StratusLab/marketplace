@@ -6,10 +6,10 @@ function fnFormatDetails ( oTable, nTr )
 	var aData = oTable.fnGetData( nTr );
 	var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 	sOut += '<tr><td>Description:</td><td>'+aData[8]+'</td></tr>';
-	sOut += '<tr><td>Identifier:</td><td>'+aData[5]+'</td></tr>';
-	sOut += '<tr><td>URL:</td><td><a href="'+aData[7]+'">'+aData[7]+'</a></td></tr>';
+	sOut += '<tr><td>Identifier:</td><td>'+aData[6]+'</td></tr>';
+        sOut += '<tr><td>URL:</td><td><a href="'+aData[7]+'">'+aData[7]+'</a></td></tr>';
 	sOut += '</table>';
-        sOut += '<br/><p align="right"><a href="/metadata/'+aData[5]+'/'+aData[4]+'/'+aData[6]+'">More...</a></p>';
+        sOut += '<br/><p align="right"><a href="/metadata/'+aData[6]+'/'+aData[4]+'/'+aData[5]+'">More...</a></p>';
 	
 	return sOut;
 }
@@ -121,7 +121,6 @@ $(document).ready(function() {
 	var oTable = $('#form_with_details').dataTable( {
 		"aoColumnDefs": [
 			{ "bSortable": false, "aTargets": [ 0 ] },
-                        { "bVisible": false, "aTargets": [5] },
                         { "bVisible": false, "aTargets": [6] },
                         { "bVisible": false, "aTargets": [7] },
                         { "bVisible": false, "aTargets": [8] },

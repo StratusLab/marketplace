@@ -13,6 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.openrdf.OpenRDFException;
 import org.openrdf.query.QueryLanguage;
@@ -48,6 +50,18 @@ import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
+import org.restlet.Application;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.data.LocalReference;
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
+import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
+import org.restlet.service.StatusService;
+import org.restlet.resource.Get;
+
 public class MarketPlaceApplication extends Application {
 
     private static final Logger LOGGER = Logger.getLogger("org.restlet");
@@ -74,7 +88,9 @@ public class MarketPlaceApplication extends Application {
         setDescription("Market-Place for StratusLab images");
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
-
+        
+        setStatusService(new MarketPlaceStatusService());
+                
         getTunnelService().setUserAgentTunnel(true);
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
@@ -123,7 +139,7 @@ public class MarketPlaceApplication extends Application {
         // Create the FreeMarker configuration.
         freeMarkerConfiguration = MarketPlaceApplication
                 .createFreeMarkerConfig(context);
-
+        
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
 
@@ -147,7 +163,7 @@ public class MarketPlaceApplication extends Application {
 
         // Defines a route for the resource "endorser"
         router.attach("/endorsers/{email}", EndorserResource.class);
-	router.attach("/endorsers/{email}/", EndorserResource.class);
+	    router.attach("/endorsers/{email}/", EndorserResource.class);
 
         // Defines a route for queries
         router.attach("/query", QueryResource.class);
@@ -270,5 +286,27 @@ public class MarketPlaceApplication extends Application {
 
         return cfg;
     }
+    
+    class MarketPlaceStatusService extends StatusService {
+
+    	@Get("html")
+        public Representation getRepresentation(Status status, Request request,
+                Response response) {
+
+            // Create the data model
+            Map<String, String> dataModel = new TreeMap<String, String>();
+            dataModel.put("baseurl", request.getRootRef().toString());
+            dataModel.put("statusName", response.getStatus().getName());
+            dataModel.put("statusDescription", response.getStatus()
+                    .getDescription());
+            dataModel.put("title", response.getStatus().getName());
+            
+            freemarker.template.Configuration freeMarkerConfig = freeMarkerConfiguration;
+
+            return new TemplateRepresentation("status.ftl", freeMarkerConfig, dataModel,
+                    MediaType.TEXT_HTML);
+        }
+    }
+
 
 }

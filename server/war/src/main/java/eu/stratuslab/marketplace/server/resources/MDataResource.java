@@ -279,7 +279,7 @@ public class MDataResource extends BaseResource {
             dMap.put("arch", arch);
             dMap.put("location", location);
             dMap.put("description", description);
-
+            
             dataMap.put(created, dMap);
             endorserMap.put(endorser, dataMap);
             root.put(identifier, endorserMap);

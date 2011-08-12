@@ -23,14 +23,15 @@
 <p><xsl:value-of select="dcterms:description"/></p>
 <table class="inline">
 <tr><td><b>type:</b></td><td><xsl:value-of select="dcterms:type"/></td></tr>
-<tr>
-<td><b>checksum:</b></td>
-<td>
-<xsl:for-each select="slreq:checksum">
-<xsl:value-of select="slreq:algorithm"/><xsl:text> </xsl:text><xsl:value-of select="slreq:value"/><br/>
-</xsl:for-each>
-</td>
-</tr>
+
+<xsl:if test="string(slterms:kind)">
+<tr><td><b>kind: </b></td><td><xsl:value-of select="slterms:kind"/></td></tr>
+</xsl:if>
+
+<xsl:if test="string(dcterms:format)">
+<tr><td><b>format: </b></td><td><xsl:value-of select="dcterms:format"/></td></tr>
+</xsl:if>
+
 <tr>
 <td><b>endorser:</b></td>
 <td><a><xsl:attribute name="href">../../../endorsers/<xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></xsl:attribute><xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></a>
@@ -46,7 +47,6 @@
 <xsl:text> v</xsl:text><xsl:value-of select="slterms:os-version"/>
 </xsl:if>
 <xsl:if test="string(slterms:os-arch)">
-
 <xsl:text> </xsl:text><xsl:value-of select="slterms:os-arch"/>
 </xsl:if>
 </td>
@@ -57,6 +57,34 @@
 <tr><td><b>version: </b></td><td><xsl:value-of select="slterms:version"/></td></tr>
 </xsl:if>
 
+<xsl:if test="string(dcterms:created)">
+<tr><td><b>created: </b></td><td><xsl:value-of select="dcterms:created"/></td></tr>
+</xsl:if>
+<xsl:if test="string(dcterms:valid)">
+<tr><td><b>valid: </b></td><td><xsl:value-of select="dcterms:valid"/></td></tr>
+</xsl:if>
+
+<xsl:if test="string(slterms:hypervisor)">
+<tr><td><b>hypervisor: </b></td><td><xsl:value-of select="slterms:hypervisor"/></td></tr>
+</xsl:if>
+
+<xsl:if test="string(dcterms:publisher)">
+<tr><td><b>publisher: </b></td><td><xsl:value-of select="dcterms:publisher"/></td></tr>
+</xsl:if>
+
+<xsl:if test="string(slreq:bytes)">
+<tr><td><b>bytes: </b></td><td><xsl:value-of select="slreq:bytes"/></td></tr>
+</xsl:if>
+
+<tr>
+<td><b>checksum:</b></td>
+<td>
+<xsl:for-each select="slreq:checksum">
+<xsl:value-of select="slreq:algorithm"/><xsl:text> </xsl:text><xsl:value-of select="slreq:value"/><br/>
+</xsl:for-each>
+</td>
+</tr>
+
 <xsl:if test="string(slterms:location)">
 <tr><td><b>location:</b></td>
 <td>
@@ -66,6 +94,7 @@
 </td>
 </tr>
 </xsl:if>
+
 </table>
 </xsl:template>
 </xsl:stylesheet>
