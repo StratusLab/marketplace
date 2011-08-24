@@ -247,18 +247,12 @@ public class MDataResource extends BaseResource {
             String identifier = resultRow.get("identifier");
             String endorser = resultRow.get("email");
             String created = resultRow.get("created");  
+            String os = resultRow.get("os");
+            String osversion = resultRow.get("osversion");
+            String arch = resultRow.get("arch");
+            String location = resultRow.get("location");
+            String description = resultRow.get("description");
             
-            String iri = identifier + "/" + endorser + "/" + created;
-            String datum = getMetadatum(getDataDir() + File.separatorChar + iri
-                    + ".xml");
-            Document doc = extractXmlDocument(new ByteArrayInputStream(datum.getBytes()));
-            
-            String os = XPathUtils.getValue(doc, XPathUtils.OS);
-            String osversion = XPathUtils.getValue(doc, XPathUtils.OS_VERSION);
-            String arch = XPathUtils.getValue(doc, XPathUtils.OS_ARCH);
-            String location = XPathUtils.getValue(doc, XPathUtils.LOCATION);
-            String description = XPathUtils.getValue(doc, XPathUtils.DESCRIPTION);
-
             HashMap<String, HashMap<String, HashMap<String, String>>> endorserMap;
             if (root.containsKey(identifier)) {
                     endorserMap = root.get(identifier);
@@ -369,15 +363,15 @@ public class MDataResource extends BaseResource {
 	}
 
         StringBuilder queryString = new StringBuilder(
-            		"SELECT DISTINCT ?identifier ?email ?created"
-            		//" ?os ?osversion ?arch ?location ?description"
+            		"SELECT ?identifier ?email ?created"
+            		+ " ?os ?osversion ?arch ?location ?description"
                     + " WHERE {"
                     + " ?x <http://purl.org/dc/terms/identifier>  ?identifier; "
-                    //+ " <http://mp.stratuslab.eu/slterms#os> ?os; "
-                    //+ " <http://mp.stratuslab.eu/slterms#os-version> ?osversion;"
-                    //+ " <http://mp.stratuslab.eu/slterms#os-arch> ?arch;"
-                    //+ " <http://mp.stratuslab.eu/slterms#location> ?location;"
-                    //+ " <http://purl.org/dc/terms/description> ?description;"
+                    + " <http://mp.stratuslab.eu/slterms#os> ?os; "
+                    + " <http://mp.stratuslab.eu/slterms#os-version> ?osversion;"
+                    + " <http://mp.stratuslab.eu/slterms#os-arch> ?arch;"
+                    + " <http://mp.stratuslab.eu/slterms#location> ?location;"
+                    + " <http://purl.org/dc/terms/description> ?description;"
                     + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
                     + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
                     + " <http://purl.org/dc/terms/created> ?created ."

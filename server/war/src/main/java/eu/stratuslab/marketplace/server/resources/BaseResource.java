@@ -1,9 +1,10 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
-import static eu.stratuslab.marketplace.server.resources.XPathUtils.CREATED_DATE;
-import static eu.stratuslab.marketplace.server.resources.XPathUtils.EMAIL;
-import static eu.stratuslab.marketplace.server.resources.XPathUtils.IDENTIFIER_ELEMENT;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.CREATED_DATE;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
+import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -197,7 +198,11 @@ public abstract class BaseResource extends ServerResource {
     protected static String createRdfEntry(Document doc) {
         Document copy = (Document) doc.cloneNode(true);
         MetadataUtils.stripSignatureElements(copy);
-        return XMLUtils.documentToString(copy);
+        String rdfEntry = XMLUtils.documentToString(copy);
+        String[] coords = getMetadataEntryCoordinates(copy);
+        rdfEntry = rdfEntry.replaceFirst("<rdf:Description rdf:about=\"#" + coords[0] + "\">",
+        		"<rdf:Description rdf:about=\"#" + coords[0] + "/" + coords[1] + "/" + coords[2] + "\">");
+        return rdfEntry;
     }
 
     protected static String[] getMetadataEntryCoordinates(Document doc) {

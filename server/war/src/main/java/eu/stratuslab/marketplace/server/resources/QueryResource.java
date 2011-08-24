@@ -4,6 +4,7 @@ import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKET
 
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -23,10 +24,14 @@ import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 
+import java.util.logging.Logger;
+
 /**
  * This resource represents a query on the rdf data
  */
 public class QueryResource extends BaseResource {
+	
+	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
 	@Get("html")
     public Representation toHtml() {
@@ -52,7 +57,8 @@ public class QueryResource extends BaseResource {
                 parser.parseQuery(queryString, MARKETPLACE_URI);
                                 
                 List<Map<String, String>> results = query(queryString);
-                if (results.size() > 0) {
+                int noOfResults = results.size();
+                if (noOfResults > 0) {
                     StringBuilder stringBuilder = new StringBuilder();
 
                     stringBuilder.append("<table border=\"1\">");
@@ -73,10 +79,12 @@ public class QueryResource extends BaseResource {
                     }
 
                     stringBuilder.append("</table>");
+                    stringBuilder.append(noOfResults + " results.");
                     resultString = stringBuilder.toString();
                 } else {
                     resultString = "";
                 }
+                                
             } else {
                 queryString = "";
                 resultString = "";

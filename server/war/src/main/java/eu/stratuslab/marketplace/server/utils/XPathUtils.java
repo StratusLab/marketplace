@@ -1,4 +1,4 @@
-package eu.stratuslab.marketplace.server.resources;
+package eu.stratuslab.marketplace.server.utils;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
