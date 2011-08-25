@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -55,6 +58,12 @@ import eu.stratuslab.marketplace.server.utils.Notifier;
 public class MDataResource extends BaseResource {
 
     private static final Logger LOGGER = Logger.getLogger("org.restlet");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+    "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    static {
+    	DATE_FORMAT.setLenient(false);
+    	DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     /**
      * Handle POST requests: register new Metadata entry.
@@ -328,40 +337,42 @@ public class MDataResource extends BaseResource {
     }
 
     private List<Map<String, String>> getMetadata() {
-	
-	Map<String, Object> requestAttr = getRequest().getAttributes();
-        boolean dateSearch = false;
 
-        StringBuilder filterPredicate = new StringBuilder();
-	boolean filter = false;
+    	Map<String, Object> requestAttr = getRequest().getAttributes();
+    	boolean dateSearch = false;
 
-        for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
+    	StringBuilder filterPredicate = new StringBuilder();
+    	boolean filter = false;
 
-        	String key = arg.getKey();
-                if (!key.startsWith("org.restlet")) {
-                    switch (classifyArg((String) arg.getValue())) {
-                    case ARG_EMAIL:
-                        filter = true;
-                        filterPredicate.append(" FILTER (?email = \""
-                                + arg.getValue() + "\"). ");
-                        break;
-                    case ARG_DATE:
-                        filter = true;
-                        dateSearch = true;
-                        filterPredicate.append(" FILTER (?created = \""
-                                + arg.getValue() + "\"). ");
-                        break;
-                    case ARG_OTHER:
-                        filter = true;
-                        filterPredicate.append(" FILTER (?identifier = \""
-                                + arg.getValue() + "\"). ");
-                        break;
-                    default:
-                        break;
-                    }
-                }
-	}
+    	for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
 
+    		String key = arg.getKey();
+    		if (!key.startsWith("org.restlet")) {
+    			switch (classifyArg((String) arg.getValue())) {
+    			case ARG_EMAIL:
+    				filter = true;
+    				filterPredicate.append(" FILTER (?email = \""
+    						+ arg.getValue() + "\"). ");
+    				break;
+    			case ARG_DATE:
+    				filter = true;
+    				dateSearch = true;
+    				filterPredicate.append(" FILTER (?created = \""
+    						+ arg.getValue() + "\"). ");
+    				break;
+    			case ARG_OTHER:
+    				filter = true;
+    				filterPredicate.append(" FILTER (?identifier = \""
+    						+ arg.getValue() + "\"). ");
+    				break;
+    			default:
+    				break;
+    			}
+    		}
+    	}
+
+        String datetime = DATE_FORMAT.format(new Date());
+        
         StringBuilder queryString = new StringBuilder(
             		"SELECT ?identifier ?email ?created"
             		+ " ?os ?osversion ?arch ?location ?description"
@@ -372,6 +383,7 @@ public class MDataResource extends BaseResource {
                     + " <http://mp.stratuslab.eu/slterms#os-arch> ?arch;"
                     + " <http://mp.stratuslab.eu/slterms#location> ?location;"
                     + " <http://purl.org/dc/terms/description> ?description;"
+                    + " <http://purl.org/dc/terms/valid> ?valid;"
                     + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
                     + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
                     + " <http://purl.org/dc/terms/created> ?created ."
@@ -391,7 +403,7 @@ public class MDataResource extends BaseResource {
                                 + " FILTER (?lemail = ?email) ."
                                 + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement))");
         }
-
+        queryString.append(" . FILTER (?valid > \"" + datetime + "\") ");
         queryString.append(" }");
 
         List<Map<String, String>> results = query(queryString.toString());
@@ -399,7 +411,7 @@ public class MDataResource extends BaseResource {
         if(results.size() <= 0 && filter){
 		throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
-	} else {
+        } else {
         	return results;
         }
     }
