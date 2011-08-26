@@ -25,9 +25,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -56,15 +53,7 @@ import eu.stratuslab.marketplace.server.utils.Notifier;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-
-    private static final Logger LOGGER = Logger.getLogger("org.restlet");
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-    "yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-    	DATE_FORMAT.setLenient(false);
-    	DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
+    
     /**
      * Handle POST requests: register new Metadata entry.
      */
@@ -371,7 +360,7 @@ public class MDataResource extends BaseResource {
     		}
     	}
 
-        String datetime = DATE_FORMAT.format(new Date());
+        String datetime = getCurrentDate();
         
         StringBuilder queryString = new StringBuilder(
             		"SELECT ?identifier ?email ?created"

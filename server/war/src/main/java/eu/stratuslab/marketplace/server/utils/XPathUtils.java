@@ -29,6 +29,8 @@ public final class XPathUtils {
             "//rdf:RDF/rdf:Description/dcterms:description", "", "");
     public static final XPathQuery LOCATION = new XPathQuery(
             "//rdf:RDF/rdf:Description/slterms:location", "", "");
+    public static final XPathQuery VALID = new XPathQuery(
+            "//rdf:RDF/rdf:Description/dcterms:valid", "", "");
     
     private XPathUtils() {
 

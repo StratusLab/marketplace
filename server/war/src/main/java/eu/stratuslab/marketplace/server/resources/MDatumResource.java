@@ -30,7 +30,7 @@ import com.talis.rdfwriters.json.JSONJenaWriter;
 public class MDatumResource extends BaseResource {
 
     private String datum = null;
-
+        
     @Override
     protected void doInit() {
         String iri = getRequest().getResourceRef().getPath();
@@ -44,7 +44,8 @@ public class MDatumResource extends BaseResource {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
-        StringRepresentation representation = new StringRepresentation(
+    	
+    	StringRepresentation representation = new StringRepresentation(
                 new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
 
         // Returns the XML representation of this document.
@@ -57,6 +58,7 @@ public class MDatumResource extends BaseResource {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
+        
         Model rdfModel = ModelFactory.createMemModelMaker()
                 .createDefaultModel();
         rdfModel.read(new ByteArrayInputStream((stripSignature(datum))
@@ -78,6 +80,7 @@ public class MDatumResource extends BaseResource {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
+        
         TransformerFactory tFactory = TransformerFactory.newInstance();
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -111,6 +114,5 @@ public class MDatumResource extends BaseResource {
                 "mdatum.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
-    }
-
+    }   
 }

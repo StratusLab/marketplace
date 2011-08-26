@@ -4,6 +4,7 @@ import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKET
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.CREATED_DATE;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.VALID;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 import java.io.BufferedInputStream;
@@ -23,6 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -66,7 +71,7 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
  */
 public abstract class BaseResource extends ServerResource {
 
-	private static final Logger LOGGER = Logger.getLogger("org.restlet");
+	protected static final Logger LOGGER = Logger.getLogger("org.restlet");
 
     protected static final int ARG_EMAIL = 1;
     protected static final int ARG_DATE = 2;
@@ -75,6 +80,13 @@ public abstract class BaseResource extends ServerResource {
     protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
     protected static final String NO_TITLE = null;
 
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+    "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    static {
+    	DATE_FORMAT.setLenient(false);
+    	DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+    
     protected Repository getMetadataStore() {
         return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
@@ -277,8 +289,26 @@ public abstract class BaseResource extends ServerResource {
         String model = null;
         try {
             model = readFileAsString(iri);
+            
+            Document datumDoc = extractXmlDocument(
+            		new ByteArrayInputStream(model.getBytes()));
+        	String validity = XPathUtils.getValue(datumDoc, XPathUtils.VALID);
+        	
+        	String date = getCurrentDate();
+        	try {
+        		Date currentDate = DATE_FORMAT.parse(date);
+        		Date validDate = DATE_FORMAT.parse(validity);
+        	
+        		if (validDate.before(currentDate)){
+        			throw new ResourceException(Status.CLIENT_ERROR_GONE,
+                    "metadata entry has expired.\n");
+        		}
+        	} catch(ParseException p){
+        		LOGGER.severe("Error parsing metadata validity date.");
+        	}
+            
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.severe("Unable to read metadata file: " + iri);
         }
 
         return model;
@@ -506,6 +536,10 @@ public abstract class BaseResource extends ServerResource {
                 LOGGER.severe(consumed.getMessage());
             }
         }
+    }
+    
+    protected static String getCurrentDate(){
+    	return DATE_FORMAT.format(new Date());
     }
 
 }
