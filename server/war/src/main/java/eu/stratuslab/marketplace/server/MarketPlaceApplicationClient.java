@@ -39,11 +39,9 @@ public final class MarketPlaceApplicationClient {
             }
         }
 
-        // Define our Restlet client resources.
+        // Define our Restlet client resource.
         ClientResource metadataResource = new ClientResource(url + "/metadata");
-        ClientResource endorsersResource = new ClientResource(url
-                + "/endorsers");
-
+        
         // Create a new item
         Representation rdf = new FileRepresentation(metadata,
                 MediaType.APPLICATION_RDF_XML);
@@ -53,6 +51,7 @@ public final class MarketPlaceApplicationClient {
         try {
             if (metadataResource != null) {
                 Representation r = metadataResource.post(rdf);
+                System.out.println(r.getLocationRef());
                 metadataResource.getResponseEntity().write(System.out);
                 metadatumResource = new ClientResource(r.getLocationRef());
             }
@@ -68,17 +67,9 @@ public final class MarketPlaceApplicationClient {
         metadataResource.getResponseEntity().exhaust();
 
         if (metadatumResource != null) {
-            // Prints the list of registered metadata.
-            get(metadataResource);
-            System.out.println();
-
             // Prints a metadata entry.
             get(metadatumResource, mediaType);
-            System.out.println();
-
-            // Prints the current list of endorsers
-            get(endorsersResource);
-            System.out.println();
+            System.out.println();          
         }
 
     }
