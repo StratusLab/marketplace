@@ -288,25 +288,7 @@ public abstract class BaseResource extends ServerResource {
     protected String getMetadatum(String iri) {
         String model = null;
         try {
-            model = readFileAsString(iri);
-            
-            Document datumDoc = extractXmlDocument(
-            		new ByteArrayInputStream(model.getBytes()));
-        	String validity = XPathUtils.getValue(datumDoc, XPathUtils.VALID);
-        	
-        	String date = getCurrentDate();
-        	try {
-        		Date currentDate = DATE_FORMAT.parse(date);
-        		Date validDate = DATE_FORMAT.parse(validity);
-        	
-        		if (validDate.before(currentDate)){
-        			throw new ResourceException(Status.CLIENT_ERROR_GONE,
-                    "metadata entry has expired.\n");
-        		}
-        	} catch(ParseException p){
-        		LOGGER.severe("Error parsing metadata validity date.");
-        	}
-            
+            model = readFileAsString(iri);           
         } catch (IOException e) {
             LOGGER.severe("Unable to read metadata file: " + iri);
         }

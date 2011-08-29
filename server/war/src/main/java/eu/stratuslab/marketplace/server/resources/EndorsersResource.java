@@ -14,13 +14,6 @@ import org.restlet.resource.Get;
  */
 public class EndorsersResource extends BaseResource {
 
-    /*private String queryString = "SELECT DISTINCT ?email "
-            + " WHERE {"
-            + " ?x <http://purl.org/dc/terms/identifier>  ?identifier . "
-            + " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
-            + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . "
-            + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email . }";
-	*/
     private static final String EMAIL_QUERY = //
         "SELECT DISTINCT ?email ?subject ?issuer "
                 + " WHERE {"
