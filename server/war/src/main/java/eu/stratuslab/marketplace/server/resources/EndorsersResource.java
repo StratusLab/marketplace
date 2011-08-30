@@ -27,7 +27,15 @@ public class EndorsersResource extends BaseResource {
     @Get("html")
     public Representation toHtml() {
         List<Map<String, String>> results = query(EMAIL_QUERY);
-
+        
+        for(int i = 0; i < results.size(); i++){
+        	Map<String, String> resultRow = results.get(i);
+        	String subject = resultRow.get("subject");
+        	String cn = subject.substring(subject.indexOf("CN=")+3, 
+        			subject.indexOf(",", subject.indexOf("CN=")+3));
+        	resultRow.put("name", cn);
+        	results.set(i, resultRow);
+        }
         Map<String, Object> data = createInfoStructure("Endorsers");
         data.put("content", results);
 

@@ -7,6 +7,7 @@ function fnFormatDetails ( oTable, nTr )
 	var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 	sOut += '<tr><td>Subject:</td><td>'+aData[2]+'</td></tr>';
 	sOut += '<tr><td>Issuer:</td><td>'+aData[3]+'</td></tr>';
+        sOut += '<tr><td>Email:</td><td>'+aData[4]+'</td></tr>';
 	sOut += '</table>';
 	
 	return sOut;
@@ -120,7 +121,8 @@ $(document).ready(function() {
 		"aoColumnDefs": [
 			{ "bSortable": false, "aTargets": [ 0 ] },
                         { "bVisible": false, "aTargets": [2] },
-                        { "bVisible": false, "aTargets": [3] },                       
+                        { "bVisible": false, "aTargets": [3] },
+                        { "bVisible": false, "aTargets": [4] },                       
                 ],
 		"aaSorting": [[1, 'asc']],
                 'sPaginationType': 'listbox',
