@@ -12,14 +12,6 @@
   <div class="Content">
       <h1>${title}</h1>
 
-      <!-- <table border=0>
-          <#list content as emails>
-              <tr>
-              <td><a href=endorsers/${emails.email}>${emails.name}</a></td>
-              </tr>
-           </#list>
-      </table> -->
-
       <table id="form_with_details" class="display">
     <thead>
         <tr>
@@ -48,9 +40,8 @@
 </table>
 
 <#include "endorserdetails-js.ftl">
-
-
-  </div>
+  
+</div>
 </div>
 
 </body>
