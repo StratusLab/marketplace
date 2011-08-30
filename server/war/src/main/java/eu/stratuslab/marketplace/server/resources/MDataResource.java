@@ -333,6 +333,18 @@ public class MDataResource extends BaseResource {
     	StringBuilder filterPredicate = new StringBuilder();
     	boolean filter = false;
 
+    	Form form = getRequest().getResourceRef().getQueryAsForm();
+    	Map<String, String> formValues = form.getValuesMap();
+    	String deprecatedValue = "off";
+    	
+    	if(formValues.containsKey("deprecated")){
+    		deprecatedValue = formValues.remove("deprecated");
+    		if(deprecatedValue == null)
+    			deprecatedValue = "on";
+    	}
+    	    	   	
+    	requestAttr.putAll(formValues);
+    	    	    	    	
     	for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
 
     		String key = arg.getKey();
@@ -372,6 +384,7 @@ public class MDataResource extends BaseResource {
                     + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-arch> ?arch . }"
                     + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
                     + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
+                    + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . }"
                     + " ?x <http://purl.org/dc/terms/valid> ?valid;"
                     + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
                     + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
@@ -393,6 +406,13 @@ public class MDataResource extends BaseResource {
                                 + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement))");
         }
         queryString.append(" . FILTER (?valid > \"" + datetime + "\") ");
+        
+        if (deprecatedValue.equals("off")){
+        	queryString.append(" . FILTER (!bound (?deprecated))");
+        } else if (deprecatedValue.equals("only")){
+        	queryString.append(" . FILTER (bound (?deprecated))");
+        }
+        
         queryString.append(" }");
 
         List<Map<String, String>> results = query(queryString.toString());

@@ -22,6 +22,11 @@
 </xsl:choose>
 <p><xsl:value-of select="dcterms:description"/></p>
 <table class="inline">
+
+<xsl:if test="string(slterms:deprecated)">
+<tr><td><b>Deprecated: </b></td><td><b><font color="red"><xsl:value-of select="slterms:deprecated"/></font></b></td></tr>
+</xsl:if>
+
 <tr><td><b>type:</b></td><td><xsl:value-of select="dcterms:type"/></td></tr>
 
 <xsl:if test="string(slterms:kind)">
