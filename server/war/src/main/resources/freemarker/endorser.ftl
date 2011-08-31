@@ -35,7 +35,9 @@
 
 <script type="text/javascript" charset="utf-8">
 	$(document).ready(function() {
-		$('#endorserhistory').dataTable();
+		$('#endorserhistory').dataTable({
+			'sPaginationType':'listbox',
+	});
 	} );
 </script>
 

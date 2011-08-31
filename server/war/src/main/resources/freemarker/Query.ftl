@@ -30,6 +30,15 @@
 <h2>Results:</h2>
 ${results}
 
+<script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+                $('#resultstable').dataTable({
+			'bPaginate':true,
+                        'sPaginationType':'listbox',		
+		});
+        } );
+</script>
+
 </div>
 </div>
 

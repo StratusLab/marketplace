@@ -61,12 +61,14 @@ public class QueryResource extends BaseResource {
                 if (noOfResults > 0) {
                     StringBuilder stringBuilder = new StringBuilder();
 
-                    stringBuilder.append("<table border=\"1\">");
-                    stringBuilder.append("<tr>");
+                    stringBuilder.append("<table cellpadding=\"0\" cellspacing=\"0\" " +
+                    		"border=\"0\" class=\"display\" id=\"resultstable\">");
+                    stringBuilder.append("<thead><tr>");
                     for (String key : results.get(0).keySet()) {
-                        stringBuilder.append("<td>" + key + "</td>");
+                        stringBuilder.append("<th>" + key + "</th>");
                     }
-                    stringBuilder.append("</tr>");
+                    stringBuilder.append("</tr></thead>");
+                    stringBuilder.append("<tbody>");
 
                     for (Map<String, String> resultRow : results) {
                         stringBuilder.append("<tr>");
@@ -77,9 +79,9 @@ public class QueryResource extends BaseResource {
                         }
                         stringBuilder.append("</tr>");
                     }
-
+                    stringBuilder.append("</tbody>");
                     stringBuilder.append("</table>");
-                    stringBuilder.append(noOfResults + " results.");
+                    //stringBuilder.append(noOfResults + " results.");
                     resultString = stringBuilder.toString();
                 } else {
                     resultString = "";
