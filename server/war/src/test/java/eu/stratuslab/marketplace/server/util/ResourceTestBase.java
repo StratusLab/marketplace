@@ -3,37 +3,44 @@ package eu.stratuslab.marketplace.server.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import org.restlet.Component;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Method;
+import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
+import org.restlet.Application;
+
+import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 
 public class ResourceTestBase {
 
-	/*
+	static Application application;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		// Create a new Component.
-        component = new Component();
-
-        // Add a new HTTP server listening on port 8111.
-        component.getServers().add(Protocol.HTTP, 8111);
-
-        // Attach the sample application.
-        component.getDefaultHost().attach("/",
-                new MarketPlaceApplication("memory"));
-
-        // Start the component.
-        component.start();
+        Component component = new Component();
+		application = new MarketPlaceApplication("memory");
+		component.getDefaultHost().attach("/", application);
+		component.getClients().add(Protocol.CLAP);
+		application.setContext(component.getDefaultHost().getContext());
+		application.createInboundRoot();
 	}
 	
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		component.stop();
+		application.stop();
 	}
-	*/
+	
 	
 	public Request createRequest(Map<String, Object> attributes, Method method)
 			throws Exception {
@@ -90,6 +97,8 @@ public class ResourceTestBase {
 
 		Response response = new Response(request);
 
+		resource.setApplication(application);
+		
 		resource.init(null, request, response);
 		if (response.getStatus().isSuccess()) {
 			resource.handle();

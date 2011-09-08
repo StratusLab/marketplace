@@ -104,7 +104,7 @@ public abstract class BaseResource extends ServerResource {
             Map<String, Object> info, MediaType mediaType) {
 
         freemarker.template.Configuration freeMarkerConfig = getFreeMarkerConfiguration();
-
+                
         return new TemplateRepresentation(tpl, freeMarkerConfig, info,
                 mediaType);
     }

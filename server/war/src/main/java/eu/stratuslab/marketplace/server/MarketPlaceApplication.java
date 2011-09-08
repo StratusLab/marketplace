@@ -28,6 +28,7 @@ import org.openrdf.sail.SailException;
 import org.openrdf.sail.helpers.SailBase;
 import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.sail.rdbms.mysql.MySqlStore;
+
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Restlet;
@@ -37,6 +38,16 @@ import org.restlet.resource.Directory;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
+import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
+import org.restlet.service.StatusService;
+import org.restlet.resource.Get;
+import org.restlet.Client;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
@@ -49,18 +60,6 @@ import eu.stratuslab.marketplace.server.resources.SearchResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
-
-import org.restlet.Application;
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.LocalReference;
-import org.restlet.data.MediaType;
-import org.restlet.data.Status;
-import org.restlet.ext.freemarker.TemplateRepresentation;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
-import org.restlet.service.StatusService;
-import org.restlet.resource.Get;
 
 public class MarketPlaceApplication extends Application {
 
@@ -142,7 +141,7 @@ public class MarketPlaceApplication extends Application {
     public Restlet createInboundRoot() {
 
         Context context = getContext();
-
+        
         // Create the FreeMarker configuration.
         freeMarkerConfiguration = MarketPlaceApplication
                 .createFreeMarkerConfig(context);
@@ -289,6 +288,7 @@ public class MarketPlaceApplication extends Application {
 
         LocalReference fmBaseRef = LocalReference
                 .createClapReference("/freemarker/");
+        
         cfg.setTemplateLoader(new ContextTemplateLoader(context, fmBaseRef));
 
         return cfg;
