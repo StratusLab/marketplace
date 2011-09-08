@@ -15,6 +15,6 @@ public class AboutResource extends BaseResource {
         Map<String, Object> info = createInfoStructure(NO_TITLE);
 
         return createTemplateRepresentation("about.ftl", info, MediaType.TEXT_HTML);
-    }
+    } 
 
 }

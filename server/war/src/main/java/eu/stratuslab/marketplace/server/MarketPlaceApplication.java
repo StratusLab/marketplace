@@ -83,9 +83,17 @@ public class MarketPlaceApplication extends Application {
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
     public MarketPlaceApplication() {
+        String storeType = Configuration.getParameterValue(STORE_TYPE);
+        init(storeType);
+    }
 
-        setName("StratusLab Market-Place");
-        setDescription("Market-Place for StratusLab images");
+    public MarketPlaceApplication(String storeType) {
+    	init(storeType);
+    }
+    
+    private void init(String storeType){
+    	setName("StratusLab Marketplace");
+        setDescription("Marketplace for StratusLab images");
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
         
@@ -95,7 +103,6 @@ public class MarketPlaceApplication extends Application {
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
        
-        String storeType = Configuration.getParameterValue(STORE_TYPE);
         if (storeType.equals("memory")) {
             LOGGER.warning(MEMORY_STORE_WARNING);
             store = new MemoryStore();
@@ -127,7 +134,7 @@ public class MarketPlaceApplication extends Application {
           pingerHandle =
               scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
     }
-
+    
     /**
      * Creates a root Restlet that will receive all incoming calls.
      */

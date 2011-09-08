@@ -81,7 +81,6 @@ public class QueryResource extends BaseResource {
                     }
                     stringBuilder.append("</tbody>");
                     stringBuilder.append("</table>");
-                    //stringBuilder.append(noOfResults + " results.");
                     resultString = stringBuilder.toString();
                 } else {
                     resultString = "";
