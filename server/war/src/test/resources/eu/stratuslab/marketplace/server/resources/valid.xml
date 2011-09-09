@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:slterms="http://mp.stratuslab.eu/slterms#"
+    xmlns:slreq="http://mp.stratuslab.eu/slreq#"
+    xml:base="http://mp.stratuslab.eu/">
+
+    <rdf:Description rdf:about="#BEE8-MMAw-Lk_IgsEExAy3d9R8h">
+
+        <dcterms:identifier>BEE8-MMAw-Lk_IgsEExAy3d9R8h</dcterms:identifier>
+
+        <slreq:bytes>128</slreq:bytes>
+
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>MD5</slreq:algorithm>
+            <slreq:value>a003bf123ce16965005ee85c60281a31</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-1</slreq:algorithm>
+            <slreq:value>1104f3e30c030f8b93f220b04131032dddf51f21</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-256</slreq:algorithm>
+            <slreq:value>63694032b698d2f455b67311e0d4b821e3c4a8a08c679f3e6514d5e13b7255f8</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-512</slreq:algorithm>
+            <slreq:value>70cd8ad17fab1abe7fae230ff70f682ed3af4892225b3100e6a07fc2471b657def80fce93afd02aa7f3e716bb8cab02b745d032cdc4895d5fd242a7ac8403693</slreq:value>
+        </slreq:checksum>
+
+        <slreq:endorsement rdf:parseType="Resource"/>
+
+        <dcterms:type>base</dcterms:type>
+        <slterms:kind>machine</slterms:kind>
+
+        <slterms:os>ttylinux</slterms:os>
+        <slterms:os-version>9.3</slterms:os-version>
+        <slterms:os-arch>i686</slterms:os-arch>
+        <slterms:version>1.0</slterms:version>
+        <dcterms:compression></dcterms:compression>
+        
+
+        <dcterms:format>raw</dcterms:format>
+
+        <dcterms:creator>Jane Tester</dcterms:creator>
+
+        <dcterms:created>2011-09-09T14:12:57Z</dcterms:created>
+        <dcterms:valid>2012-03-05T14:12:57Z</dcterms:valid>
+
+        <dcterms:description></dcterms:description>
+
+        <slterms:hypervisor>kvm</slterms:hypervisor>
+
+        <dcterms:publisher>StratusLab</dcterms:publisher>
+        
+
+    </rdf:Description>
+</rdf:RDF>

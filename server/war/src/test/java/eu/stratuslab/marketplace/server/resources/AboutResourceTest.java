@@ -6,39 +6,16 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.Form;
-import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.ServerResource;
-import org.restlet.Client;
-import org.restlet.data.Protocol;
-import org.restlet.data.Method;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.data.MediaType;
-
-
-import eu.stratuslab.marketplace.server.resources.AboutResource;
-import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
-import org.restlet.Component;
-import org.restlet.Context;
-import org.restlet.data.Protocol;
-import org.restlet.Application;
-
 public class AboutResourceTest extends ResourceTestBase {
 	
-	Application application;
-		
 	@Test
 	public void getAbout() throws Exception {
 		Request request = createGetRequest("test", "test");

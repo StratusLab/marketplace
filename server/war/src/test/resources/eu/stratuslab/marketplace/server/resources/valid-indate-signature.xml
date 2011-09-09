@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:slreq="http://mp.stratuslab.eu/slreq#" xmlns:slterms="http://mp.stratuslab.eu/slterms#" xml:base="http://mp.stratuslab.eu/">
+
+    <rdf:Description rdf:about="#BEE8-MMAw-Lk_IgsEExAy3d9R8h">
+
+        <dcterms:identifier>BEE8-MMAw-Lk_IgsEExAy3d9R8h</dcterms:identifier>
+
+        <slreq:bytes>128</slreq:bytes>
+
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>MD5</slreq:algorithm>
+            <slreq:value>a003bf123ce16965005ee85c60281a31</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-1</slreq:algorithm>
+            <slreq:value>1104f3e30c030f8b93f220b04131032dddf51f21</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-256</slreq:algorithm>
+            <slreq:value>63694032b698d2f455b67311e0d4b821e3c4a8a08c679f3e6514d5e13b7255f8</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-512</slreq:algorithm>
+            <slreq:value>70cd8ad17fab1abe7fae230ff70f682ed3af4892225b3100e6a07fc2471b657def80fce93afd02aa7f3e716bb8cab02b745d032cdc4895d5fd242a7ac8403693</slreq:value>
+        </slreq:checksum>
+
+        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2011-09-09T14:12:59Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</issuer></endorser></slreq:endorsement>
+
+        <dcterms:type>base</dcterms:type>
+        <slterms:kind>machine</slterms:kind>
+
+        <slterms:os>ttylinux</slterms:os>
+        <slterms:os-version>9.3</slterms:os-version>
+        <slterms:os-arch>i686</slterms:os-arch>
+        <slterms:version>1.0</slterms:version>
+        <dcterms:compression/>
+        
+
+        <dcterms:format>raw</dcterms:format>
+
+        <dcterms:creator>Jane Tester</dcterms:creator>
+
+        <dcterms:created>2011-09-09T14:12:57Z</dcterms:created>
+        <dcterms:valid>2012-03-05T14:12:57Z</dcterms:valid>
+
+        <dcterms:description/>
+
+        <slterms:hypervisor>kvm</slterms:hypervisor>
+
+        <dcterms:publisher>StratusLab</dcterms:publisher>
+        
+
+    </rdf:Description>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>gsjDTsS2ayeZ9yubVE7LhHxYBhY=</DigestValue></Reference></SignedInfo><SignatureValue>VhyFBzGmyZ0m2ewphl34COZZ9zPmUDRiSghAr4QZCoE6Wh6s0SewAGbAvSN0VSssp5NaGcyJAIVI
+72T9GzTTCcbv64E9E5geGnSn0sH8tNBhkQF4vr1A6B5/0AafLhCM+U/x6IFwInbN8+/U3QIiCqV/
+nnzLxvMiX1FRw6/46z+a6+JNZsYn/ul9GBiyJ9wspwOdzB9sV0i1ZFQ4Na3r+2HPE5MhZSNhu7v/
+92PYZ9iEK+FYyLNtcPRWX+tu+3avxRQDe/i2TzjVrQ0gNSZvIuKCJRN1U8mqCFteGDpDVJbik5Yx
+Q8tR3C7P6U9yjWcV3ycppGVGPxpbHlfnrJ20mg==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIERjCCAy6gAwIBAgIJAMG9Ce84YxAWMA0GCSqGSIb3DQEBBQUAMF0xCzAJBgNVBAYTAkVVMRsw
+GQYDVQQKExJTdHJhdHVzTGFiIFByb2plY3QxGzAZBgNVBAsTElRlc3RpbmcgRGVwYXJ0bWVudDEU
+MBIGA1UEAxMLSmFuZSBUZXN0ZXIwHhcNMTEwOTA5MTQxMjU2WhcNMTIwOTA4MTQxMjU2WjBdMQsw
+CQYDVQQGEwJFVTEbMBkGA1UEChMSU3RyYXR1c0xhYiBQcm9qZWN0MRswGQYDVQQLExJUZXN0aW5n
+IERlcGFydG1lbnQxFDASBgNVBAMTC0phbmUgVGVzdGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEA6gyidwRVp/FTiq/dG0TLUjjIdLGJUmhRshyzBYfIz2vkpuKA5HqM715vbWOLdFW+
+0EBGlrQxc3ovQukz3X+XvLt8JJPOg9glnYk+Uysl7B2TNpScB1JS+KjaM19zWJdp+2Wn/WbdnbEG
+GkVf8/zlxEbN29fPp0msKUN6w6BpCiELdS52lCl1zJMGX76df9SDWP+kfDE2dJskwVsU5KOih9sR
+32F+XaDRCUQl95K9GXBBZNSv98tp44PBrZ+XAtJ6788tjCxgdSDpzaT04J/kD4eETzdj8LSjp9DB
+ueoubMXZy6kKdLxCQM4Zj1e1gGKAU0hVNH10bLw3AqWGcfVPlQIDAQABo4IBBzCCAQMwCQYDVR0T
+BAIwADARBglghkgBhvhCAQEEBAMCBLAwDgYDVR0PAQH/BAQDAgP4MB0GA1UdDgQWBBQrmDi6WHjd
++0ZqPUxrj+I5APTKojCBjwYDVR0jBIGHMIGEgBQrmDi6WHjd+0ZqPUxrj+I5APTKoqFhpF8wXTEL
+MAkGA1UEBhMCRVUxGzAZBgNVBAoTElN0cmF0dXNMYWIgUHJvamVjdDEbMBkGA1UECxMSVGVzdGlu
+ZyBEZXBhcnRtZW50MRQwEgYDVQQDEwtKYW5lIFRlc3RlcoIJAMG9Ce84YxAWMCIGA1UdEQQbMBmB
+F2phbmUudGVzdGVyQGV4YW1wbGUub3JnMA0GCSqGSIb3DQEBBQUAA4IBAQAPlzCyUa33YhODWvrl
+bEdqAcFU8alS+Debym860rCmS8AMfv4WGmvsnEd6Q/iZ6mKCQHv7zHvVb+oQc4k9iQLguM0OYOKc
+SjW5FQue+ed63wWR8nPTPeNGb15HgD26zl2L8v0isdDKZG0LmOSgq8Ss8APjAhTNMlv3PCT481cE
+DtTCkbntV99OczW1cfK0yqcj7jsMbGGaFiW1Hx66oqnn7w4Mp2X0KJCbCxmxmtWIIbAGIGwQkhJe
+Nxvy6iDGnRxnEDJKOetau0ANkNSwocUHRQqtoAdRFKR2gGziqxBrgmMOmwePR7wP6tOwkCI+Evsh
+LOOM7PHL/0qIGvVLdX1D</X509Certificate></X509Data></KeyInfo></Signature></rdf:RDF>

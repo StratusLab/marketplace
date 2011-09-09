@@ -403,14 +403,14 @@ public class MDataResource extends BaseResource {
                                 + " ?lendorser <http://mp.stratuslab.eu/slreq#email> ?lemail ."
                                 + " FILTER (?lidentifier = ?identifier) ."
                                 + " FILTER (?lemail = ?email) ."
-                                + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement))");
+                                + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) .");
+                queryString.append(" FILTER (?valid > \"" + datetime + "\") .");
         }
-        queryString.append(" . FILTER (?valid > \"" + datetime + "\") ");
-        
+                     
         if (deprecatedValue.equals("off")){
-        	queryString.append(" . FILTER (!bound (?deprecated))");
+        	queryString.append(" FILTER (!bound (?deprecated))");
         } else if (deprecatedValue.equals("only")){
-        	queryString.append(" . FILTER (bound (?deprecated))");
+        	queryString.append(" FILTER (bound (?deprecated))");
         }
         
         queryString.append(" }");

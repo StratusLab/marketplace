@@ -2,6 +2,8 @@ package eu.stratuslab.marketplace.server.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -19,7 +21,12 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
 import org.restlet.Application;
 
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+import javax.xml.parsers.DocumentBuilder;
+
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
+import eu.stratuslab.marketplace.XMLUtils;
 
 public class ResourceTestBase {
 
@@ -60,10 +67,10 @@ public class ResourceTestBase {
 		request.setRootRef(new Reference("http://something.org"));
 		request.setEntity(entity);
 		request.setAttributes(attributes);
-
+		
 		return request;
 	}
-
+	
 	protected Request createGetRequest(Map<String, Object> attributes)
 			throws Exception {
 		Method method = Method.GET;
@@ -98,8 +105,9 @@ public class ResourceTestBase {
 		Response response = new Response(request);
 
 		resource.setApplication(application);
-		
+				
 		resource.init(null, request, response);
+					
 		if (response.getStatus().isSuccess()) {
 			resource.handle();
 		}
@@ -112,4 +120,13 @@ public class ResourceTestBase {
 		attributes.put(name, value);
 		return attributes;
 	}
+	
+	protected Document extractXmlDocument(InputStream stream) throws Exception {
+
+        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
+        Document datumDoc = null;
+        datumDoc = db.parse(stream);
+        return datumDoc;
+    }
+	
 }
