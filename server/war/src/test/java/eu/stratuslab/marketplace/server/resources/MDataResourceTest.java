@@ -55,11 +55,23 @@ public class MDataResourceTest extends ResourceTestBase {
 		Request getRequest = createGetRequest(attributes);
 		Response response = executeRequest(getRequest);
 		
-		//Document metadata = extractXmlDocument(response.getEntity().getStream());
-		
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK)); 
 	}
+	/*
+	@Test
+	public void testIdentifierReturnsLatest() throws Exception {
+		Request request = createPostRequest("valid-indate-newer-signature.xml");
+		Response response = executeRequest(request);
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED)); 
 		
+		Map<String, Object> attributes = createAttributes("identifier",
+				"BEE8-MMAw-Lk_IgsEExAy3d9R8h");
+		Request getRequest = createGetRequest(attributes);
+		response = executeRequest(getRequest);
+		
+		assertThat(response.getStatus(), is(Status.SUCCESS_OK)); 
+	}*/
+	
 	private Request createPostRequest(String filename)
 	throws Exception{
 		Representation rdf = new InputRepresentation(

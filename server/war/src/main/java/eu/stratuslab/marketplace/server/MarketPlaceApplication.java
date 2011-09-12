@@ -1,6 +1,7 @@
 package eu.stratuslab.marketplace.server;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBNAME;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBPASS;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBUSER;
@@ -102,14 +103,9 @@ public class MarketPlaceApplication extends Application {
         getTunnelService().setUserAgentTunnel(true);
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
-        File dataDirFile = new File(dataDir);
-        if(!dataDirFile.exists()){
-        	LOGGER.warning("data directory does not exist: " + dataDir);
-        	if(!dataDirFile.mkdirs()){
-        		LOGGER.severe("Unable to create data directory: " + dataDir);
-        	}
-        }
-       
+        createIfNotExists(dataDir);
+        createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
+                
         if (storeType.equals("memory")) {
             LOGGER.warning(MEMORY_STORE_WARNING);
             store = new MemoryStore();
@@ -300,6 +296,16 @@ public class MarketPlaceApplication extends Application {
         cfg.setTemplateLoader(new ContextTemplateLoader(context, fmBaseRef));
 
         return cfg;
+    }
+    
+    private void createIfNotExists(String path){
+    	File dir = new File(path);
+        if(!dir.exists()){
+        	LOGGER.warning("directory does not exist: " + path);
+        	if(!dir.mkdirs()){
+        		LOGGER.severe("Unable to create directory: " + path);
+        	}
+        }
     }
     
     class MarketPlaceStatusService extends StatusService {
