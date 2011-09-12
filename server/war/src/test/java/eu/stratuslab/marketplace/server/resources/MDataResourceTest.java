@@ -21,7 +21,7 @@ import org.restlet.representation.Representation;
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
 public class MDataResourceTest extends ResourceTestBase {
-        /*	
+    
 	@Test
 	public void testInvalidPostNoSignature() throws Exception {
 		Request request = createPostRequest("valid.xml");
@@ -59,7 +59,7 @@ public class MDataResourceTest extends ResourceTestBase {
 		
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK)); 
 	}
-	*/		
+		
 	private Request createPostRequest(String filename)
 	throws Exception{
 		Representation rdf = new InputRepresentation(

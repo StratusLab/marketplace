@@ -8,6 +8,7 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 
+import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -101,6 +102,13 @@ public class MarketPlaceApplication extends Application {
         getTunnelService().setUserAgentTunnel(true);
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
+        File dataDirFile = new File(dataDir);
+        if(!dataDirFile.exists()){
+        	LOGGER.warning("data directory does not exist: " + dataDir);
+        	if(!dataDirFile.mkdirs()){
+        		LOGGER.severe("Unable to create data directory: " + dataDir);
+        	}
+        }
        
         if (storeType.equals("memory")) {
             LOGGER.warning(MEMORY_STORE_WARNING);
