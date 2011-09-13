@@ -20,13 +20,16 @@ import org.restlet.data.Reference;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
 import org.restlet.Application;
+import org.restlet.data.MediaType;
+import org.restlet.representation.InputRepresentation;
 
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
+import eu.stratuslab.marketplace.server.utils.XPathUtils;
 import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.server.resources.MDataResource;
 
 public class ResourceTestBase {
 
@@ -99,7 +102,20 @@ public class ResourceTestBase {
 		Method method = Method.POST;
 		return createRequest(attributes, method, entity);
 	}
+	
+	private Request createPostRequest(String filename)
+	throws Exception {
+		Representation rdf = new InputRepresentation(
+				this.getClass().getResourceAsStream(filename),
+                MediaType.APPLICATION_RDF_XML);
+		Request request = createPostRequest(createAttributes("test","test"), rdf);
+		return request;
+	}
 
+	private Response executeMetadataPostRequest(Request request) {
+		return executeRequest(request, new MDataResource());
+	}
+	
 	protected Response executeRequest(Request request, ServerResource resource) {
 
 		Response response = new Response(request);
@@ -121,6 +137,13 @@ public class ResourceTestBase {
 		return attributes;
 	}
 	
+	protected Response postMetadataFile(String filename) throws Exception {
+		Request request = createPostRequest(filename);
+		Response response = executeMetadataPostRequest(request);
+		
+		return response;
+	}
+	
 	protected Document extractXmlDocument(InputStream stream) throws Exception {
 
         DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
@@ -128,5 +151,18 @@ public class ResourceTestBase {
         datumDoc = db.parse(stream);
         return datumDoc;
     }
+	
+	protected String getValueFromDoc(Document doc, String key) throws Exception {
+		String value = "";		
+		if(key.equals("created")){
+			value = XPathUtils.getValue(doc, XPathUtils.CREATED_DATE);
+		} else if (key.equals("identifier")){
+			value = XPathUtils.getValue(doc, XPathUtils.IDENTIFIER_ELEMENT);
+		} else if (key.equals("email")){
+			value = XPathUtils.getValue(doc, XPathUtils.EMAIL);
+		}
+				
+		return value;
+	}
 	
 }

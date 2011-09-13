@@ -44,18 +44,13 @@ public class QueryResource extends BaseResource {
         	
             if (queryString != null && !"".equals(queryString)) {
                 
-            	//check that query is allowed.
+                //check that query is allowed.
         	    if(!validQuery(queryString)){
         	    			throw new ResourceException(
                                     Status.CLIENT_ERROR_BAD_REQUEST,
                                     "query not allowed.");
         	    }
-        	    
-        	    //make sure query is valid for sesame.
-                QueryParser parser = QueryParserUtil
-                        .createParser(QueryLanguage.SPARQL);
-                parser.parseQuery(queryString, MARKETPLACE_URI);
-                                
+                
                 List<Map<String, String>> results = query(queryString);
                 int noOfResults = results.size();
                 if (noOfResults > 0) {
@@ -118,10 +113,13 @@ public class QueryResource extends BaseResource {
             String results = "";
 
             if (queryString != null && !"".equals(queryString)) {
-                QueryParser parser = QueryParserUtil
-                        .createParser(QueryLanguage.SPARQL);
-                parser.parseQuery(queryString, MARKETPLACE_URI);
-
+            	//check that query is allowed.
+        	    if(!validQuery(queryString)){
+        	    			throw new ResourceException(
+                                    Status.CLIENT_ERROR_BAD_REQUEST,
+                                    "query not allowed.");
+        	    }
+                
                 results = getResults(queryString, "sparql");
             }
 
@@ -147,9 +145,15 @@ public class QueryResource extends BaseResource {
         return results;
     }
     
-    private boolean validQuery(String queryString){
+    private boolean validQuery(String queryString)
+    throws MalformedQueryException {
     	boolean valid = true;
 
+    	//make sure query is valid for sesame.
+        QueryParser parser = QueryParserUtil
+                .createParser(QueryLanguage.SPARQL);
+        parser.parseQuery(queryString, MARKETPLACE_URI);
+    	
     	ParserSPARQL11 jenaParser = new ParserSPARQL11();
     	Query selectQuery = jenaParser.parse(new Query(), queryString);
 

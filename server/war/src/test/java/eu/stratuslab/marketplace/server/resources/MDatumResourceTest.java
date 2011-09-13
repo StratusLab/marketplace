@@ -4,15 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
-import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.w3c.dom.Document;
@@ -24,8 +15,6 @@ import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Status;
 import org.restlet.data.MediaType;
-import org.restlet.representation.InputRepresentation;
-import org.restlet.representation.Representation;
 import org.restlet.data.ClientInfo;
 import org.restlet.data.Preference;
 import org.restlet.data.Method;
@@ -34,15 +23,18 @@ import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
 public class MDatumResourceTest extends ResourceTestBase {
 	
-	private String iri = "/metadata/" +
-	"BEE8-MMAw-Lk_IgsEExAy3d9R8h/" +
-	"jane.tester@example.org/" +
-	"2011-09-09T14:12:59Z";
+	private String iri;
 	
 	@Before 
 	public void setUp() throws Exception {
-		Request request = createPostRequest("valid-indate-signature.xml");
-		Response response = executePostRequest(request);
+		postMetadataFile("valid-indate-signature.xml");
+		
+		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-indate-signature.xml"));
+		
+		this.iri = "/metadata/" + getValueFromDoc(metadata, "identifier")
+			+ "/" + getValueFromDoc(metadata, "email")
+			+ "/" + getValueFromDoc(metadata, "created");
 	}
 	
 	@Test
@@ -81,18 +73,10 @@ public class MDatumResourceTest extends ResourceTestBase {
 				is("application/json"));
 	}
 	
-	private Request createPostRequest(String filename)
-	throws Exception{
-		Representation rdf = new InputRepresentation(
-				this.getClass().getResourceAsStream(filename),
-                MediaType.APPLICATION_RDF_XML);
-		Request request = createPostRequest(createAttributes("test","test"), rdf);
-		return request;
-	}
-	
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDatumResource());
 	}
+	
 	private Response executePostRequest(Request request) {
 		return executeRequest(request, new MDataResource());
 	}
