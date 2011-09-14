@@ -10,7 +10,6 @@ function fnFormatDetails ( oTable, nTr )
         sOut += '<tr><td>URL:</td><td><a href="'+aData[7]+'">'+aData[7]+'</a></td></tr>';
         sOut += '<tr><td><a href="/metadata/'+aData[6]+'/'+aData[4]+'/'+aData[5]+'">More...</a></td><td></td></tr>';
 	sOut += '</table>';
-        //sOut += '<br/><p align="right"><a href="/metadata/'+aData[6]+'/'+aData[4]+'/'+aData[5]+'">More...</a></p>';
 	
 	return sOut;
 }

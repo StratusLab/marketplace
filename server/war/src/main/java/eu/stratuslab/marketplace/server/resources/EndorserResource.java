@@ -38,7 +38,20 @@ public class EndorserResource extends BaseResource {
     @Get("html")
     public Representation toHtml() {
         List<Map<String, String>> results = query(queryString);
-
+        for(int i = 0; i < results.size(); i++){
+        	Map<String, String> resultRow = results.get(i);
+        	String deprecated = resultRow.get("deprecated");
+        	String location = resultRow.get("location");
+        	
+        	if(deprecated.equals("null"))
+        		resultRow.put("deprecated", "");
+        	
+        	if(location.equals("null"))
+        		resultRow.put("location", "");
+        	
+        	results.set(i, resultRow);
+        }
+        	
         Map<String, Object> data = createInfoStructure("History for " + this.email);
         data.put("content", results);
 
