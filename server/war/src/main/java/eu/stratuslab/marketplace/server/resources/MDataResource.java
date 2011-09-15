@@ -234,8 +234,7 @@ public class MDataResource extends BaseResource {
 
     @Get("html")
     public Representation toHtml() {
-
-        List<Map<String, String>> results = getMetadata();
+    	List<Map<String, String>> results = getMetadata();
         
         HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>> root =
             new HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>>();
