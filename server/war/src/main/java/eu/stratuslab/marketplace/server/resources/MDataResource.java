@@ -417,7 +417,7 @@ public class MDataResource extends BaseResource {
         List<Map<String, String>> results = query(queryString.toString());
 
         if(results.size() <= 0 && filter){
-		throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+        	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
         } else {
         	return results;

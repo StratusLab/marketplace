@@ -95,8 +95,8 @@ public class QueryResource extends BaseResource {
             representation = createTemplateRepresentation("Query.ftl", query,
                     MediaType.TEXT_HTML);
         } catch (MalformedQueryException e) {
-            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
-            representation = generateErrorRepresentation(e.getMessage(), "1");
+        	throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
+                    .getMessage());
         }
 
         return representation;
@@ -126,8 +126,8 @@ public class QueryResource extends BaseResource {
             representation = new StringRepresentation(results,
                     MediaType.APPLICATION_XML);
         } catch (MalformedQueryException e) {
-            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
-            representation = generateErrorRepresentation(e.getMessage(), "1");
+        	throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
+                    .getMessage());
         }
         // Returns the XML representation of this document.
         return representation;

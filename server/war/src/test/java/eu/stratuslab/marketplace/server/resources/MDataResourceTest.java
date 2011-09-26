@@ -26,7 +26,7 @@ public class MDataResourceTest extends ResourceTestBase {
         assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST)); 
 		assertThat(response.getStatus().getDescription(), is("invalid metadata: no signature"));
 	}
-	
+		
 	@Test
 	public void testValidPostSignature() throws Exception {
 		Response response = postMetadataFile("valid-indate-signature.xml");

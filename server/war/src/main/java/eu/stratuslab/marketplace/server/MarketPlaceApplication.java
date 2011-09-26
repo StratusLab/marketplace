@@ -10,6 +10,7 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -43,13 +44,17 @@ import org.restlet.routing.TemplateRoute;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
+import org.restlet.data.Preference;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.service.StatusService;
 import org.restlet.resource.Get;
 import org.restlet.Client;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
@@ -310,23 +315,51 @@ public class MarketPlaceApplication extends Application {
     
     class MarketPlaceStatusService extends StatusService {
 
-    	@Get("html")
-        public Representation getRepresentation(Status status, Request request,
+    	public Representation getRepresentation(Status status, Request request,
                 Response response) {
 
-            // Create the data model
-            Map<String, String> dataModel = new TreeMap<String, String>();
-            dataModel.put("baseurl", request.getRootRef().toString());
-            dataModel.put("statusName", response.getStatus().getName());
-            dataModel.put("statusDescription", response.getStatus()
-                    .getDescription());
-            dataModel.put("title", response.getStatus().getName());
-            
-            freemarker.template.Configuration freeMarkerConfig = freeMarkerConfiguration;
+           if(request.getClientInfo().getAcceptedMediaTypes().get(0).
+    				getMetadata().equals(MediaType.TEXT_XML) || 
+    				request.getClientInfo().getAcceptedMediaTypes().get(0).
+    				getMetadata().equals(MediaType.APPLICATION_XML)) {
+        	   
+        	   Representation r = generateErrorRepresentation(response.getStatus()
+                       .getDescription(), Integer.toString(response.getStatus().getCode()));
+        	   return r;
+    		} else {
+    			// Create the data model
+    			Map<String, String> dataModel = new TreeMap<String, String>();
+    			dataModel.put("baseurl", request.getRootRef().toString());
+    			dataModel.put("statusName", response.getStatus().getName());
+    			dataModel.put("statusDescription", response.getStatus()
+    					.getDescription());
+    			dataModel.put("title", response.getStatus().getName());
 
-            return new TemplateRepresentation("status.ftl", freeMarkerConfig, dataModel,
-                    MediaType.TEXT_HTML);
+    			freemarker.template.Configuration freeMarkerConfig = freeMarkerConfiguration;
+
+    			return new TemplateRepresentation("status.ftl", freeMarkerConfig, dataModel,
+    					MediaType.TEXT_HTML);
+    		}
         }
+    	    	    	
+    	/**
+         * Generate an XML representation of an error response.
+         * 
+         * @param errorMessage
+         *            the error message.
+         * @param errorCode
+         *            the error code.
+         */
+        protected Representation generateErrorRepresentation(String errorMessage,
+                String errorCode) {
+            StringRepresentation result = new StringRepresentation(
+            		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
+                		"<error>" + errorMessage + "</error>"
+                		, MediaType.APPLICATION_XML);
+                
+            return result;
+        }
+    	
     }
 
 
