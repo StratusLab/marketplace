@@ -294,7 +294,7 @@ public abstract class BaseResource extends ServerResource {
 
         return model;
     }
-
+    
     /**
      * Remove a metadata entry
      * 

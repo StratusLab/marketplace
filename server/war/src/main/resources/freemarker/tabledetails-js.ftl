@@ -37,7 +37,10 @@ $(document).ready(function() {
 	 * Initialse DataTables, with no sorting on the 'details' column
 	 */
 	var oTable = $('#form_with_details').dataTable( {
-		"aoColumnDefs": [
+		"bServerSide": true,
+                "sAjaxSource": window.location.href,
+                "bProcessing": true,
+                "aoColumnDefs": [
 			{ "bSortable": false, "aTargets": [ 0 ] },
                         { "bVisible": false, "aTargets": [6] },
                         { "bVisible": false, "aTargets": [7] },

@@ -28,25 +28,6 @@
         </tr>
     </thead>
     <tbody>
-        <#list content?keys as identifier>
-            <#assign endorsers = content[identifier]>
-            <#list endorsers?keys as email>
-               <#assign created = endorsers[email]>
-               <#list created?keys as date>
-                    <#assign data = created[date]>
-                    <tr>
-                        <td>${data.os}</td>
-                        <td>${data.osversion}</td>
-                        <td>${data.arch}</td>
-                        <td>${email}</td>
-                        <td>${date}</td>
-                        <td>${identifier}</td>
-                        <td>${data.location}</td>
-                        <td>${data.description}</td>
-                    </tr>
-                </#list>
-             </#list>
-        </#list>
      </tbody>
      <tfoot>
          <tr>

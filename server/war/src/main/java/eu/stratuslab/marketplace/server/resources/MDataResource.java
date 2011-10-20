@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.StringTokenizer;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -48,13 +49,14 @@ import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
+import eu.stratuslab.marketplace.server.utils.SparqlUtils;
 
 /**
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
     
-    /**
+	/**
      * Handle POST requests: register new Metadata entry.
      */
     @Post
@@ -234,51 +236,8 @@ public class MDataResource extends BaseResource {
 
     @Get("html")
     public Representation toHtml() {
-    	List<Map<String, String>> results = getMetadata();
+    	Map<String, Object> data = createInfoStructure("Metadata");
         
-        HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>> root =
-            new HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>>();
-        
-        for (Map<String, String> resultRow : results) {
-
-            String identifier = resultRow.get("identifier");
-            String endorser = resultRow.get("email");
-            String created = resultRow.get("created");  
-            String os = resultRow.get("os");
-            String osversion = resultRow.get("osversion");
-            String arch = resultRow.get("arch");
-            String location = resultRow.get("location");
-            String description = resultRow.get("description");
-            
-            HashMap<String, HashMap<String, HashMap<String, String>>> endorserMap;
-            if (root.containsKey(identifier)) {
-                    endorserMap = root.get(identifier);
-            } else {
-                    endorserMap = new HashMap<String, HashMap<String, HashMap<String, String>>>();
-            }
-
-            HashMap<String, HashMap<String, String>> dataMap;
-            if (endorserMap.containsKey(endorser)) {
-                    dataMap = endorserMap.get(endorser);
-            } else {
-                    dataMap = new HashMap<String, HashMap<String, String>>();
-            }
-
-            HashMap<String, String> dMap = new HashMap<String, String>();
-            dMap.put("os", os);
-            dMap.put("osversion", osversion);
-            dMap.put("arch", arch);
-            dMap.put("location", location);
-            dMap.put("description", description);
-            
-            dataMap.put(created, dMap);
-            endorserMap.put(endorser, dataMap);
-            root.put(identifier, endorserMap);
-        }
-
-        Map<String, Object> data = createInfoStructure("Metadata");
-        data.put("content", root);
-
         // Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation
         Representation representation = createTemplateRepresentation(
@@ -293,9 +252,15 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-
-        List<Map<String, String>> results = getMetadata();
-        
+    	Form form = getRequest().getResourceRef().getQueryAsForm();
+    	Map<String, String> formValues = form.getValuesMap();
+    	    	
+    	String deprecatedValue = (formValues.containsKey("deprecated")) ? 
+    			getDeprecatedFlag(formValues.get("deprecated")) : "off";
+    			
+    	List<Map<String, String>> results = getMetadata(deprecatedValue);
+        results.remove(0);
+    	
         ArrayList<String> uris = new ArrayList<String>();
         for (Map<String, String> resultRow : results) {
 
@@ -324,46 +289,124 @@ public class MDataResource extends BaseResource {
         return representation;
     }
 
-    private List<Map<String, String>> getMetadata() {
+    /**
+     * Returns a listing of all registered metadata or a particular entry if
+     * specified.
+     */
+    @Get("json")
+    public Representation toJSON() {
+    	Form form = getRequest().getResourceRef().getQueryAsForm();
+    	Map<String, String> formValues = form.getValuesMap();
+    	
+    	String deprecatedValue = (formValues.containsKey("deprecated")) ? 
+    			getDeprecatedFlag(formValues.get("deprecated")) : "off";
+    	
+    	List<Map<String, String>> results = null;
+    	
+    	try {
+    		results = getMetadata(deprecatedValue);
+    	} catch(ResourceException r){
+    		results = new ArrayList();
+    	}
+    	
+    	long iTotalRecords = getTotalRecords(deprecatedValue);
+    	String iTotalDisplayRecords = "0";
+    	if(results.size() > 0){
+    		iTotalDisplayRecords = (String)((Map<String, String>)results.remove(0)).get("count");
+    	}
+    	
+    	StringBuilder json = new StringBuilder("{ \"sEcho\":\"" 
+    			+ formValues.get("sEcho") + "\", ");
+    	json.append("\"iTotalRecords\":" + iTotalRecords + ", ");
+    	json.append("\"iTotalDisplayRecords\":" + iTotalDisplayRecords + ", ");
+    	json.append("\"aaData\":[ ");
+    	
+    	for(int i = 0; i < results.size(); i++){
+    		Map<String, String> resultRow = (Map<String, String>)results.get(i);
 
-    	Map<String, Object> requestAttr = getRequest().getAttributes();
+    		String identifier = resultRow.get("identifier");
+    		String endorser = resultRow.get("email");
+    		String created = resultRow.get("created");  
+    		String os = resultRow.get("os");
+    		String osversion = resultRow.get("osversion");
+    		String arch = resultRow.get("arch");
+    		String location = resultRow.get("location");
+    		String description = resultRow.get("description");
+
+    		json.append("[\"<img src='/css/details_open.png'>\", " + 
+    				"\"" + os + "\"," +
+    				"\"" + osversion + "\"," +
+    				"\"" + arch + "\"," +
+    				"\"" + endorser + "\"," +
+    				"\"" + created + "\"," +
+    				"\"" + identifier + "\"," +
+    				"\"" + location + "\"," +
+    				"\"" + description.replaceAll("\"", "&quot;") + "\"" +
+    		"]");
+
+    		if(i < results.size() -1){
+    			json.append(",");
+    		}
+    	}
+    	
+    	json.append("]}");
+             
+    	String jsonString = json.toString().replaceAll("\n", "<br>");
+    	
+    	// Returns the XML representation of this document.
+        StringRepresentation representation = new StringRepresentation(jsonString,
+                MediaType.APPLICATION_JSON);
+
+        return representation;
+    }
+    
+    /*
+     * Retrieves the metadata from the repository
+     * 
+     * @param deprecatedValue indicates whether deprecated values should be included
+     *                        possible values are on, off, only.
+     *                        
+     * @return a metadata list
+     */
+    private List<Map<String, String>> getMetadata(String deprecatedValue) {
     	boolean dateSearch = false;
-
     	StringBuilder filterPredicate = new StringBuilder();
     	boolean filter = false;
 
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
-    	String deprecatedValue = "off";
+    	Map<String, Object> requestAttr = getRequest().getAttributes();
     	
-    	if(formValues.containsKey("deprecated")){
-    		deprecatedValue = formValues.remove("deprecated");
-    		if(deprecatedValue == null)
-    			deprecatedValue = "on";
+    	//Create filter from request parameters.    	    	 	
+    	if(formValues.containsKey("identifier")){
+    		requestAttr.put("identifier", formValues.get("identifier"));
     	}
-    	    	   	
-    	requestAttr.putAll(formValues);
-    	    	    	    	
+    	if(formValues.containsKey("email")){
+    		requestAttr.put("email", formValues.get("email"));
+    	}
+    	if(formValues.containsKey("created")){
+    		requestAttr.put("created", formValues.get("created"));
+    	}    	
+    	
     	for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
-
     		String key = arg.getKey();
     		if (!key.startsWith("org.restlet")) {
     			switch (classifyArg((String) arg.getValue())) {
     			case ARG_EMAIL:
     				filter = true;
-    				filterPredicate.append(" FILTER (?email = \""
-    						+ arg.getValue() + "\"). ");
+    				filterPredicate.append(
+    						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
     				break;
     			case ARG_DATE:
     				filter = true;
     				dateSearch = true;
-    				filterPredicate.append(" FILTER (?created = \""
-    						+ arg.getValue() + "\"). ");
+    				filterPredicate.append(
+    						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
     				break;
     			case ARG_OTHER:
     				filter = true;
-    				filterPredicate.append(" FILTER (?identifier = \""
-    						+ arg.getValue() + "\"). ");
+    				filterPredicate.append(
+    						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
     				break;
     			default:
     				break;
@@ -371,12 +414,18 @@ public class MDataResource extends BaseResource {
     		}
     	}
 
-        String datetime = getCurrentDate();
-        
-        StringBuilder queryString = new StringBuilder(
+    	String paging = buildPagingFilter(formValues.get("iDisplayStart"), formValues.get("iDisplayLength"),
+    			formValues.get("iSortCol_0"), formValues.get("sSortDir_0"));    	
+    	String searching = buildSearchingFilter(formValues);
+    	    	
+    	StringBuilder queryString = new StringBuilder(
             		"SELECT ?identifier ?email ?created"
-            		+ " ?os ?osversion ?arch ?location ?description"
-                    + " WHERE {"
+            		+ " ?os ?osversion ?arch ?location ?description");
+        StringBuilder counterString = new StringBuilder(
+        		    "SELECT DISTINCT(COUNT(*) AS ?count)");
+                
+        StringBuilder filterString = new StringBuilder(
+                    " WHERE {"
                     + " ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
                     + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os> ?os . }"
                     + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-version> ?osversion . }"
@@ -390,10 +439,10 @@ public class MDataResource extends BaseResource {
                     + " <http://purl.org/dc/terms/created> ?created ."
                     + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
 
-        queryString.append(filterPredicate.toString());
+        filterString.append(filterPredicate.toString());
 
         if (!dateSearch) {
-                queryString
+                filterString
                         .append(" OPTIONAL { "
                                 + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
                                 + " <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ."
@@ -403,27 +452,165 @@ public class MDataResource extends BaseResource {
                                 + " FILTER (?lidentifier = ?identifier) ."
                                 + " FILTER (?lemail = ?email) ."
                                 + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) .");
-                queryString.append(" FILTER (?valid > \"" + datetime + "\") .");
+                filterString.append(" FILTER (?valid > \"" + getCurrentDate() + "\") .");
         }
                      
         if (deprecatedValue.equals("off")){
-        	queryString.append(" FILTER (!bound (?deprecated))");
+        	filterString.append(" FILTER (!bound (?deprecated))");
         } else if (deprecatedValue.equals("only")){
-        	queryString.append(" FILTER (bound (?deprecated))");
+        	filterString.append(" FILTER (bound (?deprecated))");
         }
-        
-        queryString.append(" }");
+                
+        filterString.append(searching);
+        filterString.append(" }");
 
+        counterString.append(filterString);
+        List<Map<String, String>> countResult = query(counterString.toString());
+        Map<String, String> count = new HashMap();
+        count.put("count", "0");
+        if(countResult.size() > 0){
+        	count = (Map<String, String>)countResult.get(0);
+        }
+                
+        queryString.append(filterString);
+        queryString.append(paging);
+                
         List<Map<String, String>> results = query(queryString.toString());
 
         if(results.size() <= 0 && filter){
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
         } else {
+        	results.add(0, count);
         	return results;
         }
     }
 
+    /*
+     * Build a paging filter (ORDER BY ... LIMIT ...)
+     * 
+     * @param iDisplayStart offset
+     * @param iDisplayLength page length
+     * @param iSortCol the column to sort on
+     * @param sSortDir direction of sort
+     * 
+     * @return SPARQL LIMIT clause
+     */
+    private String buildPagingFilter(String iDisplayStart, String iDisplayLength, 
+    		String iSortCol, String sSortDir){
+    	String paging = "";
+    	
+    	if(iDisplayStart != null && iDisplayLength != null){
+    		int sort = (iSortCol != null) ? 
+    				Integer.parseInt(iSortCol) : 1;
+    		String sortCol = SparqlUtils.getColumn(sort);
+    		      		
+    		paging = SparqlUtils.buildLimit(sortCol, iDisplayLength, iDisplayStart, sSortDir);
+    	}
+    	
+    	return paging;
+    }
+    
+    private String buildSearchingFilter(Map<String, String> formValues){
+    	String searching = "";
+    	
+    	if(formValues.get("sSearch") != null){
+    		String sSearch = formValues.get("sSearch");
+    		
+    		String[] searchTerms = sSearch.split(" ");
+    		StringBuilder searchAllFilter = new StringBuilder(" FILTER (");
+    		for(int i = 0; i < searchTerms.length; i++){
+    			
+    			searchAllFilter.append("(");
+    			for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
+    				searchAllFilter.append(SparqlUtils.buildRegex(
+    						SparqlUtils.getColumn(j), searchTerms[i]));
+    		        
+    				if(j < SparqlUtils.getColumnCount() - 1)
+    					searchAllFilter.append(" || ");
+    			}
+    			searchAllFilter.append(")");
+    			
+    			if(i < searchTerms.length -1)
+					searchAllFilter.append(" && ");    			
+    		}
+    		searchAllFilter.append(") . ");
+    		searching = searchAllFilter.toString();
+    	}
+    	
+    	StringBuilder searchColumnsPredicate = new StringBuilder();
+    	for(int i = 1; i < 6; i++){
+    		if ( formValues.get("sSearch_" + i) != null )
+    		{
+    			if ( searchColumnsPredicate.length() == 0 )
+    			{
+    				searchColumnsPredicate.append(" FILTER (");
+    			}
+    			else
+    			{
+    				searchColumnsPredicate.append(" && ");
+    			}
+    			String word = formValues.get("sSearch_" + i);
+    			searchColumnsPredicate.append(SparqlUtils.buildRegex(
+    					SparqlUtils.getColumn(i), word));
+    		}
+    	}
+    	if(searchColumnsPredicate.length() != 0){
+    		searchColumnsPredicate.append(" ) . ");
+    	}
+    	searching += searchColumnsPredicate.toString();
+    	
+    	return searching;
+    }
+    
+    private String getDeprecatedFlag(String deprecated){
+    	return (deprecated == null) ? "on" : deprecated;
+    }
+    
+    private long getTotalRecords(String deprecatedValue){
+    	String queryString = 
+        		"SELECT DISTINCT(COUNT(*) AS ?count)"
+                + " WHERE {"
+                + " ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
+                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os> ?os . }"
+                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-version> ?osversion . }"
+                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-arch> ?arch . }"
+                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
+                + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
+                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . }"
+                + " ?x <http://purl.org/dc/terms/valid> ?valid;"
+                + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
+                + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
+                + " <http://purl.org/dc/terms/created> ?created ."
+                + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email ."
+                + " OPTIONAL { "
+                + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
+                + " <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ."
+                + " ?lendorsement <http://mp.stratuslab.eu/slreq#endorser> ?lendorser;"
+                + " <http://purl.org/dc/terms/created> ?latestcreated ."
+                + " ?lendorser <http://mp.stratuslab.eu/slreq#email> ?lemail ."
+                + " FILTER (?lidentifier = ?identifier) ."
+                + " FILTER (?lemail = ?email) ."
+                + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) ."
+                + " FILTER (?valid > \"" + getCurrentDate() + "\") .";
+    	
+    	if (deprecatedValue.equals("off")){
+        	queryString += " FILTER (!bound (?deprecated))";
+        } else if (deprecatedValue.equals("only")){
+        	queryString += " FILTER (bound (?deprecated))";
+        }
+    	queryString += " }";
+    	
+    	List<Map<String, String>> totalResults = query(queryString);
+    	String iTotalRecords = "0";
+    	
+    	if(totalResults.size() > 0){
+    		iTotalRecords = (String)((Map<String, String>)totalResults.remove(0)).get("count");
+    	}
+    	
+    	return Long.parseLong(iTotalRecords);
+    }
+        
     private static void closeReliably(Closeable closeable) {
         if (closeable != null) {
             try {
