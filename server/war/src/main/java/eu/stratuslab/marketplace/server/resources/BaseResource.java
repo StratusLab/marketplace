@@ -42,6 +42,8 @@ import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.rio.RDFFormat;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -268,10 +270,12 @@ public abstract class BaseResource extends ServerResource {
                 con.close();
             }
             success = true;
-        } catch (OpenRDFException e) {
-            e.printStackTrace();
+        } catch (RepositoryException e) {
+            LOGGER.severe("Unable to clear metadata entry: " + e.getMessage());
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            LOGGER.severe("Error storing metadata entry: " + e.getMessage());
+        } catch(org.openrdf.rio.RDFParseException e){
+        	LOGGER.severe(e.getMessage());
         }
         
         return success;
@@ -310,8 +314,8 @@ public abstract class BaseResource extends ServerResource {
             } finally {
                 con.close();
             }
-        } catch (OpenRDFException e) {
-            e.printStackTrace();
+        } catch (RepositoryException e) {
+            LOGGER.severe("Error removing metadata entry: " + e.getMessage());
         }
     }
 
@@ -344,10 +348,15 @@ public abstract class BaseResource extends ServerResource {
             } finally {
                 con.close();
             }
-        } catch (OpenRDFException e) {
-            e.printStackTrace();
+        } catch (RepositoryException e) {
+        	LOGGER.severe("Error accessing repository: " + e.getMessage());
+        } catch (MalformedQueryException e) {
+        	LOGGER.severe("Malformed query: " + e.getMessage());
+        } catch (QueryEvaluationException e) {
+        	LOGGER.severe("Error processing query: " + e.getMessage());
+        } catch (org.openrdf.query.TupleQueryResultHandlerException e){
+        	LOGGER.severe(e.getMessage());
         }
-
         return resultString;
     }
 
@@ -362,40 +371,44 @@ public abstract class BaseResource extends ServerResource {
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
         
         try {
-            RepositoryConnection con = getMetadataStore().getConnection();
-            try {
-               	TupleQuery tupleQuery = con.prepareTupleQuery(
-                       	QueryLanguage.SPARQL, queryString);
-               	TupleQueryResult results = tupleQuery.evaluate();
-               	try {
-               		List<String> columnNames = results.getBindingNames();
-               		int cols = columnNames.size();
+        	RepositoryConnection con = getMetadataStore().getConnection();
+        	try {
+        		TupleQuery tupleQuery = con.prepareTupleQuery(
+        				QueryLanguage.SPARQL, queryString);
+        		TupleQueryResult results = tupleQuery.evaluate();
+        		try {
+        			List<String> columnNames = results.getBindingNames();
+        			int cols = columnNames.size();
 
-               		while (results.hasNext()) {
-            	   		BindingSet solution = results.next();
-                       		HashMap<String, String> row = new HashMap<String, String>(
-                               		cols, 1);
-                       		for (Iterator<String> namesIter = columnNames
-                               		.listIterator(); namesIter.hasNext();) {
-                       			String columnName = namesIter.next();
-                       			Value columnValue = solution.getValue(columnName);
-                       			if (columnValue != null) {
-                               			row.put(columnName, (solution
-                                       		.getValue(columnName)).stringValue());
-                       			} else {
-                	       			row.put(columnName, "null");
-                       			}
-                        	}
-                        	list.add(row);
-                    	}
-                } finally {
-                	results.close();
-                }
-            	} finally {
-                	con.close();
-            	}
-	} catch (OpenRDFException e) {
-            e.printStackTrace();
+        			while (results.hasNext()) {
+        				BindingSet solution = results.next();
+        				HashMap<String, String> row = new HashMap<String, String>(
+        						cols, 1);
+        				for (Iterator<String> namesIter = columnNames
+        						.listIterator(); namesIter.hasNext();) {
+        					String columnName = namesIter.next();
+        					Value columnValue = solution.getValue(columnName);
+        					if (columnValue != null) {
+        						row.put(columnName, (solution
+        								.getValue(columnName)).stringValue());
+        					} else {
+        						row.put(columnName, "null");
+        					}
+        				}
+        				list.add(row);
+        			}
+        		} finally {
+        			results.close();
+        		}
+        	} finally {
+        		con.close();
+        	}
+        } catch (RepositoryException e) {
+        	LOGGER.severe("Error accessing repository: " + e.getMessage());
+        } catch (MalformedQueryException m) {
+        	LOGGER.severe("Malformed query: " + m.getMessage());
+        } catch (QueryEvaluationException q) {
+        	LOGGER.severe("Error processing query: " + q.getMessage());
         }
 
         return list;

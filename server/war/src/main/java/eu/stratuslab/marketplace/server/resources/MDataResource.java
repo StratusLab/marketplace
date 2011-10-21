@@ -370,9 +370,9 @@ public class MDataResource extends BaseResource {
      */
     private List<Map<String, String>> getMetadata(String deprecatedValue) {
     	boolean dateSearch = false;
-    	StringBuilder filterPredicate = new StringBuilder();
     	boolean filter = false;
-
+    	StringBuilder filterPredicate = new StringBuilder();
+    	
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
     	Map<String, Object> requestAttr = getRequest().getAttributes();
@@ -414,45 +414,31 @@ public class MDataResource extends BaseResource {
     		}
     	}
 
-    	String paging = buildPagingFilter(formValues.get("iDisplayStart"), formValues.get("iDisplayLength"),
-    			formValues.get("iSortCol_0"), formValues.get("sSortDir_0"));    	
-    	String searching = buildSearchingFilter(formValues);
+    	//Build the paging query
+    	String paging = buildPagingFilter(formValues.get("iDisplayStart"), 
+    			formValues.get("iDisplayLength"), formValues.get("iSortCol_0"), 
+    			formValues.get("sSortDir_0"));
+    	
+    	//Build the search query
+    	String[] sSearchCols = new String[9];
+    	for(int i = 0; i < SparqlUtils.getColumnCount();i++){
+    		sSearchCols[i] = formValues.get("sSearch_" + i);
+    	}
+    	String searching = buildSearchingFilter(formValues.get("sSearch"), sSearchCols);
     	    	
-    	StringBuilder queryString = new StringBuilder(
-            		"SELECT ?identifier ?email ?created"
-            		+ " ?os ?osversion ?arch ?location ?description");
-        StringBuilder counterString = new StringBuilder(
-        		    "SELECT DISTINCT(COUNT(*) AS ?count)");
+    	//Build the full SPARQL query
+    	StringBuilder queryString = new StringBuilder(SparqlUtils.SELECT_ALL);
+        StringBuilder counterString = new StringBuilder(SparqlUtils.SELECT_COUNT);
                 
         StringBuilder filterString = new StringBuilder(
                     " WHERE {"
-                    + " ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
-                    + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os> ?os . }"
-                    + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-version> ?osversion . }"
-                    + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-arch> ?arch . }"
-                    + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
-                    + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
-                    + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . }"
-                    + " ?x <http://purl.org/dc/terms/valid> ?valid;"
-                    + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
-                    + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
-                    + " <http://purl.org/dc/terms/created> ?created ."
-                    + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .");
+                    + SparqlUtils.WHERE_BLOCK);
 
         filterString.append(filterPredicate.toString());
 
         if (!dateSearch) {
                 filterString
-                        .append(" OPTIONAL { "
-                                + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
-                                + " <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ."
-                                + " ?lendorsement <http://mp.stratuslab.eu/slreq#endorser> ?lendorser;"
-                                + " <http://purl.org/dc/terms/created> ?latestcreated ."
-                                + " ?lendorser <http://mp.stratuslab.eu/slreq#email> ?lemail ."
-                                + " FILTER (?lidentifier = ?identifier) ."
-                                + " FILTER (?lemail = ?email) ."
-                                + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) .");
-                filterString.append(" FILTER (?valid > \"" + getCurrentDate() + "\") .");
+                        .append(SparqlUtils.getLatestFilter(getCurrentDate()));
         }
                      
         if (deprecatedValue.equals("off")){
@@ -464,6 +450,7 @@ public class MDataResource extends BaseResource {
         filterString.append(searching);
         filterString.append(" }");
 
+        //Get the total number of unfiltered results
         counterString.append(filterString);
         List<Map<String, String>> countResult = query(counterString.toString());
         Map<String, String> count = new HashMap();
@@ -474,7 +461,8 @@ public class MDataResource extends BaseResource {
                 
         queryString.append(filterString);
         queryString.append(paging);
-                
+            
+        //Get the results
         List<Map<String, String>> results = query(queryString.toString());
 
         if(results.size() <= 0 && filter){
@@ -511,12 +499,18 @@ public class MDataResource extends BaseResource {
     	return paging;
     }
     
-    private String buildSearchingFilter(Map<String, String> formValues){
+    /*
+     * Build the search filter based on the entries in the search text boxes.
+     * 
+     * @param String taken from the 'Search all columns' field
+     * @param individual column search text
+     * 
+     * @return sparql filter string
+     */
+    private String buildSearchingFilter(String sSearch, String[] sSearchCols){
     	String searching = "";
     	
-    	if(formValues.get("sSearch") != null){
-    		String sSearch = formValues.get("sSearch");
-    		
+    	if(sSearch != null && sSearch.length() > 0){		    		
     		String[] searchTerms = sSearch.split(" ");
     		StringBuilder searchAllFilter = new StringBuilder(" FILTER (");
     		for(int i = 0; i < searchTerms.length; i++){
@@ -540,7 +534,7 @@ public class MDataResource extends BaseResource {
     	
     	StringBuilder searchColumnsPredicate = new StringBuilder();
     	for(int i = 1; i < 6; i++){
-    		if ( formValues.get("sSearch_" + i) != null )
+    		if ( sSearchCols[i] != null && sSearchCols[i].length() > 0 )
     		{
     			if ( searchColumnsPredicate.length() == 0 )
     			{
@@ -550,7 +544,7 @@ public class MDataResource extends BaseResource {
     			{
     				searchColumnsPredicate.append(" && ");
     			}
-    			String word = formValues.get("sSearch_" + i);
+    			String word = sSearchCols[i];
     			searchColumnsPredicate.append(SparqlUtils.buildRegex(
     					SparqlUtils.getColumn(i), word));
     		}
@@ -563,36 +557,30 @@ public class MDataResource extends BaseResource {
     	return searching;
     }
     
+    /*
+     * Gets the value of the deprecated flag from the query
+     * 
+     * @param the value taken from the request
+     * 
+     * @return the value of the deprecated flag
+     */
     private String getDeprecatedFlag(String deprecated){
     	return (deprecated == null) ? "on" : deprecated;
     }
     
+    /*
+     * Gets the total number of unfiltered records
+     * 
+     * @param whether to include deprecated entries or not
+     * 
+     * @return the total number of records
+     */
     private long getTotalRecords(String deprecatedValue){
     	String queryString = 
-        		"SELECT DISTINCT(COUNT(*) AS ?count)"
+        		SparqlUtils.SELECT_COUNT
                 + " WHERE {"
-                + " ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
-                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os> ?os . }"
-                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-version> ?osversion . }"
-                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-arch> ?arch . }"
-                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
-                + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
-                + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . }"
-                + " ?x <http://purl.org/dc/terms/valid> ?valid;"
-                + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
-                + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
-                + " <http://purl.org/dc/terms/created> ?created ."
-                + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email ."
-                + " OPTIONAL { "
-                + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
-                + " <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ."
-                + " ?lendorsement <http://mp.stratuslab.eu/slreq#endorser> ?lendorser;"
-                + " <http://purl.org/dc/terms/created> ?latestcreated ."
-                + " ?lendorser <http://mp.stratuslab.eu/slreq#email> ?lemail ."
-                + " FILTER (?lidentifier = ?identifier) ."
-                + " FILTER (?lemail = ?email) ."
-                + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) ."
-                + " FILTER (?valid > \"" + getCurrentDate() + "\") .";
+                + SparqlUtils.WHERE_BLOCK
+                + SparqlUtils.getLatestFilter(getCurrentDate());
     	
     	if (deprecatedValue.equals("off")){
         	queryString += " FILTER (!bound (?deprecated))";
