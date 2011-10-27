@@ -14,6 +14,45 @@ function fnFormatDetails ( oTable, nTr )
 	return sOut;
 }
 
+jQuery.fn.dataTableExt.oApi.fnSetFilteringDelay = function ( oSettings, iDelay ) {
+	/*
+	 * Inputs:      object:oSettings - dataTables settings object - automatically given
+	 *              integer:iDelay - delay in milliseconds
+	 * Usage:       $('#example').dataTable().fnSetFilteringDelay(250);
+	 * Author:      Zygimantas Berziunas (www.zygimantas.com) and Allan Jardine
+	 * License:     GPL v2 or BSD 3 point style
+	 * Contact:     zygimantas.berziunas /AT\ hotmail.com
+	 */
+	var
+		_that = this,
+		iDelay = (typeof iDelay == 'undefined') ? 250 : iDelay;
+	
+	this.each( function ( i ) {
+		$.fn.dataTableExt.iApiIndex = i;
+		var
+			$this = this, 
+			oTimerId = null, 
+			sPreviousSearch = null,
+			anControl = $( 'input', _that.fnSettings().aanFeatures.f );
+		
+			anControl.unbind( 'keyup' ).bind( 'keyup', function() {
+			var $$this = $this;
+
+			if (sPreviousSearch === null || sPreviousSearch != anControl.val()) {
+				window.clearTimeout(oTimerId);
+				sPreviousSearch = anControl.val();	
+				oTimerId = window.setTimeout(function() {
+					$.fn.dataTableExt.iApiIndex = i;
+					_that.fnFilter( anControl.val() );
+				}, iDelay);
+			}
+		});
+		
+		return this;
+	} );
+	return this;
+}
+
 var asInitVals = new Array();
 
 $(document).ready(function() {
@@ -40,6 +79,20 @@ $(document).ready(function() {
 		"bServerSide": true,
                 "sAjaxSource": window.location.href,
                 "bProcessing": true,
+                "fnServerData": function ( sSource, aoData, fnCallback ) {
+			$.ajax( {
+				"dataType": 'json', 
+				"type": "GET", 
+				"url": sSource, 
+				"data": aoData, 
+			        "success": function (json) {
+                                    oTable.fnSettings().oLanguage.sZeroRecords = json.rMsg;
+                                    oTable.fnSettings().oLanguage.sEmptyTable = json.rMsg;
+
+                                    fnCallback(json);
+                                }	
+                         } );
+		},
                 "aoColumnDefs": [
 			{ "bSortable": false, "aTargets": [ 0 ] },
                         { "bVisible": false, "aTargets": [6] },
@@ -73,14 +126,30 @@ $(document).ready(function() {
 		}
 	} );
 
-
-        $("tfoot input").keyup( function () {
-                /* Filter on the column (the index) of this element */
-                oTable.fnFilter( this.value, $("tfoot input").index(this) + 1 );
-        } );
+        var search_timeout = undefined;
+        $("tfoot input").keyup( function (event) {
+		if(event.keyCode!='9') {
+			if(search_timeout != undefined) {
+				clearTimeout(search_timeout);
+			}
+			$this = this;
+			search_timeout = setTimeout(function() {
+				search_timeout = undefined;
+				oTable.fnFilter( $this.value, $("tfoot input").index($this) + 1 );
+			}, 250);
+		}
+	} );
+				
+	$("tfoot input").focusout( function () {
+		if(search_timeout != undefined) {
+			clearTimeout(search_timeout);
+		}
+		$this = this;
+		oTable.fnFilter( $this.value, $("tfoot input").index($this) + 1 );
+	} );
 
         /*
-         * Support functions to provide a little bit of 'user friendlyness' to the textboxes in
+         * Support functions to provide a little bit of 'user friendliness' to the textboxes in
          * the footer
          */
         $("tfoot input").each( function (i) {
@@ -102,6 +171,8 @@ $(document).ready(function() {
                         this.value = asInitVals[$("tfoot input").index(this)];
                 }
         } );
+
+	oTable.fnSetFilteringDelay();
 
 } );
 

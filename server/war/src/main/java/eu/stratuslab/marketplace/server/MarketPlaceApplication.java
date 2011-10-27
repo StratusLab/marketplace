@@ -124,7 +124,7 @@ public class MarketPlaceApplication extends Application {
         } catch (RepositoryException r) {
             LOGGER.severe("error initializing repository: " + r.getMessage());
         }
-
+        
         /*
          * Set up a task to check the repository connection is alive
          */

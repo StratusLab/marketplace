@@ -20,7 +20,7 @@
             <th>os</th>
             <th>os-version</th>
             <th>arch</th>
-            <th>email</th>
+            <th>endorser</th>
             <th>date</th>
             <th>identifier</th>
             <th>description</th>
@@ -35,7 +35,7 @@
              <th><input type="text" name="search_os" value="Search os" class="search_init" /></th>
 	     <th><input type="text" name="search_osversion" value="Search os version" class="search_init" /></th>
 	     <th><input type="text" name="search_arch" value="Search architecture" class="search_init" /></th>
-             <th><input type="text" name="search_email" value="Search email" class="search_init" /></th>
+             <th><input type="text" name="search_endorser" value="Search endorser" class="search_init" /></th>
              <th><input type="text" name="search_date" value="Search date" class="search_init" /></th>
              <th><input type="text" name="search_identifier" value="Search identifier" class="search_init" /></th>
              <th><input type="text" name="search_location" value="Search location" class="search_init" /></th>

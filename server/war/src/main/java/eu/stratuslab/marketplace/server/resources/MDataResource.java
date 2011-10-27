@@ -303,6 +303,8 @@ public class MDataResource extends BaseResource {
     	
     	List<Map<String, String>> results = null;
     	
+    	String msg = "no metadata matching query found";
+    	
     	try {
     		results = getMetadata(deprecatedValue);
     	} catch(ResourceException r){
@@ -319,6 +321,7 @@ public class MDataResource extends BaseResource {
     			+ formValues.get("sEcho") + "\", ");
     	json.append("\"iTotalRecords\":" + iTotalRecords + ", ");
     	json.append("\"iTotalDisplayRecords\":" + iTotalDisplayRecords + ", ");
+    	json.append("\"rMsg\":\"" + msg + "\", ");
     	json.append("\"aaData\":[ ");
     	
     	for(int i = 0; i < results.size(); i++){
@@ -350,7 +353,7 @@ public class MDataResource extends BaseResource {
     	}
     	
     	json.append("]}");
-             
+
     	String jsonString = json.toString().replaceAll("\n", "<br>");
     	
     	// Returns the XML representation of this document.

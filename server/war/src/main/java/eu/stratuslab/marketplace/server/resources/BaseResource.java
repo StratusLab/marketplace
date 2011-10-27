@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.lang.IllegalStateException;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -404,6 +405,8 @@ public abstract class BaseResource extends ServerResource {
         		con.close();
         	}
         } catch (RepositoryException e) {
+        	LOGGER.severe("Error accessing repository: " + e.getMessage());
+        } catch (IllegalStateException e) {
         	LOGGER.severe("Error accessing repository: " + e.getMessage());
         } catch (MalformedQueryException m) {
         	LOGGER.severe("Malformed query: " + m.getMessage());
