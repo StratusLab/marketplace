@@ -50,6 +50,7 @@ import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
 import eu.stratuslab.marketplace.server.utils.SparqlUtils;
+import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
  * This resource represents a list of all Metadata entries
@@ -455,18 +456,30 @@ public class MDataResource extends BaseResource {
 
         //Get the total number of unfiltered results
         counterString.append(filterString);
-        List<Map<String, String>> countResult = query(counterString.toString());
         Map<String, String> count = new HashMap();
         count.put("count", "0");
-        if(countResult.size() > 0){
-        	count = (Map<String, String>)countResult.get(0);
+        
+        try {
+        	 List<Map<String, String>> countResult = query(counterString.toString());
+             
+        	 if(countResult.size() > 0){
+        		 count = (Map<String, String>)countResult.get(0);
+        	 }
+        } catch(MarketplaceException e){
+        	LOGGER.severe(e.getMessage());
         }
                 
         queryString.append(filterString);
         queryString.append(paging);
             
         //Get the results
-        List<Map<String, String>> results = query(queryString.toString());
+        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+        
+        try {
+        	results = query(queryString.toString());
+        } catch(MarketplaceException e){
+        	LOGGER.severe(e.getMessage());
+        }
 
         if(results.size() <= 0 && filter){
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
@@ -592,11 +605,16 @@ public class MDataResource extends BaseResource {
         }
     	queryString += " }";
     	
-    	List<Map<String, String>> totalResults = query(queryString);
     	String iTotalRecords = "0";
     	
-    	if(totalResults.size() > 0){
-    		iTotalRecords = (String)((Map<String, String>)totalResults.remove(0)).get("count");
+    	try {
+    		List<Map<String, String>> totalResults = query(queryString);
+        	
+    		if(totalResults.size() > 0){
+    			iTotalRecords = (String)((Map<String, String>)totalResults.remove(0)).get("count");
+    		}
+    	} catch(MarketplaceException e){
+    		LOGGER.severe(e.getMessage());
     	}
     	
     	return Long.parseLong(iTotalRecords);

@@ -3,6 +3,7 @@ package eu.stratuslab.marketplace.server.resources;
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -25,6 +26,8 @@ import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 
 import java.util.logging.Logger;
+
+import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
  * This resource represents a query on the rdf data
@@ -51,7 +54,14 @@ public class QueryResource extends BaseResource {
                                     "query not allowed.");
         	    }
                 
-                List<Map<String, String>> results = query(queryString);
+                List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+                
+                try {	
+                	results = query(queryString);
+                } catch(MarketplaceException e){
+                	LOGGER.severe(e.getMessage());
+                }
+                
                 int noOfResults = results.size();
                 if (noOfResults > 0) {
                     StringBuilder stringBuilder = new StringBuilder();

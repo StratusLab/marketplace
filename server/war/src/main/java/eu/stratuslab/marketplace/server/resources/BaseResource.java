@@ -6,6 +6,7 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.VALID;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
+import eu.stratuslab.marketplace.server.MarketplaceException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -368,7 +369,8 @@ public abstract class BaseResource extends ServerResource {
      *            the query
      * @return the resultset as a Java Collection
      */
-    protected List<Map<String, String>> query(String queryString) {
+    protected List<Map<String, String>> query(String queryString) 
+    throws MarketplaceException {
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
         
         try {

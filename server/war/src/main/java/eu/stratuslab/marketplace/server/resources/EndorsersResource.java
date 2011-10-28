@@ -2,12 +2,15 @@ package eu.stratuslab.marketplace.server.resources;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import org.openrdf.query.QueryLanguage;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
+
+import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
  * This resource represents a list of endorsers
@@ -26,7 +29,12 @@ public class EndorsersResource extends BaseResource {
                 
     @Get("html")
     public Representation toHtml() {
-        List<Map<String, String>> results = query(EMAIL_QUERY);
+        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+        try {
+        	results = query(EMAIL_QUERY);
+        } catch(MarketplaceException e){
+        	LOGGER.severe(e.getMessage());
+        }
         
         for(int i = 0; i < results.size(); i++){
         	Map<String, String> resultRow = results.get(i);

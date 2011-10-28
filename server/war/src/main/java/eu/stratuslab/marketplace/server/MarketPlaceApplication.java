@@ -63,7 +63,6 @@ import eu.stratuslab.marketplace.server.resources.HomeResource;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
-import eu.stratuslab.marketplace.server.resources.SearchResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
@@ -188,10 +187,6 @@ public class MarketPlaceApplication extends Application {
         router.attach("/upload", UploadResource.class);
         router.attach("/upload/", UploadResource.class);
 
-        // Defines a route for the search resource
-        router.attach("/search", SearchResource.class);
-        router.attach("/search/", SearchResource.class);
-
         // Define a route for the about page
         router.attach("/about", AboutResource.class);
         router.attach("/about/", AboutResource.class);
@@ -205,7 +200,7 @@ public class MarketPlaceApplication extends Application {
         cssDir.setNegotiatingContent(false);
         cssDir.setIndexName("index.html");
         router.attach("/css/", cssDir);
-
+                            
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
 

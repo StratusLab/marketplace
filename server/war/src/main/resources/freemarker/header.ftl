@@ -7,7 +7,6 @@
 
   <script src="http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js"></script>
   <script type="text/javascript" language="javascript" src="http://www.datatables.net/download/build/jquery.dataTables.min.js"></script>
-
   <script type="text/javascript">
        $.fn.dataTableExt.oPagination.listbox = {
         /*
@@ -15,8 +14,8 @@
          * Purpose:  Initalise dom elements required for pagination with listbox input
          * Returns:  -
          * Inputs:   object:oSettings - dataTables settings object
-         *                     node:nPaging - the DIV which contains this pagination control
-         *                     function:fnCallbackDraw - draw function which must be called on update
+         *           node:nPaging - the DIV which contains this pagination control
+         *           function:fnCallbackDraw - draw function which must be called on update
          */
         "fnInit": function (oSettings, nPaging, fnCallbackDraw) {
                 var nInput = document.createElement('select');
@@ -92,7 +91,6 @@
   }; 
 
   </script>
-
 
   <link rel="shortcut icon" href="css/favicon.ico"/>
   <link rel="stylesheet" type="text/css" href="css/stratuslab.css"/>
