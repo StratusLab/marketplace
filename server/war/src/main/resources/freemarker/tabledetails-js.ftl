@@ -86,7 +86,11 @@ $(document).ready(function() {
 				"url": sSource, 
 				"data": aoData, 
 			        "success": function (json) {
-                                    oTable.fnSettings().oLanguage.sZeroRecords = json.rMsg;
+                                    var message = json.rMsg;
+                                    if(message.indexOf("ERROR") != -1){
+					alert(message);
+				    }
+				    oTable.fnSettings().oLanguage.sZeroRecords = json.rMsg;
                                     oTable.fnSettings().oLanguage.sEmptyTable = json.rMsg;
 
                                     fnCallback(json);

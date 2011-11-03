@@ -29,5 +29,17 @@
       <Class name="eu.stratuslab.marketplace.server.resources.MDatumResource" />
      </Or>
      <Bug pattern="UUF_UNUSED_FIELD" />
+    </Match>
+    <Match>
+     <Or>
+      <Class name="eu.stratuslab.marketplace.server.resources.MDataResource" />
+     </Or>
+     <Bug pattern="DLS_DEAD_LOCAL_STORE" />
     </Match> 
+     <Match>
+     <Or>
+      <Class name="eu.stratuslab.marketplace.server.resources.EndorsersResource" />
+     </Or>
+     <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+    </Match>
 </FindBugsFilter>

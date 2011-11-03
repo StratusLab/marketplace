@@ -310,6 +310,9 @@ public class MDataResource extends BaseResource {
     		results = getMetadata(deprecatedValue);
     	} catch(ResourceException r){
     		results = new ArrayList();
+                if(r.getCause() != null){
+			msg = "ERROR: " + r.getCause().getMessage();
+		}
     	}
     	
     	long iTotalRecords = getTotalRecords(deprecatedValue);
@@ -466,8 +469,8 @@ public class MDataResource extends BaseResource {
         		 count = (Map<String, String>)countResult.get(0);
         	 }
         } catch(MarketplaceException e){
-        	LOGGER.severe(e.getMessage());
-        }
+       		LOGGER.severe(e.getMessage());
+	}
                 
         queryString.append(filterString);
         queryString.append(paging);
@@ -478,7 +481,7 @@ public class MDataResource extends BaseResource {
         try {
         	results = query(queryString.toString());
         } catch(MarketplaceException e){
-        	LOGGER.severe(e.getMessage());
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
 
         if(results.size() <= 0 && filter){

@@ -407,13 +407,13 @@ public abstract class BaseResource extends ServerResource {
         		con.close();
         	}
         } catch (RepositoryException e) {
-        	LOGGER.severe("Error accessing repository: " + e.getMessage());
+                throw new MarketplaceException(e.getMessage());
         } catch (IllegalStateException e) {
-        	LOGGER.severe("Error accessing repository: " + e.getMessage());
+                throw new MarketplaceException(e.getMessage());
         } catch (MalformedQueryException m) {
-        	LOGGER.severe("Malformed query: " + m.getMessage());
+                throw new MarketplaceException(m.getMessage());
         } catch (QueryEvaluationException q) {
-        	LOGGER.severe("Error processing query: " + q.getMessage());
+                throw new MarketplaceException(q.getMessage());
         }
 
         return list;

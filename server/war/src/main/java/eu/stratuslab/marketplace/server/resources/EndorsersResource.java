@@ -6,9 +6,11 @@ import java.util.ArrayList;
 
 import org.openrdf.query.QueryLanguage;
 import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
+import org.restlet.resource.ResourceException;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
@@ -33,7 +35,7 @@ public class EndorsersResource extends BaseResource {
         try {
         	results = query(EMAIL_QUERY);
         } catch(MarketplaceException e){
-        	LOGGER.severe(e.getMessage());
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
         
         for(int i = 0; i < results.size(); i++){
