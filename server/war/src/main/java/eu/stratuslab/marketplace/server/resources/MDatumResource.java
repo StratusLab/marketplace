@@ -30,12 +30,14 @@ import com.talis.rdfwriters.json.JSONJenaWriter;
 public class MDatumResource extends BaseResource {
 
     private String datum = null;
+    private String identifier = null;
         
     @Override
     protected void doInit() {
         String iri = getRequest().getResourceRef().getPath();
         iri = iri.substring(iri.indexOf("metadata") + 9);
         this.datum = getMetadatum(getDataDir() + "/" + iri + ".xml");
+        this.identifier = iri.substring(0, iri.indexOf("/"));
     }
 
     @Get("xml")
@@ -106,6 +108,7 @@ public class MDatumResource extends BaseResource {
         }
 
         Map<String, Object> data = createInfoStructure("Metadata");
+        data.put("identifier", this.identifier);
         data.put("content", stringBuilder.toString());
 
         // Load the FreeMarker template

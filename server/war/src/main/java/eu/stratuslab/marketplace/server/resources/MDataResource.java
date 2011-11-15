@@ -311,8 +311,8 @@ public class MDataResource extends BaseResource {
     	} catch(ResourceException r){
     		results = new ArrayList();
                 if(r.getCause() != null){
-			msg = "ERROR: " + r.getCause().getMessage();
-		}
+                	msg = "ERROR: " + r.getCause().getMessage();
+                }
     	}
     	
     	long iTotalRecords = getTotalRecords(deprecatedValue);

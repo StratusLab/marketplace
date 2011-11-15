@@ -65,6 +65,7 @@ import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
+import eu.stratuslab.marketplace.server.resources.RatingsResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
@@ -169,7 +170,7 @@ public class MarketPlaceApplication extends Application {
         router.attach("/metadata/{identifier}/{email}/{date}",
                 MDatumResource.class);
         router.attach("/metadata/{identifier}/{email}/{date}/",
-		MDatumResource.class);
+        		MDatumResource.class);
 
         // Defines a route for the resource "endorsers"
         router.attach("/endorsers", EndorsersResource.class);
@@ -191,6 +192,10 @@ public class MarketPlaceApplication extends Application {
         router.attach("/about", AboutResource.class);
         router.attach("/about/", AboutResource.class);
         
+     // Define a route for the ratings
+        router.attach("/ratings", RatingsResource.class);
+        router.attach("/ratings/", RatingsResource.class);
+        
         // Defines a router for actions
         TemplateRoute route;
         route = router.attach("/action/", new ActionRouter());
@@ -200,7 +205,12 @@ public class MarketPlaceApplication extends Application {
         cssDir.setNegotiatingContent(false);
         cssDir.setIndexName("index.html");
         router.attach("/css/", cssDir);
-                            
+                           
+        Directory jsDir = new Directory(getContext(), "war:///js");
+        jsDir.setNegotiatingContent(false);
+        jsDir.setIndexName("index.html");
+        router.attach("/js/", jsDir);
+        
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
 
