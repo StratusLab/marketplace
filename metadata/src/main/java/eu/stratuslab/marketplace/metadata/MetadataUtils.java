@@ -38,6 +38,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import eu.stratuslab.marketplace.X509Info;
+import eu.stratuslab.marketplace.X509Utils;
 
 public final class MetadataUtils {
 
@@ -78,6 +79,20 @@ public final class MetadataUtils {
 
     private MetadataUtils() {
 
+    }
+
+    public static void signMetadataEntry(Document doc, X509Info x509Info,
+            String email) {
+
+        // Clean out any existing signatures.
+        MetadataUtils.clearEndorsementElement(doc);
+        MetadataUtils.stripSignatureElements(doc);
+
+        // Fill in the endorsement element if it is empty.
+        MetadataUtils.fillEndorsementElement(doc, x509Info, email);
+
+        // Sign the document. The document is directly modified by method.
+        X509Utils.signDocument(x509Info, doc);
     }
 
     public static Map<String, BigInteger> streamInfo(InputStream is) {
@@ -278,17 +293,25 @@ public final class MetadataUtils {
         return info;
     }
 
+    public static void removeNodeFromParent(Node node) {
+        Node parent = node.getParentNode();
+        parent.removeChild(node);
+    }
+
     public static void stripSignatureElements(Document doc) {
 
-        NodeList nodes = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
-                "Signature");
+        NodeList nodes;
 
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node node = nodes.item(i);
-            Node parent = node.getParentNode();
-            parent.removeChild(node);
-            doc.normalizeDocument();
+        // Careful, search needs to be done every time something's removed!
+        for (//
+        nodes = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature"); //
+        nodes.getLength() > 0; //
+        nodes = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature")) {
+
+            removeNodeFromParent(nodes.item(0));
         }
+
+        doc.normalizeDocument();
     }
 
     public static void writeStringToFile(String contents, File outputFile) {
@@ -311,6 +334,35 @@ public final class MetadataUtils {
             }
         }
 
+    }
+
+    public static void clearEndorsementElement(Document doc) {
+
+        NodeList nodes;
+
+        // Careful, search needs to be done every time something's removed!
+        // Remove all but last endorsement.
+        for (//
+        nodes = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement"); //
+        nodes.getLength() > 1; //
+        nodes = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement")) {
+
+            removeNodeFromParent(nodes.item(0));
+        }
+
+        doc.normalizeDocument();
+
+        nodes = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement");
+        if (nodes.getLength() > 0) {
+            Node endorsement = nodes.item(0);
+
+            while (endorsement.hasChildNodes()) {
+                Node child = endorsement.getLastChild();
+                endorsement.removeChild(child);
+            }
+        }
+
+        doc.normalizeDocument();
     }
 
     public static void fillEndorsementElement(Document doc, X509Info x509info,

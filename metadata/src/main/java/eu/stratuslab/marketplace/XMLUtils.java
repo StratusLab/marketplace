@@ -1,5 +1,8 @@
 package eu.stratuslab.marketplace;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,6 +17,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public final class XMLUtils {
 
@@ -73,6 +78,15 @@ public final class XMLUtils {
 
     public static String documentToString(Document doc) {
         return documentToString(doc, false);
+    }
+
+    public static Document documentFromString(String xml) throws SAXException,
+            IOException {
+
+        Reader reader = new StringReader(xml);
+        InputSource source = new InputSource(reader);
+        DocumentBuilder db = newDocumentBuilder(false);
+        return db.parse(source);
     }
 
     public static String documentToString(Document doc, boolean indented) {

@@ -1,13 +1,9 @@
 package eu.stratuslab.marketplace.metadata;
 
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -36,22 +32,40 @@ public class SignValidateCycleTest {
             String signedContents = signDocument(name);
 
             // Recreate signed document.
-            is = new ByteArrayInputStream(signedContents.getBytes());
-            DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
-            Document signedDoc = db.parse(is);
+            Document signedDoc = XMLUtils.documentFromString(signedContents);
 
             // Check that all's OK.
-            // ValidateXMLSignature.validate(signedDoc);
             ValidateMetadata.validate(signedDoc);
 
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException consumed) {
+            closeReliably(is);
+        }
 
-                }
-            }
+    }
+
+    private static void signAndValidateTwice(String name) throws SAXException,
+            IOException {
+
+        InputStream is = null;
+
+        try {
+
+            // Read, sign, and put into string.
+            String signedContents = signDocument(name);
+
+            // Recreate signed document.
+            Document signedDoc = XMLUtils.documentFromString(signedContents);
+
+            // Sign again.
+            String signedContents2 = signDocument(signedDoc);
+
+            signedDoc = XMLUtils.documentFromString(signedContents2);
+
+            // Check that all's OK.
+            ValidateMetadata.validate(signedDoc);
+
+        } finally {
+            closeReliably(is);
         }
 
     }
@@ -59,6 +73,11 @@ public class SignValidateCycleTest {
     @Test
     public void testNormalCycleOK() throws SAXException, IOException {
         signAndValidate("valid-minimal.xml");
+    }
+
+    @Test
+    public void testDoubleSignatureOK() throws SAXException, IOException {
+        signAndValidateTwice("valid-minimal.xml");
     }
 
     @Test
@@ -74,49 +93,30 @@ public class SignValidateCycleTest {
 
         try {
 
-            // Read, sign, and put into string.
             String signedContents = signDocument("valid-minimal.xml");
 
             // CORRUPT THE INFORMATION.
             signedContents = signedContents.replace(">SHA-1", ">SHA-2");
 
-            // Recreate signed document.
-            is = new ByteArrayInputStream(signedContents.getBytes());
-            DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
-            Document signedDoc = db.parse(is);
+            Document signedDoc = XMLUtils.documentFromString(signedContents);
 
             // This should now throw an exception.
             ValidateXMLSignature.validate(signedDoc);
 
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException consumed) {
-
-                }
-            }
+            closeReliably(is);
         }
 
-    }
-
-    @Test
-    public void testBadEndorserInfo() throws SAXException, IOException {
-
-        String[] names = new String[] { "invalid-email-mismatch.xml",
-                "invalid-subject-mismatch.xml", "invalid-issuer-mismatch.xml" };
-
-        for (String name : names) {
-            try {
-                signAndValidate(name);
-                fail(name + " passed validation but should have failed");
-            } catch (MetadataException e) {
-                // OK, exception is expected.
-            }
-        }
     }
 
     private static String signDocument(String name) throws SAXException,
+            IOException {
+
+        Document doc = readDocument(name);
+        return signDocument(doc);
+    }
+
+    private static String signDocument(Document doc) throws SAXException,
             IOException {
 
         InputStream is = null;
@@ -131,26 +131,13 @@ public class SignValidateCycleTest {
             KeyStore keyStore = X509Utils.pkcs12ToKeyStore(is, passwd);
             X509Info x509Info = X509Utils.x509FromKeyStore(keyStore, passwd);
 
-            // Instantiate the document to be signed
-            Document doc = readDocument(name);
-
-            // Fill in the endorsement if necessary.
-            MetadataUtils.fillEndorsementElement(doc, x509Info, null);
-
-            // Sign the document. The document is directly modified by method.
-            X509Utils.signDocument(x509Info, doc);
+            MetadataUtils.signMetadataEntry(doc, x509Info, null);
 
             // Store the signed content in a string.
             return XMLUtils.documentToString(doc);
 
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException consumed) {
-
-                }
-            }
+            closeReliably(is);
         }
 
     }
@@ -158,6 +145,16 @@ public class SignValidateCycleTest {
     private static Document readDocument(String name) {
         return TestUtils
                 .readResourceDocument(SignValidateCycleTest.class, name);
+    }
+
+    private static void closeReliably(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException consumed) {
+
+            }
+        }
     }
 
 }

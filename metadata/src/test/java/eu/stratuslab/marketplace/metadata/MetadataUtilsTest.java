@@ -13,6 +13,8 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
+import javax.xml.crypto.dsig.XMLSignature;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -65,6 +67,7 @@ public class MetadataUtilsTest {
         }
     }
 
+    @Test
     public void checkIdEncodeDecodeCycle() {
         String data = "data for SHA1 digest";
         byte[] buffer = data.getBytes();
@@ -80,6 +83,46 @@ public class MetadataUtilsTest {
         BigInteger sha1DigestCheck = MetadataUtils.identifierToSha1(identifier);
 
         assertEquals(sha1Digest, sha1DigestCheck);
+
+    }
+
+    @Test
+    public void checkStripSignatureElements() {
+
+        Document doc = readDocument("partial-multiple-signatures.xml");
+        MetadataUtils.stripSignatureElements(doc);
+
+        NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
+                "Signature");
+        if (nl.getLength() > 0) {
+            fail("not all signature elements were removed\n"
+                    + XMLUtils.documentToString(doc));
+        }
+
+    }
+
+    @Test
+    public void checkClearEndorsementElement() {
+
+        Document doc = readDocument("partial-multiple-endorsements.xml");
+        MetadataUtils.clearEndorsementElement(doc);
+
+        NodeList nl = doc.getElementsByTagNameNS(SLREQ_NS_URI, "endorsement");
+        if (nl.getLength() > 1) {
+            fail("multiple endorsements were not removed\n"
+                    + XMLUtils.documentToString(doc));
+        }
+
+        if (nl.getLength() != 1) {
+            fail("all endorsements were removed; should have kept one\n"
+                    + XMLUtils.documentToString(doc));
+        }
+
+        Node endorsement = nl.item(0);
+        if (endorsement.hasChildNodes()) {
+            fail("clearEndorsementElement didn't remove all child nodes\n"
+                    + XMLUtils.documentToString(doc));
+        }
 
     }
 

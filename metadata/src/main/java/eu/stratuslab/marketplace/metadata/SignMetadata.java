@@ -58,15 +58,10 @@ public final class SignMetadata {
 
         try {
 
-            // Instantiate the document to be signed
             DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
             doc = db.parse(metadataFile);
 
-            // Fill in the endorsement element if it is empty.
-            MetadataUtils.fillEndorsementElement(doc, x509Info, email);
-
-            // Sign the document. The document is directly modified by method.
-            X509Utils.signDocument(x509Info, doc);
+            MetadataUtils.signMetadataEntry(doc, x509Info, email);
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
