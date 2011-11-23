@@ -26,25 +26,6 @@
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
     </dependency>
-<!--
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
-    </dependency>
--->
-    <dependency>
-       <groupId>org.openrdf.sesame</groupId>
-       <artifactId>sesame-sail-api</artifactId>
-    </dependency>
-    <dependency>
-       <groupId>org.openrdf.sesame</groupId>
-       <artifactId>sesame-repository-sail</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-sail-memory</artifactId>
-    </dependency>
     <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-rio-rdfxml</artifactId>

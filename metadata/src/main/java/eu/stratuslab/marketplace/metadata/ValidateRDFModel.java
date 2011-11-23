@@ -1,17 +1,14 @@
 package eu.stratuslab.marketplace.metadata;
 
-import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
-
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.openrdf.OpenRDFException;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.sail.memory.MemoryStore;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.XMLUtils;
@@ -24,40 +21,37 @@ public final class ValidateRDFModel {
 
     public static void validate(Document doc) {
 
-        Repository rep = null;
+        Reader reader = null;
 
         try {
 
-            // Create a deep copy of the document and strip signature elements.
             Document copy = (Document) doc.cloneNode(true);
             MetadataUtils.stripSignatureElements(copy);
 
-            // Create a reader for the content for loading into repository.
             String rdfEntry = XMLUtils.documentToString(copy);
-            Reader reader = new StringReader(rdfEntry);
+            reader = new StringReader(rdfEntry);
 
-            rep = new SailRepository(new MemoryStore());
-            rep.initialize();
+            RDFParser rdfParser = Rio.createParser(RDFFormat.RDFXML);
 
-            RepositoryConnection con = rep.getConnection();
-            try {
-                con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML);
-            } finally {
-                con.close();
-            }
+            rdfParser.setRDFHandler(new RDFHandlerBase());
 
-            rep.shutDown();
+            rdfParser.parse(reader, "http://example.org/metadata");
 
         } catch (OpenRDFException e) {
             throw new MetadataException(e.getMessage());
         } catch (java.io.IOException e) {
             throw new MetadataException(e.getMessage());
         } finally {
-            if (rep != null) {
-                try {
-                    rep.shutDown();
-                } catch (RepositoryException consumed) {
-                }
+            closeReader(reader);
+        }
+    }
+
+    public static void closeReader(Reader reader) {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException consumed) {
+
             }
         }
     }
