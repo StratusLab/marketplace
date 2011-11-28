@@ -18,7 +18,7 @@ ${content}
 
 <br>
 
-<div class='image_rating'>
+<!-- <div class='image_rating'>
     Rate this image:
     <div id="${identifier}" class="rate_image">
         <div class="star_1 ratings_stars"></div>
@@ -28,7 +28,7 @@ ${content}
         <div class="star_5 ratings_stars"></div>
         <div class="total_votes">vote data</div>
     </div>
-</div>
+</div> -->
 
 </div>
 

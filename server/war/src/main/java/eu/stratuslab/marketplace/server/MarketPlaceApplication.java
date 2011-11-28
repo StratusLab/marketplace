@@ -192,9 +192,9 @@ public class MarketPlaceApplication extends Application {
         router.attach("/about", AboutResource.class);
         router.attach("/about/", AboutResource.class);
         
-     // Define a route for the ratings
-        router.attach("/ratings", RatingsResource.class);
-        router.attach("/ratings/", RatingsResource.class);
+        // Define a route for the ratings
+        //router.attach("/ratings", RatingsResource.class);
+        //router.attach("/ratings/", RatingsResource.class);
         
         // Defines a router for actions
         TemplateRoute route;

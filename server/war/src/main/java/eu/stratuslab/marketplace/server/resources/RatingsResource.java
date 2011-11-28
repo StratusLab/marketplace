@@ -176,7 +176,10 @@ public class RatingsResource extends BaseResource {
     	}
     	    	    	
     	String json = jsonString.toString();
-       	json = json.substring(0, json.length() - 3);
+    	
+    	if(json.length() > 3){
+       	    json = json.substring(0, json.length() - 3);
+    	}
     	json = json + " }";
     	
     	return json;

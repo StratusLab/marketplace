@@ -78,7 +78,7 @@ public class MDatumResource extends BaseResource {
 
     @Get("html")
     public Representation toHtml() {
-        if (this.datum == null) {
+    	if (this.datum == null) {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
