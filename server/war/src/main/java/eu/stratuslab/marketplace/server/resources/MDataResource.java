@@ -118,14 +118,14 @@ public class MDataResource extends BaseResource {
 	private Representation createStatusRepresentation(String title,
 			String message) {
 		Representation rep = null;
-		if (getRequest().getClientInfo().getAcceptedMediaTypes().size() >= 0
-				&& getRequest().getClientInfo().getAcceptedMediaTypes().get(0)
-						.getMetadata().equals(MediaType.TEXT_HTML)) {
+		if (getRequest().getClientInfo().getAcceptedMediaTypes().size() > 0
+			&& getRequest().getClientInfo().getAcceptedMediaTypes()
+				.get(0).getMetadata().equals(MediaType.TEXT_HTML)) {
 			Map<String, Object> dataModel = createInfoStructure(title);
 			dataModel.put("statusName", getResponse().getStatus().getName());
 			dataModel.put("statusDescription", message);
 			rep = createTemplateRepresentation("status.ftl", dataModel,
-					MediaType.TEXT_HTML);
+				MediaType.TEXT_HTML);
 		} else {
 			rep = new StringRepresentation(message, TEXT_PLAIN);
 		}
