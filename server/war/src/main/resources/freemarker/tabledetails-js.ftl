@@ -84,6 +84,9 @@ $(document).ready(function() {
 				"dataType": 'json', 
 				"type": "POST", 
 				"url": sSource, 
+				error: function (jqXHR, textStatus, errorThrown) {
+					alert(jqXHR, textStatus, errorThrown);
+				},
 				"data": aoData, 
 			        "success": function (json) {
                                     var message = json.rMsg;

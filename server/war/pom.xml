@@ -9,10 +9,14 @@
 	<parent>
 		<groupId>eu.stratuslab.marketplace</groupId>
 		<artifactId>marketplace-server</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.2-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>eu.stratuslab.marketplace</groupId>
+			<artifactId>marketplace-metadata</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet</artifactId>
@@ -64,12 +68,6 @@
 		<dependency>
 			<groupId>com.talis.jena</groupId>
 			<artifactId>rdf-json</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>eu.stratuslab.marketplace</groupId>
-			<artifactId>marketplace-metadata</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
-			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

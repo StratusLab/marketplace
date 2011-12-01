@@ -187,12 +187,15 @@ public class MarketPlaceApplication extends Application {
         route = router.attach("/action/", new ActionRouter());
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
-        Directory cssDir = new Directory(getContext(), "war:///css");
+		String staticContentLocation = System.getProperty(
+				"static.content.location", "war:///");
+        
+        Directory cssDir = new Directory(getContext(), staticContentLocation + "/css");
         cssDir.setNegotiatingContent(false);
         cssDir.setIndexName("index.html");
         router.attach("/css/", cssDir);
                            
-        Directory jsDir = new Directory(getContext(), "war:///js");
+        Directory jsDir = new Directory(getContext(), staticContentLocation + "/js");
         jsDir.setNegotiatingContent(false);
         jsDir.setIndexName("index.html");
         router.attach("/js/", jsDir);
@@ -245,7 +248,7 @@ public class MarketPlaceApplication extends Application {
     public Repository getMetadataStore() {
     	while(this.repositoryLock){
     		try {
-    		    Thread.currentThread().sleep(1000L);
+    		    Thread.sleep(1000L);
     		} catch(InterruptedException e){}
     	}
         return this.metadata;

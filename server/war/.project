@@ -4,7 +4,9 @@
 available) machine and disk images.  This project contains the code
 for the Marketplace server as well as various utilities related to the
 metadata. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
-  <projects/>
+  <projects>
+    <project>marketplace-metadata</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>

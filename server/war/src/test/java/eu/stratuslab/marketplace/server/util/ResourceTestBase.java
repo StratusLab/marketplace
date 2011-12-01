@@ -1,35 +1,30 @@
 package eu.stratuslab.marketplace.server.util;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.IOException;
-import java.io.InputStream;
 
-import org.junit.After;
+import javax.xml.parsers.DocumentBuilder;
+
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-
+import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Request;
 import org.restlet.Response;
+import org.restlet.data.MediaType;
 import org.restlet.data.Method;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
+import org.restlet.representation.InputRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
-import org.restlet.Application;
-import org.restlet.data.MediaType;
-import org.restlet.representation.InputRepresentation;
-
 import org.w3c.dom.Document;
-import javax.xml.parsers.DocumentBuilder;
 
-import eu.stratuslab.marketplace.server.MarketPlaceApplication;
-import eu.stratuslab.marketplace.server.utils.XPathUtils;
 import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
+import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 public class ResourceTestBase {
 
