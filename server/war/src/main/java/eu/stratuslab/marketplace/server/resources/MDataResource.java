@@ -4,15 +4,14 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.METADATA_MAX_BYTES;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
 import static org.restlet.data.MediaType.APPLICATION_RDF_XML;
+import static org.restlet.data.MediaType.APPLICATION_WWW_FORM;
 import static org.restlet.data.MediaType.APPLICATION_XML;
 import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
 import static org.restlet.data.MediaType.TEXT_PLAIN;
-import static org.restlet.data.MediaType.APPLICATION_WWW_FORM;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,9 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.StringTokenizer;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -47,36 +43,17 @@ import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
 import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
 import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
+import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
 import eu.stratuslab.marketplace.server.utils.SparqlUtils;
-import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-   
-
-     private Representation createStatusRepresentation(String title, String message){
-     	    Representation rep = null;
-            if(getRequest().getClientInfo().getAcceptedMediaTypes().size() >= 0 &&
-                        getRequest().getClientInfo().getAcceptedMediaTypes().get(0).getMetadata()
-                        .equals(MediaType.TEXT_HTML)){
-                Map<String, Object> dataModel = createInfoStructure(title);
-                dataModel.put("statusName", getResponse().getStatus().getName());
-                dataModel.put("statusDescription", message);
-                rep = createTemplateRepresentation(
-                "status.ftl", dataModel, MediaType.TEXT_HTML);
-            } else {
-                rep = new StringRepresentation(
-                    message, TEXT_PLAIN);
-            }
-
-	    return rep;
-     } 
-
+        
 	/**
      * Handle POST requests: register new Metadata entry.
      */
@@ -97,14 +74,14 @@ public class MDataResource extends BaseResource {
                 || (APPLICATION_XML.equals(mediaType, true))) {
             uploadedFile = writeContentsToDisk(entity);
         } else if (APPLICATION_WWW_FORM.equals(mediaType, true)) {
-		String queryString = "";
-		try {
-			queryString = entity.getText();
-		} catch(IOException e){}
+        	String queryString = "";
+        	try {
+        		queryString = entity.getText();
+        	} catch(IOException e){}
 	
-		getRequest().getResourceRef().setQuery(queryString);
+        	getRequest().getResourceRef().setQuery(queryString);
 
-		return toJSON();
+        	return toJSON();
 	} else {
             throw new ResourceException(
                     Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE, mediaType
@@ -121,7 +98,8 @@ public class MDataResource extends BaseResource {
             String iri = commitMetadataEntry(uploadedFile, doc);
 
             setStatus(Status.SUCCESS_CREATED);
-            Representation rep = createStatusRepresentation("Upload", "metadata entry created");
+            Representation rep = createStatusRepresentation("Upload", 
+            		"metadata entry created");
             rep.setLocationRef(iri);
 
             return rep;
@@ -137,6 +115,24 @@ public class MDataResource extends BaseResource {
 
     }
 
+	private Representation createStatusRepresentation(String title,
+			String message) {
+		Representation rep = null;
+		if (getRequest().getClientInfo().getAcceptedMediaTypes().size() >= 0
+				&& getRequest().getClientInfo().getAcceptedMediaTypes().get(0)
+						.getMetadata().equals(MediaType.TEXT_HTML)) {
+			Map<String, Object> dataModel = createInfoStructure(title);
+			dataModel.put("statusName", getResponse().getStatus().getName());
+			dataModel.put("statusDescription", message);
+			rep = createTemplateRepresentation("status.ftl", dataModel,
+					MediaType.TEXT_HTML);
+		} else {
+			rep = new StringRepresentation(message, TEXT_PLAIN);
+		}
+
+		return rep;
+	}
+    
     private static void confirmMetadataEntry(File uploadedFile, Document doc) {
 
         try {
@@ -336,7 +332,7 @@ public class MDataResource extends BaseResource {
     	try {
     		results = getMetadata(deprecatedValue);
     	} catch(ResourceException r){
-    		results = new ArrayList();
+    		results = new ArrayList<Map<String, String>>();
                 if(r.getCause() != null){
                 	msg = "ERROR: " + r.getCause().getMessage();
                 }
@@ -486,7 +482,7 @@ public class MDataResource extends BaseResource {
 
         //Get the total number of unfiltered results
         counterString.append(filterString);
-        Map<String, String> count = new HashMap();
+        Map<String, String> count = new HashMap<String, String>();
         count.put("count", "0");
         
         try {

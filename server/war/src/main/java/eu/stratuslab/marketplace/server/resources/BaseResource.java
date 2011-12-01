@@ -4,9 +4,6 @@ import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKET
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.CREATED_DATE;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
-import static eu.stratuslab.marketplace.server.utils.XPathUtils.VALID;
-import eu.stratuslab.marketplace.server.utils.XPathUtils;
-import eu.stratuslab.marketplace.server.MarketplaceException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -19,24 +16,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.TimeZone;
-import java.lang.IllegalStateException;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.openrdf.OpenRDFException;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -44,24 +40,22 @@ import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.rio.RDFFormat;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
-import org.restlet.representation.Representation;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
+import eu.stratuslab.marketplace.server.MarketplaceException;
+import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 /**
 

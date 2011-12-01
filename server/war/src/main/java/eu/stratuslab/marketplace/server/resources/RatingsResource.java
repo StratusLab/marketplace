@@ -1,24 +1,22 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
-import eu.stratuslab.marketplace.server.cfg.Configuration;
 
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.restlet.data.Form;
+import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-import org.restlet.data.MediaType;
-import org.restlet.data.Form;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.HashMap;
-import java.util.Map;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.Closeable;
+import eu.stratuslab.marketplace.server.cfg.Configuration;
 
 /**
  * This resource represents star ratings

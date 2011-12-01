@@ -64,7 +64,7 @@ public class MarketPlaceApplication extends Application {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
-    private ScheduledFuture pingerHandle;
+    private ScheduledFuture<?> pingerHandle;
     
     private Repository metadata = null;
     private SailBase store = null;
