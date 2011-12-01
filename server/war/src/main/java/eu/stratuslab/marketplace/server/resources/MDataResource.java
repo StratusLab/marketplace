@@ -7,6 +7,7 @@ import static org.restlet.data.MediaType.APPLICATION_RDF_XML;
 import static org.restlet.data.MediaType.APPLICATION_XML;
 import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
 import static org.restlet.data.MediaType.TEXT_PLAIN;
+import static org.restlet.data.MediaType.APPLICATION_WWW_FORM;
 
 import java.io.Closeable;
 import java.io.File;
@@ -56,7 +57,26 @@ import eu.stratuslab.marketplace.server.MarketplaceException;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-    
+   
+
+     private Representation createStatusRepresentation(String title, String message){
+     	    Representation rep = null;
+            if(getRequest().getClientInfo().getAcceptedMediaTypes().size() >= 0 &&
+                        getRequest().getClientInfo().getAcceptedMediaTypes().get(0).getMetadata()
+                        .equals(MediaType.TEXT_HTML)){
+                Map<String, Object> dataModel = createInfoStructure(title);
+                dataModel.put("statusName", getResponse().getStatus().getName());
+                dataModel.put("statusDescription", message);
+                rep = createTemplateRepresentation(
+                "status.ftl", dataModel, MediaType.TEXT_HTML);
+            } else {
+                rep = new StringRepresentation(
+                    message, TEXT_PLAIN);
+            }
+
+	    return rep;
+     } 
+
 	/**
      * Handle POST requests: register new Metadata entry.
      */
@@ -76,7 +96,16 @@ public class MDataResource extends BaseResource {
         } else if (APPLICATION_RDF_XML.equals(mediaType, true)
                 || (APPLICATION_XML.equals(mediaType, true))) {
             uploadedFile = writeContentsToDisk(entity);
-        } else {
+        } else if (APPLICATION_WWW_FORM.equals(mediaType, true)) {
+		String queryString = "";
+		try {
+			queryString = entity.getText();
+		} catch(IOException e){}
+	
+		getRequest().getResourceRef().setQuery(queryString);
+
+		return toJSON();
+	} else {
             throw new ResourceException(
                     Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE, mediaType
                             .getName());
@@ -92,8 +121,7 @@ public class MDataResource extends BaseResource {
             String iri = commitMetadataEntry(uploadedFile, doc);
 
             setStatus(Status.SUCCESS_CREATED);
-            Representation rep = new StringRepresentation(
-                    "metadata entry created.\n", TEXT_PLAIN);
+            Representation rep = createStatusRepresentation("Upload", "metadata entry created");
             rep.setLocationRef(iri);
 
             return rep;
@@ -103,9 +131,8 @@ public class MDataResource extends BaseResource {
             confirmMetadataEntry(uploadedFile, doc);
 
             setStatus(Status.SUCCESS_ACCEPTED);
-            return new StringRepresentation(
-                    "confirmation email sent for new metadata entry\n",
-                    TEXT_PLAIN);
+            return createStatusRepresentation("Upload",
+                    "confirmation email sent for new metadata entry\n");
         }
 
     }

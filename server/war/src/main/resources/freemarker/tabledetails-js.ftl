@@ -82,7 +82,7 @@ $(document).ready(function() {
                 "fnServerData": function ( sSource, aoData, fnCallback ) {
 			$.ajax( {
 				"dataType": 'json', 
-				"type": "GET", 
+				"type": "POST", 
 				"url": sSource, 
 				"data": aoData, 
 			        "success": function (json) {
