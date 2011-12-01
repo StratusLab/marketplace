@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>eu.stratuslab.marketplace</groupId>
 		<artifactId>marketplace-server</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1</version>
 	</parent>
 
 	<dependencies>
@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>eu.stratuslab.marketplace</groupId>
 			<artifactId>marketplace-metadata</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.1</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
