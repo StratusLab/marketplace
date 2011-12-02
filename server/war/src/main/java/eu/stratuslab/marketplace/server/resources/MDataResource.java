@@ -242,9 +242,7 @@ public class MDataResource extends BaseResource {
         Representation representation = createTemplateRepresentation(
                 "metadata.ftl", data, MediaType.TEXT_HTML);
 
-//        Representation representation = new StringRepresentation("<html><body>hello</body></html>");
-//        representation.setMediaType(MediaType.TEXT_HTML);
-        return new StringRepresentation(representation.getText(), MediaType.TEXT_HTML);
+        return representation;
     }
 
     /**
