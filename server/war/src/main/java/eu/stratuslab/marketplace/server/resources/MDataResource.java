@@ -309,7 +309,7 @@ public class MDataResource extends BaseResource {
     	try {
     		results = getMetadata(deprecatedValue);
     	} catch(ResourceException r){
-    		results = new ArrayList();
+    		results = new ArrayList<Map<String, String>>();
                 if(r.getCause() != null){
                 	msg = "ERROR: " + r.getCause().getMessage();
                 }
