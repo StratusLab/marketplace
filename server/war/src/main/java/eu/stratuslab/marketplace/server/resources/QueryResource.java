@@ -2,10 +2,10 @@ package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -19,13 +19,11 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
-import com.hp.hpl.jena.sparql.lang.ParserSPARQL11;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.sparql.lang.ParserSPARQL11;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
-
-import java.util.logging.Logger;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
