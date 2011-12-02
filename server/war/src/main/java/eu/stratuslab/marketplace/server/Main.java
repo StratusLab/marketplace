@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.server;
 
+import java.util.logging.Logger;
+
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
@@ -8,10 +10,8 @@ import org.restlet.data.Protocol;
 
 public class Main {
 
-	/**
-	 * @param args
-	 * @throws Exception 
-	 */
+	private static final Logger LOGGER = Logger.getLogger("org.restlet");
+
 	public static void main(String[] args) throws Exception {
 
 		Component component = new Component();
@@ -24,18 +24,16 @@ public class Main {
 		component.getClients().add(Protocol.CLAP);
 
 		Application application = new MarketPlaceApplication();
-		component.getDefaultHost().attach("", application);
-
+		component.getDefaultHost().attach("", application);		
+		
 		try {
 			component.start();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.err.println("\nStarting Marketplace FAILED!\n");
+			LOGGER.severe("Starting Marketplace FAILED!");
 			System.exit(1);
 		}
-		System.out.println("\nMarketplace started!\n");
-
-
+		LOGGER.info("Marketplace started!");
 	}
 
 }
