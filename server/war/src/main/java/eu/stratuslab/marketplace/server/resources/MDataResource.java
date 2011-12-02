@@ -11,7 +11,6 @@ import static org.restlet.data.MediaType.TEXT_PLAIN;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.StringTokenizer;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -46,11 +42,11 @@ import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
 import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
 import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
+import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
 import eu.stratuslab.marketplace.server.utils.SparqlUtils;
-import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
  * This resource represents a list of all Metadata entries
@@ -236,15 +232,19 @@ public class MDataResource extends BaseResource {
     }
 
     @Get("html")
-    public Representation toHtml() {
+    public Representation toHtml() throws IOException {
     	Map<String, Object> data = createInfoStructure("Metadata");
-        
+
+    	getLogger().info("In get html");
+    	
         // Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation
         Representation representation = createTemplateRepresentation(
                 "metadata.ftl", data, MediaType.TEXT_HTML);
 
-        return representation;
+//        Representation representation = new StringRepresentation("<html><body>hello</body></html>");
+//        representation.setMediaType(MediaType.TEXT_HTML);
+        return new StringRepresentation(representation.getText(), MediaType.TEXT_HTML);
     }
 
     /**
@@ -253,6 +253,8 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
+    	getLogger().info("In get xml");
+
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
     	    	
@@ -296,6 +298,7 @@ public class MDataResource extends BaseResource {
      */
     @Get("json")
     public Representation toJSON() {
+    	getLogger().info("In get json");
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
     	
@@ -459,7 +462,7 @@ public class MDataResource extends BaseResource {
 
         //Get the total number of unfiltered results
         counterString.append(filterString);
-        Map<String, String> count = new HashMap();
+        Map<String, String> count = new HashMap<String, String>();
         count.put("count", "0");
         
         try {

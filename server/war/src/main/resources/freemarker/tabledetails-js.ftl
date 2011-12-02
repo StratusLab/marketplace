@@ -81,9 +81,12 @@ $(document).ready(function() {
                 "bProcessing": true,
                 "fnServerData": function ( sSource, aoData, fnCallback ) {
 			$.ajax( {
-				"dataType": 'json', 
+				"dataType": 'json',
 				"type": "GET", 
 				"url": sSource, 
+				error: function (jqXHR, textStatus, errorThrown) {
+					alert(jqXHR, textStatus, errorThrown);
+				},
 				"data": aoData, 
 			        "success": function (json) {
                                     var message = json.rMsg;
