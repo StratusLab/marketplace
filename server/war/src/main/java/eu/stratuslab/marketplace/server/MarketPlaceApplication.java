@@ -1,29 +1,23 @@
 package eu.stratuslab.marketplace.server;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBNAME;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBPASS;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBUSER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.Map;
-import java.util.TreeMap;
 
-import org.openrdf.OpenRDFException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
@@ -31,32 +25,26 @@ import org.openrdf.sail.SailException;
 import org.openrdf.sail.helpers.SailBase;
 import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.sail.rdbms.mysql.MySqlStore;
-
 import org.restlet.Application;
 import org.restlet.Context;
+import org.restlet.Request;
+import org.restlet.Response;
 import org.restlet.Restlet;
 import org.restlet.data.LocalReference;
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.ext.freemarker.ContextTemplateLoader;
+import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Directory;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.MediaType;
-import org.restlet.data.Preference;
-import org.restlet.data.Status;
-import org.restlet.ext.freemarker.TemplateRepresentation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
 import org.restlet.service.StatusService;
-import org.restlet.resource.Get;
-import org.restlet.Client;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
 import eu.stratuslab.marketplace.server.resources.HomeResource;
@@ -64,8 +52,6 @@ import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
-import eu.stratuslab.marketplace.server.resources.AboutResource;
-import eu.stratuslab.marketplace.server.resources.RatingsResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 
 public class MarketPlaceApplication extends Application {
