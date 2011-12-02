@@ -259,7 +259,7 @@ public class MarketPlaceApplication extends Application {
     public Repository getMetadataStore() {
     	while(this.repositoryLock){
     		try {
-    		    Thread.currentThread().sleep(1000L);
+    		    Thread.sleep(1000L);
     		} catch(InterruptedException e){}
     	}
         return this.metadata;
