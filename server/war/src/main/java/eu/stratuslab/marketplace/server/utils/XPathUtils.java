@@ -77,7 +77,7 @@ public final class XPathUtils {
                 throw new MetadataException(e);
             }
         }
-
+        
         public void evaluate(Object item) {
             if (!(correctResult.equals(result(item)))) {
                 throw new MetadataException(message);

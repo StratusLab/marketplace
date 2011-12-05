@@ -262,9 +262,7 @@ public class MDataResource extends BaseResource {
     public Representation toHtml() throws IOException {
     	Map<String, Object> data = createInfoStructure("Metadata");
 
-    	getLogger().info("In get html");
-    	
-        // Load the FreeMarker template
+    	// Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation
         Representation representation = createTemplateRepresentation(
                 "metadata.ftl", data, MediaType.TEXT_HTML);
@@ -278,8 +276,6 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-    	getLogger().info("In get xml");
-
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
     	    	
@@ -323,7 +319,6 @@ public class MDataResource extends BaseResource {
      */
     @Get("json")
     public Representation toJSON() {
-    	getLogger().info("In get json");
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
     	
