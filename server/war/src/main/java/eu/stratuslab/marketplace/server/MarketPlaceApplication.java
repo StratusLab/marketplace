@@ -92,7 +92,7 @@ public class MarketPlaceApplication extends Application {
         setStatusService(new MarketPlaceStatusService());
                 
         getTunnelService().setUserAgentTunnel(true);
-
+               
         dataDir = Configuration.getParameterValue(DATA_DIR);
         createIfNotExists(dataDir);
         createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
@@ -178,17 +178,13 @@ public class MarketPlaceApplication extends Application {
         router.attach("/about", AboutResource.class);
         router.attach("/about/", AboutResource.class);
         
-        // Define a route for the ratings
-        //router.attach("/ratings", RatingsResource.class);
-        //router.attach("/ratings/", RatingsResource.class);
-        
-        // Defines a router for actions
+       // Defines a router for actions
         TemplateRoute route;
         route = router.attach("/action/", new ActionRouter());
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
 		String staticContentLocation = System.getProperty(
-				"static.content.location", "war:///");
+				"static.content.location", "war://");
         
         Directory cssDir = new Directory(getContext(), staticContentLocation + "/css");
         cssDir.setNegotiatingContent(false);
