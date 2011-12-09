@@ -23,7 +23,7 @@ metadata.
   </modules>
 
   <properties>
-    <jetty.version>7.4.0.v20110414</jetty.version>
+    <jetty.version>7.4.5.v20110725</jetty.version>
     <nexus.release.repository.name>fedora-14-releases</nexus.release.repository.name>
     <nexus.snapshot.repository.name>fedora-14-snapshots</nexus.snapshot.repository.name>
   </properties>
@@ -173,6 +173,11 @@ metadata.
       <dependency>
         <groupId>org.restlet.jee</groupId>
         <artifactId>org.restlet.ext.fileupload</artifactId>
+        <version>2.1-M4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.restlet.jee</groupId>
+        <artifactId>org.restlet.ext.ssl</artifactId>
         <version>2.1-M4</version>
       </dependency>
       <dependency>

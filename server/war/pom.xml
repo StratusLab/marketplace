@@ -79,6 +79,11 @@
 			<artifactId>sesame-queryparser-sparql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+                <dependency>
+                        <groupId>org.restlet.jee</groupId>
+                        <artifactId>org.restlet.ext.ssl</artifactId>
+                        <scope>runtime</scope>
+                </dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -115,10 +120,20 @@
 							<value>${basedir}/src/main/config</value>
 						</systemProperty>
 					</systemProperties>
-
+                                        <connectors>
+                                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                                            <port>8080</port>
+                                            <maxIdleTime>60000</maxIdleTime>
+                                        </connector>
+                                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                                             <port>8443</port>
+                                             <maxIdleTime>60000</maxIdleTime>
+                                             <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
+                                             <password>jetty7</password>
+                                             <keyPassword>jetty7</keyPassword>
+                                        </connector>
+                                        </connectors>
 				</configuration>
-
-
 
 				<executions>
 					<execution>
@@ -139,6 +154,35 @@
 					</execution>
 				</executions>
 			</plugin>
+
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>keytool-maven-plugin</artifactId>
+                                <executions>
+                                    <execution>
+                                        <phase>generate-resources</phase>
+                                        <id>clean</id>
+                                        <goals>
+                                            <goal>clean</goal>
+                                        </goals>
+                                    </execution>
+                                    <execution>
+                                        <phase>generate-resources</phase>
+                                        <id>genkey</id>
+                                        <goals>
+                                            <goal>genkey</goal>
+                                        </goals>
+                                    </execution>
+                                </executions>
+                                <configuration>
+                                    <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
+                                    <dname>cn=marketplace.stratuslab.eu</dname>
+                                    <keypass>jetty7</keypass>
+                                    <storepass>jetty7</storepass>
+                                    <alias>jetty7</alias>
+                                    <keyalg>RSA</keyalg>
+                                </configuration>
+                        </plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
