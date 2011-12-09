@@ -39,7 +39,7 @@
       </tfoot>
 </table>
 
-<#include "endorserdetails-js.ftl">
+<script type="text/javascript" language="javascript" src="/js/endorsers.js"></script>
   
 </div>
 </div>

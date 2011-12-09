@@ -1,5 +1,3 @@
-<script language="javascript">
-
 /* Formating function for row details */
 function fnFormatDetails ( oTable, nTr )
 {
@@ -99,5 +97,3 @@ $(document).ready(function() {
         } );
 
 } );
-
-</script>

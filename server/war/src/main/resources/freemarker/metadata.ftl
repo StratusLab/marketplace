@@ -44,7 +44,7 @@
       </tfoot>
 </table>
 
-<#include "tabledetails-js.ftl">
+<script type="text/javascript" language="javascript" src="/js/metadata.js"></script>
 
 </div>
 </div>
