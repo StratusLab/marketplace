@@ -499,5 +499,5 @@ public abstract class BaseResource extends ServerResource {
     protected static String getCurrentDate(){
     	return DATE_FORMAT.format(new Date());
     }
-
+        
 }

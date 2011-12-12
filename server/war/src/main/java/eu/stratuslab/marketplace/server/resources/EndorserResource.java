@@ -12,6 +12,8 @@ import org.restlet.resource.Get;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
+import static eu.stratuslab.marketplace.server.utils.SparqlUtils.ENDORSER_HISTORY_QUERY_TEMPLATE;
+
 /**
  * This resource represents a single endorser
  */
@@ -19,23 +21,11 @@ public class EndorserResource extends BaseResource {
 
     private String queryString = null;
     private String email = null;
-    
-    private static final String HISTORY_QUERY_TEMPLATE = //
-    	"SELECT ?identifier ?created ?description ?location ?deprecated ?email " +
-    	"WHERE { ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
-    	"OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . } " +
-    	"OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . } " +
-    	"OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . } " +
-    	"?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
-    	"?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; " +
-    	"<http://purl.org/dc/terms/created> ?created . " +
-    	"?endorser <http://mp.stratuslab.eu/slreq#email> ?email . " +
-    	"FILTER (?email = \"%s\") }";
-    
+            
     @Override
     protected void doInit() {
         this.email = (String) getRequest().getAttributes().get("email");
-        queryString = String.format(HISTORY_QUERY_TEMPLATE, email);
+        queryString = String.format(ENDORSER_HISTORY_QUERY_TEMPLATE, email);
     }
 
     @Get("html")

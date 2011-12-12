@@ -12,6 +12,7 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
+import static eu.stratuslab.marketplace.server.utils.SparqlUtils.EMAIL_QUERY;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
@@ -19,15 +20,7 @@ import eu.stratuslab.marketplace.server.MarketplaceException;
  */
 public class EndorsersResource extends BaseResource {
 
-    private static final String EMAIL_QUERY = //
-        "SELECT DISTINCT ?email ?subject ?issuer "
-                + " WHERE {"
-                + " ?x <http://purl.org/dc/terms/identifier>  ?identifier . "
-                + " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
-                + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . "
-                + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email . "
-                + " ?endorser <http://mp.stratuslab.eu/slreq#subject> ?subject . "
-                + " ?endorser <http://mp.stratuslab.eu/slreq#issuer> ?issuer . }";
+    
                 
     @Get("html")
     public Representation toHtml() {

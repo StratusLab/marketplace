@@ -299,10 +299,13 @@ public class MDataResource extends BaseResource {
         for (String uri : uris) {
             String datum = getMetadatum(getDataDir() + File.separatorChar + uri
                     + ".xml");
-            if (datum.startsWith(XML_HEADER)) {
-                datum = datum.substring(XML_HEADER.length());
+            if(datum != null){
+            	if (datum.startsWith(XML_HEADER)) {
+            		datum = datum.substring(XML_HEADER.length());
+            	}
+
+            	output.append(datum);
             }
-            output.append(datum);
         }
         output.append("</metadata>");
         
@@ -406,7 +409,7 @@ public class MDataResource extends BaseResource {
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	Map<String, String> formValues = form.getValuesMap();
     	Map<String, Object> requestAttr = getRequest().getAttributes();
-    	
+    	    	    	
     	//Create filter from request parameters.    	    	 	
     	if(formValues.containsKey("identifier")){
     		requestAttr.put("identifier", formValues.get("identifier"));
@@ -493,7 +496,7 @@ public class MDataResource extends BaseResource {
         	 }
         } catch(MarketplaceException e){
        		LOGGER.severe(e.getMessage());
-	}
+        }
                 
         queryString.append(filterString);
         queryString.append(paging);

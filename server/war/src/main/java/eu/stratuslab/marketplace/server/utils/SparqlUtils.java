@@ -5,6 +5,28 @@ public class SparqlUtils {
 	private static final String[] aColumns = { "", "os", "osversion", "arch", "email", "created",
 			"identifier", "location", "description"};
 	
+	public static final String EMAIL_QUERY = //
+        "SELECT DISTINCT ?email ?subject ?issuer "
+                + " WHERE {"
+                + " ?x <http://purl.org/dc/terms/identifier>  ?identifier . "
+                + " ?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
+                + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser . "
+                + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email . "
+                + " ?endorser <http://mp.stratuslab.eu/slreq#subject> ?subject . "
+                + " ?endorser <http://mp.stratuslab.eu/slreq#issuer> ?issuer . }";
+	
+	public static final String ENDORSER_HISTORY_QUERY_TEMPLATE = //
+    	"SELECT ?identifier ?created ?description ?location ?deprecated ?email " +
+    	"WHERE { ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
+    	"OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . } " +
+    	"OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . } " +
+    	"OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . } " +
+    	"?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
+    	"?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; " +
+    	"<http://purl.org/dc/terms/created> ?created . " +
+    	"?endorser <http://mp.stratuslab.eu/slreq#email> ?email . " +
+    	"FILTER (?email = \"%s\") }";
+	
 	private static final String FILTER_TEMPLATE = " FILTER (?%s = \"%s\") . ";
 	private static final String LIMIT_TEMPLATE = " ORDER BY %s(?%s)" +
     		         " LIMIT %s" +

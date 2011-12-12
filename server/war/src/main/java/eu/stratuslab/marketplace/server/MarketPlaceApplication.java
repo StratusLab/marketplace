@@ -126,7 +126,7 @@ public class MarketPlaceApplication extends Application {
            * Ping the repository once an hour to make sure MySQL does not close the connection
            */
           pingerHandle =
-              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
+              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);                
     }
     
     /**
@@ -198,7 +198,7 @@ public class MarketPlaceApplication extends Application {
         
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
-
+    
         return router;
     }
 

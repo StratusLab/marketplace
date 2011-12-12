@@ -14,7 +14,7 @@
 
 <br/>
 
-<table id="form_with_details" class="display">
+<table id="search_table" class="display">
     <thead>
         <tr>
             <th>os</th>

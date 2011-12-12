@@ -62,18 +62,18 @@ $(document).ready(function() {
 	nCloneTd.innerHTML = '<img src="/css/details_open.png">';
 	nCloneTd.className = "center";
 	
-	$('#form_with_details thead tr').each( function () {
+	$('#search_table thead tr').each( function () {
 		this.insertBefore( nCloneTh, this.childNodes[0] );
 	} );
 	
-	$('#form_with_details tbody tr').each( function () {
+	$('#search_table tbody tr').each( function () {
 		this.insertBefore(  nCloneTd.cloneNode( true ), this.childNodes[0] );
 	} );
 	
 	/*
 	 * Initialse DataTables, with no sorting on the 'details' column
 	 */
-	var oTable = $('#form_with_details').dataTable( {
+	var oTable = $('#search_table').dataTable( {
 		"bServerSide": true,
                 "sAjaxSource": window.location.href,
                 "bProcessing": true,
@@ -115,7 +115,7 @@ $(document).ready(function() {
 	 * Note that the indicator for showing which row is open is not controlled by DataTables,
 	 * rather it is done here
 	 */
-	$('#form_with_details tbody td img').live('click', function () {
+	$('#search_table tbody td img').live('click', function () {
 		var nTr = this.parentNode.parentNode;
 		if ( this.src.match('details_close') )
 		{
