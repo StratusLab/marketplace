@@ -36,6 +36,15 @@ public enum Parameter {
         }
     },
 
+    ENDORSER_REMINDER(true, "false", "Flag to determine if email reminder " +
+    		"should be sent to endorsers periodically.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            isBoolean(value);
+        }
+    },
+    
     PENDING_DIR(true, "/var/lib/stratuslab/pending",
             "Directory for pending (unconfirmed) entries.") {
         @Override

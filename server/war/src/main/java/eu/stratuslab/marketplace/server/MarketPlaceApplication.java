@@ -8,6 +8,7 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 
 import java.io.File;
 import java.util.Map;
@@ -53,6 +54,7 @@ import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
+import eu.stratuslab.marketplace.server.utils.Reminder;
 
 public class MarketPlaceApplication extends Application {
 
@@ -65,6 +67,9 @@ public class MarketPlaceApplication extends Application {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     private ScheduledFuture<?> pingerHandle;
+    private ScheduledFuture<?> reminderHandle;
+    
+    private Reminder reminder;
     
     private Repository metadata = null;
     private SailBase store = null;
@@ -126,8 +131,20 @@ public class MarketPlaceApplication extends Application {
            * Ping the repository once an hour to make sure MySQL does not close the connection
            */
           pingerHandle =
-              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);                
-    }
+              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
+          
+          final Runnable remind = new Runnable() {
+        	  public void run() {
+        		  remind();
+        	  }
+          };
+          
+          this.reminder = new Reminder(this);
+          if(Boolean.parseBoolean(Configuration.getParameterValue(ENDORSER_REMINDER))){
+        	  reminderHandle = 
+        		  scheduler.scheduleAtFixedRate(remind, 30, 30, TimeUnit.DAYS);
+          }
+   }
     
     /**
      * Creates a root Restlet that will receive all incoming calls.
@@ -227,6 +244,10 @@ public class MarketPlaceApplication extends Application {
     	this.repositoryLock = false;
     }
     
+    private void remind(){
+    	this.reminder.remind();
+    }
+    
     @Override
     public void stop() {
         if (store != null) {
@@ -239,6 +260,10 @@ public class MarketPlaceApplication extends Application {
         }
         
         pingerHandle.cancel(true);
+        
+        if(reminderHandle != null){
+        	reminderHandle.cancel(true);
+        }
     }
 
     public Repository getMetadataStore() {

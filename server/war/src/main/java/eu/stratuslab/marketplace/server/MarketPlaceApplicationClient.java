@@ -22,7 +22,7 @@ public final class MarketPlaceApplicationClient {
 
         if (args.length != 2 && args.length != 3) {
             System.out
-                    .println("Usage: MarketPlaceApplicationClient <URL> <Metadata> <rdf|json>");
+                    .println("Usage: MarketPlaceApplicationClient <URL> <Metadata> <rdf|json|html>");
             System.exit(-1);
         } else {
             url = args[0];
