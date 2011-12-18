@@ -3,7 +3,7 @@
  
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>marketplace</artifactId>
-  <version>1.0.6-SNAPSHOT</version>
+  <version>1.0.6</version>
   <name>Marketplace (POM)</name>
 
   <url>http://hudson.stratuslab.eu/marketplace</url>
@@ -243,7 +243,7 @@ metadata.
       <dependency>
  	<groupId>eu.stratuslab.marketplace</groupId>
 	<artifactId>marketplace-metadata</artifactId>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>1.0.6</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
