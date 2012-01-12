@@ -54,6 +54,21 @@ import eu.stratuslab.marketplace.server.utils.SparqlUtils;
  */
 public class MDataResource extends BaseResource {
         
+	private static String JSON_DISPLAY_TEMPLATE = "<table class=vmpanel>"
+			+ "<tr><td colspan=3><div id=header>%s v"
+			+ "%s %s </div></td></tr>"
+			+ "<tr><td></td><td></td><td rowspan=5><a href="
+			+ "%s><img src=/css/download.png/></a></td></tr>"
+			+ "<tr><td><div id=detail>Endorser:</div></td>"
+			+ "<td><div id=detail>%s</div></td></tr>"
+			+ "<tr><td><div id=detail>Identifier:</div></td>"
+			+ "<td><div id=detail>%s</div></td></tr>"
+			+ "<tr><td><div id=detail>Created:</div></td>"
+			+ "<td><div id=detail>%s</div></td></tr>" + "<tr></tr></div>"
+			+ "<tr><td colspan=3><div id=description>%s" + "</div></td></tr>"
+			+ "<tr><td><a href=/metadata/%s/%s/%s>More...</a></td></tr>"
+			+ "</table>";
+	
 	/**
      * Handle POST requests: register new Metadata entry.
      */
@@ -67,19 +82,19 @@ public class MDataResource extends BaseResource {
 
         MediaType mediaType = entity.getMediaType();
 
-        File uploadedFile = null;
+        File upload = null;
         if (MULTIPART_FORM_DATA.equals(mediaType, true)) {
-            uploadedFile = processMultipartForm();
+            upload = processMultipartForm();
         } else if (APPLICATION_RDF_XML.equals(mediaType, true)
                 || (APPLICATION_XML.equals(mediaType, true))) {
-            uploadedFile = writeContentsToDisk(entity);
+            upload = writeContentsToDisk(entity);
         } else if (APPLICATION_WWW_FORM.equals(mediaType, true)) {
-        	String queryString = "";
+        	String query = "";
         	try {
-        		queryString = entity.getText();
+        		query = entity.getText();
         	} catch(IOException e){}
 	
-        	getRequest().getResourceRef().setQuery(queryString);
+        	getRequest().getResourceRef().setQuery(query);
 
         	return toJSON();
 	} else {
@@ -91,22 +106,22 @@ public class MDataResource extends BaseResource {
         boolean validateEmail = Configuration
                 .getParameterValueAsBoolean(VALIDATE_EMAIL);
 
-        Document doc = validateMetadata(uploadedFile);
+        Document validatedUpload = validateMetadata(upload);
 
         if (!validateEmail) {
 
-            String iri = commitMetadataEntry(uploadedFile, doc);
+            String iri = commitMetadataEntry(upload, validatedUpload);
 
             setStatus(Status.SUCCESS_CREATED);
-            Representation rep = createStatusRepresentation("Upload", 
+            Representation status = createStatusRepresentation("Upload", 
             		"metadata entry created");
-            rep.setLocationRef(iri);
+            status.setLocationRef(iri);
 
-            return rep;
+            return status;
 
         } else {
 
-            confirmMetadataEntry(uploadedFile, doc);
+            confirmMetadataEntry(upload, validatedUpload);
 
             setStatus(Status.SUCCESS_ACCEPTED);
             return createStatusRepresentation("Upload",
@@ -117,27 +132,27 @@ public class MDataResource extends BaseResource {
 
 	private Representation createStatusRepresentation(String title,
 			String message) {
-		Representation rep = null;
+		Representation status = null;
 		if (getRequest().getClientInfo().getAcceptedMediaTypes().size() > 0
 			&& getRequest().getClientInfo().getAcceptedMediaTypes()
 				.get(0).getMetadata().equals(MediaType.TEXT_HTML)) {
 			Map<String, Object> dataModel = createInfoStructure(title);
 			dataModel.put("statusName", getResponse().getStatus().getName());
 			dataModel.put("statusDescription", message);
-			rep = createTemplateRepresentation("status.ftl", dataModel,
+			status = createTemplateRepresentation("status.ftl", dataModel,
 				MediaType.TEXT_HTML);
 		} else {
-			rep = new StringRepresentation(message, TEXT_PLAIN);
+			status = new StringRepresentation(message, TEXT_PLAIN);
 		}
 
-		return rep;
+		return status;
 	}
     
-    private static void confirmMetadataEntry(File uploadedFile, Document doc) {
+    private static void confirmMetadataEntry(File upload, Document metadata) {
 
         try {
-            String[] coords = getMetadataEntryCoordinates(doc);
-            sendEmailConfirmation(coords[1], uploadedFile);
+            String[] coords = getMetadataEntryCoordinates(metadata);
+            sendEmailConfirmation(coords[1], upload);
         } catch (Exception e) {
             String msg = "error sending confirmation email";
             LOGGER.severe(msg + ": " + e.getMessage());
@@ -196,34 +211,34 @@ public class MDataResource extends BaseResource {
         Notifier.sendNotification(email, message);
     }
 
-    private Document validateMetadata(File uploadedFile) {
+    private Document validateMetadata(File upload) {
 
         InputStream stream = null;
-        Document doc = null;
+        Document metadataXml = null;
 
         try {
 
-            stream = new FileInputStream(uploadedFile);
+            stream = new FileInputStream(upload);
 
-            doc = extractXmlDocument(stream);
+            metadataXml = extractXmlDocument(stream);
 
-            ValidateXMLSignature.validate(doc);
-            ValidateMetadataConstraints.validate(doc);
-            ValidateRDFModel.validate(doc);
+            ValidateXMLSignature.validate(metadataXml);
+            ValidateMetadataConstraints.validate(metadataXml);
+            ValidateRDFModel.validate(metadataXml);
 
         } catch (MetadataException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                     "invalid metadata: " + e.getMessage());
         } catch (FileNotFoundException e) {
             LOGGER.severe("unable to read metadata file: "
-                    + uploadedFile.getAbsolutePath());
+                    + upload.getAbsolutePath());
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
                     "unable to read metadata file");
         } finally {
             closeReliably(stream);
         }
 
-        return doc;
+        return metadataXml;
     }
 
     private static File writeContentsToDisk(Representation entity) {
@@ -276,86 +291,115 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-    	Form form = getRequest().getResourceRef().getQueryAsForm();
-    	Map<String, String> formValues = form.getValuesMap();
-    	    	
-    	String deprecatedValue = (formValues.containsKey("deprecated")) ? 
-    			getDeprecatedFlag(formValues.get("deprecated")) : "off";
+    	String deprecatedFlag = getDeprecatedFlag();
     			
-    	List<Map<String, String>> results = getMetadata(deprecatedValue);
-        results.remove(0);
+    	List<Map<String, String>> metadata = getMetadata(deprecatedFlag);
+        metadata.remove(0);
     	
-        ArrayList<String> uris = new ArrayList<String>();
-        for (Map<String, String> resultRow : results) {
+        List<String> pathsToMetadata = buildPathsToMetadata(metadata);
 
-            String iri = resultRow.get("identifier") + "/"
-                    + resultRow.get("email") + "/" + resultRow.get("created");
-            uris.add(iri);
-        }
-
-        StringBuilder output = new StringBuilder(XML_HEADER);
-        
-        output.append("<metadata>");
-        for (String uri : uris) {
-            String datum = getMetadatum(getDataDir() + File.separatorChar + uri
-                    + ".xml");
-            if(datum != null){
-            	if (datum.startsWith(XML_HEADER)) {
-            		datum = datum.substring(XML_HEADER.length());
-            	}
-
-            	output.append(datum);
-            }
-        }
-        output.append("</metadata>");
-        
+        String xmlOutput = buildXmlOutput(pathsToMetadata);
+                
         // Returns the XML representation of this document.
-        StringRepresentation representation = new StringRepresentation(output,
+        StringRepresentation representation = new StringRepresentation(xmlOutput,
                 MediaType.APPLICATION_XML);
 
         return representation;
     }
 
+    private List<String> buildPathsToMetadata(List<Map<String, String>> metadata){
+    	List<String> pathsToMetadata = new ArrayList<String>();
+        for (Map<String, String> entry : metadata) {
+
+            String path = entry.get("identifier") + "/"
+                    + entry.get("email") + "/" + entry.get("created");
+            pathsToMetadata.add(path);
+        }
+        
+        return pathsToMetadata;
+    }
+    
+	private String buildXmlOutput(List<String> pathsToMetadata) {
+		StringBuilder output = new StringBuilder(XML_HEADER);
+
+		output.append("<metadata>");
+		for (String path : pathsToMetadata) {
+			String datum = getMetadatum(getDataDir() + File.separatorChar + path
+					+ ".xml");
+			if (datum != null) {
+				if (datum.startsWith(XML_HEADER)) {
+					datum = datum.substring(XML_HEADER.length());
+				}
+
+				output.append(datum);
+			}
+		}
+		output.append("</metadata>");
+		
+		return output.toString();
+	}
+    
     /**
      * Returns a listing of all registered metadata or a particular entry if
      * specified.
      */
     @Get("json")
     public Representation toJSON() {
-    	Form form = getRequest().getResourceRef().getQueryAsForm();
-    	Map<String, String> formValues = form.getValuesMap();
-    	
-    	String deprecatedValue = (formValues.containsKey("deprecated")) ? 
-    			getDeprecatedFlag(formValues.get("deprecated")) : "off";
-    	
-    	List<Map<String, String>> results = null;
+    	String deprecatedFlag = getDeprecatedFlag();
+    	            	
+    	List<Map<String, String>> metadata = null;
     	
     	String msg = "no metadata matching query found";
     	
     	try {
-    		results = getMetadata(deprecatedValue);
+    		metadata = getMetadata(deprecatedFlag);
     	} catch(ResourceException r){
-    		results = new ArrayList<Map<String, String>>();
+    		metadata = new ArrayList<Map<String, String>>();
                 if(r.getCause() != null){
                 	msg = "ERROR: " + r.getCause().getMessage();
                 }
     	}
     	
-    	long iTotalRecords = getTotalRecords(deprecatedValue);
+    	String json = buildJsonOutput(metadata, msg, getTotalRecords(deprecatedFlag));
+    	    	    	
+    	// Returns the XML representation of this document.
+        return new StringRepresentation(json,
+                MediaType.APPLICATION_JSON);
+    }
+    
+    private String buildJsonOutput(List<Map<String, String>> metadata, String msg, long iTotalRecords){
     	String iTotalDisplayRecords = "0";
-    	if(results.size() > 0){
-    		iTotalDisplayRecords = (String)((Map<String, String>)results.remove(0)).get("count");
+    	if(metadata.size() > 0){
+    		iTotalDisplayRecords = (String)((Map<String, String>)metadata.remove(0)).get("count");
     	}
     	
+    	String jsonHeader = buildJsonHeader(iTotalRecords, iTotalDisplayRecords, msg);    	
+    	String jsonResults = buildJsonResults(metadata);    	
+    	    
+    	StringBuilder json = new StringBuilder();
+    	json.append(jsonHeader);
+    	json.append(jsonResults);
+    	json.append("]}");
+
+    	return json.toString().replaceAll("\n", "<br>");
+    }
+    
+    private String buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){
     	StringBuilder json = new StringBuilder("{ \"sEcho\":\"" 
-    			+ formValues.get("sEcho") + "\", ");
+    			+ getRequestQueryValues().get("sEcho") + "\", ");
     	json.append("\"iTotalRecords\":" + iTotalRecords + ", ");
     	json.append("\"iTotalDisplayRecords\":" + iTotalDisplayRecords + ", ");
     	json.append("\"rMsg\":\"" + msg + "\", ");
     	json.append("\"aaData\":[ ");
     	
-    	for(int i = 0; i < results.size(); i++){
-    		Map<String, String> resultRow = (Map<String, String>)results.get(i);
+    	return json.toString();
+    }
+    
+    private String buildJsonResults(List<Map<String, String>> metadata){
+    	StringBuilder json = new StringBuilder();
+    	
+    	for(int i = 0; i < metadata.size(); i++){
+    		Map<String, String> resultRow = (Map<String, String>)metadata.get(i);
 
     		String identifier = resultRow.get("identifier");
     		String endorser = resultRow.get("email");
@@ -365,32 +409,26 @@ public class MDataResource extends BaseResource {
     		String arch = resultRow.get("arch");
     		String location = resultRow.get("location");
     		String description = resultRow.get("description");
+    		
+			String display = String.format(JSON_DISPLAY_TEMPLATE, os,
+					osversion, arch, location, endorser, identifier, created,
+					description.replaceAll("\"", "&quot;"), identifier,
+					endorser, created);
+    		    		    		
+    		json.append("[\"" + display + "\"," +
+    					"\"" + os + "\"," +
+    		            "\"" + osversion + "\"," +
+    		            "\"" + arch + "\"," +
+    		            "\"" + endorser + "\"," +
+    		            "\"" + created + "\"" +
+    		            "]");
 
-    		json.append("[\"<img src='/css/details_open.png'>\", " + 
-    				"\"" + os + "\"," +
-    				"\"" + osversion + "\"," +
-    				"\"" + arch + "\"," +
-    				"\"" + endorser + "\"," +
-    				"\"" + created + "\"," +
-    				"\"" + identifier + "\"," +
-    				"\"" + location + "\"," +
-    				"\"" + description.replaceAll("\"", "&quot;") + "\"" +
-    		"]");
-
-    		if(i < results.size() -1){
+    		if(i < metadata.size() -1){
     			json.append(",");
     		}
     	}
-    	
-    	json.append("]}");
 
-    	String jsonString = json.toString().replaceAll("\n", "<br>");
-    	
-    	// Returns the XML representation of this document.
-        StringRepresentation representation = new StringRepresentation(jsonString,
-                MediaType.APPLICATION_JSON);
-
-        return representation;
+    	return json.toString();
     }
     
     /*
@@ -403,11 +441,10 @@ public class MDataResource extends BaseResource {
      */
     private List<Map<String, String>> getMetadata(String deprecatedValue) {
     	boolean dateSearch = false;
-    	boolean filter = false;
+    	boolean hasFilter = false;
     	StringBuilder filterPredicate = new StringBuilder();
     	
-    	Form form = getRequest().getResourceRef().getQueryAsForm();
-    	Map<String, String> formValues = form.getValuesMap();
+    	Map<String, String> formValues = getRequestQueryValues();
     	Map<String, Object> requestAttr = getRequest().getAttributes();
     	    	    	
     	//Create filter from request parameters.    	    	 	
@@ -426,18 +463,18 @@ public class MDataResource extends BaseResource {
     		if (!key.startsWith("org.restlet")) {
     			switch (classifyArg((String) arg.getValue())) {
     			case ARG_EMAIL:
-    				filter = true;
+    				hasFilter = true;
     				filterPredicate.append(
     						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
     				break;
     			case ARG_DATE:
-    				filter = true;
+    				hasFilter = true;
     				dateSearch = true;
     				filterPredicate.append(
     						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
     				break;
     			case ARG_OTHER:
-    				filter = true;
+    				hasFilter = true;
     				filterPredicate.append(
     						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
     				break;
@@ -452,44 +489,39 @@ public class MDataResource extends BaseResource {
     			formValues.get("iDisplayLength"), formValues.get("iSortCol_0"), 
     			formValues.get("sSortDir_0"));
     	
-    	//Build the search query
-    	String[] sSearchCols = new String[9];
-    	for(int i = 0; i < SparqlUtils.getColumnCount();i++){
-    		sSearchCols[i] = formValues.get("sSearch_" + i);
-    	}
-    	String searching = buildSearchingFilter(formValues.get("sSearch"), sSearchCols);
+    	String searching = buildSearchingFilter(formValues.get("sSearch"));
     	    	
     	//Build the full SPARQL query
-    	StringBuilder queryString = new StringBuilder(SparqlUtils.SELECT_ALL);
-        StringBuilder counterString = new StringBuilder(SparqlUtils.SELECT_COUNT);
+    	StringBuilder dataQuery = new StringBuilder(SparqlUtils.SELECT_ALL);
+        StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
                 
-        StringBuilder filterString = new StringBuilder(
+        StringBuilder filter = new StringBuilder(
                     " WHERE {"
                     + SparqlUtils.WHERE_BLOCK);
 
-        filterString.append(filterPredicate.toString());
+        filter.append(filterPredicate.toString());
 
         if (!dateSearch) {
-                filterString
+                filter
                         .append(SparqlUtils.getLatestFilter(getCurrentDate()));
         }
                      
         if (deprecatedValue.equals("off")){
-        	filterString.append(" FILTER (!bound (?deprecated))");
+        	filter.append(" FILTER (!bound (?deprecated))");
         } else if (deprecatedValue.equals("only")){
-        	filterString.append(" FILTER (bound (?deprecated))");
+        	filter.append(" FILTER (bound (?deprecated))");
         }
                 
-        filterString.append(searching);
-        filterString.append(" }");
+        filter.append(searching);
+        filter.append(" }");
 
         //Get the total number of unfiltered results
-        counterString.append(filterString);
+        countQuery.append(filter);
         Map<String, String> count = new HashMap<String, String>();
         count.put("count", "0");
         
         try {
-        	 List<Map<String, String>> countResult = query(counterString.toString());
+        	 List<Map<String, String>> countResult = query(countQuery.toString());
              
         	 if(countResult.size() > 0){
         		 count = (Map<String, String>)countResult.get(0);
@@ -498,19 +530,19 @@ public class MDataResource extends BaseResource {
        		LOGGER.severe(e.getMessage());
         }
                 
-        queryString.append(filterString);
-        queryString.append(paging);
-            
+        dataQuery.append(filter);
+        dataQuery.append(paging);
+        
         //Get the results
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         
         try {
-        	results = query(queryString.toString());
+        	results = query(dataQuery.toString());
         } catch(MarketplaceException e){
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
 
-        if(results.size() <= 0 && filter){
+        if(results.size() <= 0 && hasFilter){
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
         } else {
@@ -535,7 +567,7 @@ public class MDataResource extends BaseResource {
     	
     	if(iDisplayStart != null && iDisplayLength != null){
     		int sort = (iSortCol != null) ? 
-    				Integer.parseInt(iSortCol) : 1;
+    				Integer.parseInt(iSortCol) : 5;
     		String sortCol = SparqlUtils.getColumn(sort);
     		      		
     		paging = SparqlUtils.buildLimit(sortCol, iDisplayLength, iDisplayStart, sSortDir);
@@ -552,54 +584,47 @@ public class MDataResource extends BaseResource {
      * 
      * @return sparql filter string
      */
-    private String buildSearchingFilter(String sSearch, String[] sSearchCols){
-    	String searching = "";
+    private String buildSearchingFilter(String sSearch){
+    	String filter = "";
     	
     	if(sSearch != null && sSearch.length() > 0){		    		
     		String[] searchTerms = sSearch.split(" ");
-    		StringBuilder searchAllFilter = new StringBuilder(" FILTER (");
+    		StringBuilder searchFilter = new StringBuilder(" FILTER (");
     		for(int i = 0; i < searchTerms.length; i++){
     			
-    			searchAllFilter.append("(");
-    			for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
-    				searchAllFilter.append(SparqlUtils.buildRegex(
+    			searchFilter.append("(");
+    			for(int j = 0; j < SparqlUtils.getColumnCount(); j++){
+    				searchFilter.append(SparqlUtils.buildRegex(
     						SparqlUtils.getColumn(j), searchTerms[i]));
     		        
     				if(j < SparqlUtils.getColumnCount() - 1)
-    					searchAllFilter.append(" || ");
+    					searchFilter.append(" || ");
     			}
-    			searchAllFilter.append(")");
+    			searchFilter.append(")");
     			
     			if(i < searchTerms.length -1)
-					searchAllFilter.append(" && ");    			
+					searchFilter.append(" && ");    			
     		}
-    		searchAllFilter.append(") . ");
-    		searching = searchAllFilter.toString();
+    		searchFilter.append(") . ");
+    		filter = searchFilter.toString();
     	}
     	
-    	StringBuilder searchColumnsPredicate = new StringBuilder();
-    	for(int i = 1; i < 6; i++){
-    		if ( sSearchCols[i] != null && sSearchCols[i].length() > 0 )
-    		{
-    			if ( searchColumnsPredicate.length() == 0 )
-    			{
-    				searchColumnsPredicate.append(" FILTER (");
-    			}
-    			else
-    			{
-    				searchColumnsPredicate.append(" && ");
-    			}
-    			String word = sSearchCols[i];
-    			searchColumnsPredicate.append(SparqlUtils.buildRegex(
-    					SparqlUtils.getColumn(i), word));
-    		}
-    	}
-    	if(searchColumnsPredicate.length() != 0){
-    		searchColumnsPredicate.append(" ) . ");
-    	}
-    	searching += searchColumnsPredicate.toString();
+    	return filter;
+    }
+        
+    private Map<String, String> getRequestQueryValues(){
+    	Form form = getRequest().getResourceRef().getQueryAsForm();
     	
-    	return searching;
+    	return form.getValuesMap();
+    }
+    
+    private String getDeprecatedFlag(){
+    	Map<String, String> requestValues = getRequestQueryValues();
+    	
+    	String deprecatedFlag = (requestValues.containsKey("deprecated")) ? 
+    			getDeprecatedFlag(requestValues.get("deprecated")) : "off";
+    			
+        return deprecatedFlag;
     }
     
     /*
@@ -620,27 +645,27 @@ public class MDataResource extends BaseResource {
      * 
      * @return the total number of records
      */
-    private long getTotalRecords(String deprecatedValue){
-    	String queryString = 
+    private long getTotalRecords(String deprecatedFlag){
+    	StringBuilder query = new StringBuilder(
         		SparqlUtils.SELECT_COUNT
                 + " WHERE {"
                 + SparqlUtils.WHERE_BLOCK
-                + SparqlUtils.getLatestFilter(getCurrentDate());
+                + SparqlUtils.getLatestFilter(getCurrentDate()));
     	
-    	if (deprecatedValue.equals("off")){
-        	queryString += " FILTER (!bound (?deprecated))";
-        } else if (deprecatedValue.equals("only")){
-        	queryString += " FILTER (bound (?deprecated))";
+    	if (deprecatedFlag.equals("off")){
+        	query.append(" FILTER (!bound (?deprecated))");
+        } else if (deprecatedFlag.equals("only")){
+        	query.append(" FILTER (bound (?deprecated))");
         }
-    	queryString += " }";
+    	query.append(" }");
     	
     	String iTotalRecords = "0";
     	
     	try {
-    		List<Map<String, String>> totalResults = query(queryString);
+    		List<Map<String, String>> results = query(query.toString());
         	
-    		if(totalResults.size() > 0){
-    			iTotalRecords = (String)((Map<String, String>)totalResults.remove(0)).get("count");
+    		if(results.size() > 0){
+    			iTotalRecords = (String)((Map<String, String>)results.remove(0)).get("count");
     		}
     	} catch(MarketplaceException e){
     		LOGGER.severe(e.getMessage());

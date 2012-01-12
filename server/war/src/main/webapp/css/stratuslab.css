@@ -68,7 +68,6 @@ table.display thead th {
         border-bottom: 1px solid black;
         font-weight: bold;
         cursor: pointer;
-        * cursor: hand;
 }
 
 table.display tfoot th {
@@ -89,11 +88,11 @@ table.display td.center {
         text-align: center;
 }
 
-tr.odd {
+table.display tr.odd {
         background-color: #E2E4FF;
 }
 
-tr.even {
+table.display tr.even {
         background-color: white;
 }
 
@@ -101,3 +100,41 @@ td.details {
         background-color: #d1cfd0;
         border: 2px solid #A19B9E;
 }
+
+table.search thead{
+        display: none;
+}
+
+table.search th {
+        height: 1em;
+        margin-bottom: 5px;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 130%;
+        
+        text-align: left;
+}
+
+table.vmpanel {
+	border-bottom: 2px solid #9baff1;
+}
+
+#header
+{
+	background: #E2E4FF;
+        padding: 3px 18px 3px 1px;
+        width: 500px;
+        font-weight: bold;
+}
+
+#detail
+{
+        font-style: italic;
+        font-size: 80%;
+        color: grey;
+
+}
+
+img
+{ border-style: none;
+}       

@@ -13,8 +13,6 @@ import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Status;
-import org.restlet.resource.ServerResource;
-import org.restlet.data.MediaType;
 import org.restlet.data.Method;
 
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;

@@ -14,34 +14,28 @@
 
 <br/>
 
-<table id="search_table" class="display">
+<select name="sortBy" id="sortBy">
+<option value="_none_">Sort By...</option>
+<option value="os">OS</option>
+<option value="osversion">OS Version</option>
+<option value="arch">Arch</option>
+<option value="endorser">Endorser</option>
+<option value="date">Date</option>
+</select>
+
+<table id="search_table" class="search">
     <thead>
         <tr>
+            <th>details</th>
             <th>os</th>
             <th>os-version</th>
             <th>arch</th>
             <th>endorser</th>
             <th>date</th>
-            <th>identifier</th>
-            <th>description</th>
-            <th>location</th>
         </tr>
     </thead>
     <tbody>
      </tbody>
-     <tfoot>
-         <tr>
-             <th></th>
-             <th><input type="text" name="search_os" value="Search os" class="search_init" /></th>
-	     <th><input type="text" name="search_osversion" value="Search os version" class="search_init" /></th>
-	     <th><input type="text" name="search_arch" value="Search architecture" class="search_init" /></th>
-             <th><input type="text" name="search_endorser" value="Search endorser" class="search_init" /></th>
-             <th><input type="text" name="search_date" value="Search date" class="search_init" /></th>
-             <th><input type="text" name="search_identifier" value="Search identifier" class="search_init" /></th>
-             <th><input type="text" name="search_location" value="Search location" class="search_init" /></th>
-             <th><input type="text" name="search_description" value="Search description" class="search_init" /></th>
-         </tr>
-      </tfoot>
 </table>
 
 <script type="text/javascript" language="javascript" src="/js/metadata.js"></script>

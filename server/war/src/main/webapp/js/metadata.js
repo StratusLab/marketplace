@@ -1,75 +1,6 @@
-/* Formating function for row details */
-function fnFormatDetails ( oTable, nTr )
-{
-	var aData = oTable.fnGetData( nTr );
-	var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
-	sOut += '<tr><td>Description:</td><td>'+aData[8]+'</td></tr>';
-	sOut += '<tr><td>Identifier:</td><td>'+aData[6]+'</td></tr>';
-        sOut += '<tr><td>URL:</td><td><a href="'+aData[7]+'">'+aData[7]+'</a></td></tr>';
-        sOut += '<tr><td><a href="/metadata/'+aData[6]+'/'+aData[4]+'/'+aData[5]+'">More...</a></td><td></td></tr>';
-	sOut += '</table>';
-	
-	return sOut;
-}
-
-jQuery.fn.dataTableExt.oApi.fnSetFilteringDelay = function ( oSettings, iDelay ) {
-	/*
-	 * Inputs:      object:oSettings - dataTables settings object - automatically given
-	 *              integer:iDelay - delay in milliseconds
-	 * Usage:       $('#example').dataTable().fnSetFilteringDelay(250);
-	 * Author:      Zygimantas Berziunas (www.zygimantas.com) and Allan Jardine
-	 * License:     GPL v2 or BSD 3 point style
-	 * Contact:     zygimantas.berziunas /AT\ hotmail.com
-	 */
-	var
-		_that = this,
-		iDelay = (typeof iDelay == 'undefined') ? 250 : iDelay;
-	
-	this.each( function ( i ) {
-		$.fn.dataTableExt.iApiIndex = i;
-		var
-			$this = this, 
-			oTimerId = null, 
-			sPreviousSearch = null,
-			anControl = $( 'input', _that.fnSettings().aanFeatures.f );
-		
-			anControl.unbind( 'keyup' ).bind( 'keyup', function() {
-			var $$this = $this;
-
-			if (sPreviousSearch === null || sPreviousSearch != anControl.val()) {
-				window.clearTimeout(oTimerId);
-				sPreviousSearch = anControl.val();	
-				oTimerId = window.setTimeout(function() {
-					$.fn.dataTableExt.iApiIndex = i;
-					_that.fnFilter( anControl.val() );
-				}, iDelay);
-			}
-		});
-		
-		return this;
-	} );
-	return this;
-}
-
 var asInitVals = new Array();
 
 $(document).ready(function() {
-	/*
-	 * Insert a 'details' column to the table
-	 */
-	var nCloneTh = document.createElement( 'th' );
-	var nCloneTd = document.createElement( 'td' );
-	nCloneTd.innerHTML = '<img src="/css/details_open.png">';
-	nCloneTd.className = "center";
-	
-	$('#search_table thead tr').each( function () {
-		this.insertBefore( nCloneTh, this.childNodes[0] );
-	} );
-	
-	$('#search_table tbody tr').each( function () {
-		this.insertBefore(  nCloneTd.cloneNode( true ), this.childNodes[0] );
-	} );
-	
 	/*
 	 * Initialse DataTables, with no sorting on the 'details' column
 	 */
@@ -78,7 +9,13 @@ $(document).ready(function() {
                 "sAjaxSource": window.location.href,
                 "bProcessing": true,
                 "fnServerData": function ( sSource, aoData, fnCallback ) {
-			$.ajax( {
+                        var re = /[?&]([^=]+)(?:=([^&]*))?/g;
+                        var matchInfo;
+
+                        while(matchInfo = re.exec(window.location.search)){
+                            aoData.push( {"name": matchInfo[1], "value": matchInfo[2]} );
+                        } 
+                        $.ajax( {
 				"dataType": 'json', 
 				"type": "POST", 
 				"url": sSource, 
@@ -98,85 +35,48 @@ $(document).ready(function() {
                                 }	
                          } );
 		},
+                
                 "aoColumnDefs": [
 			{ "bSortable": false, "aTargets": [ 0 ] },
-                        { "bVisible": false, "aTargets": [6] },
-                        { "bVisible": false, "aTargets": [7] },
-                        { "bVisible": false, "aTargets": [8] },
+                        { "bSearchable": false, "bVisible": false, "aTargets": [1] },
+                        { "bSearchable": false, "bVisible": false, "aTargets": [2] },
+                        { "bSearchable": false, "bVisible": false, "aTargets": [3] },
+                        { "bSearchable": false, "bVisible": false, "aTargets": [4] },
+                        { "bSearchable": false, "bVisible": false, "aTargets": [5] },
 		],
-		"aaSorting": [[1, 'asc']],
+		"aaSorting": [[5, 'desc']],
                 'sPaginationType': 'listbox',
                 "oLanguage": {
-                        "sSearch": "Search all columns:"
+                        "sSearch": "Search:"
                 }
 	});
-	
-	/* Add event listener for opening and closing details
-	 * Note that the indicator for showing which row is open is not controlled by DataTables,
-	 * rather it is done here
-	 */
-	$('#search_table tbody td img').live('click', function () {
-		var nTr = this.parentNode.parentNode;
-		if ( this.src.match('details_close') )
-		{
-			/* This row is already open - close it */
-			this.src = "/css/details_open.png";
-			oTable.fnClose( nTr );
-		}
-		else
-		{
-			/* Open this row */
-			this.src = "/css/details_close.png";
-			oTable.fnOpen( nTr, fnFormatDetails(oTable, nTr), 'details' );
-		}
-	} );
 
-        var search_timeout = undefined;
-        $("tfoot input").keyup( function (event) {
-		if(event.keyCode!='9') {
-			if(search_timeout != undefined) {
-				clearTimeout(search_timeout);
-			}
-			$this = this;
-			search_timeout = setTimeout(function() {
-				search_timeout = undefined;
-				oTable.fnFilter( $this.value, $("tfoot input").index($this) + 1 );
-			}, 250);
-		}
-	} );
-				
-	$("tfoot input").focusout( function () {
-		if(search_timeout != undefined) {
-			clearTimeout(search_timeout);
-		}
-		$this = this;
-		oTable.fnFilter( $this.value, $("tfoot input").index($this) + 1 );
-	} );
+        $('#sortBy').change( function () {
+            switch ($(this).val()) {
+                case "_none_":  // first option chosen, not associated with any column, do some default
+                    oTable.fnSort( [ [1,'asc'] ] );
+                    break;
 
-        /*
-         * Support functions to provide a little bit of 'user friendliness' to the textboxes in
-         * the footer
-         */
-        $("tfoot input").each( function (i) {
-                asInitVals[i] = this.value;
-        } );
+                case "os":
+                    oTable.fnSort( [ [1,'asc'] ] );
+                    break;
 
-        $("tfoot input").focus( function () {
-                if ( this.className == "search_init" )
-                {
-                        this.className = "";
-                        this.value = "";
-                }
-        } );
+                case "osversion":
+                    oTable.fnSort( [ [2,'asc'] ] );
+                    break;
 
-        $("tfoot input").blur( function (i) {
-                if ( this.value == "" )
-                {
-                        this.className = "search_init";
-                        this.value = asInitVals[$("tfoot input").index(this)];
-                }
-        } );
+                case "arch":
+                    oTable.fnSort( [ [3,'asc'] ] );
+                    break;
 
-	oTable.fnSetFilteringDelay();
+                case "endorser":
+                    oTable.fnSort( [ [4,'asc'] ] );
+                    break;
+
+                case "date":
+                    oTable.fnSort( [ [5,'desc'] ] );
+                    break;
+           }
+    });
 
 } );
