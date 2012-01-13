@@ -360,22 +360,21 @@ public class MDataResource extends BaseResource {
                 }
     	}
     	
-    	String json = buildJsonOutput(metadata, msg, getTotalRecords(deprecatedFlag));
+    	String iTotalDisplayRecords = "0";
+    	if(metadata.size() > 0){
+    		iTotalDisplayRecords = (String)((Map<String, String>)metadata.remove(0)).get("count");
+    	}
+    	
+    	String jsonHeader = buildJsonHeader(getTotalRecords(deprecatedFlag), iTotalDisplayRecords, msg);    	
+    	String jsonResults = buildJsonResults(metadata);    	
+    	String json = buildJsonOutput(jsonHeader, jsonResults);
     	    	    	
     	// Returns the XML representation of this document.
         return new StringRepresentation(json,
                 MediaType.APPLICATION_JSON);
     }
     
-    private String buildJsonOutput(List<Map<String, String>> metadata, String msg, long iTotalRecords){
-    	String iTotalDisplayRecords = "0";
-    	if(metadata.size() > 0){
-    		iTotalDisplayRecords = (String)((Map<String, String>)metadata.remove(0)).get("count");
-    	}
-    	
-    	String jsonHeader = buildJsonHeader(iTotalRecords, iTotalDisplayRecords, msg);    	
-    	String jsonResults = buildJsonResults(metadata);    	
-    	    
+    private String buildJsonOutput(String jsonHeader, String jsonResults){
     	StringBuilder json = new StringBuilder();
     	json.append(jsonHeader);
     	json.append(jsonResults);
@@ -440,58 +439,26 @@ public class MDataResource extends BaseResource {
      * @return a metadata list
      */
     private List<Map<String, String>> getMetadata(String deprecatedValue) {
-    	boolean dateSearch = false;
+    	boolean hasDate = false;
     	boolean hasFilter = false;
-    	StringBuilder filterPredicate = new StringBuilder();
     	
-    	Map<String, String> formValues = getRequestQueryValues();
-    	Map<String, Object> requestAttr = getRequest().getAttributes();
-    	    	    	
-    	//Create filter from request parameters.    	    	 	
-    	if(formValues.containsKey("identifier")){
-    		requestAttr.put("identifier", formValues.get("identifier"));
-    	}
-    	if(formValues.containsKey("email")){
-    		requestAttr.put("email", formValues.get("email"));
-    	}
-    	if(formValues.containsKey("created")){
-    		requestAttr.put("created", formValues.get("created"));
-    	}    	
+    	addQueryParametersToRequest();
     	
-    	for (Map.Entry<String, Object> arg : requestAttr.entrySet()) {
-    		String key = arg.getKey();
-    		if (!key.startsWith("org.restlet")) {
-    			switch (classifyArg((String) arg.getValue())) {
-    			case ARG_EMAIL:
-    				hasFilter = true;
-    				filterPredicate.append(
-    						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
-    				break;
-    			case ARG_DATE:
-    				hasFilter = true;
-    				dateSearch = true;
-    				filterPredicate.append(
-    						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
-    				break;
-    			case ARG_OTHER:
-    				hasFilter = true;
-    				filterPredicate.append(
-    						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
-    				break;
-    			default:
-    				break;
-    			}
+    	String filterPredicate = buildQueryFilter();
+    	
+    	if(filterPredicate.length() > 0){
+    		hasFilter = true;
+    		
+    		if(filterPredicate.contains("created")){
+    			hasDate = true;
     		}
     	}
-
-    	//Build the paging query
-    	String paging = buildPagingFilter(formValues.get("iDisplayStart"), 
-    			formValues.get("iDisplayLength"), formValues.get("iSortCol_0"), 
-    			formValues.get("sSortDir_0"));
-    	
-    	String searching = buildSearchingFilter(formValues.get("sSearch"));
     	    	
-    	//Build the full SPARQL query
+    	//Build the paging query
+    	String paging = buildPagingFilter();
+    	String searching = buildSearchingFilter();
+    	    	
+    	//Build the full SPARQL queries
     	StringBuilder dataQuery = new StringBuilder(SparqlUtils.SELECT_ALL);
         StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
                 
@@ -499,9 +466,9 @@ public class MDataResource extends BaseResource {
                     " WHERE {"
                     + SparqlUtils.WHERE_BLOCK);
 
-        filter.append(filterPredicate.toString());
+        filter.append(filterPredicate);
 
-        if (!dateSearch) {
+        if (!hasDate) {
                 filter
                         .append(SparqlUtils.getLatestFilter(getCurrentDate()));
         }
@@ -517,18 +484,7 @@ public class MDataResource extends BaseResource {
 
         //Get the total number of unfiltered results
         countQuery.append(filter);
-        Map<String, String> count = new HashMap<String, String>();
-        count.put("count", "0");
-        
-        try {
-        	 List<Map<String, String>> countResult = query(countQuery.toString());
-             
-        	 if(countResult.size() > 0){
-        		 count = (Map<String, String>)countResult.get(0);
-        	 }
-        } catch(MarketplaceException e){
-       		LOGGER.severe(e.getMessage());
-        }
+        Map<String, String> count = getTotalMetadataEntries(countQuery.toString());
                 
         dataQuery.append(filter);
         dataQuery.append(paging);
@@ -551,18 +507,65 @@ public class MDataResource extends BaseResource {
         }
     }
 
+    private void addQueryParametersToRequest() {
+    	Map<String, String> formValues = getRequestQueryValues();
+    	    	    	
+    	//Create filter from request parameters.    	    	 	
+    	if(formValues.containsKey("identifier")){
+    		getRequest().getAttributes().put("identifier", formValues.get("identifier"));
+    	}
+    	if(formValues.containsKey("email")){
+    		getRequest().getAttributes().put("email", formValues.get("email"));
+    	}
+    	if(formValues.containsKey("created")){
+    		getRequest().getAttributes().put("created", formValues.get("created"));
+    	}   
+    }
+    
+    private String buildQueryFilter(){
+    	StringBuilder filterPredicate = new StringBuilder();
+    	
+    	for (Map.Entry<String, Object> arg : getRequest().getAttributes().entrySet()) {
+    		String key = arg.getKey();
+    		if (!key.startsWith("org.restlet")) {
+    			switch (classifyArg((String) arg.getValue())) {
+    			case ARG_EMAIL:
+    				//hasFilter = true;
+    				filterPredicate.append(
+    						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
+    				break;
+    			case ARG_DATE:
+    				//hasFilter = true;
+    				//dateSearch = true;
+    				filterPredicate.append(
+    						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
+    				break;
+    			case ARG_OTHER:
+    				//hasFilter = true;
+    				filterPredicate.append(
+    						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
+    				break;
+    			default:
+    				break;
+    			}
+    		}
+    	}
+    	
+    	return filterPredicate.toString();
+    }
+    
     /*
      * Build a paging filter (ORDER BY ... LIMIT ...)
      * 
-     * @param iDisplayStart offset
-     * @param iDisplayLength page length
-     * @param iSortCol the column to sort on
-     * @param sSortDir direction of sort
-     * 
      * @return SPARQL LIMIT clause
      */
-    private String buildPagingFilter(String iDisplayStart, String iDisplayLength, 
-    		String iSortCol, String sSortDir){
+    private String buildPagingFilter(){
+    	Map<String, String> queryValues = getRequestQueryValues();    	
+    	
+    	String iDisplayStart = queryValues.get("iDisplayStart");
+		String iDisplayLength = queryValues.get("iDisplayLength");
+		String iSortCol = queryValues.get("iSortCol_0");
+		String sSortDir = queryValues.get("sSortDir_0");   	
     	String paging = "";
     	
     	if(iDisplayStart != null && iDisplayLength != null){
@@ -577,14 +580,12 @@ public class MDataResource extends BaseResource {
     }
     
     /*
-     * Build the search filter based on the entries in the search text boxes.
-     * 
-     * @param String taken from the 'Search all columns' field
-     * @param individual column search text
+     * Build the search filter based on the entries in the search text box.
      * 
      * @return sparql filter string
      */
-    private String buildSearchingFilter(String sSearch){
+    private String buildSearchingFilter(){
+    	String sSearch = getRequestQueryValues().get("sSearch");
     	String filter = "";
     	
     	if(sSearch != null && sSearch.length() > 0){		    		
@@ -625,6 +626,23 @@ public class MDataResource extends BaseResource {
     			getDeprecatedFlag(requestValues.get("deprecated")) : "off";
     			
         return deprecatedFlag;
+    }
+    
+    private Map<String, String> getTotalMetadataEntries(String query){
+    	Map<String, String> count = new HashMap<String, String>();
+        count.put("count", "0");
+        
+        try {
+        	 List<Map<String, String>> countResult = query(query);
+             
+        	 if(countResult.size() > 0){
+        		 count = (Map<String, String>)countResult.get(0);
+        	 }
+        } catch(MarketplaceException e){
+       		LOGGER.severe(e.getMessage());
+        }
+        
+        return count;
     }
     
     /*

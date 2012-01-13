@@ -86,22 +86,22 @@ public class Reminder extends BaseResource {
 		filterPredicate.append(
 				SparqlUtils.buildFilterEq("email", email));
 		//Build the full SPARQL query
-		StringBuilder queryString = new StringBuilder(SparqlUtils.SELECT_ALL);
+		StringBuilder query = new StringBuilder(SparqlUtils.SELECT_ALL);
 
-		StringBuilder filterString = new StringBuilder(
+		StringBuilder filter = new StringBuilder(
 				" WHERE {"
 				+ SparqlUtils.WHERE_BLOCK);
 
-		filterString.append(filterPredicate.toString());
-		filterString
+		filter.append(filterPredicate.toString());
+		filter
 		.append(SparqlUtils.getLatestFilter(getCurrentDate()));
 
-		filterString.append(" FILTER (!bound (?deprecated))");
-		filterString.append(" }");
+		filter.append(" FILTER (!bound (?deprecated))");
+		filter.append(" }");
 
-		queryString.append(filterString);
+		query.append(filter);
 
-		return queryString.toString();
+		return query.toString();
 	}
 		
 }
