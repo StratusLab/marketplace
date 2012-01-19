@@ -39,6 +39,7 @@
   <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet.ext.servlet/2.1-M4/org.restlet.ext.servlet-2.1-M4.jar" sourcepath="M2_REPO/org/restlet/jee/org.restlet.ext.servlet/2.1-M4/org.restlet.ext.servlet-2.1-M4-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/restlet/jee/org.restlet.ext.xml/2.1-M4/org.restlet.ext.xml-2.1-M4.jar" sourcepath="M2_REPO/org/restlet/jee/org.restlet.ext.xml/2.1-M4/org.restlet.ext.xml-2.1-M4-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/talis/jena/rdf-json/0.3/rdf-json-0.3.jar" sourcepath="M2_REPO/com/talis/jena/rdf-json/0.3/rdf-json-0.3-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-http-client/2.5.1/sesame-http-client-2.5.1.jar" sourcepath="M2_REPO/org/openrdf/sesame/sesame-http-client/2.5.1/sesame-http-client-2.5.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-http-protocol/2.5.1/sesame-http-protocol-2.5.1.jar" sourcepath="M2_REPO/org/openrdf/sesame/sesame-http-protocol/2.5.1/sesame-http-protocol-2.5.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-model/2.5.1/sesame-model-2.5.1.jar" sourcepath="M2_REPO/org/openrdf/sesame/sesame-model/2.5.1/sesame-model-2.5.1-sources.jar"/>

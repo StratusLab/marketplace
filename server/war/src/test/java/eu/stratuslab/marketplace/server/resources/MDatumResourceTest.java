@@ -1,10 +1,7 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
-
-import java.util.Map;
 
 import org.w3c.dom.Document;
 
@@ -13,7 +10,6 @@ import org.junit.Test;
 
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.Status;
 import org.restlet.data.MediaType;
 import org.restlet.data.ClientInfo;
 import org.restlet.data.Preference;
@@ -76,9 +72,5 @@ public class MDatumResourceTest extends ResourceTestBase {
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDatumResource());
 	}
-	
-	private Response executePostRequest(Request request) {
-		return executeRequest(request, new MDataResource());
-	}
-	
+			
 }

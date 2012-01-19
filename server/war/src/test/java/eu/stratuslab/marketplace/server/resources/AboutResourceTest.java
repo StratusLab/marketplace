@@ -1,7 +1,6 @@
 package eu.stratuslab.marketplace.server.resources;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.util.Map;
@@ -10,7 +9,6 @@ import org.junit.Test;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.Status;
-import org.restlet.resource.ServerResource;
 
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
