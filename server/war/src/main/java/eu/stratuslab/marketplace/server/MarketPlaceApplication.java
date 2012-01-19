@@ -94,6 +94,11 @@ public class MarketPlaceApplication extends Application {
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
         
+        getMetadataService().addExtension("multipart", MediaType.MULTIPART_FORM_DATA, false);
+        getMetadataService().addExtension("www_form", MediaType.APPLICATION_WWW_FORM, false);
+        getMetadataService().addExtension("application_rdf", MediaType.APPLICATION_RDF_XML, true);
+        getMetadataService().addExtension("application_xml", MediaType.APPLICATION_XML, false);
+        
         setStatusService(new MarketPlaceStatusService());
                 
         getTunnelService().setUserAgentTunnel(true);

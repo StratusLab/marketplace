@@ -24,6 +24,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.talis.rdfwriters.json.JSONJenaWriter;
 
+import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
+
 /**
  * This resource represents a metadata entry
  */
@@ -63,7 +65,7 @@ public class MDatumResource extends BaseResource {
         
         Model rdfModel = ModelFactory.createMemModelMaker()
                 .createDefaultModel();
-        rdfModel.read(new ByteArrayInputStream((stripSignature(datum))
+        rdfModel.read(new ByteArrayInputStream((MetadataFileUtils.stripSignature(datum))
                 .getBytes()), MARKETPLACE_URI);
 
         JSONJenaWriter jenaWriter = new JSONJenaWriter();
@@ -95,15 +97,13 @@ public class MDatumResource extends BaseResource {
             StringWriter xmlOutWriter = new StringWriter();
 
             transformer.transform(new javax.xml.transform.stream.StreamSource(
-                    new StringReader(stripSignature(datum))),
+                    new StringReader(MetadataFileUtils.stripSignature(datum))),
                     new javax.xml.transform.stream.StreamResult(xmlOutWriter));
 
             stringBuilder.append(xmlOutWriter.toString());
         } catch (TransformerConfigurationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (TransformerException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

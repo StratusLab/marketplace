@@ -39,6 +39,7 @@ import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 public class ActionResource extends BaseResource {
 
@@ -127,7 +128,7 @@ public class ActionResource extends BaseResource {
             File file = getUploadedFile(uuid);
 
             stream = new FileInputStream(file);
-            Document doc = extractXmlDocument(stream);
+            Document doc = MetadataFileUtils.extractXmlDocument(stream);
 
             if (!file.delete()) {
                 LOGGER.severe("cannot delete file: " + file);

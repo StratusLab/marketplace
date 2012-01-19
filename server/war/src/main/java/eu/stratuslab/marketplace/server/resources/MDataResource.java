@@ -3,13 +3,8 @@ package eu.stratuslab.marketplace.server.resources;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.METADATA_MAX_BYTES;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
-import static org.restlet.data.MediaType.APPLICATION_RDF_XML;
-import static org.restlet.data.MediaType.APPLICATION_WWW_FORM;
-import static org.restlet.data.MediaType.APPLICATION_XML;
-import static org.restlet.data.MediaType.MULTIPART_FORM_DATA;
 import static org.restlet.data.MediaType.TEXT_PLAIN;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,6 +34,9 @@ import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
 import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
@@ -46,6 +44,7 @@ import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
+import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
 import eu.stratuslab.marketplace.server.utils.SparqlUtils;
 
@@ -69,67 +68,74 @@ public class MDataResource extends BaseResource {
 			+ "<tr><td><a href=/metadata/%s/%s/%s>More...</a></td></tr>"
 			+ "</table>";
 	
-	/**
-     * Handle POST requests: register new Metadata entry.
-     */
-    @Post
-    public Representation acceptMetadatum(Representation entity) {
+	@Post("www_form")
+	public Representation acceptDatatablesQueryString(Representation entity){
+		if (entity == null) {
+            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                    "post with null entity");
+        }
+		
+		String query = "";
+    	try {
+    		query = entity.getText();
+    	} catch(IOException e){}
 
-        if (entity == null) {
+    	getRequest().getResourceRef().setQuery(query);
+
+    	return toJSON();
+	}
+	
+	@Post("multipart")
+    public Representation acceptMetadataWebUpload(Representation entity) {
+		if (entity == null) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                     "post with null entity");
         }
 
-        MediaType mediaType = entity.getMediaType();
-
-        File upload = null;
-        if (MULTIPART_FORM_DATA.equals(mediaType, true)) {
-            upload = processMultipartForm();
-        } else if (APPLICATION_RDF_XML.equals(mediaType, true)
-                || (APPLICATION_XML.equals(mediaType, true))) {
-            upload = writeContentsToDisk(entity);
-        } else if (APPLICATION_WWW_FORM.equals(mediaType, true)) {
-        	String query = "";
-        	try {
-        		query = entity.getText();
-        	} catch(IOException e){}
+        File upload = processMultipartForm();
+       
+        return acceptMetadataEntry(upload);
+    }
 	
-        	getRequest().getResourceRef().setQuery(query);
-
-        	return toJSON();
-	} else {
-            throw new ResourceException(
-                    Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE, mediaType
-                            .getName());
+	@Post("application_rdf|application_xml")
+    public Representation acceptMetadataUpload(Representation entity) {
+		if (entity == null) {
+            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
+                    "post with null entity");
         }
 
-        boolean validateEmail = Configuration
-                .getParameterValueAsBoolean(VALIDATE_EMAIL);
-
-        Document validatedUpload = validateMetadata(upload);
-
-        if (!validateEmail) {
-
-            String iri = commitMetadataEntry(upload, validatedUpload);
-
-            setStatus(Status.SUCCESS_CREATED);
-            Representation status = createStatusRepresentation("Upload", 
-            		"metadata entry created");
-            status.setLocationRef(iri);
-
-            return status;
-
-        } else {
-
-            confirmMetadataEntry(upload, validatedUpload);
-
-            setStatus(Status.SUCCESS_ACCEPTED);
-            return createStatusRepresentation("Upload",
-                    "confirmation email sent for new metadata entry\n");
-        }
-
+        File upload = writeContentsToDisk(entity);
+        
+        return acceptMetadataEntry(upload);
     }
 
+	private Representation acceptMetadataEntry(File upload){
+		boolean validateEmail = Configuration
+		.getParameterValueAsBoolean(VALIDATE_EMAIL);
+
+		Document validatedUpload = validateMetadata(upload);
+
+		if (!validateEmail) {
+
+			String iri = commitMetadataEntry(upload, validatedUpload);
+
+			setStatus(Status.SUCCESS_CREATED);
+			Representation status = createStatusRepresentation("Upload", 
+			"metadata entry created");
+			status.setLocationRef(iri);
+
+			return status;
+
+		} else {
+
+			confirmMetadataEntry(upload, validatedUpload);
+
+			setStatus(Status.SUCCESS_ACCEPTED);
+			return createStatusRepresentation("Upload",
+			"confirmation email sent for new metadata entry\n");
+		}
+	}
+	
 	private Representation createStatusRepresentation(String title,
 			String message) {
 		Representation status = null;
@@ -220,7 +226,7 @@ public class MDataResource extends BaseResource {
 
             stream = new FileInputStream(upload);
 
-            metadataXml = extractXmlDocument(stream);
+            metadataXml = MetadataFileUtils.extractXmlDocument(stream);
 
             ValidateXMLSignature.validate(metadataXml);
             ValidateMetadataConstraints.validate(metadataXml);
@@ -235,13 +241,13 @@ public class MDataResource extends BaseResource {
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
                     "unable to read metadata file");
         } finally {
-            closeReliably(stream);
+            MetadataFileUtils.closeReliably(stream);
         }
 
         return metadataXml;
     }
-
-    private static File writeContentsToDisk(Representation entity) {
+    
+	private static File writeContentsToDisk(Representation entity) {
 
         char[] buffer = new char[4096];
 
@@ -267,8 +273,8 @@ public class MDataResource extends BaseResource {
         } catch (IOException consumed) {
 
         } finally {
-            closeReliably(reader);
-            closeReliably(writer);
+            MetadataFileUtils.closeReliably(reader);
+            MetadataFileUtils.closeReliably(writer);
         }
         return output;
     }
@@ -360,42 +366,34 @@ public class MDataResource extends BaseResource {
                 }
     	}
     	
-    	String iTotalDisplayRecords = "0";
-    	if(metadata.size() > 0){
-    		iTotalDisplayRecords = (String)((Map<String, String>)metadata.remove(0)).get("count");
-    	}
-    	
-    	String jsonHeader = buildJsonHeader(getTotalRecords(deprecatedFlag), iTotalDisplayRecords, msg);    	
-    	String jsonResults = buildJsonResults(metadata);    	
-    	String json = buildJsonOutput(jsonHeader, jsonResults);
-    	    	    	
-    	// Returns the XML representation of this document.
-        return new StringRepresentation(json,
-                MediaType.APPLICATION_JSON);
-    }
-    
-    private String buildJsonOutput(String jsonHeader, String jsonResults){
-    	StringBuilder json = new StringBuilder();
-    	json.append(jsonHeader);
-    	json.append(jsonResults);
-    	json.append("]}");
+		String iTotalDisplayRecords = "0";
+		if (metadata.size() > 0) {
+			iTotalDisplayRecords = (String) ((Map<String, String>) metadata
+					.remove(0)).get("count");
+		}
 
-    	return json.toString().replaceAll("\n", "<br>");
+		JSONObject json = buildJsonHeader(getTotalRecords(deprecatedFlag),
+				iTotalDisplayRecords, msg);
+		JSONArray jsonResults = buildJsonResults(metadata);
+		
+		json.put("aaData", jsonResults);
+
+		// Returns the XML representation of this document.
+		return new StringRepresentation(json.toString(), MediaType.APPLICATION_JSON);
+    }
+            
+    private JSONObject buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){
+    	JSONObject json = new JSONObject();
+        json.put("sEcho", new Integer(getRequestQueryValues().get("sEcho")));
+        json.put("iTotalRecords", Long.valueOf(iTotalRecords));
+        json.put("iTotalDisplayRecords", Long.valueOf(iTotalDisplayRecords));
+        json.put("rMsg", msg);
+    	    	
+    	return json;
     }
     
-    private String buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){
-    	StringBuilder json = new StringBuilder("{ \"sEcho\":\"" 
-    			+ getRequestQueryValues().get("sEcho") + "\", ");
-    	json.append("\"iTotalRecords\":" + iTotalRecords + ", ");
-    	json.append("\"iTotalDisplayRecords\":" + iTotalDisplayRecords + ", ");
-    	json.append("\"rMsg\":\"" + msg + "\", ");
-    	json.append("\"aaData\":[ ");
-    	
-    	return json.toString();
-    }
-    
-    private String buildJsonResults(List<Map<String, String>> metadata){
-    	StringBuilder json = new StringBuilder();
+    private JSONArray buildJsonResults(List<Map<String, String>> metadata){
+    	JSONArray aaData = new JSONArray();
     	
     	for(int i = 0; i < metadata.size(); i++){
     		Map<String, String> resultRow = (Map<String, String>)metadata.get(i);
@@ -413,21 +411,19 @@ public class MDataResource extends BaseResource {
 					osversion, arch, location, endorser, identifier, created,
 					description.replaceAll("\"", "&quot;"), identifier,
 					endorser, created);
-    		    		    		
-    		json.append("[\"" + display + "\"," +
-    					"\"" + os + "\"," +
-    		            "\"" + osversion + "\"," +
-    		            "\"" + arch + "\"," +
-    		            "\"" + endorser + "\"," +
-    		            "\"" + created + "\"" +
-    		            "]");
-
-    		if(i < metadata.size() -1){
-    			json.append(",");
-    		}
+			
+			JSONArray row = new JSONArray();
+            row.add(display);
+            row.add(os);
+            row.add(osversion);
+            row.add(arch);
+            row.add(endorser);
+            row.add(created);
+            
+            aaData.add(row);		    		
     	}
 
-    	return json.toString();
+    	return aaData;
     }
     
     /*
@@ -530,18 +526,14 @@ public class MDataResource extends BaseResource {
     		if (!key.startsWith("org.restlet")) {
     			switch (classifyArg((String) arg.getValue())) {
     			case ARG_EMAIL:
-    				//hasFilter = true;
     				filterPredicate.append(
     						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
     				break;
     			case ARG_DATE:
-    				//hasFilter = true;
-    				//dateSearch = true;
     				filterPredicate.append(
     						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
     				break;
     			case ARG_OTHER:
-    				//hasFilter = true;
     				filterPredicate.append(
     						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
     				break;
@@ -691,7 +683,7 @@ public class MDataResource extends BaseResource {
     	
     	return Long.parseLong(iTotalRecords);
     }
-        
+    /* 
     private static void closeReliably(Closeable closeable) {
         if (closeable != null) {
             try {
@@ -700,6 +692,6 @@ public class MDataResource extends BaseResource {
 
             }
         }
-    }
+    }*/
 
 }

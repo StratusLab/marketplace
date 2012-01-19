@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:slreq="http://mp.stratuslab.eu/slreq#" xmlns:slterms="http://mp.stratuslab.eu/slterms#" xml:base="http://mp.stratuslab.eu/">
+
+    <rdf:Description rdf:about="#BEE8-MMAw-Lk_IgsEExAy3d9R8h">
+
+        <dcterms:identifier>BEE8-MMAw-Lk_IgsEExAy3d9R8h</dcterms:identifier>
+
+        <slreq:bytes>128</slreq:bytes>
+
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>MD5</slreq:algorithm>
+            <slreq:value>a003bf123ce16965005ee85c60281a31</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-1</slreq:algorithm>
+            <slreq:value>1104f3e30c030f8b93f220b04131032dddf51f21</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-256</slreq:algorithm>
+            <slreq:value>63694032b698d2f455b67311e0d4b821e3c4a8a08c679f3e6514d5e13b7255f8</slreq:value>
+        </slreq:checksum>
+        <slreq:checksum rdf:parseType="Resource">
+            <slreq:algorithm>SHA-512</slreq:algorithm>
+            <slreq:value>70cd8ad17fab1abe7fae230ff70f682ed3af4892225b3100e6a07fc2471b657def80fce93afd02aa7f3e716bb8cab02b745d032cdc4895d5fd242a7ac8403693</slreq:value>
+        </slreq:checksum>
+
+        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2012-01-19T15:46:18Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</issuer></endorser></slreq:endorsement>
+
+        <dcterms:type>base</dcterms:type>
+        <slterms:kind>machine</slterms:kind>
+
+        <slterms:os>ttylinux</slterms:os>
+        <slterms:os-version>9.3</slterms:os-version>
+        <slterms:os-arch>i686</slterms:os-arch>
+        <slterms:version>1.0</slterms:version>
+        <dcterms:compression/>
+        
+
+        <dcterms:format>raw</dcterms:format>
+
+        <dcterms:creator>Jane Tester</dcterms:creator>
+
+        <dcterms:created>2011-09-09T14:12:57Z</dcterms:created>
+        <dcterms:valid>2012-03-05T14:12:57Z</dcterms:valid>
+
+        <dcterms:description>
+        Globus appliance built by IGE (Initiative for Globus in Europe). Only root login is allowed, using ssh keys.
+        The appliance contains the Globus Toolkit (GT) 5.0.4 installed from sources.
+        The following steps (see the quickstart guide at http://globus.org/toolkit/docs/latest-stable/admin/quickstart/#quickstart) were performed:
+        (1) Install all the prerequisite packages.
+        (2) Download GT 5.0.4 from http://www.globus.org/ftppub/gt5/5.0/5.0.4/installers/src/gt5.0.4-all-source-installer.tar.bz2
+        (3) Untar the sources.
+        (4) ./configure --prefix=/usr/local/globus-5.0.4/ --with-iodbc=/usr/lib --with-buildopts=--verbose
+        (5) make
+        (6) make install
+        Sources are installed in "/home/globu/gt5/gt5.0.4-all-source-installer".
+        The same directory contains the output of the last three steps of the compilation, saved in the files "ige_config.log", "ige_make.log", "ige_make_install.log".
+        There is no explicit configuration of any GT service performed, other then the above mentioned steps.
+        There is no host/user certificate installed.
+        </dcterms:description>
+
+        <slterms:hypervisor>kvm</slterms:hypervisor>
+
+        <dcterms:publisher>StratusLab</dcterms:publisher>
+        
+
+    </rdf:Description>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>Oc/YP+toSR3kncG4ZU1yuXbhZrw=</DigestValue></Reference></SignedInfo><SignatureValue>tXfXXR4t7Wkosk6blYebVw28wWIAXM/YkzXkKFY2OtL1GU7mFcrP/c+dxsbDaaUVxOlnUk2Y+X0A
+IiY6lHe985LpHzA8pv/LGy3ur8jb0jdcruXoLD+bXntaQh7eFTz74TuPihQ+rBYElWZeUvAMUN53
+kp692YvBNwNBss5lNj+BNt5VLEFgvrIb7TJPF90SOu8Tlhw2wtm9S2C2vtyih+oSKCL4IZIDVeAo
+AIzKWU2Qyfn91tpWpxATj/Sat4QcCzT9MWyi9YUyd7l5xKxBlqdoeYEj4Hl0AG7x3ztstyuKX5uW
+NfwbUquo4156qqJ86csnzXxhJFeaNfcHQ1dvsw==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIERjCCAy6gAwIBAgIJALTElVKI0aJGMA0GCSqGSIb3DQEBBQUAMF0xCzAJBgNVBAYTAkVVMRsw
+GQYDVQQKExJTdHJhdHVzTGFiIFByb2plY3QxGzAZBgNVBAsTElRlc3RpbmcgRGVwYXJ0bWVudDEU
+MBIGA1UEAxMLSmFuZSBUZXN0ZXIwHhcNMTEwOTA1MTEyODA1WhcNMTIwOTA0MTEyODA1WjBdMQsw
+CQYDVQQGEwJFVTEbMBkGA1UEChMSU3RyYXR1c0xhYiBQcm9qZWN0MRswGQYDVQQLExJUZXN0aW5n
+IERlcGFydG1lbnQxFDASBgNVBAMTC0phbmUgVGVzdGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEA0AZWMKhBWQOyY43bgYFwH7FIwRRZUqg0IS3r7HG414EVVYjKnEh3aADrcy4kjGYk
+esmDYQ5zNz0IZhq/w6wg4DBcZUQ3/L/MK28hnHR6uyvBRrzRiAddH3qU6Xb0Vm/ZEGZsjTcx2Qj8
+B3muEH455s/b3LhbEm/KrnZZ1j6sWNVcDwWzSGclzKhpgn66EPnK+jP0dI4gHBBzopxVNEqLHaaP
+Q7TsV7xU1iiSfakTbq56kR2YKilrOoxhOI5zhup+ALFbpxWIfXUILNQnYT/SSQeM0qohWGEfT0hc
+srUvzhDRqPz152HcJQeWcDoVAt/QRPDZ+0uzRUscTbhpvyydlQIDAQABo4IBBzCCAQMwCQYDVR0T
+BAIwADARBglghkgBhvhCAQEEBAMCBLAwDgYDVR0PAQH/BAQDAgP4MB0GA1UdDgQWBBRgJJVZ5PnB
+/ePwkDBDhsLM+GCoRzCBjwYDVR0jBIGHMIGEgBRgJJVZ5PnB/ePwkDBDhsLM+GCoR6FhpF8wXTEL
+MAkGA1UEBhMCRVUxGzAZBgNVBAoTElN0cmF0dXNMYWIgUHJvamVjdDEbMBkGA1UECxMSVGVzdGlu
+ZyBEZXBhcnRtZW50MRQwEgYDVQQDEwtKYW5lIFRlc3RlcoIJALTElVKI0aJGMCIGA1UdEQQbMBmB
+F2phbmUudGVzdGVyQGV4YW1wbGUub3JnMA0GCSqGSIb3DQEBBQUAA4IBAQBV9luB87VhjrY8l4tx
+KKTD4Vg//SerHJzD5dsj+shvZXXsg+q8pEsoVlKYT9XZttjVkKJQzkwc2IIqH1wixgP8tuKFMOH1
+dXoXmA3d22V+Qldq3l3koMpt2D8+/IdrUmzOy7XPeW9cuSlnl4jw0VkhqCrtYCwgPYzt197CzuEm
+cbRjQ17oclkPUr8YSmP1/2fTNSbLyGDd9U2n8lJmf0cG11YewKjIFTnzgJhbZlgvXraH7V65na9y
+IIavw2W9a0vmAZveA0pnN9GKgQV0yKL9jXUG1OpuSuFjj3E+MKxqdvdVmvSzPScOjzKT3W02eUQe
+7f97qlyl0I3eSn6956ZM</X509Certificate></X509Data></KeyInfo></Signature></rdf:RDF>

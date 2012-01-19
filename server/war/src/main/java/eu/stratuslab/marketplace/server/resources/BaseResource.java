@@ -5,15 +5,10 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.CREATED_DATE;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
@@ -25,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
@@ -41,14 +34,12 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.XMLUtils;
@@ -56,6 +47,7 @@ import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
+import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 /**
 
@@ -119,25 +111,6 @@ public abstract class BaseResource extends ServerResource {
         }
 
         return info;
-    }
-
-    protected static Document extractXmlDocument(InputStream stream) {
-
-        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
-        Document datumDoc = null;
-
-        try {
-
-            datumDoc = db.parse(stream);
-
-        } catch (SAXException e) {
-            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-                    "unable to parse metadata: " + e.getMessage());
-        } catch (IOException e) {
-            throw new ResourceException(e);
-        }
-
-        return datumDoc;
     }
 
     protected String commitMetadataEntry(File uploadedFile, Document doc) {
@@ -287,7 +260,7 @@ public abstract class BaseResource extends ServerResource {
     protected String getMetadatum(String iri) {
         String model = null;
         try {
-            model = readFileAsString(iri);           
+            model = MetadataFileUtils.readFileAsString(iri);           
         } catch (IOException e) {
             LOGGER.severe("Unable to read metadata file: " + iri);
         }
@@ -413,21 +386,6 @@ public abstract class BaseResource extends ServerResource {
         return list;
     }
 
-    protected StringBuilder formToString(Form form) {
-        StringBuilder predicate = new StringBuilder();
-
-        for (String key : form.getNames()) {
-            predicate.append(" FILTER (?");
-            predicate.append(key);
-            predicate.append(" = \"");
-            predicate.append(form.getFirstValue(key));
-            predicate.append("\" ). ");
-        }
-
-        return predicate;
-
-    }
-
     protected int classifyArg(String arg) {
         if (arg == null || arg.equals("null") || arg.equals("")) {
             return -1;
@@ -439,63 +397,7 @@ public abstract class BaseResource extends ServerResource {
             return ARG_OTHER;
         }
     }
-
-    protected String stripSignature(String signedString) {
-        DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
-        Document datumDoc = null;
-        String rdfEntry = "";
-        try {
-            datumDoc = db.parse(new ByteArrayInputStream(signedString
-                    .getBytes("UTF-8")));
-
-            // Create a deep copy of the document and strip signature elements.
-            Document copy = (Document) datumDoc.cloneNode(true);
-            MetadataUtils.stripSignatureElements(copy);
-            rdfEntry = XMLUtils.documentToString(copy);
-        } catch (SAXException e) {
-            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-                    "Unable to parse metadata: " + e.getMessage());
-        } catch (IOException e) {
-            throw new ResourceException(e);
-        }
-
-        return rdfEntry;
-    }
-
-    protected static String readFileAsString(String filePath)
-            throws IOException {
-
-        File file = new File(filePath);
-        int bytes = (int) file.length();
-
-        byte[] buffer = new byte[bytes];
-
-        BufferedInputStream f = null;
-        try {
-            f = new BufferedInputStream(new FileInputStream(file));
-            int remaining = bytes;
-            int offset = 0;
-            while (remaining > 0) {
-                int readBytes = f.read(buffer, offset, remaining);
-                offset += readBytes;
-                remaining -= readBytes;
-            }
-        } finally {
-            closeReliably(f);
-        }
-        return new String(buffer);
-    }
-
-    private static void closeReliably(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException consumed) {
-                LOGGER.severe(consumed.getMessage());
-            }
-        }
-    }
-    
+            
     protected static String getCurrentDate(){
     	return DATE_FORMAT.format(new Date());
     }

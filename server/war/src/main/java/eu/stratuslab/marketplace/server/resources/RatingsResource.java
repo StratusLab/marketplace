@@ -17,6 +17,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 /**
  * This resource represents star ratings
@@ -107,7 +108,7 @@ public class RatingsResource extends BaseResource {
     		+ "/" + identifier + "/rating.txt";
     	
     	try {
-    		data = readFileAsString(path);
+    		data = MetadataFileUtils.readFileAsString(path);
     	} catch(IOException e){
     		LOGGER.severe("Unable to read ratings");
     	}
