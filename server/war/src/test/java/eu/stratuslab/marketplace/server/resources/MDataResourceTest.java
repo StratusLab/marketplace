@@ -243,7 +243,7 @@ public class MDataResourceTest extends ResourceTestBase {
 		JSONParser parser = new JSONParser();
         
 		try{
-		    parser.parse(response.getEntity().getText());
+			parser.parse(response.getEntity().getText());
 		    valid = true;
 		} catch(ParseException pe){
 		   valid = false;

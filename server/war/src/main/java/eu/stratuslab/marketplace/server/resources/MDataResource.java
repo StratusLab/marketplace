@@ -15,6 +15,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +24,7 @@ import java.util.UUID;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.json.simple.JSONValue;
 import org.restlet.Request;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -33,9 +36,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
 
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
@@ -372,18 +372,18 @@ public class MDataResource extends BaseResource {
 					.remove(0)).get("count");
 		}
 
-		JSONObject json = buildJsonHeader(getTotalRecords(deprecatedFlag),
+		Map<String, Object> json = buildJsonHeader(getTotalRecords(deprecatedFlag),
 				iTotalDisplayRecords, msg);
-		JSONArray jsonResults = buildJsonResults(metadata);
+		LinkedList<LinkedList<String>> jsonResults = buildJsonResults(metadata);
 		
 		json.put("aaData", jsonResults);
 
 		// Returns the XML representation of this document.
-		return new StringRepresentation(json.toString(), MediaType.APPLICATION_JSON);
+		return new StringRepresentation(JSONValue.toJSONString(json), MediaType.APPLICATION_JSON);
     }
             
-    private JSONObject buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){
-    	JSONObject json = new JSONObject();
+    private Map<String, Object> buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){
+    	Map<String, Object> json = new LinkedHashMap<String, Object>();
         json.put("sEcho", new Integer(getRequestQueryValues().get("sEcho")));
         json.put("iTotalRecords", Long.valueOf(iTotalRecords));
         json.put("iTotalDisplayRecords", Long.valueOf(iTotalDisplayRecords));
@@ -392,8 +392,8 @@ public class MDataResource extends BaseResource {
     	return json;
     }
     
-    private JSONArray buildJsonResults(List<Map<String, String>> metadata){
-    	JSONArray aaData = new JSONArray();
+    private LinkedList<LinkedList<String>> buildJsonResults(List<Map<String, String>> metadata){
+    	LinkedList<LinkedList<String>> aaData = new LinkedList<LinkedList<String>>();
     	
     	for(int i = 0; i < metadata.size(); i++){
     		Map<String, String> resultRow = (Map<String, String>)metadata.get(i);
@@ -412,7 +412,8 @@ public class MDataResource extends BaseResource {
 					description.replaceAll("\"", "&quot;"), identifier,
 					endorser, created);
 			
-			JSONArray row = new JSONArray();
+			//JSONArray row = new JSONArray();
+			LinkedList<String> row = new LinkedList<String>();
             row.add(display);
             row.add(os);
             row.add(osversion);
