@@ -101,6 +101,16 @@ td.details {
         border: 2px solid #A19B9E;
 }
 
+table.display {
+        margin: 0 auto;
+        clear: both;
+        width: 500px;
+}
+
+table.search {
+	width: 100%;
+}
+
 table.search thead{
         display: none;
 }
@@ -115,16 +125,37 @@ table.search th {
         text-align: left;
 }
 
+.dataTables_length {
+        width: 40%;
+        float: left;
+}
+
+.dataTables_filter {
+        width: 60%;
+        float: right;
+        text-align: right;
+}
+
+.dataTables_info {
+        width: 60%;
+        float: left;
+}
+
+.dataTables_paginate {
+        float: right;
+        text-align: right;
+}
+
 table.vmpanel {
 	border-bottom: 2px solid #9baff1;
+	width: 100%;
 }
 
 #header
 {
 	background: #E2E4FF;
-        padding: 3px 18px 3px 1px;
-        width: 500px;
-        font-weight: bold;
+    padding: 3px 18px 3px 1px;
+    font-weight: bold;
 }
 
 #detail
@@ -132,7 +163,13 @@ table.vmpanel {
         font-style: italic;
         font-size: 80%;
         color: grey;
+        width: 100%;
 
+}
+
+#description
+{
+	width: 100%;
 }
 
 img

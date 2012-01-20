@@ -251,13 +251,7 @@ public class MDataResourceTest extends ResourceTestBase {
 				
 		assertTrue(valid);
 	}
-/*
-	private Request createGetRequest(String key, String value) throws Exception {
-		Map<String, Object> attributes = createAttributes(key, value);
-		Request request = createGetRequest(attributes);
-		return request;
-	}
-*/
+
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDataResource());
 	}

@@ -55,7 +55,7 @@ public class MDataResource extends BaseResource {
         
 	private static String JSON_DISPLAY_TEMPLATE = "<table class=vmpanel>"
 			+ "<tr><td colspan=3><div id=header>%s v"
-			+ "%s %s </div></td></tr>"
+			+ "%s %s </div></td><td></td><td></td></tr>"
 			+ "<tr><td></td><td></td><td rowspan=5><a href="
 			+ "%s><img src=/css/download.png/></a></td></tr>"
 			+ "<tr><td><div id=detail>Endorser:</div></td>"
@@ -412,7 +412,6 @@ public class MDataResource extends BaseResource {
 					description.replaceAll("\"", "&quot;"), identifier,
 					endorser, created);
 			
-			//JSONArray row = new JSONArray();
 			LinkedList<String> row = new LinkedList<String>();
             row.add(display);
             row.add(os);
@@ -488,7 +487,6 @@ public class MDataResource extends BaseResource {
         
         //Get the results
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
-        
         try {
         	results = query(dataQuery.toString());
         } catch(MarketplaceException e){
@@ -587,7 +585,7 @@ public class MDataResource extends BaseResource {
     		for(int i = 0; i < searchTerms.length; i++){
     			
     			searchFilter.append("(");
-    			for(int j = 0; j < SparqlUtils.getColumnCount(); j++){
+    			for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
     				searchFilter.append(SparqlUtils.buildRegex(
     						SparqlUtils.getColumn(j), searchTerms[i]));
     		        
@@ -684,15 +682,5 @@ public class MDataResource extends BaseResource {
     	
     	return Long.parseLong(iTotalRecords);
     }
-    /* 
-    private static void closeReliably(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException consumed) {
-
-            }
-        }
-    }*/
-
+  
 }
