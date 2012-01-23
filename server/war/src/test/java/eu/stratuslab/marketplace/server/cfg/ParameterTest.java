@@ -3,7 +3,7 @@ package eu.stratuslab.marketplace.server.cfg;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.ADMIN_EMAIL;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MAIL_PORT;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.RDBMS_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.SUPPORT_EMAIL;
 //import static eu.stratuslab.marketplace.server.cfg.Parameter.TIME_RANGE;
@@ -43,6 +43,7 @@ public class ParameterTest {
     public void checkValidStoreTypeValues() {
         STORE_TYPE.validate("memory");
         STORE_TYPE.validate("mysql");
+        STORE_TYPE.validate("postgres");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -86,7 +87,7 @@ public class ParameterTest {
     public void checkValidMysqlPortValues() {
         String[] values = { "1", "10", "07", "65535" };
         for (String value : values) {
-            MYSQL_PORT.validate(value);
+            RDBMS_PORT.validate(value);
         }
     }
 
@@ -95,7 +96,7 @@ public class ParameterTest {
         String[] values = { "0", "-1", "0xG", "65536" };
         for (String value : values) {
             try {
-                MYSQL_PORT.validate(value);
+                RDBMS_PORT.validate(value);
                 fail("no exception thrown for value: " + value);
             } catch (IllegalArgumentException consumed) {
                 // OK

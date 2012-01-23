@@ -1,11 +1,6 @@
 package eu.stratuslab.marketplace.server;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBNAME;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBPASS;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_DBUSER;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_HOST;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MYSQL_PORT;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
@@ -19,13 +14,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.helpers.SailBase;
-import org.openrdf.sail.memory.MemoryStore;
-import org.openrdf.sail.rdbms.mysql.MySqlStore;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -56,26 +44,22 @@ import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
 import eu.stratuslab.marketplace.server.utils.Reminder;
 
+import eu.stratuslab.marketplace.server.store.RdfStoreFactory;
+import eu.stratuslab.marketplace.server.store.RdfStoreFactoryImpl;
+import eu.stratuslab.marketplace.server.store.RdfStore;
+
 public class MarketPlaceApplication extends Application {
 
     private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
-    private static final String MYSQL_URL_MESSAGE = "using mysql datastore: mysql://%s:xxxxxx@%s:%d/%s";
-
-    private static final String MEMORY_STORE_WARNING = "memory store being used; data is NOT persistent";
-
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
-    private ScheduledFuture<?> pingerHandle;
     private ScheduledFuture<?> reminderHandle;
     
     private Reminder reminder;
     
-    private Repository metadata = null;
-    private SailBase store = null;
+    private RdfStore store = null;
     private String dataDir = null;
-    
-    private boolean repositoryLock = false;
     
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
@@ -106,39 +90,12 @@ public class MarketPlaceApplication extends Application {
         dataDir = Configuration.getParameterValue(DATA_DIR);
         createIfNotExists(dataDir);
         createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
-                
-        if (storeType.equals("memory")) {
-            LOGGER.warning(MEMORY_STORE_WARNING);
-            store = new MemoryStore();
-        } else {
-            store = createMysqlStore();
-        }
-
-        metadata = new SailRepository(store);
-        try {
-            metadata.initialize();
-        } catch (RepositoryException r) {
-            LOGGER.severe("error initializing repository: " + r.getMessage());
-        }
-        
-        /*
-         * Set up a task to check the repository connection is alive
-         */
-        final Runnable pinger = new Runnable() {
-            public void run() { 
-            	lockRepository();
-            	reInitialize();
-            	unlockRepository();
-            }
-          };
-          
-          /*
-           * Ping the repository once an hour to make sure MySQL does not close the connection
-           */
-          pingerHandle =
-              scheduler.scheduleAtFixedRate(pinger, 3600, 3600, TimeUnit.SECONDS);
-          
-          final Runnable remind = new Runnable() {
+                     
+        RdfStoreFactory factory = new RdfStoreFactoryImpl();
+        store = factory.createRdfStore("sesame", storeType);
+        store.initialize();
+       
+        final Runnable remind = new Runnable() {
         	  public void run() {
         		  remind();
         	  }
@@ -223,61 +180,22 @@ public class MarketPlaceApplication extends Application {
     
         return router;
     }
-
-    private void reInitialize(){
-    	if (store != null) {
-            try {
-                store.shutDown();
-            } catch (SailException e) {
-                LOGGER.warning("error shutting down repository: "
-                        + e.getMessage());
-            }
-        }
-    	
-    	try {
-            metadata.initialize();
-        } catch (RepositoryException r) {
-            LOGGER.severe("error initializing repository: " + r.getMessage());
-        }
-    }
-    
-    private void lockRepository(){
-    	this.repositoryLock = true;
-    }
-    
-    private void unlockRepository(){
-    	this.repositoryLock = false;
-    }
-    
+      
     private void remind(){
     	this.reminder.remind();
     }
     
     @Override
     public void stop() {
-        if (store != null) {
-            try {
-                store.shutDown();
-            } catch (SailException e) {
-                LOGGER.warning("error shutting down repository: "
-                        + e.getMessage());
-            }
-        }
-        
-        pingerHandle.cancel(true);
-        
-        if(reminderHandle != null){
-        	reminderHandle.cancel(true);
-        }
+       store.shutdown();
+    	
+       if(reminderHandle != null){
+    	   reminderHandle.cancel(true);
+       }
     }
 
-    public Repository getMetadataStore() {
-    	while(this.repositoryLock){
-    		try {
-    		    Thread.sleep(1000L);
-    		} catch(InterruptedException e){}
-    	}
-        return this.metadata;
+    public RdfStore getMetadataStore() {
+    	return this.store;
     }
 
     public String getDataDir() {
@@ -287,28 +205,7 @@ public class MarketPlaceApplication extends Application {
     public freemarker.template.Configuration getFreeMarkerConfiguration() {
         return freeMarkerConfiguration;
     }
-
-    private static MySqlStore createMysqlStore() {
-
-        String mysqlDb = Configuration.getParameterValue(MYSQL_DBNAME);
-        String mysqlHost = Configuration.getParameterValue(MYSQL_HOST);
-        int mysqlPort = Configuration.getParameterValueAsInt(MYSQL_PORT);
-        String mysqlUser = Configuration.getParameterValue(MYSQL_DBUSER);
-        String mysqlPass = Configuration.getParameterValue(MYSQL_DBPASS);
-
-        LOGGER.info(String.format(MYSQL_URL_MESSAGE, mysqlUser, mysqlHost,
-                mysqlPort, mysqlDb));
-
-        MySqlStore mysqlStore = new MySqlStore();
-        mysqlStore.setDatabaseName(mysqlDb);
-        mysqlStore.setServerName(mysqlHost);
-        mysqlStore.setPortNumber(mysqlPort);
-        mysqlStore.setUser(mysqlUser);
-        mysqlStore.setPassword(mysqlPass);
-
-        return mysqlStore;
-    }
-
+       
     private static freemarker.template.Configuration createFreeMarkerConfig(
             Context context) {
 

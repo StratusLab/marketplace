@@ -1,39 +1,19 @@
 package eu.stratuslab.marketplace.server.resources;
 
-import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.CREATED_DATE;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFFormat;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
@@ -46,6 +26,7 @@ import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.MarketplaceException;
+import eu.stratuslab.marketplace.server.store.RdfStore;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
@@ -76,7 +57,7 @@ public abstract class BaseResource extends ServerResource {
     	DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
     
-    protected Repository getMetadataStore() {
+    protected RdfStore getMetadataStore() {
         return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
 
@@ -226,26 +207,7 @@ public abstract class BaseResource extends ServerResource {
      *            the metadata entry to store
      */
     protected boolean storeMetadatum(String iri, String rdf) {
-    	boolean success = false;
-        try {
-            RepositoryConnection con = getMetadataStore().getConnection();
-            ValueFactory vf = con.getValueFactory();
-            Reader reader = new StringReader(rdf);
-            try {
-            	con.clear(vf.createURI(iri));
-                con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML, vf
-                        .createURI(iri));
-            } finally {
-                con.close();
-            }
-            success = true;
-        } catch (RepositoryException e) {
-            LOGGER.severe("Unable to clear metadata entry: " + e.getMessage());
-        } catch (java.io.IOException e) {
-            LOGGER.severe("Error storing metadata entry: " + e.getMessage());
-        } catch(org.openrdf.rio.RDFParseException e){
-        	LOGGER.severe(e.getMessage());
-        }
+    	boolean success = getMetadataStore().store(iri, rdf);
         
         return success;
     }
@@ -275,17 +237,7 @@ public abstract class BaseResource extends ServerResource {
      *            identifier of the metadata entry
      */
     protected void removeMetadatum(String iri) {
-        try {
-            RepositoryConnection con = getMetadataStore().getConnection();
-            ValueFactory vf = con.getValueFactory();
-            try {
-                con.clear(vf.createURI(iri));
-            } finally {
-                con.close();
-            }
-        } catch (RepositoryException e) {
-            LOGGER.severe("Error removing metadata entry: " + e.getMessage());
-        }
+    	getMetadataStore().remove(iri);
     }
 
     /**
@@ -299,33 +251,9 @@ public abstract class BaseResource extends ServerResource {
      *            the output format of the resultset
      * @return
      */
-    protected String query(String queryString, QueryLanguage syntax) {
-        String resultString = null;
-
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            BufferedOutputStream out = new BufferedOutputStream(bytes);
-            SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
-                    out);
-
-            RepositoryConnection con = getMetadataStore().getConnection();
-            try {
-                TupleQuery tupleQuery = con.prepareTupleQuery(syntax,
-                        queryString);
-                tupleQuery.evaluate(sparqlWriter);
-                resultString = bytes.toString();
-            } finally {
-                con.close();
-            }
-        } catch (RepositoryException e) {
-        	LOGGER.severe("Error accessing repository: " + e.getMessage());
-        } catch (MalformedQueryException e) {
-        	LOGGER.severe("Malformed query: " + e.getMessage());
-        } catch (QueryEvaluationException e) {
-        	LOGGER.severe("Error processing query: " + e.getMessage());
-        } catch (org.openrdf.query.TupleQueryResultHandlerException e){
-        	LOGGER.severe(e.getMessage());
-        }
+    protected String queryResultsAsString(String queryString) {
+        String resultString = getMetadataStore().getRdfEntriesAsString(queryString);
+               
         return resultString;
     }
 
@@ -338,51 +266,8 @@ public abstract class BaseResource extends ServerResource {
      */
     protected List<Map<String, String>> query(String queryString) 
     throws MarketplaceException {
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        
-        try {
-        	RepositoryConnection con = getMetadataStore().getConnection();
-        	try {
-        		TupleQuery tupleQuery = con.prepareTupleQuery(
-        				QueryLanguage.SPARQL, queryString);
-        		TupleQueryResult results = tupleQuery.evaluate();
-        		try {
-        			List<String> columnNames = results.getBindingNames();
-        			int cols = columnNames.size();
-
-        			while (results.hasNext()) {
-        				BindingSet solution = results.next();
-        				HashMap<String, String> row = new HashMap<String, String>(
-        						cols, 1);
-        				for (Iterator<String> namesIter = columnNames
-        						.listIterator(); namesIter.hasNext();) {
-        					String columnName = namesIter.next();
-        					Value columnValue = solution.getValue(columnName);
-        					if (columnValue != null) {
-        						row.put(columnName, (solution
-        								.getValue(columnName)).stringValue());
-        					} else {
-        						row.put(columnName, "null");
-        					}
-        				}
-        				list.add(row);
-        			}
-        		} finally {
-        			results.close();
-        		}
-        	} finally {
-        		con.close();
-        	}
-        } catch (RepositoryException e) {
-                throw new MarketplaceException(e.getMessage());
-        } catch (IllegalStateException e) {
-                throw new MarketplaceException(e.getMessage());
-        } catch (MalformedQueryException m) {
-                throw new MarketplaceException(m.getMessage());
-        } catch (QueryEvaluationException q) {
-                throw new MarketplaceException(q.getMessage());
-        }
-
+        List<Map<String, String>> list = getMetadataStore().getRdfEntriesAsMap(queryString);
+      
         return list;
     }
 

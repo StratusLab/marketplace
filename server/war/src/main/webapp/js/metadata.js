@@ -85,6 +85,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		while(matchInfo = re.exec(window.location.search)){
 			aoData.push( {"name": matchInfo[1], "value": matchInfo[2]} );
 		} 
+		
 		$.ajax( {
 			"dataType": 'json', 
 			"type": "POST", 
@@ -216,6 +217,6 @@ $(document).ready(function() {
 			break;
 		}
 	});
-
+	
 	oTable.fnSetFilteringDelay();
 } );

@@ -14,8 +14,10 @@
 
 <br/>
 
+<form>
+<label for="sortBy">Sort by:</label>
 <select name="sortBy" id="sortBy">
-<option value="_none_">Sort By...</option>
+<option value="_none_"></option>
 <option value="os">OS</option>
 <option value="osversion">OS Version</option>
 <option value="arch">Arch</option>
@@ -39,6 +41,8 @@
 </table>
 
 <script type="text/javascript" language="javascript" src="/js/metadata.js"></script>
+
+</br>
 
 </div>
 </div>

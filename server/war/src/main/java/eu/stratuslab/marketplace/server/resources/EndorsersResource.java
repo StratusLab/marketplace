@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
-import org.openrdf.query.QueryLanguage;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -56,7 +55,7 @@ public class EndorsersResource extends BaseResource {
     @Get("xml")
     public Representation toXml() {
         // Generate the right representation according to its media type.
-        String results = query(EMAIL_QUERY, QueryLanguage.SPARQL);
+        String results = queryResultsAsString(EMAIL_QUERY);
         StringRepresentation representation = new StringRepresentation(results,
                 MediaType.APPLICATION_XML);
 

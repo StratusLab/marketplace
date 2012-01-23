@@ -128,7 +128,7 @@ public class QueryResource extends BaseResource {
                                     "query not allowed.");
         	    }
                 
-                results = getResults(queryString, "sparql");
+                results = queryResultsAsString(queryString);
             }
 
             representation = new StringRepresentation(results,
@@ -140,19 +140,7 @@ public class QueryResource extends BaseResource {
         // Returns the XML representation of this document.
         return representation;
     }
-
-    private String getResults(String query, String queryLanguage) {
-        // Generate the right representation according to its media type.
-        String results = "";
-        if (queryLanguage.equals("sparql")) {
-            results = query(query, QueryLanguage.SPARQL);
-        } else if (queryLanguage.equals("serql")) {
-            results = query(query, QueryLanguage.SERQL);
-        }
-
-        return results;
-    }
-    
+       
     private boolean validQuery(String queryString)
     throws MalformedQueryException {
     	boolean valid = true;

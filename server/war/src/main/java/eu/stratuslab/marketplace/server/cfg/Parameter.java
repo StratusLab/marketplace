@@ -12,13 +12,13 @@ import javax.mail.internet.InternetAddress;
 public enum Parameter {
 
     STORE_TYPE(true, "memory",
-            "Storage type for image metadata database (memory or mysql)") {
+            "Storage type for image metadata database (memory, mysql or postgres)") {
         @Override
         public void validate(String value) {
             super.validate(value);
-            if (!("memory".equals(value) || "mysql".equals(value))) {
+            if (!("memory".equals(value) || "mysql".equals(value) || "postgres".equals(value))) {
                 throw new IllegalArgumentException(getKey()
-                        + " must be 'memory' or 'mysql'");
+                        + " must be 'memory', 'mysql' or 'postgres'");
             }
         }
     },
@@ -75,11 +75,11 @@ public enum Parameter {
         }
     },
 
-    MYSQL_DBNAME(false, "marketplace", "MySQL database name."),
+    RDBMS_DBNAME(false, "marketplace", "Database name."),
 
-    MYSQL_HOST(false, "localhost", "MySQL hostname."),
+    RDBMS_HOST(false, "localhost", "RDBMS hostname."),
 
-    MYSQL_PORT(false, "3306", "Port on for MySQL server.") {
+    RDBMS_PORT(false, "3306", "Port on for RDBMS server.") {
         @Override
         public void validate(String value) {
             super.validate(value);
@@ -87,9 +87,9 @@ public enum Parameter {
         }
     },
 
-    MYSQL_DBUSER(false, "sesame", "MySQL username."),
+    RDBMS_DBUSER(false, "sesame", "RDBMS username."),
 
-    MYSQL_DBPASS(false, "sesame", "MySQL password."),
+    RDBMS_DBPASS(false, "sesame", "RDBMS password."),
 
     ADMIN_EMAIL(true, "Email address for account approvals, etc.") {
         @Override
