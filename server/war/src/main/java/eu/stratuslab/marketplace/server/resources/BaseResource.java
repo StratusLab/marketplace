@@ -21,7 +21,6 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 
-import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
@@ -270,19 +269,7 @@ public abstract class BaseResource extends ServerResource {
       
         return list;
     }
-
-    protected int classifyArg(String arg) {
-        if (arg == null || arg.equals("null") || arg.equals("")) {
-            return -1;
-        } else if (PatternUtils.isEmail(arg)) {
-            return ARG_EMAIL;
-        } else if (PatternUtils.isDate(arg)) {
-            return ARG_DATE;
-        } else {
-            return ARG_OTHER;
-        }
-    }
-            
+               
     protected static String getCurrentDate(){
     	return DATE_FORMAT.format(new Date());
     }

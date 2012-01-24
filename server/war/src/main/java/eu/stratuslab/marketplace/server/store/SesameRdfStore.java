@@ -62,10 +62,10 @@ public class SesameRdfStore extends RdfStore {
 			.newScheduledThreadPool(1);
 
 	public SesameRdfStore(String storeType) {
-		if (storeType.equals("mysql")) {
+		if (storeType.equals(RdfStoreFactory.MYSQL_BACKEND)) {
 			store = createMysqlStore();
 			createKeepRepositoryAlive();
-		} else if (storeType.equals("postgres")) {
+		} else if (storeType.equals(RdfStoreFactory.POSTGRESQL_BACKEND)) {
 			store = createPostgresStore();
 			createKeepRepositoryAlive();
 		} else {

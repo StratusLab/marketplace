@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.w3c.dom.Document;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.restlet.Request;
@@ -142,7 +141,6 @@ public class MDataResourceTest extends ResourceTestBase {
 		assertThat(created, is("2011-09-12T09:58:55Z"));
 	}
 
-	@Ignore
 	@Test
 	public void testUploadingOlderMetadataFails() throws Exception {
 		Response response = postMetadataFile("valid-indate-older-signature.xml");

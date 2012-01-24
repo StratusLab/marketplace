@@ -27,6 +27,17 @@ public class SparqlUtils {
     	"?endorser <http://mp.stratuslab.eu/slreq#email> ?email . " +
     	"FILTER (?email = \"%s\") }";
 	
+	public static final String LATEST_ENTRY_QUERY_TEMPLATE = //
+		"SELECT ?created " +
+		"WHERE { ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
+		"?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
+    	"?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; " +
+    	"<http://purl.org/dc/terms/created> ?created . " +
+    	"?endorser <http://mp.stratuslab.eu/slreq#email> ?email . " +
+    	"FILTER (?identifier = \"%s\") . " +
+    	"FILTER (?email = \"%s\") . " +
+    	"FILTER (?created > \"%s\") }";
+    	
 	private static final String FILTER_TEMPLATE = " FILTER (?%s = \"%s\") . ";
 	private static final String LIMIT_TEMPLATE = " ORDER BY %s(?%s)" +
     		         " LIMIT %s" +

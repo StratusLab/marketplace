@@ -92,7 +92,7 @@ public class MarketPlaceApplication extends Application {
         createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
                      
         RdfStoreFactory factory = new RdfStoreFactoryImpl();
-        store = factory.createRdfStore("sesame", storeType);
+        store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER, storeType);
         store.initialize();
        
         final Runnable remind = new Runnable() {

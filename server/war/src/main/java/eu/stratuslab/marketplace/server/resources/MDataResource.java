@@ -37,6 +37,7 @@ import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
 
+import eu.stratuslab.marketplace.PatternUtils;
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
 import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
@@ -232,6 +233,8 @@ public class MDataResource extends BaseResource {
             ValidateMetadataConstraints.validate(metadataXml);
             ValidateRDFModel.validate(metadataXml);
 
+            validateMetadataNewerThanLatest(metadataXml);
+            
         } catch (MetadataException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                     "invalid metadata: " + e.getMessage());
@@ -247,6 +250,29 @@ public class MDataResource extends BaseResource {
         return metadataXml;
     }
     
+	private void validateMetadataNewerThanLatest(Document metadataXml) 
+	throws MetadataException {
+		String[] coordinates = getMetadataEntryCoordinates(metadataXml);
+		
+		String identifier = coordinates[0];
+        String endorser = coordinates[1];
+        String created = coordinates[2];
+        
+        String query = String.format(SparqlUtils.LATEST_ENTRY_QUERY_TEMPLATE, 
+        		identifier, endorser, created);
+        
+        try {
+        	List<Map<String, String>> results = query(query);
+        	
+        	if(results.size() > 0){
+        		throw new MetadataException("older than latest entry");
+        	}
+        } catch(MarketplaceException e){
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
+        }
+		
+	}
+
 	private static File writeContentsToDisk(Representation entity) {
 
         char[] buffer = new char[4096];
@@ -543,6 +569,18 @@ public class MDataResource extends BaseResource {
     	}
     	
     	return filterPredicate.toString();
+    }
+    
+    private int classifyArg(String arg) {
+        if (arg == null || arg.equals("null") || arg.equals("")) {
+            return -1;
+        } else if (PatternUtils.isEmail(arg)) {
+            return ARG_EMAIL;
+        } else if (PatternUtils.isDate(arg)) {
+            return ARG_DATE;
+        } else {
+            return ARG_OTHER;
+        }
     }
     
     /*
