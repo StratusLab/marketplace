@@ -5,7 +5,9 @@ function fnFormatDetails ( oTable, nTr )
 	var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 	sOut += '<tr><td>Subject:</td><td>'+aData[2]+'</td></tr>';
 	sOut += '<tr><td>Issuer:</td><td>'+aData[3]+'</td></tr>';
-        sOut += '<tr><td>Email:</td><td><a href=/endorsers/'+aData[4]+'>'+aData[4]+'</a></td></tr>';
+        sOut += '<tr><td>Email:</td><td>'+aData[4]+'</td></tr>';
+        sOut += '<tr><td><a href=/endorsers/'+aData[4]+'>History</a></td>'
+                +'<td><a href=/metadata/'+aData[4]+'>Current metadata</a></td></tr>';
 	sOut += '</table>';
 	return sOut;
 }

@@ -251,7 +251,7 @@ public abstract class BaseResource extends ServerResource {
      *            the output format of the resultset
      * @return
      */
-    protected String queryResultsAsString(String queryString) {
+    protected String queryResultsAsString(String queryString) throws MarketplaceException {
         String resultString = getMetadataStore().getRdfEntriesAsString(queryString);
                
         return resultString;

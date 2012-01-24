@@ -178,7 +178,7 @@ public class SesameRdfStore extends RdfStore {
 		return list;
 	}
 
-	public String getRdfEntriesAsString(String query) {
+	public String getRdfEntriesAsString(String query) throws MarketplaceException {
 		String resultString = null;
 
 		try {
@@ -197,13 +197,13 @@ public class SesameRdfStore extends RdfStore {
 				con.close();
 			}
 		} catch (RepositoryException e) {
-			LOGGER.severe("Error accessing repository: " + e.getMessage());
+			throw new MarketplaceException(e.getMessage());
 		} catch (MalformedQueryException e) {
-			LOGGER.severe("Malformed query: " + e.getMessage());
+			throw new MarketplaceException(e.getMessage());
 		} catch (QueryEvaluationException e) {
-			LOGGER.severe("Error processing query: " + e.getMessage());
+			throw new MarketplaceException(e.getMessage());
 		} catch (org.openrdf.query.TupleQueryResultHandlerException e) {
-			LOGGER.severe(e.getMessage());
+			throw new MarketplaceException(e.getMessage());
 		}
 		return resultString;
 	}

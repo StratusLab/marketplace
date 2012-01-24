@@ -18,13 +18,13 @@ import static eu.stratuslab.marketplace.server.utils.SparqlUtils.ENDORSER_HISTOR
  */
 public class EndorserResource extends BaseResource {
 
-    private String queryString = null;
+    private String query = null;
     private String email = null;
             
     @Override
     protected void doInit() {
         this.email = (String) getRequest().getAttributes().get("email");
-        queryString = String.format(ENDORSER_HISTORY_QUERY_TEMPLATE, email);
+        query = String.format(ENDORSER_HISTORY_QUERY_TEMPLATE, email);
     }
 
     @Get("html")
@@ -32,7 +32,7 @@ public class EndorserResource extends BaseResource {
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         
         try {
-        	results = query(queryString);
+        	results = query(query);
         } catch(MarketplaceException e){
         	LOGGER.severe(e.getMessage());
         }
@@ -67,7 +67,12 @@ public class EndorserResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-        String results = queryResultsAsString(queryString);
+        String results = "";
+		try {
+			results = queryResultsAsString(query);
+		} catch (MarketplaceException e) {
+			LOGGER.severe(e.getMessage());
+		}
         StringRepresentation representation = new StringRepresentation(results,
                 MediaType.APPLICATION_XML);
 

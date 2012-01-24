@@ -21,7 +21,7 @@
     <tbody>
          <#list content as emails>
               <tr>
-		<td><a href=metadata/${emails.email}>${emails.name}</a></td>
+		<td>${emails.name}</td>
                 <td>${emails.subject}</td>
                 <td>${emails.issuer}</td>
                 <td>${emails.email}</td>

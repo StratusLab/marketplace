@@ -18,8 +18,6 @@ import eu.stratuslab.marketplace.server.MarketplaceException;
  * This resource represents a list of endorsers
  */
 public class EndorsersResource extends BaseResource {
-
-    
                 
     @Get("html")
     public Representation toHtml() {
@@ -55,12 +53,16 @@ public class EndorsersResource extends BaseResource {
     @Get("xml")
     public Representation toXml() {
         // Generate the right representation according to its media type.
-        String results = queryResultsAsString(EMAIL_QUERY);
+        String results = "";
+		try {
+			results = queryResultsAsString(EMAIL_QUERY);
+		} catch (MarketplaceException e) {
+			LOGGER.severe(e.getMessage());
+		}
         StringRepresentation representation = new StringRepresentation(results,
                 MediaType.APPLICATION_XML);
 
         // Returns the XML representation of this document.
         return representation;
-
     }
 }

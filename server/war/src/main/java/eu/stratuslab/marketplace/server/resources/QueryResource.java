@@ -39,14 +39,14 @@ public class QueryResource extends BaseResource {
         Representation representation = null;
 
         Form queryForm = getRequest().getResourceRef().getQueryAsForm();
-        String queryString = queryForm.getFirstValue("query");
-        String resultString = "";
+        String queryInSparql = queryForm.getFirstValue("query");
+        String resultsInHtml = "";
         try {
         	
-            if (queryString != null && !"".equals(queryString)) {
+            if (queryInSparql != null && !"".equals(queryInSparql)) {
                 
                 //check that query is allowed.
-        	    if(!validQuery(queryString)){
+        	    if(!validQuery(queryInSparql)){
         	    			throw new ResourceException(
                                     Status.CLIENT_ERROR_BAD_REQUEST,
                                     "query not allowed.");
@@ -55,48 +55,27 @@ public class QueryResource extends BaseResource {
                 List<Map<String, String>> results = new ArrayList<Map<String, String>>();
                 
                 try {	
-                	results = query(queryString);
+                	results = query(queryInSparql);
                 } catch(MarketplaceException e){
                 	LOGGER.severe(e.getMessage());
                 }
                 
                 int noOfResults = results.size();
                 if (noOfResults > 0) {
-                    StringBuilder stringBuilder = new StringBuilder();
-
-                    stringBuilder.append("<table cellpadding=\"0\" cellspacing=\"0\" " +
-                    		"border=\"0\" class=\"display\" id=\"resultstable\">");
-                    stringBuilder.append("<thead><tr>");
-                    for (String key : results.get(0).keySet()) {
-                        stringBuilder.append("<th>" + key + "</th>");
-                    }
-                    stringBuilder.append("</tr></thead>");
-                    stringBuilder.append("<tbody>");
-
-                    for (Map<String, String> resultRow : results) {
-                        stringBuilder.append("<tr>");
-                        for (Map.Entry<String, String> entry : resultRow
-                                .entrySet()) {
-                            stringBuilder.append("<td>" + entry.getValue()
-                                    + "</td>");
-                        }
-                        stringBuilder.append("</tr>");
-                    }
-                    stringBuilder.append("</tbody>");
-                    stringBuilder.append("</table>");
-                    resultString = stringBuilder.toString();
+                	resultsInHtml = buildResultsHtml(results);                	
+                    
                 } else {
-                    resultString = "";
+                    resultsInHtml = "";
                 }
                                 
             } else {
-                queryString = "";
-                resultString = "";
+                queryInSparql = "";
+                resultsInHtml = "";
             }
             // return representation;
             Map<String, Object> query = createInfoStructure("Query");
-            query.put("query", queryString);
-            query.put("results", resultString);
+            query.put("query", queryInSparql);
+            query.put("results", resultsInHtml);
 
             // Load the FreeMarker template
             // Wraps the bean with a FreeMarker representation
@@ -110,25 +89,56 @@ public class QueryResource extends BaseResource {
         return representation;
     }
 
-    @Get("xml")
+    private String buildResultsHtml(List<Map<String, String>> results) {
+    	StringBuilder html = new StringBuilder();
+
+        html.append("<table cellpadding=\"0\" cellspacing=\"0\" " +
+        		"border=\"0\" class=\"display\" id=\"resultstable\">");
+        html.append("<thead><tr>");
+        for (String key : results.get(0).keySet()) {
+            html.append("<th>" + key + "</th>");
+        }
+        html.append("</tr></thead>");
+        html.append("<tbody>");
+
+        for (Map<String, String> resultRow : results) {
+            html.append("<tr>");
+            for (Map.Entry<String, String> entry : resultRow
+                    .entrySet()) {
+                html.append("<td>" + entry.getValue()
+                        + "</td>");
+            }
+            html.append("</tr>");
+        }
+        html.append("</tbody>");
+        html.append("</table>");
+        
+        return html.toString();
+	}
+
+	@Get("xml")
     public Representation toXml() {
         Representation representation = null;
 
-        Form queryForm = getRequest().getResourceRef().getQueryAsForm();
-        String queryString = queryForm.getFirstValue("query");
+        Form query = getRequest().getResourceRef().getQueryAsForm();
+        String queryInSparql = query.getFirstValue("query");
 
         try {
             String results = "";
 
-            if (queryString != null && !"".equals(queryString)) {
+            if (queryInSparql != null && !"".equals(queryInSparql)) {
             	//check that query is allowed.
-        	    if(!validQuery(queryString)){
+        	    if(!validQuery(queryInSparql)){
         	    			throw new ResourceException(
                                     Status.CLIENT_ERROR_BAD_REQUEST,
                                     "query not allowed.");
         	    }
                 
-                results = queryResultsAsString(queryString);
+                try {
+					results = queryResultsAsString(queryInSparql);
+				} catch (MarketplaceException e) {
+					LOGGER.severe(e.getMessage());
+				}
             }
 
             representation = new StringRepresentation(results,
@@ -141,23 +151,23 @@ public class QueryResource extends BaseResource {
         return representation;
     }
        
-    private boolean validQuery(String queryString)
+    private boolean validQuery(String query)
     throws MalformedQueryException {
     	boolean valid = true;
 
     	//make sure query is valid for sesame.
         QueryParser parser = QueryParserUtil
                 .createParser(QueryLanguage.SPARQL);
-        parser.parseQuery(queryString, MARKETPLACE_URI);
+        parser.parseQuery(query, MARKETPLACE_URI);
     	
     	ParserSPARQL11 jenaParser = new ParserSPARQL11();
-    	Query selectQuery = jenaParser.parse(new Query(), queryString);
+    	Query select = jenaParser.parse(new Query(), query);
 
-    	if(!selectQuery.isSelectType() || 
-    			selectQuery.hasDatasetDescription()){
+    	if(!select.isSelectType() || 
+    			select.hasDatasetDescription()){
     		valid = false;
     	} else {
-    		Element queryElement = selectQuery.getQueryPattern();
+    		Element queryElement = select.getQueryPattern();
     		if(queryElement.getClass() == ElementGroup.class){
     			List<Element> elements = ((ElementGroup)queryElement).getElements();
     			for(Element e: elements){
