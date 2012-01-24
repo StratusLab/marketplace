@@ -55,8 +55,8 @@ import eu.stratuslab.marketplace.server.utils.SparqlUtils;
 public class MDataResource extends BaseResource {
         
 	private static String JSON_DISPLAY_TEMPLATE = "<table class=vmpanel>"
-			+ "<tr><td colspan=3><div id=header>%s v"
-			+ "%s %s </div></td><td></td><td></td></tr>"
+			+ "<tr><td colspan=3><div id=header>%s"
+			+ "</div></td><td></td><td></td></tr>"
 			+ "<tr><td></td><td></td><td rowspan=5><a href="
 			+ "%s><img src=/css/download.png/></a></td></tr>"
 			+ "<tr><td><div id=detail>Endorser:</div></td>"
@@ -433,9 +433,20 @@ public class MDataResource extends BaseResource {
     		String location = resultRow.get("location");
     		String description = resultRow.get("description");
     		
-			String display = String.format(JSON_DISPLAY_TEMPLATE, os,
-					osversion, arch, location, endorser, identifier, created,
-					description.replaceAll("\"", "&quot;"), identifier,
+    		String header = os;
+    		if(osversion != null && osversion.length() > 0){
+    			header += " v" + osversion;
+    		}
+    		if(arch != null && arch.length() > 0){
+    			header += " " + arch;
+    		}
+    		if(header.length() == 0){
+    			header = identifier;
+    		}
+    		    		
+			String display = String.format(JSON_DISPLAY_TEMPLATE, header, 
+					location, endorser, identifier, created,
+					description, identifier,
 					endorser, created);
 			
 			LinkedList<String> row = new LinkedList<String>();

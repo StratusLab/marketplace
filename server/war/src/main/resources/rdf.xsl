@@ -10,6 +10,20 @@
 <xsl:output method="html" indent="yes"/>
 <xsl:strip-space elements="*"/>
 
+<xsl:template name="text_wrapper">
+<xsl:param name="text"/>
+<xsl:param name="width" select="20"/> 
+
+<xsl:if test="string-length($text)">
+  <xsl:value-of select="substring($text, 1, $width)"/><br/>
+  <xsl:call-template name="text_wrapper">
+    <xsl:with-param name="text"
+     select="substring($text, $width + 1)"/>
+    <xsl:with-param name="width" select="$width"/>
+  </xsl:call-template>
+</xsl:if>
+</xsl:template>
+
 <xsl:template match="rdf:Description">
 <xsl:choose>
    <xsl:when test="string(dcterms:title)">
@@ -39,8 +53,7 @@
 
 <tr>
 <td><b>endorser:</b></td>
-<td><a><xsl:attribute name="href">../../../endorsers/<xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></xsl:attribute><xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></a>
-</td>
+<td><xsl:value-of select="slreq:endorsement/slreq:endorser/slreq:email"/></td>
 </tr>
 
 <xsl:if test="string(slterms:os)">
@@ -84,9 +97,19 @@
 <tr>
 <td><b>checksum:</b></td>
 <td>
+<table border="1">
 <xsl:for-each select="slreq:checksum">
-<xsl:value-of select="slreq:algorithm"/><xsl:text> </xsl:text><xsl:value-of select="slreq:value"/><br/>
+<tr>
+  <td><b><xsl:value-of select="slreq:algorithm"/></b></td>
+  <td>
+    <xsl:call-template name="text_wrapper">
+        <xsl:with-param name="text" select="slreq:value"/>
+        <xsl:with-param name="width" select="40"/>
+    </xsl:call-template>
+  </td>
+</tr>
 </xsl:for-each>
+</table>
 </td>
 </tr>
 

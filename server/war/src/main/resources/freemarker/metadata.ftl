@@ -14,6 +14,15 @@
 
 <br/>
 
+<p>View:
+<a HREF="/metadata">
+All</a> |
+<a href="/metadata?deprecated">
+With deprecated</a> |
+<a href="/metadata?deprecated=only">
+Deprecated only</a>
+</p>
+
 <form>
 <label for="sortBy">Sort by:</label>
 <select name="sortBy" id="sortBy">
