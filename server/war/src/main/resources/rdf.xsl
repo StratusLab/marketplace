@@ -75,6 +75,11 @@
 <tr><td><b>version: </b></td><td><xsl:value-of select="slterms:version"/></td></tr>
 </xsl:if>
 
+<tr>
+<td><b>endorsed:</b></td>
+<td><xsl:value-of select="slreq:endorsement/dcterms:created"/></td>
+</tr>
+
 <xsl:if test="string(dcterms:created)">
 <tr><td><b>created: </b></td><td><xsl:value-of select="dcterms:created"/></td></tr>
 </xsl:if>
