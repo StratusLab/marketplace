@@ -14,7 +14,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CRLException;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertStore;
@@ -345,10 +344,12 @@ public final class MetadataUtils {
 				intermediates));
 			
 			if(crls.size() > 0){
+				System.out.println("crls loaded.");
 				CertStoreParameters revoked = new CollectionCertStoreParameters(crls);
 				params.addCertStore(CertStore.getInstance("Collection", revoked));
 			} else {
 				// Disable CRL checks
+				System.out.println("crls disabled.");
 				params.setRevocationEnabled(false);
 			}
 			
