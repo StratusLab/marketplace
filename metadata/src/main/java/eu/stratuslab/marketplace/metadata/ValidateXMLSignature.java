@@ -52,8 +52,6 @@ public final class ValidateXMLSignature {
 		isVerified = ((Boolean) result[0]).booleanValue();
 		String message = (String) result[1];
 
-		System.out.println(message);
-		
 		if (isVerified) {
 			return message;
 		} else {

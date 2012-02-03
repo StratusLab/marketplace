@@ -344,12 +344,10 @@ public final class MetadataUtils {
 				intermediates));
 			
 			if(crls.size() > 0){
-				System.out.println("crls loaded.");
 				CertStoreParameters revoked = new CollectionCertStoreParameters(crls);
 				params.addCertStore(CertStore.getInstance("Collection", revoked));
 			} else {
 				// Disable CRL checks
-				System.out.println("crls disabled.");
 				params.setRevocationEnabled(false);
 			}
 			
