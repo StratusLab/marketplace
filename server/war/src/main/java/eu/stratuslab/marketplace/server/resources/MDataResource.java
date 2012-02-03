@@ -44,6 +44,7 @@ import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
 import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
@@ -116,7 +117,11 @@ public class MDataResource extends BaseResource {
 
 		Document validatedUpload = validateMetadata(upload);
 
-		if (!validateEmail) {
+		EndorserWhitelist whitelist = getWhitelist();
+		
+		if (!validateEmail
+				|| (whitelist.isEnabled() && whitelist
+						.isEndorserWhitelisted(validatedUpload))) {
 
 			String iri = commitMetadataEntry(upload, validatedUpload);
 
@@ -128,9 +133,9 @@ public class MDataResource extends BaseResource {
 			return status;
 
 		} else {
-
+			
 			confirmMetadataEntry(upload, validatedUpload);
-
+			
 			setStatus(Status.SUCCESS_ACCEPTED);
 			return createStatusRepresentation("Upload",
 			"confirmation email sent for new metadata entry\n");

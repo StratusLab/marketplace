@@ -26,6 +26,7 @@ import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.store.RdfStore;
+import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
@@ -64,6 +65,10 @@ public abstract class BaseResource extends ServerResource {
         return ((MarketPlaceApplication) getApplication()).getDataDir();
     }
 
+    protected EndorserWhitelist getWhitelist() {
+        return ((MarketPlaceApplication) getApplication()).getWhitelist();
+    }
+    
     protected freemarker.template.Configuration getFreeMarkerConfiguration() {
         return ((MarketPlaceApplication) getApplication())
                 .getFreeMarkerConfiguration();

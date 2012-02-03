@@ -18,8 +18,8 @@ import eu.stratuslab.marketplace.server.MarketplaceException;
  * This resource represents a list of endorsers
  */
 public class EndorsersResource extends BaseResource {
-                
-    @Get("html")
+   
+	@Get("html")
     public Representation toHtml() {
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
@@ -65,4 +65,5 @@ public class EndorsersResource extends BaseResource {
         // Returns the XML representation of this document.
         return representation;
     }
+    
 }

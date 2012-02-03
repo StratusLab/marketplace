@@ -1,5 +1,7 @@
 package eu.stratuslab.marketplace.server.util;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -158,6 +160,15 @@ public class ResourceTestBase {
 		}
 				
 		return value;
+	}
+	
+	protected static void closeReliably(Closeable closeable) {
+		if (closeable != null) {
+			try {
+				closeable.close();
+			} catch (IOException consumed) {
+			}
+		}
 	}
 	
 }

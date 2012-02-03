@@ -9,11 +9,25 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CRLException;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreParameters;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathBuilderResult;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -175,22 +189,10 @@ public final class MetadataUtils {
             Node node) {
 
         try {
-
-            DOMValidateContext context = new DOMValidateContext(
-                    new X509KeySelector(), node);
-
-            XMLSignatureFactory factory = XMLSignatureFactory
-                    .getInstance("DOM");
-
-            // This can throw a NPE when the signature element is empty or
-            // malformed. Catch this explicitly.
-            XMLSignature signature = null;
-            try {
-                signature = factory.unmarshalXMLSignature(context);
-            } catch (NullPointerException e) {
-                throw new MetadataException("invalid signature element");
-            }
-
+        	DOMValidateContext context = createContext(node);
+        	
+            XMLSignature signature = extractXmlSignature(context);
+            
             boolean coreValidation = signature.validate(context);
 
             if (coreValidation) {
@@ -198,7 +200,7 @@ public final class MetadataUtils {
                 KeyInfo keyInfo = signature.getKeyInfo();
                 X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
                 Map<String, String> certEndorserInfo = extractEndorserInfoFromCert(cert);
-
+               
                 String errorString = isEndorserInfoConsistent(certEndorserInfo,
                         docEndorserInfo);
                 if (errorString == null) {
@@ -233,8 +235,68 @@ public final class MetadataUtils {
         }
     }
 
+    private static DOMValidateContext createContext(Node signatureXml){
+    	DOMValidateContext context = new DOMValidateContext(
+                new X509KeySelector(), signatureXml);
+    	
+    	return context;
+    }
+    
+    private static XMLSignature extractXmlSignature(DOMValidateContext context) 
+    throws MarshalException{
+    	XMLSignatureFactory factory = XMLSignatureFactory
+                .getInstance("DOM");
+
+        // This can throw a NPE when the signature element is empty or
+        // malformed. Catch this explicitly.
+        XMLSignature signature = null;
+        try {
+            signature = factory.unmarshalXMLSignature(context);
+        } catch (NullPointerException e) {
+            throw new MetadataException("invalid signature element");
+        }
+        
+        return signature;
+    }
+    
+    public static Object[] isCertificateVerified(Node signatureXml, KeyStore anchors,
+    		Collection<X509CRL> crls) {
+
+    	try {
+    		DOMValidateContext context = createContext(signatureXml);
+    		XMLSignature signature = extractXmlSignature(context);
+
+    		KeyInfo keyInfo = signature.getKeyInfo();
+
+    		PKIXBuilderParameters params = createPKIXBuilderParameters(anchors, crls, keyInfo);
+
+    		/*
+    		 * If build() returns successfully, the certificate is valid. More
+    		 * details about the valid path can be obtained through the
+    		 * PKIXBuilderResult. If no valid path can be found, a
+    		 * CertPathBuilderException is thrown.
+    		 */
+    		return buildCertPath(params);
+
+    	} catch (MarshalException e) {
+    		return new Object[] { Boolean.FALSE, e.getMessage() };
+    	}
+    }
+    
     public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
 
+    	List<X509Certificate> certs = extractX509CertChainFromKeyInfo(keyInfo);
+    	
+    	if(certs.size() > 0){
+    		return certs.get(0);
+    	} else {
+    		return null;
+    	}
+    }
+    
+    public static List<X509Certificate> extractX509CertChainFromKeyInfo(KeyInfo keyInfo) {
+    	List<X509Certificate> chain = new ArrayList<X509Certificate>();
+    	
         List<?> keyInfoContent = keyInfo.getContent();
         for (Object o : keyInfoContent) {
             if (o instanceof X509Data) {
@@ -242,15 +304,85 @@ public final class MetadataUtils {
                 List<?> x509DataContent = x509Data.getContent();
                 for (Object obj2 : x509DataContent) {
                     if (obj2 instanceof X509Certificate) {
-                        return (X509Certificate) obj2;
+                        chain.add((X509Certificate) obj2);
                     }
                 }
             }
         }
 
-        return null;
+        return chain;
     }
 
+    public static X509Certificate extractX509CertFromNode(Node signatureXml){
+    	DOMValidateContext context = createContext(signatureXml);
+		XMLSignature signature;
+		try {
+			signature = extractXmlSignature(context);
+		} catch (MarshalException e) {
+			throw new MetadataException(e.getMessage());
+		}
+
+		KeyInfo keyInfo = signature.getKeyInfo();
+		
+		X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
+		
+		return cert;
+    }
+    
+    private static PKIXBuilderParameters createPKIXBuilderParameters(KeyStore anchors, 
+    		Collection<X509CRL> crls, KeyInfo keyInfo) {
+    	List<X509Certificate> chain = extractX509CertChainFromKeyInfo(keyInfo);
+
+		X509CertSelector target = new X509CertSelector();
+		target.setCertificate(chain.get(0));
+    	
+		try {
+			
+			PKIXBuilderParameters params = new PKIXBuilderParameters(anchors, target);
+			CertStoreParameters intermediates = new CollectionCertStoreParameters(
+				chain);
+			params.addCertStore(CertStore.getInstance("Collection",
+				intermediates));
+			
+			if(crls.size() > 0){
+				CertStoreParameters revoked = new CollectionCertStoreParameters(crls);
+				params.addCertStore(CertStore.getInstance("Collection", revoked));
+			} else {
+				// Disable CRL checks
+				params.setRevocationEnabled(false);
+			}
+			
+			return params;
+			
+    	} catch (KeyStoreException e){
+    		throw new MetadataException(e.getMessage());
+    	} catch (InvalidAlgorithmParameterException e){
+    		throw new MetadataException(e.getMessage());
+    	} catch (NoSuchAlgorithmException e) {
+    		throw new MetadataException(e.getMessage());
+		}
+    	
+    }
+    
+    private static Object[] buildCertPath(PKIXBuilderParameters params){
+    	try {
+    		CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
+
+    		PKIXCertPathBuilderResult r = (PKIXCertPathBuilderResult) builder
+    		.build(params);
+    		String builderResult = r.toString();
+    		
+    		return new Object[] { Boolean.TRUE, builderResult };
+    	    
+    	} catch (NoSuchAlgorithmException e) {
+    		throw new MetadataException(e.getMessage());
+    	} catch (CertPathBuilderException e) {
+			return new Object[] { Boolean.FALSE, e.getMessage() };
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new MetadataException(e.getMessage());
+		}
+	}
+    
     /*
      * All of the keys extracted from the certificate must be match the values
      * in the metadata description, if present. Returns an error string; null

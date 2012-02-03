@@ -42,6 +42,7 @@ import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
+import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.Reminder;
 
 import eu.stratuslab.marketplace.server.store.RdfStoreFactory;
@@ -62,6 +63,8 @@ public class MarketPlaceApplication extends Application {
     private String dataDir = null;
     
     private freemarker.template.Configuration freeMarkerConfiguration = null;
+
+	private EndorserWhitelist whitelist;
 
     public MarketPlaceApplication() {
         String storeType = Configuration.getParameterValue(STORE_TYPE);
@@ -90,7 +93,9 @@ public class MarketPlaceApplication extends Application {
         dataDir = Configuration.getParameterValue(DATA_DIR);
         createIfNotExists(dataDir);
         createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
-                     
+   
+        this.whitelist = new EndorserWhitelist();
+                
         RdfStoreFactory factory = new RdfStoreFactoryImpl();
         store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER, storeType);
         store.initialize();
@@ -102,10 +107,11 @@ public class MarketPlaceApplication extends Application {
           };
           
           this.reminder = new Reminder(this);
-          if(Boolean.parseBoolean(Configuration.getParameterValue(ENDORSER_REMINDER))){
+          if(Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)){
         	  reminderHandle = 
-        		  scheduler.scheduleAtFixedRate(remind, 30, 30, TimeUnit.DAYS);
+        		  scheduler.scheduleWithFixedDelay(remind, 30, 30, TimeUnit.DAYS);
           }
+          
    }
     
     /**
@@ -192,6 +198,8 @@ public class MarketPlaceApplication extends Application {
        if(reminderHandle != null){
     	   reminderHandle.cancel(true);
        }
+       
+       this.whitelist.stop();
     }
 
     public RdfStore getMetadataStore() {
@@ -202,6 +210,10 @@ public class MarketPlaceApplication extends Application {
         return this.dataDir;
     }
 
+    public EndorserWhitelist getWhitelist(){
+    	return this.whitelist;
+    }
+    
     public freemarker.template.Configuration getFreeMarkerConfiguration() {
         return freeMarkerConfiguration;
     }

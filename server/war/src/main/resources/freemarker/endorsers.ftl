@@ -12,7 +12,7 @@
   <div class="Content">
       <h1>${title}</h1>
 
-      <table id="endorsers_table" class="display">
+    <table id="endorsers_table" class="display">
     <thead>
         <tr>
             <th>Endorser</th>

@@ -36,7 +36,7 @@ public enum Parameter {
         }
     },
 
-    ENDORSER_REMINDER(true, "false", "Flag to determine if email reminder " +
+    ENDORSER_REMINDER(false, "false", "Flag to determine if email reminder " +
     		"should be sent to endorsers periodically.") {
         @Override
         public void validate(String value) {
@@ -148,6 +148,42 @@ public enum Parameter {
                         + value);
             }
         }
+    },
+    
+    WHITELIST_ENABLED(false, "false", "Enable endorser whitelist.") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    		isBoolean(value);
+    	}
+    },
+    
+    WHITELIST_LOCATION(false, "/etc/stratuslab/marketplace.whitelist", "Endorser whitelist location.") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    	}
+    },
+    
+    WHITELIST_TRUSTSTORE(false, "/etc/stratuslab/marketplace.truststore", "Marketplace truststore location.") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    	}
+    },
+    
+    WHITELIST_CRL(false, "/etc/stratuslab/marketplace.crl", "File containing list of CRLs.") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    	}
+    },
+    
+    WHITELIST_PASSWORD(false, "Truststore password.") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    	}
     };
 
     private final String key;

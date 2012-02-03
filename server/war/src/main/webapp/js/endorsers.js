@@ -4,12 +4,12 @@ function fnFormatDetails ( oTable, nTr )
 	var aData = oTable.fnGetData( nTr );
 	var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
 	sOut += '<tr><td>Subject:</td><td>'+aData[2]+'</td></tr>';
-	sOut += '<tr><td>Issuer:</td><td>'+aData[3]+'</td></tr>';
-        sOut += '<tr><td>Email:</td><td>'+aData[4]+'</td></tr>';
-	sOut += '</table>';
-        sOut += '<p style="padding-left:60px;"><a href=/metadata/'
-             +aData[4]+'>Current metadata</a> <a href=/endorsers/'
-             +aData[4]+'>History</a></p>';
+        sOut += '<tr><td>Issuer:</td><td>'+aData[3]+'</td></tr>'
+        sOut += '<tr><td>Email:</td><td>'+aData[4]+'</td><td/></tr>';
+	sOut += '<tr><td>View:</td><td><a href=/metadata/'
+             +aData[4]+'>Current</a> <a href=/endorsers/'
+             +aData[4]+'>History</a></td></tr>';
+        sOut += '</table>';
 	return sOut;
 }
 
