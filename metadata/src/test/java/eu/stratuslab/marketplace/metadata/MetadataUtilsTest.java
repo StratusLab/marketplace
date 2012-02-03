@@ -271,7 +271,7 @@ public class MetadataUtilsTest {
     
     }
     
-    @Test
+    @Test(expected = MetadataException.class)
     public void signatureHasRevokedCertificate() throws Exception {
     	
     	Document doc = readDocument("valid-ca-signed.xml");
@@ -290,17 +290,12 @@ public class MetadataUtilsTest {
     	
     	InputStream inStream = MetadataUtilsTest.class
     	.getResourceAsStream("test-crl-revoked.pem");
+    	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+    	X509CRL crl = (X509CRL)cf.generateCRL(inStream);
     	
     	Collection<X509CRL> crls = new ArrayList<X509CRL>();
-    	    	
-    	try {
-    		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-    		X509CRL crl = (X509CRL)cf.generateCRL(inStream);
-    		crls.add(crl);
-        } catch(Exception e){
-    		fail(e.getMessage());
-    	}
-    	   	
+    	crls.add(crl);
+    	
     	ValidateXMLSignature.validateCertificate(doc, anchors, crls);
     	
     }
