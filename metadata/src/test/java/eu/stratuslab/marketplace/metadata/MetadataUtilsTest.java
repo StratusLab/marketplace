@@ -298,7 +298,7 @@ public class MetadataUtilsTest {
     	
     	ValidateXMLSignature.validateCertificate(doc, anchors, crls);
     	} catch(Exception e){
-    		System.out.println(e.getMessage());
+    		fail(e.getMessage());
     	}
     }
     
