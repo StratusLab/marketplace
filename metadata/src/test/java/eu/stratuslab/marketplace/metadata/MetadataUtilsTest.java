@@ -271,7 +271,7 @@ public class MetadataUtilsTest {
     
     }
     
-    @Test(expected = MetadataException.class)
+    @Test
     public void signatureHasRevokedCertificate() throws Exception {
     	try {
     	Document doc = readDocument("valid-ca-signed.xml");
