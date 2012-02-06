@@ -89,7 +89,7 @@ public final class MetadataUtils {
         DATE_FORMAT.setLenient(false);
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
-
+    
     private MetadataUtils() {
 
     }
@@ -266,9 +266,14 @@ public final class MetadataUtils {
     		XMLSignature signature = extractXmlSignature(context);
 
     		KeyInfo keyInfo = signature.getKeyInfo();
-
+    		
     		PKIXBuilderParameters params = createPKIXBuilderParameters(anchors, crls, keyInfo);
 
+    		boolean isRevoked = isCertRevoked(keyInfo, crls);
+    		if(isRevoked){
+    			return new Object[] { Boolean.FALSE, "Certificate is revoked." };
+    		}
+    		    		
     		/*
     		 * If build() returns successfully, the certificate is valid. More
     		 * details about the valid path can be obtained through the
@@ -282,7 +287,23 @@ public final class MetadataUtils {
     	}
     }
     
-    public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
+    private static boolean isCertRevoked(KeyInfo keyInfo, Collection<X509CRL> crls) {
+    	boolean isRevoked = false;
+    	
+    	X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
+    	 
+    	if(cert != null){
+    		for(X509CRL c: crls){
+    			if(c.isRevoked(cert)){
+    				isRevoked = true;
+    			}
+    		}
+    	}
+    	
+    	return isRevoked;
+	}
+
+	public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
 
     	List<X509Certificate> certs = extractX509CertChainFromKeyInfo(keyInfo);
     	
@@ -303,7 +324,7 @@ public final class MetadataUtils {
                 List<?> x509DataContent = x509Data.getContent();
                 for (Object obj2 : x509DataContent) {
                     if (obj2 instanceof X509Certificate) {
-                        chain.add((X509Certificate) obj2);
+                    	chain.add((X509Certificate) obj2);
                     }
                 }
             }

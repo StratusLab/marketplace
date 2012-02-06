@@ -16,7 +16,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.xml.crypto.dsig.XMLSignature;
 
@@ -35,7 +34,6 @@ import eu.stratuslab.marketplace.XMLUtils;
 public class MetadataUtilsTest {
 
     public static final String EXAMPLE_EMAIL = "example@example.org";
-    private static final Logger LOGGER = Logger.getLogger("eu.stratuslab");
     
     @Test(expected = MetadataException.class)
     public void checkNoNPE() throws SAXException, IOException {
@@ -273,7 +271,7 @@ public class MetadataUtilsTest {
     
     }
     
-    @Test
+    @Test(expected = MetadataException.class)
     public void signatureHasRevokedCertificate() throws Exception {
     	
     	Document doc = readDocument("valid-ca-signed.xml");
@@ -298,12 +296,8 @@ public class MetadataUtilsTest {
     	Collection<X509CRL> crls = new ArrayList<X509CRL>();
     	crls.add(crl);
     	
-    	try {
-    	String message = ValidateXMLSignature.validateCertificate(doc, anchors, crls);
-    	fail(message);
-    	} catch(Exception e){
-    		LOGGER.info(e.getMessage());
-    	}
+    	ValidateXMLSignature.validateCertificate(doc, anchors, crls);
+    	
     }
     
     private static X509Info getX509Info() {
