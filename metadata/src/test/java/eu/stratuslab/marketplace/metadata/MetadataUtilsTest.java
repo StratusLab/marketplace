@@ -273,7 +273,7 @@ public class MetadataUtilsTest {
     
     }
     
-    @Test(expected = MetadataException.class)
+    @Test
     public void signatureHasRevokedCertificate() throws Exception {
     	
     	Document doc = readDocument("valid-ca-signed.xml");
@@ -299,7 +299,8 @@ public class MetadataUtilsTest {
     	crls.add(crl);
     	
     	try {
-    	ValidateXMLSignature.validateCertificate(doc, anchors, crls);
+    	String message = ValidateXMLSignature.validateCertificate(doc, anchors, crls);
+    	fail(message);
     	} catch(Exception e){
     		LOGGER.info(e.getMessage());
     	}
