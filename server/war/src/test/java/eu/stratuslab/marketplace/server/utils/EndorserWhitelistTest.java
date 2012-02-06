@@ -11,7 +11,6 @@ import javax.security.auth.x500.X500Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -27,8 +26,6 @@ public class EndorserWhitelistTest extends ResourceTestBase {
 	private String password = "XYZXYZ";
 	
 	private String classPrefix = "/eu/stratuslab/marketplace/server/resources/";
-	
-	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
 	@Test
 	public void testCertVerificationWithUnverifiedCert() throws Exception {
@@ -57,9 +54,7 @@ public class EndorserWhitelistTest extends ResourceTestBase {
 	}
 	
 	@Test
-	public void testCertVerificationWithRevokedCert() {
-		try {
-		
+	public void testCertVerificationWithRevokedCert() throws Exception {
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream(classPrefix + "valid-ca-signed.xml"));
 				
@@ -69,10 +64,6 @@ public class EndorserWhitelistTest extends ResourceTestBase {
 		boolean verified = whitelist.isCertVerified(metadata);
 		
 		assertFalse(verified);
-		} catch(Exception e){
-			LOGGER.info("Caught exception: " + e.getMessage());
-		}
-		
 	}
 	
 	@Test
@@ -143,7 +134,6 @@ public class EndorserWhitelistTest extends ResourceTestBase {
 	}
 	
 	private Collection<X509CRL> loadCrls(String filename) throws Exception {
-		LOGGER.info("Loading CRL");
 		InputStream is = EndorserWhitelistTest.class
 		.getResourceAsStream(classPrefix + filename);
 		CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -158,8 +148,6 @@ public class EndorserWhitelistTest extends ResourceTestBase {
 		Collection<X509CRL> crls = new ArrayList<X509CRL>();
 		crls.add(crl);
 
-		LOGGER.info("CRL loaded");
-		
 		return crls;
 	}
 	
