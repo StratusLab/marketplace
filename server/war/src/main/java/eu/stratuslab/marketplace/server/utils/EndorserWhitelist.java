@@ -100,12 +100,15 @@ public class EndorserWhitelist {
 						
 			for ( File f : crlFiles ){
 				InputStream inStream = new FileInputStream(f);
-				CertificateFactory cf = CertificateFactory.getInstance("X.509");
-				X509CRL crl = (X509CRL)cf.generateCRL(inStream);
-			
-				this.crls.add(crl);
 				
-				closeReliably(inStream);
+				try {
+					CertificateFactory cf = CertificateFactory.getInstance("X.509");
+					X509CRL crl = (X509CRL)cf.generateCRL(inStream);
+
+					this.crls.add(crl);
+				} finally {
+					closeReliably(inStream);
+				}
 			}	
 
 		} catch (FileNotFoundException e) {
@@ -158,12 +161,14 @@ public class EndorserWhitelist {
 		try {
 			InputStream trustStoreInput = new FileInputStream(truststore);
 
-			KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
-			anchors.load(trustStoreInput, password.toCharArray());
+			try {
+				KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
+				anchors.load(trustStoreInput, password.toCharArray());
 
-			this.truststore = anchors;
-
-			closeReliably(trustStoreInput);
+				this.truststore = anchors;
+			} finally {
+				closeReliably(trustStoreInput);
+			}
 			
 		} catch(IOException e){
 			LOGGER.severe("Unable to load truststore: " + e.getMessage());
