@@ -43,6 +43,9 @@ Deprecated only</a>
             <th>arch</th>
             <th>endorser</th>
             <th>date</th>
+            <th>identifier</th>
+            <th>location</th>
+            <th>description</th>
         </tr>
     </thead>
     <tbody>

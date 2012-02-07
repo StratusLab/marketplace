@@ -27,6 +27,50 @@ function fnGetKey( aoData, sKey )
 	return null;
 }
 
+function buildHtmlDisplay( aData )
+{
+        var os = aData[1];
+        var osversion = aData[2];
+        var arch = aData[3];
+
+        var header = createHeader(os, osversion, arch);
+        if( header.length == 0 )
+        {
+            header = aData[6];
+        }
+
+        var display = "<table class=vmpanel>"
+                        + "<tr><td colspan=3><div id=header>" + header
+                        + "</div></td><td></td><td></td></tr>"
+                        + "<tr><td></td><td></td><td rowspan=5><a href=" + aData[7]
+                        + "><img src=/css/download.png/></a></td></tr>"
+                        + "<tr><td><div id=detail>Endorser:</div></td>"
+                        + "<td><div id=detail>" + aData[4] + "</div></td></tr>"
+                        + "<tr><td><div id=detail>Identifier:</div></td>"
+                        + "<td><div id=detail>" + aData[6] + "</div></td></tr>"
+                        + "<tr><td><div id=detail>Created:</div></td>"
+                        + "<td><div id=detail>" + aData[5] + "</div></td></tr>" + "<tr></tr></div>"
+                        + "<tr><td colspan=3><div id=description>" + aData[8] + "</div></td></tr>"
+                        + "<tr><td><a href=/metadata/" + aData[6] + "/" + aData[4] + "/" + aData[5] + ">More...</a></td></tr>"
+                        + "</table>";
+
+        return display;
+}
+
+function createHeader( os, osversion, arch ){
+        var header = os;
+        if(osversion.length > 0)
+        {
+            header = header + " v" + osversion;
+        }       
+        if(arch.length > 0)
+        {
+            header = header + " " + arch;
+        }       
+
+        return header;
+}
+
 function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	var iPipe = 5; /* Ajust the pipe size */
 
@@ -48,7 +92,9 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	{
 		for( var i=0, iLen=aoData.length ; i<iLen ; i++ )
 		{
-			if ( aoData[i].name != "iDisplayStart" && aoData[i].name != "iDisplayLength" && aoData[i].name != "sEcho" )
+			if ( aoData[i].name != "iDisplayStart" 
+				&& aoData[i].name != "iDisplayLength" 
+					&& aoData[i].name != "sEcho" )
 			{
 				if ( aoData[i].value != oCache.lastRequest[i].value )
 				{
@@ -82,7 +128,8 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		var re = /[?&]([^=]+)(?:=([^&]*))?/g;
 		var matchInfo;
 
-		while(matchInfo = re.exec(window.location.search)){
+		while(matchInfo = re.exec(window.location.search))
+                {
 			aoData.push( {"name": matchInfo[1], "value": matchInfo[2]} );
 		} 
 		
@@ -172,14 +219,24 @@ $(document).ready(function() {
 		"bServerSide": true,
 		"sAjaxSource": window.location.href,
 		"bProcessing": true,
-		"fnServerData": fnDataTablesPipeline, 
+		"fnServerData": fnDataTablesPipeline,
+                //"fnCreatedRow": function( nRow, aData, iDataIndex ) {
+                //                      $('td:eq(0)', nRow).html( displayHtml );
+                //                 },
 		"aoColumnDefs": [
-		                 { "bSortable": false, "aTargets": [ 0 ] },
-		                 { "bSearchable": false, "bVisible": false, "aTargets": [1] },
-		                 { "bSearchable": false, "bVisible": false, "aTargets": [2] },
-		                 { "bSearchable": false, "bVisible": false, "aTargets": [3] },
-		                 { "bSearchable": false, "bVisible": false, "aTargets": [4] },
-		                 { "bSearchable": false, "bVisible": false, "aTargets": [5] },
+		                 { "bSortable": false, 
+                                   "fnRender": function ( o, val ) {
+                                                   return buildHtmlDisplay( o.aData );
+                                               },
+                                   "aTargets": [ 0 ] },
+		                 { "bSearchable": false, "bVisible": false, "aTargets": [1] }, //os
+		                 { "bSearchable": false, "bVisible": false, "aTargets": [2] }, //osversion
+		                 { "bSearchable": false, "bVisible": false, "aTargets": [3] }, //arch
+		                 { "bSearchable": false, "bVisible": false, "aTargets": [4] }, //endorser
+		                 { "bSearchable": false, "bVisible": false, "aTargets": [5] }, //created
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [6] }, //identifier
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [7] }, //location
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [8] }, //description
 		                 ],
 		                 "aaSorting": [[5, 'desc']],
 		                 'sPaginationType': 'listbox',

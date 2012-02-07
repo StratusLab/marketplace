@@ -54,22 +54,7 @@ import eu.stratuslab.marketplace.server.utils.SparqlUtils;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends BaseResource {
-        
-	private static String JSON_DISPLAY_TEMPLATE = "<table class=vmpanel>"
-			+ "<tr><td colspan=3><div id=header>%s"
-			+ "</div></td><td></td><td></td></tr>"
-			+ "<tr><td></td><td></td><td rowspan=5><a href="
-			+ "%s><img src=/css/download.png/></a></td></tr>"
-			+ "<tr><td><div id=detail>Endorser:</div></td>"
-			+ "<td><div id=detail>%s</div></td></tr>"
-			+ "<tr><td><div id=detail>Identifier:</div></td>"
-			+ "<td><div id=detail>%s</div></td></tr>"
-			+ "<tr><td><div id=detail>Created:</div></td>"
-			+ "<td><div id=detail>%s</div></td></tr>" + "<tr></tr></div>"
-			+ "<tr><td colspan=3><div id=description>%s" + "</div></td></tr>"
-			+ "<tr><td><a href=/metadata/%s/%s/%s>More...</a></td></tr>"
-			+ "</table>";
-	
+    		
 	@Post("www_form")
 	public Representation acceptDatatablesQueryString(Representation entity){
 		if (entity == null) {
@@ -429,38 +414,16 @@ public class MDataResource extends BaseResource {
     	for(int i = 0; i < metadata.size(); i++){
     		Map<String, String> resultRow = (Map<String, String>)metadata.get(i);
 
-    		String identifier = resultRow.get("identifier");
-    		String endorser = resultRow.get("email");
-    		String created = resultRow.get("created");  
-    		String os = resultRow.get("os");
-    		String osversion = resultRow.get("osversion");
-    		String arch = resultRow.get("arch");
-    		String location = resultRow.get("location");
-    		String description = resultRow.get("description");
-    		
-    		String header = os;
-    		if(osversion != null && osversion.length() > 0){
-    			header += " v" + osversion;
-    		}
-    		if(arch != null && arch.length() > 0){
-    			header += " " + arch;
-    		}
-    		if(header.length() == 0){
-    			header = identifier;
-    		}
-    		    		
-			String display = String.format(JSON_DISPLAY_TEMPLATE, header, 
-					location, endorser, identifier, created,
-					description, identifier,
-					endorser, created);
-			
-			LinkedList<String> row = new LinkedList<String>();
-            row.add(display);
-            row.add(os);
-            row.add(osversion);
-            row.add(arch);
-            row.add(endorser);
-            row.add(created);
+    		LinkedList<String> row = new LinkedList<String>();
+			row.add(""); //empty cell used for display
+			row.add(resultRow.get("os"));
+            row.add(resultRow.get("osversion"));
+            row.add(resultRow.get("arch"));
+            row.add(resultRow.get("email"));
+            row.add(resultRow.get("created"));
+            row.add(resultRow.get("identifier"));
+            row.add(resultRow.get("location"));
+            row.add(resultRow.get("description"));
             
             aaData.add(row);		    		
     	}
