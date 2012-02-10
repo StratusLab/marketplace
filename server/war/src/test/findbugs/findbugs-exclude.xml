@@ -48,4 +48,10 @@
      </Or>
      <Bug pattern="URF_UNREAD_FIELD" />
     </Match>
+    <Match>
+     <Or>
+      <Class name="eu.stratuslab.marketplace.server.resources.QueryResource$SparqlQuery" />
+     </Or>
+     <Bug pattern="SIC_INNER_SHOULD_BE_STATIC" />
+    </Match>
 </FindBugsFilter>

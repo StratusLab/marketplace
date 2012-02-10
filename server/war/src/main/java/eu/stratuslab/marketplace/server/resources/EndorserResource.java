@@ -69,7 +69,7 @@ public class EndorserResource extends BaseResource {
     public Representation toXml() {
         String results = "";
 		try {
-			results = queryResultsAsString(query);
+			results = queryResultsAsXml(query);
 		} catch (MarketplaceException e) {
 			LOGGER.severe(e.getMessage());
 		}

@@ -9,6 +9,9 @@ import org.junit.Test;
 
 import org.restlet.Request;
 import org.restlet.Response;
+import org.restlet.data.ClientInfo;
+import org.restlet.data.MediaType;
+import org.restlet.data.Preference;
 import org.restlet.data.Status;
 import org.restlet.data.Method;
 
@@ -19,6 +22,14 @@ public class QueryResourceTest extends ResourceTestBase {
 	@Before 
 	public void setUp() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
+	}
+	
+	@Test
+	public void testEmptyQuery() throws Exception {
+		String query = "";
+		
+		Response response = executeQuery(query);
+		assertThat(response.getStatus(), is(Status.SUCCESS_NO_CONTENT));
 	}
 	
 	@Test
@@ -75,6 +86,39 @@ public class QueryResourceTest extends ResourceTestBase {
 		Response response = executeQuery(invalidQuery);
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 		assertThat(response.getStatus().getDescription(), is("query not allowed."));
+	}
+	
+	@Test
+	public void testGetHtml() throws Exception {
+		Request request = createRequest(null, Method.GET);
+		ClientInfo info = new ClientInfo(MediaType.TEXT_HTML);
+		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.TEXT_HTML));
+		request.setClientInfo(info);
+		Response response = executeRequest(request);
+		assertThat(response.getEntity().getMediaType().getName()
+				, is("text/html"));
+	}
+	
+	@Test
+	public void testGetXml() throws Exception {
+		Request request = createRequest(null, Method.GET);
+		ClientInfo info = new ClientInfo(MediaType.TEXT_XML);
+		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.TEXT_XML));
+		request.setClientInfo(info);
+		Response response = executeRequest(request);
+		assertThat(response.getEntity().getMediaType().getName(), 
+				is("application/sparql-results+xml"));
+	}
+	
+	@Test
+	public void testGetJson() throws Exception {
+		Request request = createRequest(null, Method.GET);
+		ClientInfo info = new ClientInfo(MediaType.APPLICATION_JSON);
+		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
+		request.setClientInfo(info);
+		Response response = executeRequest(request);
+		assertThat(response.getEntity().getMediaType().getName(), 
+				is("application/sparql-results+json"));
 	}
 	
 	private Response executeQuery(String query) throws Exception {

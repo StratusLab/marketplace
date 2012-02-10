@@ -30,7 +30,10 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.openrdf.query.resultio.TupleQueryResultWriter;
+import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
+import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriterFactory;
+import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriterFactory;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -178,24 +181,39 @@ public class SesameRdfStore extends RdfStore {
 		return list;
 	}
 
-	public String getRdfEntriesAsString(String query) throws MarketplaceException {
+	public String getRdfEntriesAsXml(String query) throws MarketplaceException {
+		TupleQueryResultWriterFactory writerFactory = new SPARQLResultsXMLWriterFactory();
+		
+		return getRdfEntriesAsString(query, writerFactory);
+	}
+	
+	public String getRdfEntriesAsJson(String query) throws MarketplaceException {
+		TupleQueryResultWriterFactory writerFactory = new SPARQLResultsJSONWriterFactory();
+		
+		return getRdfEntriesAsString(query, writerFactory);
+	}
+	
+	public String getRdfEntriesAsString(String query,
+			TupleQueryResultWriterFactory writerFactory)
+			throws MarketplaceException {
 		String resultString = null;
 
 		try {
 			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 			BufferedOutputStream out = new BufferedOutputStream(bytes);
-			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
-					out);
+			TupleQueryResultWriter writer = writerFactory.getWriter(out);
 
 			RepositoryConnection con = getMetadataStore().getConnection();
+
 			try {
 				TupleQuery tupleQuery = con.prepareTupleQuery(
 						QueryLanguage.SPARQL, query);
-				tupleQuery.evaluate(sparqlWriter);
+				tupleQuery.evaluate(writer);
 				resultString = bytes.toString();
 			} finally {
 				con.close();
 			}
+
 		} catch (RepositoryException e) {
 			throw new MarketplaceException(e.getMessage());
 		} catch (MalformedQueryException e) {

@@ -244,19 +244,14 @@ public abstract class BaseResource extends ServerResource {
     	getMetadataStore().remove(iri);
     }
 
-    /**
-     * Query the metadata
-     * 
-     * @param queryString
-     *            query string
-     * @param syntax
-     *            the syntax of the query
-     * @param format
-     *            the output format of the resultset
-     * @return
-     */
-    protected String queryResultsAsString(String queryString) throws MarketplaceException {
-        String resultString = getMetadataStore().getRdfEntriesAsString(queryString);
+    protected String queryResultsAsXml(String queryString) throws MarketplaceException {
+        String resultString = getMetadataStore().getRdfEntriesAsXml(queryString);
+               
+        return resultString;
+    }
+    
+    protected String queryResultsAsJson(String queryString) throws MarketplaceException {
+        String resultString = getMetadataStore().getRdfEntriesAsJson(queryString);
                
         return resultString;
     }

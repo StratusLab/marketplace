@@ -55,7 +55,7 @@ public class EndorsersResource extends BaseResource {
         // Generate the right representation according to its media type.
         String results = "";
 		try {
-			results = queryResultsAsString(EMAIL_QUERY);
+			results = queryResultsAsXml(EMAIL_QUERY);
 		} catch (MarketplaceException e) {
 			LOGGER.severe(e.getMessage());
 		}

@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONValue;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Request;
@@ -252,9 +253,14 @@ public class MarketPlaceApplication extends Application {
     				request.getClientInfo().getAcceptedMediaTypes().get(0).
     				getMetadata().equals(MediaType.APPLICATION_XML)) {
         	   
-        	   Representation r = generateErrorRepresentation(response.getStatus()
+        	   Representation r = generateXmlErrorRepresentation(response.getStatus()
                        .getDescription(), Integer.toString(response.getStatus().getCode()));
         	   return r;
+    		} else if (request.getClientInfo().getAcceptedMediaTypes().get(0).
+    				getMetadata().equals(MediaType.APPLICATION_JSON)) {
+    			Representation r = generateJsonErrorRepresentation(response.getStatus()
+                        .getDescription(), Integer.toString(response.getStatus().getCode()));
+         	   return r;	
     		} else {
     			// Create the data model
     			Map<String, String> dataModel = new TreeMap<String, String>();
@@ -271,15 +277,7 @@ public class MarketPlaceApplication extends Application {
     		}
         }
     	    	    	
-    	/**
-         * Generate an XML representation of an error response.
-         * 
-         * @param errorMessage
-         *            the error message.
-         * @param errorCode
-         *            the error code.
-         */
-        protected Representation generateErrorRepresentation(String errorMessage,
+    	protected Representation generateXmlErrorRepresentation(String errorMessage,
                 String errorCode) {
             StringRepresentation result = new StringRepresentation(
             		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
@@ -289,7 +287,15 @@ public class MarketPlaceApplication extends Application {
             return result;
         }
     	
+        protected Representation generateJsonErrorRepresentation(String errorMessage,
+                String errorCode) {
+            StringRepresentation result = new StringRepresentation(
+            		"{\"" + errorCode + "\" : " + JSONValue.toJSONString(errorMessage) + "}"
+                		, MediaType.APPLICATION_JSON);
+                
+            return result;
+        }
+        
     }
-
 
 }
