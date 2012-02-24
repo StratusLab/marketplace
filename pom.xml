@@ -148,7 +148,7 @@ metadata.
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.8.2</version>
+        <version>4.10</version>
       </dependency>
       <dependency>  
         <groupId>org.restlet.jee</groupId>  
