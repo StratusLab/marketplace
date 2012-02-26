@@ -4,8 +4,6 @@ import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKET
 
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 
 import javax.xml.xpath.XPath;
@@ -18,13 +16,6 @@ import org.w3c.dom.Document;
 import eu.stratuslab.marketplace.PatternUtils;
 
 public final class ValidateMetadataConstraints {
-
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-        DATE_FORMAT.setLenient(false);
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     private static final String TRUE = "true";
 
@@ -168,7 +159,7 @@ public final class ValidateMetadataConstraints {
             Matcher m = PatternUtils.DATE.matcher(date);
             if (m.matches()) {
                 try {
-                    DATE_FORMAT.parse(date);
+                    MetadataUtils.getDateFormat().parse(date);
                     return true;
                 } catch (ParseException e) {
                     throw new MetadataException(e.getMessage());

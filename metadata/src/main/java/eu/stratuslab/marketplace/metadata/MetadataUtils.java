@@ -5,9 +5,11 @@ import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.RDF_NS
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -24,6 +26,7 @@ import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,13 +86,8 @@ public final class MetadataUtils {
     private static final BigInteger DIVISOR = BigInteger.valueOf(2L).pow(
             FIELD_BITS);
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-        DATE_FORMAT.setLenient(false);
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-    
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
     private MetadataUtils() {
 
     }
@@ -188,10 +186,10 @@ public final class MetadataUtils {
             Node node) {
 
         try {
-        	DOMValidateContext context = createContext(node);
-        	
+            DOMValidateContext context = createContext(node);
+
             XMLSignature signature = extractXmlSignature(context);
-            
+
             boolean coreValidation = signature.validate(context);
 
             if (coreValidation) {
@@ -199,7 +197,7 @@ public final class MetadataUtils {
                 KeyInfo keyInfo = signature.getKeyInfo();
                 X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
                 Map<String, String> certEndorserInfo = extractEndorserInfoFromCert(cert);
-               
+
                 String errorString = isEndorserInfoConsistent(certEndorserInfo,
                         docEndorserInfo);
                 if (errorString == null) {
@@ -234,17 +232,16 @@ public final class MetadataUtils {
         }
     }
 
-    private static DOMValidateContext createContext(Node signatureXml){
-    	DOMValidateContext context = new DOMValidateContext(
+    private static DOMValidateContext createContext(Node signatureXml) {
+        DOMValidateContext context = new DOMValidateContext(
                 new X509KeySelector(), signatureXml);
-    	
-    	return context;
+
+        return context;
     }
-    
-    private static XMLSignature extractXmlSignature(DOMValidateContext context) 
-    throws MarshalException{
-    	XMLSignatureFactory factory = XMLSignatureFactory
-                .getInstance("DOM");
+
+    private static XMLSignature extractXmlSignature(DOMValidateContext context)
+            throws MarshalException {
+        XMLSignatureFactory factory = XMLSignatureFactory.getInstance("DOM");
 
         // This can throw a NPE when the signature element is empty or
         // malformed. Catch this explicitly.
@@ -254,69 +251,72 @@ public final class MetadataUtils {
         } catch (NullPointerException e) {
             throw new MetadataException("invalid signature element");
         }
-        
+
         return signature;
     }
-    
-    public static Object[] isCertificateVerified(Node signatureXml, KeyStore anchors,
-    		Collection<X509CRL> crls) {
 
-    	try {
-    		DOMValidateContext context = createContext(signatureXml);
-    		XMLSignature signature = extractXmlSignature(context);
+    public static Object[] isCertificateVerified(Node signatureXml,
+            KeyStore anchors, Collection<X509CRL> crls) {
 
-    		KeyInfo keyInfo = signature.getKeyInfo();
-    		
-    		PKIXBuilderParameters params = createPKIXBuilderParameters(anchors, crls, keyInfo);
+        try {
+            DOMValidateContext context = createContext(signatureXml);
+            XMLSignature signature = extractXmlSignature(context);
 
-    		boolean isRevoked = isCertRevoked(keyInfo, crls);
-    		if(isRevoked){
-    			return new Object[] { Boolean.FALSE, "Certificate is revoked." };
-    		}
-    		    		
-    		/*
-    		 * If build() returns successfully, the certificate is valid. More
-    		 * details about the valid path can be obtained through the
-    		 * PKIXBuilderResult. If no valid path can be found, a
-    		 * CertPathBuilderException is thrown.
-    		 */
-    		return buildCertPath(params);
+            KeyInfo keyInfo = signature.getKeyInfo();
 
-    	} catch (MarshalException e) {
-    		return new Object[] { Boolean.FALSE, e.getMessage() };
-    	}
+            PKIXBuilderParameters params = createPKIXBuilderParameters(anchors,
+                    crls, keyInfo);
+
+            boolean isRevoked = isCertRevoked(keyInfo, crls);
+            if (isRevoked) {
+                return new Object[] { Boolean.FALSE, "Certificate is revoked." };
+            }
+
+            /*
+             * If build() returns successfully, the certificate is valid. More
+             * details about the valid path can be obtained through the
+             * PKIXBuilderResult. If no valid path can be found, a
+             * CertPathBuilderException is thrown.
+             */
+            return buildCertPath(params);
+
+        } catch (MarshalException e) {
+            return new Object[] { Boolean.FALSE, e.getMessage() };
+        }
     }
-    
-    private static boolean isCertRevoked(KeyInfo keyInfo, Collection<X509CRL> crls) {
-    	boolean isRevoked = false;
-    	
-    	X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
-    	 
-    	if(cert != null){
-    		for(X509CRL c: crls){
-    			if(c.isRevoked(cert)){
-    				isRevoked = true;
-    			}
-    		}
-    	}
-    	
-    	return isRevoked;
-	}
 
-	public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
+    private static boolean isCertRevoked(KeyInfo keyInfo,
+            Collection<X509CRL> crls) {
+        boolean isRevoked = false;
 
-    	List<X509Certificate> certs = extractX509CertChainFromKeyInfo(keyInfo);
-    	
-    	if(certs.size() > 0){
-    		return certs.get(0);
-    	} else {
-    		return null;
-    	}
+        X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
+
+        if (cert != null) {
+            for (X509CRL c : crls) {
+                if (c.isRevoked(cert)) {
+                    isRevoked = true;
+                }
+            }
+        }
+
+        return isRevoked;
     }
-    
-    public static List<X509Certificate> extractX509CertChainFromKeyInfo(KeyInfo keyInfo) {
-    	List<X509Certificate> chain = new ArrayList<X509Certificate>();
-    	
+
+    public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
+
+        List<X509Certificate> certs = extractX509CertChainFromKeyInfo(keyInfo);
+
+        if (certs.size() > 0) {
+            return certs.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public static List<X509Certificate> extractX509CertChainFromKeyInfo(
+            KeyInfo keyInfo) {
+        List<X509Certificate> chain = new ArrayList<X509Certificate>();
+
         List<?> keyInfoContent = keyInfo.getContent();
         for (Object o : keyInfoContent) {
             if (o instanceof X509Data) {
@@ -324,7 +324,7 @@ public final class MetadataUtils {
                 List<?> x509DataContent = x509Data.getContent();
                 for (Object obj2 : x509DataContent) {
                     if (obj2 instanceof X509Certificate) {
-                    	chain.add((X509Certificate) obj2);
+                        chain.add((X509Certificate) obj2);
                     }
                 }
             }
@@ -333,76 +333,79 @@ public final class MetadataUtils {
         return chain;
     }
 
-    public static X509Certificate extractX509CertFromNode(Node signatureXml){
-    	DOMValidateContext context = createContext(signatureXml);
-		XMLSignature signature;
-		try {
-			signature = extractXmlSignature(context);
-		} catch (MarshalException e) {
-			throw new MetadataException(e.getMessage());
-		}
+    public static X509Certificate extractX509CertFromNode(Node signatureXml) {
+        DOMValidateContext context = createContext(signatureXml);
+        XMLSignature signature;
+        try {
+            signature = extractXmlSignature(context);
+        } catch (MarshalException e) {
+            throw new MetadataException(e.getMessage());
+        }
 
-		KeyInfo keyInfo = signature.getKeyInfo();
-		
-		X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
-		
-		return cert;
+        KeyInfo keyInfo = signature.getKeyInfo();
+
+        X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
+
+        return cert;
     }
-    
-    private static PKIXBuilderParameters createPKIXBuilderParameters(KeyStore anchors, 
-    		Collection<X509CRL> crls, KeyInfo keyInfo) {
-    	List<X509Certificate> chain = extractX509CertChainFromKeyInfo(keyInfo);
 
-		X509CertSelector target = new X509CertSelector();
-		target.setCertificate(chain.get(0));
-    	
-		try {
-			
-			PKIXBuilderParameters params = new PKIXBuilderParameters(anchors, target);
-			CertStoreParameters intermediates = new CollectionCertStoreParameters(
-				chain);
-			params.addCertStore(CertStore.getInstance("Collection",
-				intermediates));
-			
-			if(crls.size() > 0){
-				CertStoreParameters revoked = new CollectionCertStoreParameters(crls);
-				params.addCertStore(CertStore.getInstance("Collection", revoked));
-			} else {
-				// Disable CRL checks
-				params.setRevocationEnabled(false);
-			}
-			
-			return params;
-			
-    	} catch (KeyStoreException e){
-    		throw new MetadataException(e.getMessage());
-    	} catch (InvalidAlgorithmParameterException e){
-    		throw new MetadataException(e.getMessage());
-    	} catch (NoSuchAlgorithmException e) {
-    		throw new MetadataException(e.getMessage());
-		}
-    	
+    private static PKIXBuilderParameters createPKIXBuilderParameters(
+            KeyStore anchors, Collection<X509CRL> crls, KeyInfo keyInfo) {
+        List<X509Certificate> chain = extractX509CertChainFromKeyInfo(keyInfo);
+
+        X509CertSelector target = new X509CertSelector();
+        target.setCertificate(chain.get(0));
+
+        try {
+
+            PKIXBuilderParameters params = new PKIXBuilderParameters(anchors,
+                    target);
+            CertStoreParameters intermediates = new CollectionCertStoreParameters(
+                    chain);
+            params.addCertStore(CertStore.getInstance("Collection",
+                    intermediates));
+
+            if (crls.size() > 0) {
+                CertStoreParameters revoked = new CollectionCertStoreParameters(
+                        crls);
+                params.addCertStore(CertStore
+                        .getInstance("Collection", revoked));
+            } else {
+                // Disable CRL checks
+                params.setRevocationEnabled(false);
+            }
+
+            return params;
+
+        } catch (KeyStoreException e) {
+            throw new MetadataException(e.getMessage());
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new MetadataException(e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw new MetadataException(e.getMessage());
+        }
+
     }
-    
-    private static Object[] buildCertPath(PKIXBuilderParameters params){
-    	try {
-    		CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
 
-    		PKIXCertPathBuilderResult r = (PKIXCertPathBuilderResult) builder
-    		.build(params);
-    		String builderResult = r.toString();
-    		
-    		return new Object[] { Boolean.TRUE, builderResult };
-    	    
-    	} catch (NoSuchAlgorithmException e) {
-    		throw new MetadataException(e.getMessage());
-    	} catch (CertPathBuilderException e) {
-			return new Object[] { Boolean.FALSE, e.getMessage() };
-		} catch (InvalidAlgorithmParameterException e) {
-			throw new MetadataException(e.getMessage());
-		}
-	}
-    
+    private static Object[] buildCertPath(PKIXBuilderParameters params) {
+        try {
+            CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
+
+            PKIXCertPathBuilderResult r = (PKIXCertPathBuilderResult) builder
+                    .build(params);
+            String builderResult = r.toString();
+
+            return new Object[] { Boolean.TRUE, builderResult };
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new MetadataException(e.getMessage());
+        } catch (CertPathBuilderException e) {
+            return new Object[] { Boolean.FALSE, e.getMessage() };
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new MetadataException(e.getMessage());
+        }
+    }
+
     /*
      * All of the keys extracted from the certificate must be match the values
      * in the metadata description, if present. Returns an error string; null
@@ -468,10 +471,11 @@ public final class MetadataUtils {
 
     public static void writeStringToFile(String contents, File outputFile) {
 
-        FileWriter os = null;
+        Writer os = null;
         try {
 
-            os = new FileWriter(outputFile);
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            os = new OutputStreamWriter(fos, "UTF-8");
             os.write(contents);
 
         } catch (IOException e) {
@@ -588,9 +592,18 @@ public final class MetadataUtils {
 
     }
 
+    public static DateFormat getDateFormat() {
+
+        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+        format.setLenient(false);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        return format;
+    }
+
     private static Element createTimestampElement(Document doc) {
         Element e = doc.createElementNS(DCTERMS_NS_URI, "created");
-        String datetime = DATE_FORMAT.format(new Date());
+        String datetime = getDateFormat().format(new Date());
         e.setTextContent(datetime);
         return e;
     }
