@@ -7,51 +7,39 @@
       warning from FindBugs.
   -->
   <Match>
-    <Or>
       <Class name="eu.stratuslab.marketplace.server.MarketPlaceApplicationClient" />
-    </Or>
     <Bug pattern="NP_ALWAYS_NULL" />
   </Match>
   <Match>
-    <Or>
       <Class name="eu.stratuslab.marketplace.server.MarketPlaceApplication" />
-    </Or>
-    <Bug pattern="UUF_UNUSED_FIELD" />
+      <Bug pattern="UUF_UNUSED_FIELD" />
    </Match>
    <Match>
-     <Or>
        <Class name="eu.stratuslab.marketplace.server.resources.ActionResource" />
-     </Or>
-     <Bug pattern="UUF_UNUSED_FIELD" />
+       <Bug pattern="UUF_UNUSED_FIELD" />
    </Match>
    <Match>
-     <Or>
       <Class name="eu.stratuslab.marketplace.server.resources.MDatumResource" />
-     </Or>
-     <Bug pattern="UUF_UNUSED_FIELD" />
+      <Bug pattern="UUF_UNUSED_FIELD" />
     </Match>
     <Match>
-     <Or>
+      <Class name="eu.stratuslab.marketplace.server.resources.MDatumResource" />
+      <Bug pattern="DM_DEFAULT_ENCODING" />
+    </Match>
+    <Match>
       <Class name="eu.stratuslab.marketplace.server.resources.MDataResource" />
-     </Or>
-     <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+      <Bug pattern="DLS_DEAD_LOCAL_STORE" />
     </Match> 
      <Match>
-     <Or>
       <Class name="eu.stratuslab.marketplace.server.resources.EndorsersResource" />
-     </Or>
-     <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+      <Bug pattern="DLS_DEAD_LOCAL_STORE" />
     </Match>
     <Match>
-     <Or>
       <Class name="eu.stratuslab.marketplace.server.utils.EndorserWhitelist" />
-     </Or>
-     <Bug pattern="URF_UNREAD_FIELD" />
+      <Bug pattern="URF_UNREAD_FIELD" />
     </Match>
     <Match>
-     <Or>
       <Class name="eu.stratuslab.marketplace.server.resources.QueryResource$SparqlQuery" />
-     </Or>
-     <Bug pattern="SIC_INNER_SHOULD_BE_STATIC" />
+      <Bug pattern="SIC_INNER_SHOULD_BE_STATIC" />
     </Match>
 </FindBugsFilter>

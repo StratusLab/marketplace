@@ -23,8 +23,10 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -149,10 +151,10 @@ public class RatingsResource extends BaseResource {
     	File dataFile = new File(
     			Configuration.getParameterValue(DATA_DIR) 
     			+ "/" + identifier + "/rating.txt");
-    	FileWriter writer = null;
+    	Writer writer = null;
     	
     	try {
-    		writer = new FileWriter(dataFile);
+    		writer = new OutputStreamWriter(new FileOutputStream(dataFile), "UTF-8");
     	    writer.write(data2String(data));
     	} catch(IOException e) {
     		LOGGER.severe("Unable to save rating");

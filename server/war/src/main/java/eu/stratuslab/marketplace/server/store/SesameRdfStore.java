@@ -30,6 +30,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -228,7 +229,9 @@ public class SesameRdfStore extends RdfStore {
 				TupleQuery tupleQuery = con.prepareTupleQuery(
 						QueryLanguage.SPARQL, query);
 				tupleQuery.evaluate(writer);
-				resultString = bytes.toString();
+				resultString = bytes.toString("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new MarketplaceException(e.getMessage());
 			} finally {
 				con.close();
 			}

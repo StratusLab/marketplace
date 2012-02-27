@@ -27,7 +27,8 @@ import static org.restlet.data.MediaType.TEXT_PLAIN;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -297,7 +298,8 @@ public class MDataResource extends BaseResource {
         try {
 
             reader = entity.getReader();
-            writer = new FileWriter(output);
+            writer = new OutputStreamWriter(
+            		new FileOutputStream(output), "UTF-8");
 
             int nchars = reader.read(buffer);
             while (nchars >= 0) {
@@ -316,6 +318,7 @@ public class MDataResource extends BaseResource {
 
     @Get("html")
     public Representation toHtml() throws IOException {
+    	
     	Map<String, Object> data = createInfoStructure("Metadata");
 
     	// Load the FreeMarker template
@@ -332,6 +335,7 @@ public class MDataResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
+    	
     	String deprecatedFlag = getDeprecatedFlag();
     			
     	List<Map<String, String>> metadata = getMetadata(deprecatedFlag);
@@ -349,6 +353,7 @@ public class MDataResource extends BaseResource {
     }
 
     private List<String> buildPathsToMetadata(List<Map<String, String>> metadata){
+    	
     	List<String> pathsToMetadata = new ArrayList<String>();
         for (Map<String, String> entry : metadata) {
 
@@ -361,6 +366,7 @@ public class MDataResource extends BaseResource {
     }
     
 	private String buildXmlOutput(List<String> pathsToMetadata) {
+		
 		StringBuilder output = new StringBuilder(XML_HEADER);
 
 		output.append("<metadata>");
@@ -386,6 +392,7 @@ public class MDataResource extends BaseResource {
      */
     @Get("json")
     public Representation toJSON() {
+    	
     	String deprecatedFlag = getDeprecatedFlag();
     	            	
     	List<Map<String, String>> metadata = null;
@@ -414,7 +421,8 @@ public class MDataResource extends BaseResource {
 		json.put("aaData", jsonResults);
 
 		// Returns the XML representation of this document.
-		return new StringRepresentation(JSONValue.toJSONString(json), MediaType.APPLICATION_JSON);
+		return new StringRepresentation(JSONValue.toJSONString(json), 
+				MediaType.APPLICATION_JSON);
     }
             
     private Map<String, Object> buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){

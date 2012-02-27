@@ -85,8 +85,8 @@ public class MDatumResource extends BaseResource {
         Model rdfModel = ModelFactory.createMemModelMaker()
                 .createDefaultModel();
         rdfModel.read(new ByteArrayInputStream((MetadataFileUtils.stripSignature(datum))
-                .getBytes()), MARKETPLACE_URI);
-
+			        .getBytes()), MARKETPLACE_URI);
+		
         JSONJenaWriter jenaWriter = new JSONJenaWriter();
         ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
         jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);

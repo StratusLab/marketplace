@@ -60,7 +60,7 @@ public class MetadataFileUtils {
 		} finally {
 			closeReliably(f);
 		}
-		return new String(buffer);
+		return new String(buffer, "UTF-8");
 	}
 
 	public static void closeReliably(Closeable closeable) {

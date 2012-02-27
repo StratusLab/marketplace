@@ -25,6 +25,7 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEME
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,6 +61,8 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
  */
 public abstract class BaseResource extends ServerResource {
 
+	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    	
 	protected static final Logger LOGGER = Logger.getLogger("org.restlet");
 
     protected static final int ARG_EMAIL = 1;
@@ -68,14 +71,7 @@ public abstract class BaseResource extends ServerResource {
 
     protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
     protected static final String NO_TITLE = null;
-
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-    "yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-    	DATE_FORMAT.setLenient(false);
-    	DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-    
+        
     protected RdfStore getMetadataStore() {
         return ((MarketPlaceApplication) getApplication()).getMetadataStore();
     }
@@ -289,8 +285,16 @@ public abstract class BaseResource extends ServerResource {
         return list;
     }
                
-    protected static String getCurrentDate(){
-    	return DATE_FORMAT.format(new Date());
+    protected String getCurrentDate(){
+    	return getDateFormat().format(new Date());
+    }
+    
+    private DateFormat getDateFormat() {
+        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+        format.setLenient(false);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        return format;
     }
         
 }

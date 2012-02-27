@@ -173,6 +173,11 @@ public class QueryResource extends BaseResource {
 				
 			case SparqlQuery.OUTPUT_MAP:
 				results = query(query.getQuery());
+				break;
+				
+			default:
+				results = null;
+				break;
 				
 			}
 		}

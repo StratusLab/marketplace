@@ -20,10 +20,12 @@
 package eu.stratuslab.marketplace.server.cfg;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,7 +82,8 @@ public final class Configuration {
         Properties properties = new Properties();
 
         try {
-            Reader reader = new FileReader(configFile);
+            Reader reader = new InputStreamReader(
+            		new FileInputStream(configFile), "UTF-8");
             try {
                 properties.load(reader);
             } catch (IOException consumed) {
@@ -94,6 +97,8 @@ public final class Configuration {
             }
         } catch (FileNotFoundException consumed) {
             // Return empty properties file.
+        } catch (UnsupportedEncodingException e) {
+        	// Return empty properties file.
         }
 
         return properties;

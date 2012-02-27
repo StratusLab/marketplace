@@ -31,9 +31,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -81,6 +82,7 @@ public class EndorserWhitelist {
     private ScheduledFuture<?> reloadCrls = null;
 	
     public EndorserWhitelist(){
+    	
     	this.enabled = Configuration.getParameterValueAsBoolean(WHITELIST_ENABLED);	
 		
 		String location = Configuration.getParameterValue(WHITELIST_LOCATION);
@@ -104,6 +106,7 @@ public class EndorserWhitelist {
 
 	public EndorserWhitelist(KeyStore anchors, Collection<X509CRL> crls,
 			List<X500Principal> list) {
+		
 		this.enabled = true;
 		this.truststore = anchors;
 		this.crls = crls;
@@ -111,6 +114,7 @@ public class EndorserWhitelist {
 	}
     
 	private void loadCrls() {
+		
 		try {
 			List<File> crlFiles = getCrlFiles(crlLocation);			
 						
@@ -140,6 +144,7 @@ public class EndorserWhitelist {
 	}
 
 	private List<File> getCrlFiles(String crlLocation) {
+		
 		List<File> crlFiles = new ArrayList<File>();
 		
 		File crls = new File(crlLocation);
@@ -156,6 +161,7 @@ public class EndorserWhitelist {
 	}
 
 	private List<File> getFilesFromPattern(File crls) {
+		
 		List<File> crlFiles = new ArrayList<File>(); 
 		
 		String[] filePattern = crls.getName().split("\\*");
@@ -174,6 +180,7 @@ public class EndorserWhitelist {
 	}
 
 	private void loadTrustStore(String truststore, String password) {
+		
 		try {
 			InputStream trustStoreInput = new FileInputStream(truststore);
 
@@ -202,10 +209,12 @@ public class EndorserWhitelist {
 	}
 
 	private void loadWhitelist(String location) {
+		
 		List<X500Principal> lines = new ArrayList<X500Principal>();
 
 		try {
-			FileReader fileReader = new FileReader(location);
+			Reader fileReader = new InputStreamReader(
+					new FileInputStream(location), "UTF-8");
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 
 			String line = null;
@@ -228,16 +237,19 @@ public class EndorserWhitelist {
 	}
 
 	public void stop(){
+		
 		if(reloadCrls != null){
 			reloadCrls.cancel(true);
 		}
 	}
 	
 	public boolean isEnabled(){
+		
 		return enabled;
 	}
 	
 	public boolean isCertVerified(Document doc){
+		
 		boolean verified = false;
 		try {
 			ValidateXMLSignature.validateCertificate(doc, this.truststore, this.crls);
@@ -266,6 +278,7 @@ public class EndorserWhitelist {
 	}
 	
 	private String getCertSubject(Document doc){
+		
 		String endorser = "";
 		
 		NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
@@ -284,6 +297,7 @@ public class EndorserWhitelist {
 	}
 	
 	private boolean isEndorserListed(String endorser){
+		
 		for(X500Principal s : this.whitelist){
 			if(s.getName().equals(endorser))
 				return true;
@@ -293,6 +307,7 @@ public class EndorserWhitelist {
 	}
 	
 	public static void closeReliably(Closeable closeable) {
+		
 		if (closeable != null) {
 			try {
 				closeable.close();
