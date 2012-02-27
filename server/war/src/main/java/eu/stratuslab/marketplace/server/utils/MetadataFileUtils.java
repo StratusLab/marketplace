@@ -64,6 +64,7 @@ public class MetadataFileUtils {
 	}
 
 	public static void closeReliably(Closeable closeable) {
+		
 		if (closeable != null) {
 			try {
 				closeable.close();
@@ -73,6 +74,7 @@ public class MetadataFileUtils {
 	}
 	
 	public static String stripSignature(String signedString) {
+		
         DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
         Document datumDoc = null;
         String rdfEntry = "";
