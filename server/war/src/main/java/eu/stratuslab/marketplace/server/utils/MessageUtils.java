@@ -29,7 +29,7 @@ public final class MessageUtils {
             + "Please either confirm or abort this request by visiting%n"
             + "one of the following links:%n%n"
             + "Confirm:  %s%n%nAbort:  %s%n%n"
-            + "If this matadata entry was not uploaded by you, please%n"
+            + "If this metadata entry was not uploaded by you, please%n"
             + "indicate this by visiting the following address: %n%n"
             + "Abuse:  %s%n%n"
             + "We will then investigate how this entry was uploaded.%n";
