@@ -79,9 +79,7 @@ public final class Notifier {
 
             Message msg = new MimeMessage(session);
             msg.setFrom(admin);
-
-            msg.setReplyTo(new Address[] { new InternetAddress("no-reply@stratuslab.eu") });
-            
+                        
             Address[] recipients = new Address[] { email };
 
             msg.setRecipients(Message.RecipientType.TO, recipients);
