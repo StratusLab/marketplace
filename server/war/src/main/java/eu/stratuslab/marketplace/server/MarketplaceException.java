@@ -19,12 +19,14 @@
  */
 package eu.stratuslab.marketplace.server;
 
+@SuppressWarnings("serial")
 public class MarketplaceException extends Exception {
 
-	public MarketplaceException() {}
-	
-	public MarketplaceException(String message){
-		super(message);
-	}
-	
+    public MarketplaceException() {
+    }
+
+    public MarketplaceException(String message) {
+        super(message);
+    }
+
 }
