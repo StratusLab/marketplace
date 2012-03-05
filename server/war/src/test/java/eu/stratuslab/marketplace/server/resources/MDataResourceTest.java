@@ -138,12 +138,12 @@ public class MDataResourceTest extends ResourceTestBase {
 		String created = getValueFromDoc(extractXmlDocument(response
 				.getEntity().getStream()), "created");
 
-		assertThat(created, is("2011-09-12T09:58:55Z"));
+		assertThat(created, is("2012-03-05T19:14:58Z"));
 	}
 
 	@Test
 	public void testUploadingOlderMetadataFails() throws Exception {
-		Response response = postMetadataFile("valid-indate-older-signature.xml");
+		Response response = postMetadataFile("valid-indate-signature.xml");
 
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 		assertThat(response.getStatus().getDescription(),
