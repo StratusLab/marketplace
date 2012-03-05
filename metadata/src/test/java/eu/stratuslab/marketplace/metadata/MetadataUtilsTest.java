@@ -34,7 +34,7 @@ import eu.stratuslab.marketplace.XMLUtils;
 public class MetadataUtilsTest {
 
     public static final String EXAMPLE_EMAIL = "example@example.org";
-    
+
     @Test(expected = MetadataException.class)
     public void checkNoNPE() throws SAXException, IOException {
         Document doc = readDocument("valid-minimal-signature.xml");
@@ -211,13 +211,13 @@ public class MetadataUtilsTest {
 
     @Test
     public void signatureHasValidCertificate() throws Exception {
-    	
-    	Document doc = readDocument("valid-ca-signed.xml");
-    	InputStream is = MetadataUtilsTest.class
-        	.getResourceAsStream("test-ca.jks");
-    	String password = "XYZXYZ";
 
-    	KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
+        Document doc = readDocument("valid-ca-signed.xml");
+        InputStream is = MetadataUtilsTest.class
+                .getResourceAsStream("test-ca.jks");
+        String password = "XYZXYZ";
+
+        KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
         try {
             anchors.load(is, password.toCharArray());
         } finally {
@@ -225,32 +225,32 @@ public class MetadataUtilsTest {
                 is.close();
             }
         }
-    	
-    	InputStream inStream = MetadataUtilsTest.class
-    	.getResourceAsStream("test-crl-empty.pem");
-    	CertificateFactory cf = CertificateFactory.getInstance("X.509");
-    	X509CRL crl = (X509CRL)cf.generateCRL(inStream);
-    	
-    	Collection<X509CRL> crls = new ArrayList<X509CRL>();
-    	crls.add(crl);
-    	
-    	try {
-    		ValidateXMLSignature.validateCertificate(doc, anchors, crls);
-    	} catch (MetadataException e){
-    		fail(e.getMessage());
-    	}
-    	
+
+        InputStream inStream = MetadataUtilsTest.class
+                .getResourceAsStream("test-crl-empty.pem");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CRL crl = (X509CRL) cf.generateCRL(inStream);
+
+        Collection<X509CRL> crls = new ArrayList<X509CRL>();
+        crls.add(crl);
+
+        try {
+            ValidateXMLSignature.validateCertificate(doc, anchors, crls);
+        } catch (MetadataException e) {
+            fail(e.getMessage());
+        }
+
     }
-    
+
     @Test(expected = MetadataException.class)
     public void signatureCertificateFailsWithNoCA() throws Exception {
-    	
-    	Document doc = readDocument("valid-ca-signed.xml");
-    	InputStream is = MetadataUtilsTest.class
-        	.getResourceAsStream("test-ca-empty.jks");
-    	String password = "XYZXYZ";
 
-    	KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
+        Document doc = readDocument("valid-ca-signed.xml");
+        InputStream is = MetadataUtilsTest.class
+                .getResourceAsStream("test-ca-empty.jks");
+        String password = "XYZXYZ";
+
+        KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
         try {
             anchors.load(is, password.toCharArray());
         } finally {
@@ -258,28 +258,28 @@ public class MetadataUtilsTest {
                 is.close();
             }
         }
-    	
-    	InputStream inStream = MetadataUtilsTest.class
-    	.getResourceAsStream("test-crl-empty.pem");
-    	CertificateFactory cf = CertificateFactory.getInstance("X.509");
-    	X509CRL crl = (X509CRL)cf.generateCRL(inStream);
-    	
-    	Collection<X509CRL> crls = new ArrayList<X509CRL>();
-    	crls.add(crl);
-    	
-    	ValidateXMLSignature.validateCertificate(doc, anchors, crls);
-    
+
+        InputStream inStream = MetadataUtilsTest.class
+                .getResourceAsStream("test-crl-empty.pem");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CRL crl = (X509CRL) cf.generateCRL(inStream);
+
+        Collection<X509CRL> crls = new ArrayList<X509CRL>();
+        crls.add(crl);
+
+        ValidateXMLSignature.validateCertificate(doc, anchors, crls);
+
     }
-    
+
     @Test(expected = MetadataException.class)
     public void signatureHasRevokedCertificate() throws Exception {
-    	
-    	Document doc = readDocument("valid-ca-signed.xml");
-    	InputStream is = MetadataUtilsTest.class
-        	.getResourceAsStream("test-ca.jks");
-    	String password = "XYZXYZ";
 
-    	KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
+        Document doc = readDocument("valid-ca-signed.xml");
+        InputStream is = MetadataUtilsTest.class
+                .getResourceAsStream("test-ca.jks");
+        String password = "XYZXYZ";
+
+        KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
         try {
             anchors.load(is, password.toCharArray());
         } finally {
@@ -287,19 +287,19 @@ public class MetadataUtilsTest {
                 is.close();
             }
         }
-    	
-    	InputStream inStream = MetadataUtilsTest.class
-    	.getResourceAsStream("test-crl-revoked.pem");
-    	CertificateFactory cf = CertificateFactory.getInstance("X.509");
-    	X509CRL crl = (X509CRL)cf.generateCRL(inStream);
-    	
-    	Collection<X509CRL> crls = new ArrayList<X509CRL>();
-    	crls.add(crl);
-    	
-    	ValidateXMLSignature.validateCertificate(doc, anchors, crls);
-    	
+
+        InputStream inStream = MetadataUtilsTest.class
+                .getResourceAsStream("test-crl-revoked.pem");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509CRL crl = (X509CRL) cf.generateCRL(inStream);
+
+        Collection<X509CRL> crls = new ArrayList<X509CRL>();
+        crls.add(crl);
+
+        ValidateXMLSignature.validateCertificate(doc, anchors, crls);
+
     }
-    
+
     private static X509Info getX509Info() {
 
         InputStream is = MetadataUtilsTest.class
