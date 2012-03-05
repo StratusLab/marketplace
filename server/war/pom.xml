@@ -123,6 +123,9 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<configuration>
 					<war>${basedir}/target/${project.artifactId}-${project.version}.war</war>
+                                        <webApp>
+                                          <extraClasspath>${basedir}/target/altstyle</extraClasspath>
+                                        </webApp>
 
 					<systemProperties>
 

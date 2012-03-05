@@ -35,7 +35,8 @@ public enum Parameter {
         @Override
         public void validate(String value) {
             super.validate(value);
-            if (!("memory".equals(value) || "mysql".equals(value) || "postgres".equals(value))) {
+            if (!("memory".equals(value) || "mysql".equals(value) || "postgres"
+                    .equals(value))) {
                 throw new IllegalArgumentException(getKey()
                         + " must be 'memory', 'mysql' or 'postgres'");
             }
@@ -55,15 +56,15 @@ public enum Parameter {
         }
     },
 
-    ENDORSER_REMINDER(false, "false", "Flag to determine if email reminder " +
-    		"should be sent to endorsers periodically.") {
+    ENDORSER_REMINDER(false, "false", "Flag to determine if email reminder "
+            + "should be sent to endorsers periodically.") {
         @Override
         public void validate(String value) {
             super.validate(value);
             isBoolean(value);
         }
     },
-    
+
     PENDING_DIR(true, "/var/lib/stratuslab/pending",
             "Directory for pending (unconfirmed) entries.") {
         @Override
@@ -168,41 +169,59 @@ public enum Parameter {
             }
         }
     },
-    
+
     WHITELIST_ENABLED(false, "false", "Enable endorser whitelist.") {
-    	@Override
-    	public void validate(String value) {
-    		super.validate(value);
-    		isBoolean(value);
-    	}
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            isBoolean(value);
+        }
     },
-    
-    WHITELIST_LOCATION(false, "/etc/stratuslab/marketplace.whitelist", "Endorser whitelist location.") {
-    	@Override
-    	public void validate(String value) {
-    		super.validate(value);
-    	}
+
+    WHITELIST_LOCATION(false, "/etc/stratuslab/marketplace.whitelist",
+            "Endorser whitelist location.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+        }
     },
-    
-    WHITELIST_TRUSTSTORE(false, "/etc/stratuslab/marketplace.truststore", "Marketplace truststore location.") {
-    	@Override
-    	public void validate(String value) {
-    		super.validate(value);
-    	}
+
+    WHITELIST_TRUSTSTORE(false, "/etc/stratuslab/marketplace.truststore",
+            "Marketplace truststore location.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+        }
     },
-    
-    WHITELIST_CRL(false, "/etc/stratuslab/marketplace.crl", "File containing list of CRLs.") {
-    	@Override
-    	public void validate(String value) {
-    		super.validate(value);
-    	}
+
+    WHITELIST_CRL(false, "/etc/stratuslab/marketplace.crl",
+            "File containing list of CRLs.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+        }
     },
-    
+
     WHITELIST_PASSWORD(false, "Truststore password.") {
-    	@Override
-    	public void validate(String value) {
-    		super.validate(value);
-    	}
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+        }
+    },
+
+    STYLE_PATH(true, "/eu/stratuslab/style/css/",
+            "Path for CSS and style information.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+        }
+    },
+
+    JS_PATH(true, "/eu/stratuslab/style/js/", "Path for JavaScript files.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+        }
     };
 
     private final String key;

@@ -20,9 +20,9 @@
 package eu.stratuslab.marketplace.server;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 
 import java.io.File;
 import java.util.Map;
@@ -41,6 +41,7 @@ import org.restlet.Response;
 import org.restlet.Restlet;
 import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
+import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.ContextTemplateLoader;
 import org.restlet.ext.freemarker.TemplateRepresentation;
@@ -53,6 +54,7 @@ import org.restlet.routing.TemplateRoute;
 import org.restlet.service.StatusService;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.cfg.Parameter;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
@@ -62,29 +64,29 @@ import eu.stratuslab.marketplace.server.resources.MDatumResource;
 import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
-import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
-import eu.stratuslab.marketplace.server.utils.Reminder;
-
+import eu.stratuslab.marketplace.server.store.RdfStore;
 import eu.stratuslab.marketplace.server.store.RdfStoreFactory;
 import eu.stratuslab.marketplace.server.store.RdfStoreFactoryImpl;
-import eu.stratuslab.marketplace.server.store.RdfStore;
+import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
+import eu.stratuslab.marketplace.server.utils.Reminder;
 
 public class MarketPlaceApplication extends Application {
 
     private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+    private final ScheduledExecutorService scheduler = Executors
+            .newScheduledThreadPool(1);
+
     private ScheduledFuture<?> reminderHandle;
-    
+
     private Reminder reminder;
-    
+
     private RdfStore store = null;
     private String dataDir = null;
-    
+
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
-	private EndorserWhitelist whitelist;
+    private EndorserWhitelist whitelist;
 
     public MarketPlaceApplication() {
         String storeType = Configuration.getParameterValue(STORE_TYPE);
@@ -92,48 +94,53 @@ public class MarketPlaceApplication extends Application {
     }
 
     public MarketPlaceApplication(String storeType) {
-    	init(storeType);
+        init(storeType);
     }
-    
-    private void init(String storeType){
-    	setName("StratusLab Marketplace");
+
+    private void init(String storeType) {
+        setName("StratusLab Marketplace");
         setDescription("Marketplace for StratusLab images");
         setOwner("StratusLab");
         setAuthor("Stuart Kenny");
-        
-        getMetadataService().addExtension("multipart", MediaType.MULTIPART_FORM_DATA, false);
-        getMetadataService().addExtension("www_form", MediaType.APPLICATION_WWW_FORM, false);
-        getMetadataService().addExtension("application_rdf", MediaType.APPLICATION_RDF_XML, true);
-        getMetadataService().addExtension("application_xml", MediaType.APPLICATION_XML, false);
-        
+
+        getMetadataService().addExtension("multipart",
+                MediaType.MULTIPART_FORM_DATA, false);
+        getMetadataService().addExtension("www_form",
+                MediaType.APPLICATION_WWW_FORM, false);
+        getMetadataService().addExtension("application_rdf",
+                MediaType.APPLICATION_RDF_XML, true);
+        getMetadataService().addExtension("application_xml",
+                MediaType.APPLICATION_XML, false);
+
         setStatusService(new MarketPlaceStatusService());
-                
+
         getTunnelService().setUserAgentTunnel(true);
-               
+
         dataDir = Configuration.getParameterValue(DATA_DIR);
         createIfNotExists(dataDir);
         createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
-   
+
         this.whitelist = new EndorserWhitelist();
-                
+
         RdfStoreFactory factory = new RdfStoreFactoryImpl();
-        store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER, storeType);
+        store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
+                storeType);
         store.initialize();
-       
+
         final Runnable remind = new Runnable() {
-        	  public void run() {
-        		  remind();
-        	  }
-          };
-          
-          this.reminder = new Reminder(this);
-          if(Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)){
-        	  reminderHandle = 
-        		  scheduler.scheduleWithFixedDelay(remind, 30, 30, TimeUnit.DAYS);
-          }
-          
-   }
-    
+            public void run() {
+                remind();
+            }
+        };
+
+        this.reminder = new Reminder(this);
+        if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
+            reminderHandle = scheduler.scheduleWithFixedDelay(remind, 30, 30,
+                    TimeUnit.DAYS);
+        }
+
+    }
+
     /**
      * Creates a root Restlet that will receive all incoming calls.
      */
@@ -141,11 +148,11 @@ public class MarketPlaceApplication extends Application {
     public Restlet createInboundRoot() {
 
         Context context = getContext();
-        
+
         // Create the FreeMarker configuration.
         freeMarkerConfiguration = MarketPlaceApplication
                 .createFreeMarkerConfig(context);
-        
+
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
 
@@ -161,7 +168,7 @@ public class MarketPlaceApplication extends Application {
         router.attach("/metadata/{identifier}/{email}/{date}",
                 MDatumResource.class);
         router.attach("/metadata/{identifier}/{email}/{date}/",
-        		MDatumResource.class);
+                MDatumResource.class);
 
         // Defines a route for the resource "endorsers"
         router.attach("/endorsers", EndorsersResource.class);
@@ -169,7 +176,7 @@ public class MarketPlaceApplication extends Application {
 
         // Defines a route for the resource "endorser"
         router.attach("/endorsers/{email}", EndorserResource.class);
-	    router.attach("/endorsers/{email}/", EndorserResource.class);
+        router.attach("/endorsers/{email}/", EndorserResource.class);
 
         // Defines a route for queries
         router.attach("/query", QueryResource.class);
@@ -182,62 +189,68 @@ public class MarketPlaceApplication extends Application {
         // Define a route for the about page
         router.attach("/about", AboutResource.class);
         router.attach("/about/", AboutResource.class);
-        
-       // Defines a router for actions
+
+        // Defines a router for actions
         TemplateRoute route;
         route = router.attach("/action/", new ActionRouter());
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
-		String staticContentLocation = System.getProperty(
-				"static.content.location", "war://");
-        
-        Directory cssDir = new Directory(getContext(), staticContentLocation + "/css");
-        cssDir.setNegotiatingContent(false);
-        cssDir.setIndexName("index.html");
-        router.attach("/css/", cssDir);
-                           
-        Directory jsDir = new Directory(getContext(), staticContentLocation + "/js");
-        jsDir.setNegotiatingContent(false);
-        jsDir.setIndexName("index.html");
-        router.attach("/js/", jsDir);
-        
+        attachDirectory(router, getContext(), "/css/",
+                Configuration.getParameterValue(Parameter.STYLE_PATH));
+
+        attachDirectory(router, getContext(), "/js/",
+                Configuration.getParameterValue(Parameter.JS_PATH));
+
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
-    
+
         return router;
     }
-      
-    private void remind(){
-    	this.reminder.remind();
+
+    private static void attachDirectory(Router router, Context context,
+            String attachmentPoint, String path) {
+
+        Reference styleRef = LocalReference.createClapReference(
+                LocalReference.CLAP_THREAD, path);
+
+        Directory dir = new Directory(context, styleRef);
+        dir.setNegotiatingContent(false);
+        dir.setIndexName("index.html");
+        router.attach(attachmentPoint, dir);
+
     }
-    
+
+    private void remind() {
+        this.reminder.remind();
+    }
+
     @Override
     public void stop() {
-       store.shutdown();
-    	
-       if(reminderHandle != null){
-    	   reminderHandle.cancel(true);
-       }
-       
-       this.whitelist.stop();
+        store.shutdown();
+
+        if (reminderHandle != null) {
+            reminderHandle.cancel(true);
+        }
+
+        this.whitelist.stop();
     }
 
     public RdfStore getMetadataStore() {
-    	return this.store;
+        return this.store;
     }
 
     public String getDataDir() {
         return this.dataDir;
     }
 
-    public EndorserWhitelist getWhitelist(){
-    	return this.whitelist;
+    public EndorserWhitelist getWhitelist() {
+        return this.whitelist;
     }
-    
+
     public freemarker.template.Configuration getFreeMarkerConfiguration() {
         return freeMarkerConfiguration;
     }
-       
+
     private static freemarker.template.Configuration createFreeMarkerConfig(
             Context context) {
 
@@ -246,75 +259,78 @@ public class MarketPlaceApplication extends Application {
 
         LocalReference fmBaseRef = LocalReference
                 .createClapReference("/freemarker/");
-        
+
         cfg.setTemplateLoader(new ContextTemplateLoader(context, fmBaseRef));
 
         return cfg;
     }
-    
-    private void createIfNotExists(String path){
-    	File dir = new File(path);
-        if(!dir.exists()){
-        	LOGGER.warning("directory does not exist: " + path);
-        	if(!dir.mkdirs()){
-        		LOGGER.severe("Unable to create directory: " + path);
-        	}
+
+    private void createIfNotExists(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            LOGGER.warning("directory does not exist: " + path);
+            if (!dir.mkdirs()) {
+                LOGGER.severe("Unable to create directory: " + path);
+            }
         }
     }
-    
+
     class MarketPlaceStatusService extends StatusService {
 
-    	public Representation getRepresentation(Status status, Request request,
+        public Representation getRepresentation(Status status, Request request,
                 Response response) {
 
-           if(request.getClientInfo().getAcceptedMediaTypes().get(0).
-    				getMetadata().equals(MediaType.TEXT_XML) || 
-    				request.getClientInfo().getAcceptedMediaTypes().get(0).
-    				getMetadata().equals(MediaType.APPLICATION_XML)) {
-        	   
-        	   Representation r = generateXmlErrorRepresentation(response.getStatus()
-                       .getDescription(), Integer.toString(response.getStatus().getCode()));
-        	   return r;
-    		} else if (request.getClientInfo().getAcceptedMediaTypes().get(0).
-    				getMetadata().equals(MediaType.APPLICATION_JSON)) {
-    			Representation r = generateJsonErrorRepresentation(response.getStatus()
-                        .getDescription(), Integer.toString(response.getStatus().getCode()));
-         	   return r;	
-    		} else {
-    			// Create the data model
-    			Map<String, String> dataModel = new TreeMap<String, String>();
-    			dataModel.put("baseurl", request.getRootRef().toString());
-    			dataModel.put("statusName", response.getStatus().getName());
-    			dataModel.put("statusDescription", response.getStatus()
-    					.getDescription());
-    			dataModel.put("title", response.getStatus().getName());
+            if (request.getClientInfo().getAcceptedMediaTypes().get(0)
+                    .getMetadata().equals(MediaType.TEXT_XML)
+                    || request.getClientInfo().getAcceptedMediaTypes().get(0)
+                            .getMetadata().equals(MediaType.APPLICATION_XML)) {
 
-    			freemarker.template.Configuration freeMarkerConfig = freeMarkerConfiguration;
+                Representation r = generateXmlErrorRepresentation(response
+                        .getStatus().getDescription(),
+                        Integer.toString(response.getStatus().getCode()));
+                return r;
+            } else if (request.getClientInfo().getAcceptedMediaTypes().get(0)
+                    .getMetadata().equals(MediaType.APPLICATION_JSON)) {
+                Representation r = generateJsonErrorRepresentation(response
+                        .getStatus().getDescription(),
+                        Integer.toString(response.getStatus().getCode()));
+                return r;
+            } else {
+                // Create the data model
+                Map<String, String> dataModel = new TreeMap<String, String>();
+                dataModel.put("baseurl", request.getRootRef().toString());
+                dataModel.put("statusName", response.getStatus().getName());
+                dataModel.put("statusDescription", response.getStatus()
+                        .getDescription());
+                dataModel.put("title", response.getStatus().getName());
 
-    			return new TemplateRepresentation("status.ftl", freeMarkerConfig, dataModel,
-    					MediaType.TEXT_HTML);
-    		}
+                freemarker.template.Configuration freeMarkerConfig = freeMarkerConfiguration;
+
+                return new TemplateRepresentation("status.ftl",
+                        freeMarkerConfig, dataModel, MediaType.TEXT_HTML);
+            }
         }
-    	    	    	
-    	protected Representation generateXmlErrorRepresentation(String errorMessage,
-                String errorCode) {
+
+        protected Representation generateXmlErrorRepresentation(
+                String errorMessage, String errorCode) {
             StringRepresentation result = new StringRepresentation(
-            		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
-                		"<error>" + errorMessage + "</error>"
-                		, MediaType.APPLICATION_XML);
-                
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+                            + "<error>" + errorMessage + "</error>",
+                    MediaType.APPLICATION_XML);
+
             return result;
         }
-    	
-        protected Representation generateJsonErrorRepresentation(String errorMessage,
-                String errorCode) {
-            StringRepresentation result = new StringRepresentation(
-            		"{\"" + errorCode + "\" : " + JSONValue.toJSONString(errorMessage) + "}"
-                		, MediaType.APPLICATION_JSON);
-                
+
+        protected Representation generateJsonErrorRepresentation(
+                String errorMessage, String errorCode) {
+            StringRepresentation result = new StringRepresentation("{\""
+                    + errorCode + "\" : "
+                    + JSONValue.toJSONString(errorMessage) + "}",
+                    MediaType.APPLICATION_JSON);
+
             return result;
         }
-        
+
     }
 
 }
