@@ -1,25 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-  <classpathentry kind="src" path="src/test/java" output="target/test-classes" including="**/*.java"/>
-  <classpathentry kind="src" path="src/test/resources" output="target/test-classes" excluding="**/*.java"/>
-  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
-  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
-  <classpathentry kind="output" path="target/classes"/>
-  <classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/javax/mail/mail/1.4.1/mail-1.4.1.jar" sourcepath="M2_REPO/javax/mail/mail/1.4.1/mail-1.4.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-collections/2.8.0/aduna-commons-collections-2.8.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-collections/2.8.0/aduna-commons-collections-2.8.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-concurrent/2.7.0/aduna-commons-concurrent-2.7.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-concurrent/2.7.0/aduna-commons-concurrent-2.7.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-i18n/1.4.0/aduna-commons-i18n-1.4.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-i18n/1.4.0/aduna-commons-i18n-1.4.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-io/2.10.0/aduna-commons-io-2.10.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-io/2.10.0/aduna-commons-io-2.10.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-lang/2.9.0/aduna-commons-lang-2.9.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-lang/2.9.0/aduna-commons-lang-2.9.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-net/2.7.0/aduna-commons-net-2.7.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-net/2.7.0/aduna-commons-net-2.7.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-text/2.7.0/aduna-commons-text-2.7.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-text/2.7.0/aduna-commons-text-2.7.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/info/aduna/commons/aduna-commons-xml/2.7.0/aduna-commons-xml-2.7.0.jar" sourcepath="M2_REPO/info/aduna/commons/aduna-commons-xml/2.7.0/aduna-commons-xml-2.7.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46.jar"/>
-  <classpathentry kind="var" path="M2_REPO/junit/junit/4.8.2/junit-4.8.2.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-model/2.5.1/sesame-model-2.5.1.jar" sourcepath="M2_REPO/org/openrdf/sesame/sesame-model/2.5.1/sesame-model-2.5.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-rio-api/2.5.1/sesame-rio-api-2.5.1.jar" sourcepath="M2_REPO/org/openrdf/sesame/sesame-rio-api/2.5.1/sesame-rio-api-2.5.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/openrdf/sesame/sesame-rio-rdfxml/2.5.1/sesame-rio-rdfxml-2.5.1.jar" sourcepath="M2_REPO/org/openrdf/sesame/sesame-rio-rdfxml/2.5.1/sesame-rio-rdfxml-2.5.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.5.8/slf4j-api-1.5.8.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-simple/1.5.8/slf4j-simple-1.5.8.jar"/>
-  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
