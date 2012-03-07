@@ -11,6 +11,5 @@
 
   <link rel="shortcut icon" href="css/favicon.ico"/>
   <link rel="stylesheet" type="text/css" href="css/service.css"/>
-  <link rel="stylesheet" type="text/css" href="css/starratings.css"/>
 
 </head>
