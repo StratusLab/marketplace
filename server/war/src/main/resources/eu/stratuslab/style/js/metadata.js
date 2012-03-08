@@ -39,19 +39,19 @@ function buildHtmlDisplay( aData )
             header = aData[6];
         }
 
-        var display = "<table class=vmpanel>"
-                        + "<tr><td colspan=3><div id=header>" + header
+        var display = "<table class='vmpanel'>"
+                        + "<tr><td colspan='3'><div id='header'>" + header
                         + "</div></td><td></td><td></td></tr>"
-                        + "<tr><td></td><td></td><td rowspan=5><a href=" + aData[7]
-                        + "><img src=/css/download.png/></a></td></tr>"
-                        + "<tr><td><div id=detail>Endorser:</div></td>"
-                        + "<td><div id=detail>" + aData[4] + "</div></td></tr>"
-                        + "<tr><td><div id=detail>Identifier:</div></td>"
-                        + "<td><div id=detail>" + aData[6] + "</div></td></tr>"
-                        + "<tr><td><div id=detail>Created:</div></td>"
-                        + "<td><div id=detail>" + aData[5] + "</div></td></tr>" + "<tr></tr></div>"
-                        + "<tr><td colspan=3><div id=description>" + aData[8] + "</div></td></tr>"
-                        + "<tr><td><a href=/metadata/" + aData[6] + "/" + aData[4] + "/" + aData[5] + ">More...</a></td></tr>"
+                        + "<tr><td></td><td></td><td rowspan='5'><a href='" + aData[7]
+                        + "'><img src='/css/download.png'/></a></td></tr>"
+                        + "<tr><td><div id='detail'>Endorser:</div></td>"
+                        + "<td><div id='detail'>" + aData[4] + "</div></td></tr>"
+                        + "<tr><td><div id='detail'>Identifier:</div></td>"
+                        + "<td><div id='detail'>" + aData[6] + "</div></td></tr>"
+                        + "<tr><td><div id='detail'>Created:</div></td>"
+                        + "<td><div id='detail'>" + aData[5] + "</div></td></tr>" + "<tr></tr></div>"
+                        + "<tr><td colspan='3'><div id='description'>" + aData[8] + "</div></td></tr>"
+                        + "<tr><td><a href='/metadata/" + aData[6] + "/" + aData[4] + "/" + aData[5] + "'>More...</a></td></tr>"
                         + "</table>";
 
         return display;
