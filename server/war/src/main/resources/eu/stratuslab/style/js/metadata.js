@@ -220,9 +220,6 @@ $(document).ready(function() {
 		"sAjaxSource": window.location.href,
 		"bProcessing": true,
 		"fnServerData": fnDataTablesPipeline,
-                //"fnCreatedRow": function( nRow, aData, iDataIndex ) {
-                //                      $('td:eq(0)', nRow).html( displayHtml );
-                //                 },
 		"aoColumnDefs": [
 		                 { "bSortable": false, 
                                    "fnRender": function ( o, val ) {
@@ -274,6 +271,6 @@ $(document).ready(function() {
 			break;
 		}
 	});
-	
+
 	oTable.fnSetFilteringDelay();
 } );
