@@ -148,6 +148,7 @@
 		  <location>src/main/scripts</location>
 		  <includes>
 		    <include>generate-jetty-certificate.sh</include>
+                    <include>marketplace-sync.sh</include>
 		  </includes>
 		</source>
 	      </sources>
@@ -167,6 +168,7 @@
 		  </includes>
 		  <excludes>
                     <exclude>marketplace.cfg</exclude>
+                    <exclude>marketplace-sync.cfg</exclude>
 		    <exclude>etc/login/*</exclude>
 		    <exclude>etc/overrides/*</exclude>
 		  </excludes>
@@ -224,6 +226,7 @@
                   <location>src/main/jetty-config</location>
                   <includes>
                     <include>marketplace.cfg</include>
+                    <include>marketplace-sync.cfg</include>
                   </includes>
                 </source>
               </sources>
