@@ -10,6 +10,6 @@ if [ -f $CONFIG ]; then
     . $CONFIG
 fi
 
-/usr/bin/rsync -avz stkenny@$MASTER:/var/lib/stratuslab/* $DATADIR | grep .xml |sort > $DATADIR/sync
+/usr/bin/rsync -avz $USER@$MASTER:/var/lib/stratuslab/* $DATADIR | grep .xml |sort > $DATADIR/sync
 
 curl $SLAVE/sync
