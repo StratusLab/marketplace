@@ -58,9 +58,11 @@ public class SparqlUtils {
     	"FILTER (?created > \"%s\") }";
     	
 	private static final String FILTER_TEMPLATE = " FILTER (?%s = \"%s\") . ";
+	
 	private static final String LIMIT_TEMPLATE = " ORDER BY %s(?%s)" +
     		         " LIMIT %s" +
     		         " OFFSET %s";
+	
 	private static final String REGEX_TEMPLATE = "regex(?%s, \"%s\", \"i\") ";
 	
 	private static final String LATEST_FILTER_TEMPLATE = " OPTIONAL { "
@@ -81,7 +83,6 @@ public class SparqlUtils {
         + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os-arch> ?arch . }"
         + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
         + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
-        + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated . }"
         + " ?x <http://purl.org/dc/terms/valid> ?valid;"
         + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
         + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
@@ -92,6 +93,12 @@ public class SparqlUtils {
         
     public static final String SELECT_ALL = "SELECT ?identifier ?email ?created"
 		+ " ?os ?osversion ?arch ?location ?description";
+    
+    public static final String DEPRECATED_OFF = "FILTER (NOT EXISTS " +
+    		"{?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated}) ";
+    
+    public static final String DEPRECATED_ON = "FILTER (EXISTS " +
+    		"{?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated}) ";
     
 	public static String buildFilterEq(String arg, String value){
 		return String.format(FILTER_TEMPLATE, arg, value);

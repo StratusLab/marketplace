@@ -22,6 +22,7 @@ package eu.stratuslab.marketplace.server.resources;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.METADATA_MAX_BYTES;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MARKETPLACE_TYPE;
 import static org.restlet.data.MediaType.TEXT_PLAIN;
 
 import java.io.File;
@@ -99,6 +100,8 @@ public class MDataResource extends BaseResource {
                     "post with null entity");
         }
 
+		isUploadPermitted();
+		
         File upload = processMultipartForm();
        
         return acceptMetadataEntry(upload);
@@ -111,11 +114,22 @@ public class MDataResource extends BaseResource {
                     "post with null entity");
         }
 
+		isUploadPermitted();
+		
         File upload = writeContentsToDisk(entity);
         
         return acceptMetadataEntry(upload);
     }
 
+	private void isUploadPermitted(){
+		String type = Configuration.getParameterValue(MARKETPLACE_TYPE);
+		
+		if(type != null && type.equalsIgnoreCase("replica")){
+			throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
+            "read-only repository");
+		}
+	}
+	
 	private Representation acceptMetadataEntry(File upload){
 		boolean validateEmail = Configuration
 		.getParameterValueAsBoolean(VALIDATE_EMAIL);
@@ -392,7 +406,6 @@ public class MDataResource extends BaseResource {
      */
     @Get("json")
     public Representation toJSON() {
-    	
     	String deprecatedFlag = getDeprecatedFlag();
     	            	
     	List<Map<String, String>> metadata = null;
@@ -501,12 +514,8 @@ public class MDataResource extends BaseResource {
                         .append(SparqlUtils.getLatestFilter(getCurrentDate()));
         }
                      
-        if (deprecatedValue.equals("off")){
-        	filter.append(" FILTER (!bound (?deprecated))");
-        } else if (deprecatedValue.equals("only")){
-        	filter.append(" FILTER (bound (?deprecated))");
-        }
-                
+        appendDeprecated(deprecatedValue, filter);
+                        
         filter.append(searching);
         filter.append(" }");
 
@@ -534,7 +543,15 @@ public class MDataResource extends BaseResource {
         }
     }
 
-    private void addQueryParametersToRequest() {
+    private void appendDeprecated(String deprecated, StringBuilder filter) {
+		if (deprecated.equals("off")){
+        	filter.append(SparqlUtils.DEPRECATED_OFF);
+        } else if (deprecated.equals("only")){
+        	filter.append(SparqlUtils.DEPRECATED_ON);
+        }
+	}
+
+	private void addQueryParametersToRequest() {
     	Map<String, String> formValues = getRequestQueryValues();
     	    	    	
     	//Create filter from request parameters.    	    	 	
@@ -705,11 +722,8 @@ public class MDataResource extends BaseResource {
                 + SparqlUtils.WHERE_BLOCK
                 + SparqlUtils.getLatestFilter(getCurrentDate()));
     	
-    	if (deprecatedFlag.equals("off")){
-        	query.append(" FILTER (!bound (?deprecated))");
-        } else if (deprecatedFlag.equals("only")){
-        	query.append(" FILTER (bound (?deprecated))");
-        }
+    	appendDeprecated(deprecatedFlag, query);
+    	
     	query.append(" }");
     	
     	String iTotalRecords = "0";
@@ -718,7 +732,8 @@ public class MDataResource extends BaseResource {
     		List<Map<String, String>> results = query(query.toString());
         	
     		if(results.size() > 0){
-    			iTotalRecords = (String)((Map<String, String>)results.remove(0)).get("count");
+    			iTotalRecords = (String)(
+    					(Map<String, String>)results.remove(0)).get("count");
     		}
     	} catch(MarketplaceException e){
     		LOGGER.severe(e.getMessage());

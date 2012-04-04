@@ -206,7 +206,7 @@ public abstract class BaseResource extends ServerResource {
         String endorser = coordinates[1];
         String created = coordinates[2];
 
-        String ref = getRequest().getResourceRef().toString();
+        String ref = getRequest().getRootRef().toString() + "/metadata";
         String iri = ref + "/" + identifier + "/" + endorser + "/" + created;
               
         String rdfEntry = createRdfEntry(datumDoc);

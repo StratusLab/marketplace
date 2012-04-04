@@ -149,6 +149,13 @@ public enum Parameter {
         }
     },
 
+    MARKETPLACE_TYPE(false, "Type of Marketplace instance.") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    	}
+    },
+    
     SUPPORT_EMAIL(true, "Email address for support requests.") {
         @Override
         public void validate(String value) {
@@ -201,14 +208,14 @@ public enum Parameter {
             super.validate(value);
         }
     },
-
+    
     WHITELIST_PASSWORD(false, "Truststore password.") {
         @Override
         public void validate(String value) {
             super.validate(value);
         }
     },
-
+    
     STYLE_PATH(true, "/eu/stratuslab/style/css/",
             "Path for CSS and style information.") {
         @Override
