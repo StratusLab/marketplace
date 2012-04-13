@@ -21,9 +21,11 @@ package eu.stratuslab.marketplace.server.store;
 
 public class RdfStoreFactoryImpl implements RdfStoreFactory {
 	public RdfStore createRdfStore(String provider, String type){
-		//if(provider.equals("sesame")){
+		if(type.equals("remote")){
+			return new RemoteStore();
+		} else {
 			return new SesameRdfStore(type);
-		//}
+		}
 	}
 
 }

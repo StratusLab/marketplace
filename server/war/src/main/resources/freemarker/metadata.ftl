@@ -14,13 +14,13 @@
 
 <br/>
 
-<p>View:
+<p>Deprecated entries:
 <a HREF="/metadata">
-All</a> |
+Off</a> |
 <a href="/metadata?deprecated">
-With deprecated</a> |
+On</a> |
 <a href="/metadata?deprecated=only">
-Deprecated only</a>
+Only</a>
 </p>
 
 <form>

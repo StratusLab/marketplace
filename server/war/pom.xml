@@ -37,6 +37,10 @@
 			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet.ext.fileupload</artifactId>
 		</dependency>
+                <dependency>
+                     <groupId>org.restlet.jee</groupId>
+                     <artifactId>org.restlet.ext.httpclient</artifactId>
+                 </dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-sail</artifactId>
@@ -90,7 +94,6 @@
                 <dependency>
                         <groupId>org.restlet.jee</groupId>
                         <artifactId>org.restlet.ext.ssl</artifactId>
-                        <scope>runtime</scope>
                 </dependency>
 		<dependency>
 			<groupId>mysql</groupId>

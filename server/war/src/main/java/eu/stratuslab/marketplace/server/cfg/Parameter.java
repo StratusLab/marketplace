@@ -156,6 +156,19 @@ public enum Parameter {
     	}
     },
     
+    MASTER_URL(true, "URL of the master instance.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            try {
+                new URL(value);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("invalid master URL: "
+                        + value);
+            }
+        }
+    },
+    
     SUPPORT_EMAIL(true, "Email address for support requests.") {
         @Override
         public void validate(String value) {

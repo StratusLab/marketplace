@@ -23,6 +23,7 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.MARKETPLACE_TYPE;
 
 import java.io.File;
 import java.util.Map;
@@ -43,6 +44,7 @@ import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
+import org.restlet.engine.Engine;
 import org.restlet.ext.freemarker.ContextTemplateLoader;
 import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
@@ -83,11 +85,15 @@ public class MarketPlaceApplication extends Application {
     private Reminder reminder;
 
     private RdfStore store = null;
+    private RdfStore remoteStore = null;
+    
     private String dataDir = null;
 
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
     private EndorserWhitelist whitelist;
+
+	private boolean federation;
 
     public MarketPlaceApplication() {
         String storeType = Configuration.getParameterValue(STORE_TYPE);
@@ -128,6 +134,17 @@ public class MarketPlaceApplication extends Application {
                 storeType);
         store.initialize();
 
+        String marketplaceType = Configuration.getParameterValue(MARKETPLACE_TYPE);
+        
+        if(marketplaceType != null && marketplaceType.equals("private")){
+        	federation = true;
+        	remoteStore = factory.createRdfStore("sesame", "remote");
+        	
+        	Engine.getInstance().getRegisteredClients().clear();
+        	Engine.getInstance().getRegisteredClients().add(
+        			new org.restlet.ext.httpclient.HttpClientHelper(null));
+        }
+        
         final Runnable remind = new Runnable() {
             public void run() {
                 remind();
@@ -241,17 +258,25 @@ public class MarketPlaceApplication extends Application {
     }
 
     public RdfStore getMetadataStore() {
-        return this.store;
+        return store;
     }
 
+    public RdfStore getRemoteStore() {
+        return remoteStore;
+    }
+    
     public String getDataDir() {
-        return this.dataDir;
+        return dataDir;
     }
 
     public EndorserWhitelist getWhitelist() {
-        return this.whitelist;
+        return whitelist;
     }
 
+    public boolean isFederated(){
+    	return federation;
+    }
+    
     public freemarker.template.Configuration getFreeMarkerConfiguration() {
         return freeMarkerConfiguration;
     }
@@ -304,10 +329,10 @@ public class MarketPlaceApplication extends Application {
                 // Create the data model
                 Map<String, String> dataModel = new TreeMap<String, String>();
                 dataModel.put("baseurl", request.getRootRef().toString());
-                dataModel.put("statusName", response.getStatus().getName());
+                dataModel.put("statusName", response.getStatus().getReasonPhrase());
                 dataModel.put("statusDescription", response.getStatus()
                         .getDescription());
-                dataModel.put("title", response.getStatus().getName());
+                dataModel.put("title", response.getStatus().getReasonPhrase());
 
                 freemarker.template.Configuration freeMarkerConfig = freeMarkerConfiguration;
 

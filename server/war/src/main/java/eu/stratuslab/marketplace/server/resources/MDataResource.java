@@ -168,7 +168,7 @@ public class MDataResource extends BaseResource {
 			&& getRequest().getClientInfo().getAcceptedMediaTypes()
 				.get(0).getMetadata().equals(MediaType.TEXT_HTML)) {
 			Map<String, Object> dataModel = createInfoStructure(title);
-			dataModel.put("statusName", getResponse().getStatus().getName());
+			dataModel.put("statusName", getResponse().getStatus().getReasonPhrase());
 			dataModel.put("statusDescription", message);
 			status = createTemplateRepresentation("status.ftl", dataModel,
 				MediaType.TEXT_HTML);
@@ -385,8 +385,7 @@ public class MDataResource extends BaseResource {
 
 		output.append("<metadata>");
 		for (String path : pathsToMetadata) {
-			String datum = getMetadatum(getDataDir() + File.separatorChar + path
-					+ ".xml");
+			String datum = getMetadatum(path);
 			if (datum != null) {
 				if (datum.startsWith(XML_HEADER)) {
 					datum = datum.substring(XML_HEADER.length());
@@ -422,12 +421,15 @@ public class MDataResource extends BaseResource {
     	}
     	
 		String iTotalDisplayRecords = "0";
+		String iTotalRecords = "0";
 		if (metadata.size() > 0) {
-			iTotalDisplayRecords = (String) ((Map<String, String>) metadata
-					.remove(0)).get("count");
+			Map<String, String> recordCounts = (Map<String, String>) metadata
+					.remove(0);			
+			iTotalDisplayRecords = recordCounts.get("iTotalDisplayRecords");
+			iTotalRecords = recordCounts.get("iTotalRecords");	
 		}
 
-		Map<String, Object> json = buildJsonHeader(getTotalRecords(deprecatedFlag),
+		Map<String, Object> json = buildJsonHeader(iTotalRecords,
 				iTotalDisplayRecords, msg);
 		LinkedList<LinkedList<String>> jsonResults = buildJsonResults(metadata);
 		
@@ -438,7 +440,8 @@ public class MDataResource extends BaseResource {
 				MediaType.APPLICATION_JSON);
     }
             
-    private Map<String, Object> buildJsonHeader(long iTotalRecords, String iTotalDisplayRecords, String msg){
+    private Map<String, Object> buildJsonHeader(String iTotalRecords, 
+    		String iTotalDisplayRecords, String msg){
     	Map<String, Object> json = new LinkedHashMap<String, Object>();
         json.put("sEcho", new Integer(getRequestQueryValues().get("sEcho")));
         json.put("iTotalRecords", Long.valueOf(iTotalRecords));
@@ -485,12 +488,15 @@ public class MDataResource extends BaseResource {
     	
     	addQueryParametersToRequest();
     	
-    	String filterPredicate = buildQueryFilter();
+    	Map<String, String> recordCounts = new HashMap<String, String>();
+    	recordCounts.put("iTotalRecords", getTotalRecords(deprecatedValue));
+    	    	
+    	String filter = buildFilterFromUrlQuery();
     	
-    	if(filterPredicate.length() > 0){
+    	if(filter.length() > 0){
     		hasFilter = true;
     		
-    		if(filterPredicate.contains("created")){
+    		if(filter.contains("created")){
     			hasDate = true;
     		}
     	}
@@ -503,27 +509,28 @@ public class MDataResource extends BaseResource {
     	StringBuilder dataQuery = new StringBuilder(SparqlUtils.SELECT_ALL);
         StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
                 
-        StringBuilder filter = new StringBuilder(
+        StringBuilder wherePredicate = new StringBuilder(
                     " WHERE {"
                     + SparqlUtils.WHERE_BLOCK);
 
-        filter.append(filterPredicate);
+        wherePredicate.append(filter);
 
         if (!hasDate) {
-                filter
+                wherePredicate
                         .append(SparqlUtils.getLatestFilter(getCurrentDate()));
         }
                      
-        appendDeprecated(deprecatedValue, filter);
+        appendDeprecated(deprecatedValue, wherePredicate);
                         
-        filter.append(searching);
-        filter.append(" }");
+        wherePredicate.append(searching);
+        wherePredicate.append(" }");
 
         //Get the total number of unfiltered results
-        countQuery.append(filter);
-        Map<String, String> count = getTotalMetadataEntries(countQuery.toString());
+        countQuery.append(wherePredicate);
+        
+        recordCounts.put("iTotalDisplayRecords", getTotalDisplayRecords(countQuery.toString()));       
                 
-        dataQuery.append(filter);
+        dataQuery.append(wherePredicate);
         dataQuery.append(paging);
         
         //Get the results
@@ -538,7 +545,7 @@ public class MDataResource extends BaseResource {
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
         } else {
-        	results.add(0, count);
+        	results.add(0, recordCounts);
         	return results;
         }
     }
@@ -566,23 +573,23 @@ public class MDataResource extends BaseResource {
     	}   
     }
     
-    private String buildQueryFilter(){
-    	StringBuilder filterPredicate = new StringBuilder();
+    private String buildFilterFromUrlQuery(){
+    	StringBuilder filter = new StringBuilder();
     	
     	for (Map.Entry<String, Object> arg : getRequest().getAttributes().entrySet()) {
     		String key = arg.getKey();
     		if (!key.startsWith("org.restlet")) {
     			switch (classifyArg((String) arg.getValue())) {
     			case ARG_EMAIL:
-    				filterPredicate.append(
+    				filter.append(
     						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
     				break;
     			case ARG_DATE:
-    				filterPredicate.append(
+    				filter.append(
     						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
     				break;
     			case ARG_OTHER:
-    				filterPredicate.append(
+    				filter.append(
     						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
     				break;
     			default:
@@ -591,7 +598,7 @@ public class MDataResource extends BaseResource {
     		}
     	}
     	
-    	return filterPredicate.toString();
+    	return filter.toString();
     }
     
     private int classifyArg(String arg) {
@@ -680,23 +687,6 @@ public class MDataResource extends BaseResource {
         return deprecatedFlag;
     }
     
-    private Map<String, String> getTotalMetadataEntries(String query){
-    	Map<String, String> count = new HashMap<String, String>();
-        count.put("count", "0");
-        
-        try {
-        	 List<Map<String, String>> countResult = query(query);
-             
-        	 if(countResult.size() > 0){
-        		 count = (Map<String, String>)countResult.get(0);
-        	 }
-        } catch(MarketplaceException e){
-       		LOGGER.severe(e.getMessage());
-        }
-        
-        return count;
-    }
-    
     /*
      * Gets the value of the deprecated flag from the query
      * 
@@ -708,6 +698,22 @@ public class MDataResource extends BaseResource {
     	return (deprecated == null) ? "on" : deprecated;
     }
     
+    private String getTotalDisplayRecords(String query){
+    	String iTotalDisplayRecords = "0";
+        
+        try {
+        	 List<Map<String, String>> countResult = query(query);
+             
+        	 if(countResult.size() > 0){
+        		 iTotalDisplayRecords = (String)countResult.get(0).get("count");
+        	 }
+        } catch(MarketplaceException e){
+       		LOGGER.severe(e.getMessage());
+        }
+        
+        return iTotalDisplayRecords;
+    }
+    
     /*
      * Gets the total number of unfiltered records
      * 
@@ -715,7 +721,7 @@ public class MDataResource extends BaseResource {
      * 
      * @return the total number of records
      */
-    private long getTotalRecords(String deprecatedFlag){
+    private String getTotalRecords(String deprecatedFlag){
     	StringBuilder query = new StringBuilder(
         		SparqlUtils.SELECT_COUNT
                 + " WHERE {"
@@ -735,11 +741,12 @@ public class MDataResource extends BaseResource {
     			iTotalRecords = (String)(
     					(Map<String, String>)results.remove(0)).get("count");
     		}
+  
     	} catch(MarketplaceException e){
     		LOGGER.severe(e.getMessage());
     	}
     	
-    	return Long.parseLong(iTotalRecords);
+    	return iTotalRecords;
     }
   
 }

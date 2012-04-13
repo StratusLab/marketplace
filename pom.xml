@@ -25,6 +25,8 @@ metadata.
   <properties>
     <jetty.version>7.5.4.v20111024</jetty.version>
 
+    <restlet.version>2.1-RC4</restlet.version>
+
     <package.os>fc14</package.os>
     <nexus.release.repository.name>fedora-14-releases</nexus.release.repository.name>
     <nexus.snapshot.repository.name>fedora-14-snapshots</nexus.snapshot.repository.name>
@@ -155,32 +157,37 @@ metadata.
       <dependency>  
         <groupId>org.restlet.jee</groupId>  
         <artifactId>org.restlet</artifactId>  
-        <version>2.1-M4</version>  
+        <version>${restlet.version}</version>  
       </dependency>  
       <dependency>  
         <groupId>org.restlet.jee</groupId>  
         <artifactId>org.restlet.ext.xml</artifactId>  
-        <version>2.1-M4</version>  
+        <version>${restlet.version}</version>  
       </dependency>
       <dependency>
         <groupId>org.restlet.jee</groupId>
         <artifactId>org.restlet.ext.servlet</artifactId>
-        <version>2.1-M4</version>
+        <version>${restlet.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.restlet.jee</groupId>
+        <artifactId>org.restlet.ext.httpclient</artifactId>
+        <version>${restlet.version}</version>
       </dependency>
       <dependency>
         <groupId>org.restlet.jee</groupId>
         <artifactId>org.restlet.ext.freemarker</artifactId>
-        <version>2.1-M4</version>
+        <version>${restlet.version}</version>
       </dependency>
       <dependency>
         <groupId>org.restlet.jee</groupId>
         <artifactId>org.restlet.ext.fileupload</artifactId>
-        <version>2.1-M4</version>
+        <version>${restlet.version}</version>
       </dependency>
       <dependency>
         <groupId>org.restlet.jee</groupId>
         <artifactId>org.restlet.ext.ssl</artifactId>
-        <version>2.1-M4</version>
+        <version>${restlet.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>

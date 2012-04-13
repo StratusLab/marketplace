@@ -124,7 +124,6 @@ public class SesameRdfStore extends RdfStore {
 		}
 	}
 
-	@Override
 	public boolean store(String identifier, String entry) {
 		boolean success = false;
 		try {
@@ -151,6 +150,10 @@ public class SesameRdfStore extends RdfStore {
 	}
 
 	@Override
+	public String getRdfEntry(String uri) throws MarketplaceException {
+		return null;
+	}
+	
 	public List<Map<String, String>> getRdfEntriesAsMap(String query)
 			throws MarketplaceException {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
@@ -248,7 +251,6 @@ public class SesameRdfStore extends RdfStore {
 		return resultString;
 	}
 
-	@Override
 	public void remove(String identifier) {
 		try {
 			RepositoryConnection con = getMetadataStore().getConnection();
@@ -339,7 +341,6 @@ public class SesameRdfStore extends RdfStore {
 		return pgsqlStore;
 	}
 
-	@Override
 	public void shutdown() {
 		if (store != null) {
 			try {
