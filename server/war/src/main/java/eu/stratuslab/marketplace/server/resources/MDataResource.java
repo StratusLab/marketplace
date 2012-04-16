@@ -352,8 +352,8 @@ public class MDataResource extends BaseResource {
     	
     	String deprecatedFlag = getDeprecatedFlag();
     			
-    	List<Map<String, String>> metadata = getMetadata(deprecatedFlag);
-        metadata.remove(0);
+    	List<Map<String, String>> metadata = getFederatedMetadata(deprecatedFlag);
+    	metadata.remove(0);
     	
         List<String> pathsToMetadata = buildPathsToMetadata(metadata);
 
@@ -412,12 +412,12 @@ public class MDataResource extends BaseResource {
     	String msg = "no metadata matching query found";
     	
     	try {
-    		metadata = getMetadata(deprecatedFlag);
+    		metadata = getFederatedMetadata(deprecatedFlag);
     	} catch(ResourceException r){
     		metadata = new ArrayList<Map<String, String>>();
-                if(r.getCause() != null){
-                	msg = "ERROR: " + r.getCause().getMessage();
-                }
+        	if(r.getCause() != null){
+        		msg = "ERROR: " + r.getCause().getMessage();
+        	}
     	}
     	
 		String iTotalDisplayRecords = "0";
@@ -439,7 +439,27 @@ public class MDataResource extends BaseResource {
 		return new StringRepresentation(JSONValue.toJSONString(json), 
 				MediaType.APPLICATION_JSON);
     }
-            
+       
+    private List<Map<String, String>> getFederatedMetadata(String deprecatedFlag)
+    throws ResourceException {
+    	List<Map<String, String>> metadata = null;
+    	
+    	try {
+    		metadata = getMetadata(deprecatedFlag);
+    	} catch(ResourceException r){
+    		if(r.getStatus().equals(Status.CLIENT_ERROR_NOT_FOUND)
+    				&& !useMaster && isFederated()){
+    			useMaster = true;
+        		metadata = getFederatedMetadata(deprecatedFlag);
+    		} else {
+    			useMaster = false;
+        		throw r;
+        	}
+    	}
+    	
+    	return metadata;
+    }
+    
     private Map<String, Object> buildJsonHeader(String iTotalRecords, 
     		String iTotalDisplayRecords, String msg){
     	Map<String, Object> json = new LinkedHashMap<String, Object>();

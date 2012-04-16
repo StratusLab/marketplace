@@ -313,7 +313,9 @@ public class MarketPlaceApplication extends Application {
             if (request.getClientInfo().getAcceptedMediaTypes().get(0)
                     .getMetadata().equals(MediaType.TEXT_XML)
                     || request.getClientInfo().getAcceptedMediaTypes().get(0)
-                            .getMetadata().equals(MediaType.APPLICATION_XML)) {
+                            .getMetadata().equals(MediaType.APPLICATION_XML)
+                            || request.getClientInfo().getAcceptedMediaTypes().get(0)
+                            .getMetadata().equals(MediaType.APPLICATION_RDF_XML)) {
 
                 Representation r = generateXmlErrorRepresentation(response
                         .getStatus().getDescription(),
