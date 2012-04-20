@@ -53,13 +53,14 @@ public class MDatumResource extends BaseResource {
 
     private String datum = null;
     private String identifier = null;
-        
+    private String url = null;        
+
     @Override
     protected void doInit() {
-        String iri = getRequest().getResourceRef().getPath();
-        iri = iri.substring(iri.indexOf("metadata") + 9);
-        this.datum = getMetadatum(iri);
-        this.identifier = iri.substring(0, iri.indexOf("/"));
+        url = getRequest().getResourceRef().getPath();
+        String iri = url.substring(url.indexOf("metadata") + 9);
+        datum = getMetadatum(iri);
+        identifier = iri.substring(0, iri.indexOf("/"));
     }
 
     @Get("xml")
@@ -72,10 +73,11 @@ public class MDatumResource extends BaseResource {
     	StringRepresentation representation = new StringRepresentation(
                 new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
 
-    	Disposition disposition = representation.getDisposition();
-        disposition.setType(Disposition.TYPE_ATTACHMENT);
+        Disposition disposition = new Disposition();
         disposition.setFilename(identifier + ".xml");
-            	
+        disposition.setType(Disposition.TYPE_ATTACHMENT);
+        representation.setDisposition(disposition);            	
+
         // Returns the XML representation of this document.
         return representation;
     }
@@ -98,6 +100,11 @@ public class MDatumResource extends BaseResource {
 
         StringRepresentation representation = new StringRepresentation(jsonOut
                 .toString(), MediaType.APPLICATION_JSON);
+
+        Disposition disposition = new Disposition();
+        disposition.setFilename(identifier + ".json");
+        representation.setDisposition(disposition);
+        disposition.setType(Disposition.TYPE_ATTACHMENT);
 
         return representation;
     }
@@ -132,8 +139,9 @@ public class MDatumResource extends BaseResource {
         }
 
         Map<String, Object> data = createInfoStructure("Metadata");
-        data.put("identifier", this.identifier);
+        data.put("identifier", identifier);
         data.put("content", stringBuilder.toString());
+        data.put("url", url);
 
         // Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation

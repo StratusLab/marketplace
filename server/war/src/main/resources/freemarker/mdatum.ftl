@@ -14,6 +14,10 @@
 
 ${content}
 
+
+<input type="button" value="xml" onClick="window.location='${url}?media=xml'">
+<input type="button" value="json" onClick="window.location='${url}?media=json'">
+
 </div>
 
 </div>

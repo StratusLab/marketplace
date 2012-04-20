@@ -71,8 +71,6 @@ public abstract class BaseResource extends ServerResource {
 
 	protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 	protected static final String NO_TITLE = null;
-
-	protected boolean useMaster = false;
 	
 	protected RdfStore getMetadataStore() {
 		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
