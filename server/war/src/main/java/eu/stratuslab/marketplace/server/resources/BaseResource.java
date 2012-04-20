@@ -75,15 +75,7 @@ public abstract class BaseResource extends ServerResource {
 	protected boolean useMaster = false;
 	
 	protected RdfStore getMetadataStore() {
-		if(!useMaster){
-			return ((MarketPlaceApplication) getApplication()).getMetadataStore();
-		} else {
-			return getMasterStore();
-		}
-	}
-
-	protected RdfStore getMasterStore() {
-		return ((MarketPlaceApplication) getApplication()).getRemoteStore();
+		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
 	}
 
 	protected String getDataDir() {
@@ -92,10 +84,6 @@ public abstract class BaseResource extends ServerResource {
 
 	protected EndorserWhitelist getWhitelist() {
 		return ((MarketPlaceApplication) getApplication()).getWhitelist();
-	}
-
-	protected boolean isFederated() {
-		return ((MarketPlaceApplication) getApplication()).isFederated();
 	}
 
 	protected freemarker.template.Configuration getFreeMarkerConfiguration() {
@@ -257,16 +245,7 @@ public abstract class BaseResource extends ServerResource {
 			model = MetadataFileUtils.readFileAsString(getDataDir() 
 					+ File.separator + iri + ".xml");
 		} catch (IOException e) {
-			if(isFederated()){
-            	try {
-					model = getMasterStore().getRdfEntry(iri);
-				} catch (MarketplaceException m) {
-					 LOGGER.severe("Unable to read metadata file: " + iri);
-				}
-            } else {
-            	LOGGER.severe("Unable to read metadata file: " + iri);
-            }
-			
+			LOGGER.severe("Unable to read metadata file: " + iri);
 		}
 
 		return model;

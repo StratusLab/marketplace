@@ -23,7 +23,6 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.MARKETPLACE_TYPE;
 
 import java.io.File;
 import java.util.Map;
@@ -44,7 +43,6 @@ import org.restlet.data.LocalReference;
 import org.restlet.data.MediaType;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
-import org.restlet.engine.Engine;
 import org.restlet.ext.freemarker.ContextTemplateLoader;
 import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
@@ -85,7 +83,6 @@ public class MarketPlaceApplication extends Application {
     private Reminder reminder;
 
     private RdfStore store = null;
-    private RdfStore remoteStore = null;
     
     private String dataDir = null;
 
@@ -93,9 +90,7 @@ public class MarketPlaceApplication extends Application {
 
     private EndorserWhitelist whitelist;
 
-	private boolean federation;
-
-    public MarketPlaceApplication() {
+	public MarketPlaceApplication() {
         String storeType = Configuration.getParameterValue(STORE_TYPE);
         init(storeType);
     }
@@ -134,17 +129,6 @@ public class MarketPlaceApplication extends Application {
                 storeType);
         store.initialize();
 
-        String marketplaceType = Configuration.getParameterValue(MARKETPLACE_TYPE);
-        
-        if(marketplaceType != null && marketplaceType.equals("private")){
-        	federation = true;
-        	remoteStore = factory.createRdfStore("sesame", "remote");
-        	
-        	Engine.getInstance().getRegisteredClients().clear();
-        	Engine.getInstance().getRegisteredClients().add(
-        			new org.restlet.ext.httpclient.HttpClientHelper(null));
-        }
-        
         final Runnable remind = new Runnable() {
             public void run() {
                 remind();
@@ -181,7 +165,8 @@ public class MarketPlaceApplication extends Application {
         router.attach("/metadata/{arg1}/", MDataResource.class);
         router.attach("/metadata/{arg1}/{arg2}", MDataResource.class);
         router.attach("/metadata/{arg1}/{arg2}/", MDataResource.class);
-
+        router.attach("/metadata?query={query}", MDataResource.class);
+        
         // Defines a route for the resource "metadatum"
         router.attach("/metadata/{identifier}/{email}/{date}",
                 MDatumResource.class);
@@ -261,10 +246,6 @@ public class MarketPlaceApplication extends Application {
         return store;
     }
 
-    public RdfStore getRemoteStore() {
-        return remoteStore;
-    }
-    
     public String getDataDir() {
         return dataDir;
     }
@@ -273,10 +254,6 @@ public class MarketPlaceApplication extends Application {
         return whitelist;
     }
 
-    public boolean isFederated(){
-    	return federation;
-    }
-    
     public freemarker.template.Configuration getFreeMarkerConfiguration() {
         return freeMarkerConfiguration;
     }

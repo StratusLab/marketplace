@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
+import org.restlet.data.Disposition;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -71,6 +72,10 @@ public class MDatumResource extends BaseResource {
     	StringRepresentation representation = new StringRepresentation(
                 new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
 
+    	Disposition disposition = representation.getDisposition();
+        disposition.setType(Disposition.TYPE_ATTACHMENT);
+        disposition.setFilename(identifier + ".xml");
+            	
         // Returns the XML representation of this document.
         return representation;
     }

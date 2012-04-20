@@ -351,8 +351,8 @@ public class MDataResource extends BaseResource {
     public Representation toXml() {
     	
     	String deprecatedFlag = getDeprecatedFlag();
-    			
-    	List<Map<String, String>> metadata = getFederatedMetadata(deprecatedFlag);
+    		
+    	List<Map<String, String>> metadata = getMetadata(deprecatedFlag);
     	metadata.remove(0);
     	
         List<String> pathsToMetadata = buildPathsToMetadata(metadata);
@@ -412,7 +412,7 @@ public class MDataResource extends BaseResource {
     	String msg = "no metadata matching query found";
     	
     	try {
-    		metadata = getFederatedMetadata(deprecatedFlag);
+    		metadata = getMetadata(deprecatedFlag);
     	} catch(ResourceException r){
     		metadata = new ArrayList<Map<String, String>>();
         	if(r.getCause() != null){
@@ -440,27 +440,7 @@ public class MDataResource extends BaseResource {
 				MediaType.APPLICATION_JSON);
     }
        
-    private List<Map<String, String>> getFederatedMetadata(String deprecatedFlag)
-    throws ResourceException {
-    	List<Map<String, String>> metadata = null;
-    	
-    	try {
-    		metadata = getMetadata(deprecatedFlag);
-    	} catch(ResourceException r){
-    		if(r.getStatus().equals(Status.CLIENT_ERROR_NOT_FOUND)
-    				&& !useMaster && isFederated()){
-    			useMaster = true;
-        		metadata = getFederatedMetadata(deprecatedFlag);
-    		} else {
-    			useMaster = false;
-        		throw r;
-        	}
-    	}
-    	
-    	return metadata;
-    }
-    
-    private Map<String, Object> buildJsonHeader(String iTotalRecords, 
+   private Map<String, Object> buildJsonHeader(String iTotalRecords, 
     		String iTotalDisplayRecords, String msg){
     	Map<String, Object> json = new LinkedHashMap<String, Object>();
         json.put("sEcho", new Integer(getRequestQueryValues().get("sEcho")));
