@@ -115,7 +115,7 @@ public class Reminder extends BaseResource {
 		filter
 		.append(SparqlUtils.getLatestFilter(getCurrentDate()));
 
-		filter.append(" FILTER (!bound (?deprecated))");
+		filter.append(" " + SparqlUtils.DEPRECATED_OFF);
 		filter.append(" }");
 
 		query.append(filter);

@@ -11,25 +11,12 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.PKIXCertPathBuilderResult;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -254,54 +241,22 @@ public final class MetadataUtils {
 
         return signature;
     }
+      
+    public static KeyInfo extractKeyInfoFromNode(Node signature){
+    	DOMValidateContext context = createContext(signature);
+        XMLSignature sig = null;
+        
+		try {
+			sig = extractXmlSignature(context);
+		} catch (MarshalException e) {
+			throw new MetadataException(e.getMessage());
+		}
 
-    public static Object[] isCertificateVerified(Node signatureXml,
-            KeyStore anchors, Collection<X509CRL> crls) {
-
-        try {
-            DOMValidateContext context = createContext(signatureXml);
-            XMLSignature signature = extractXmlSignature(context);
-
-            KeyInfo keyInfo = signature.getKeyInfo();
-
-            PKIXBuilderParameters params = createPKIXBuilderParameters(anchors,
-                    crls, keyInfo);
-
-            boolean isRevoked = isCertRevoked(keyInfo, crls);
-            if (isRevoked) {
-                return new Object[] { Boolean.FALSE, "Certificate is revoked." };
-            }
-
-            /*
-             * If build() returns successfully, the certificate is valid. More
-             * details about the valid path can be obtained through the
-             * PKIXBuilderResult. If no valid path can be found, a
-             * CertPathBuilderException is thrown.
-             */
-            return buildCertPath(params);
-
-        } catch (MarshalException e) {
-            return new Object[] { Boolean.FALSE, e.getMessage() };
-        }
+        KeyInfo keyInfo = sig.getKeyInfo();
+        
+        return keyInfo;
     }
-
-    private static boolean isCertRevoked(KeyInfo keyInfo,
-            Collection<X509CRL> crls) {
-        boolean isRevoked = false;
-
-        X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
-
-        if (cert != null) {
-            for (X509CRL c : crls) {
-                if (c.isRevoked(cert)) {
-                    isRevoked = true;
-                }
-            }
-        }
-
-        return isRevoked;
-    }
-
+    
     public static X509Certificate extractX509CertFromKeyInfo(KeyInfo keyInfo) {
 
         List<X509Certificate> certs = extractX509CertChainFromKeyInfo(keyInfo);
@@ -347,63 +302,6 @@ public final class MetadataUtils {
         X509Certificate cert = extractX509CertFromKeyInfo(keyInfo);
 
         return cert;
-    }
-
-    private static PKIXBuilderParameters createPKIXBuilderParameters(
-            KeyStore anchors, Collection<X509CRL> crls, KeyInfo keyInfo) {
-        List<X509Certificate> chain = extractX509CertChainFromKeyInfo(keyInfo);
-
-        X509CertSelector target = new X509CertSelector();
-        target.setCertificate(chain.get(0));
-
-        try {
-
-            PKIXBuilderParameters params = new PKIXBuilderParameters(anchors,
-                    target);
-            CertStoreParameters intermediates = new CollectionCertStoreParameters(
-                    chain);
-            params.addCertStore(CertStore.getInstance("Collection",
-                    intermediates));
-
-            if (crls.size() > 0) {
-                CertStoreParameters revoked = new CollectionCertStoreParameters(
-                        crls);
-                params.addCertStore(CertStore
-                        .getInstance("Collection", revoked));
-            } else {
-                // Disable CRL checks
-                params.setRevocationEnabled(false);
-            }
-
-            return params;
-
-        } catch (KeyStoreException e) {
-            throw new MetadataException(e.getMessage());
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new MetadataException(e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw new MetadataException(e.getMessage());
-        }
-
-    }
-
-    private static Object[] buildCertPath(PKIXBuilderParameters params) {
-        try {
-            CertPathBuilder builder = CertPathBuilder.getInstance("PKIX");
-
-            PKIXCertPathBuilderResult r = (PKIXCertPathBuilderResult) builder
-                    .build(params);
-            String builderResult = r.toString();
-
-            return new Object[] { Boolean.TRUE, builderResult };
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new MetadataException(e.getMessage());
-        } catch (CertPathBuilderException e) {
-            return new Object[] { Boolean.FALSE, e.getMessage() };
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new MetadataException(e.getMessage());
-        }
     }
 
     /*

@@ -3,13 +3,11 @@ package eu.stratuslab.marketplace.server.utils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509CRL;
+import java.net.URL;
+
 import javax.security.auth.x500.X500Principal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
@@ -108,47 +106,16 @@ public class EndorserWhitelistTest extends ResourceTestBase {
 	private EndorserWhitelist getWhitelistInstance(String truststore, 
 			String crl, String whitelistFile) throws Exception {
 		
-		KeyStore anchors = createKeyStore(truststore, password);
-		Collection<X509CRL> crls = loadCrls(crl);
 		List<X500Principal> list = loadWhitelist(whitelistFile);
 		
-		EndorserWhitelist whitelist = new EndorserWhitelist(anchors, crls, list);
+		URL store = EndorserWhitelistTest.class
+		.getResource(classPrefix + truststore);
+		URL crlFile = EndorserWhitelistTest.class
+		.getResource(classPrefix + crl);
+		EndorserWhitelist whitelist = new EndorserWhitelist(store.getPath(), 
+				password, crlFile.getPath(), list);
 		
 		return whitelist;
-	}
-	
-	private KeyStore createKeyStore(String filename, String password) throws Exception {
-		InputStream is = EndorserWhitelistTest.class
-		.getResourceAsStream(classPrefix + filename);
-		
-		KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
-		try {
-			anchors.load(is, password.toCharArray());
-		} finally {
-			if (is != null) {
-				is.close();
-			}
-		}
-
-		return anchors;
-	}
-	
-	private Collection<X509CRL> loadCrls(String filename) throws Exception {
-		InputStream is = EndorserWhitelistTest.class
-		.getResourceAsStream(classPrefix + filename);
-		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
-		X509CRL crl = null;
-
-		try {
-			crl = (X509CRL)cf.generateCRL(is);
-		} finally {
-			closeReliably(is);
-		}
-		Collection<X509CRL> crls = new ArrayList<X509CRL>();
-		crls.add(crl);
-
-		return crls;
 	}
 	
 	private List<X500Principal> loadWhitelist(String filename) throws Exception {

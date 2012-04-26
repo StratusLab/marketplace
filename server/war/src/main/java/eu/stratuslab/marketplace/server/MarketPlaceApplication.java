@@ -239,7 +239,6 @@ public class MarketPlaceApplication extends Application {
             reminderHandle.cancel(true);
         }
 
-        this.whitelist.stop();
     }
 
     public RdfStore getMetadataStore() {

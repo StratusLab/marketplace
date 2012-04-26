@@ -215,7 +215,7 @@ public enum Parameter {
     },
 
     WHITELIST_CRL(false, "/etc/stratuslab/marketplace.crl",
-            "File containing list of CRLs.") {
+            "Location of CRLs.") {
         @Override
         public void validate(String value) {
             super.validate(value);

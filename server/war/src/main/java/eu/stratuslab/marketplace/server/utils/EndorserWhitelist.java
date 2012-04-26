@@ -32,39 +32,35 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CRLException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509CRL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
+import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import eu.emi.security.authn.x509.NamespaceCheckingMode;
+import eu.emi.security.authn.x509.ValidationResult;
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
+import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
-import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
 public class EndorserWhitelist {
@@ -72,15 +68,17 @@ public class EndorserWhitelist {
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
 	private boolean enabled = false;
+	
 	private List<X500Principal> whitelist = new ArrayList<X500Principal>();
-	private KeyStore truststore;
-
-	private Collection<X509CRL> crls = new ArrayList<X509CRL>();
+	private List<String> crls = new ArrayList<String>();
 	private String crlFileExt;
 	private String crlLocation;
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> reloadCrls = null;
 	
+    private X509CertChainValidator validator = null;
+    
+    public static final Long DEFAULT_UPDATE_INTERVAL = //
+        10L * 60L * 1000L; // 10min
+    
     public EndorserWhitelist(){
     	
     	this.enabled = Configuration.getParameterValueAsBoolean(WHITELIST_ENABLED);	
@@ -91,12 +89,15 @@ public class EndorserWhitelist {
 		crlLocation = Configuration.getParameterValue(WHITELIST_CRL);
         
 		if(Configuration.getParameterValueAsBoolean(WHITELIST_ENABLED)){
-			loadTrustStore(truststore, password);	
-			loadWhitelist(location);
-			loadCrls();
 			
-			reloadCrls = 
-      		  scheduler.scheduleWithFixedDelay(new ReloadCRLs(), 12, 12, TimeUnit.HOURS);
+			loadWhitelist(location);
+			
+			if(new File(truststore).isFile()){
+				loadCrls();
+				validator = createKeystoreValidator(truststore, password.toCharArray());	
+			} else {
+				validator = createOpensslValidator(truststore);
+			}
 		}
 		
 		if(this.enabled){
@@ -104,43 +105,64 @@ public class EndorserWhitelist {
 		}
     }
 
-	public EndorserWhitelist(KeyStore anchors, Collection<X509CRL> crls,
-			List<X500Principal> list) {
+	private X509CertChainValidator createOpensslValidator(String truststore) {
 		
-		this.enabled = true;
-		this.truststore = anchors;
-		this.crls = crls;
-		this.whitelist = list;
+		OpensslCertChainValidator validator = new OpensslCertChainValidator(
+				truststore, 
+				NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, 
+				DEFAULT_UPDATE_INTERVAL);
+			
+		return validator;
 	}
-    
-	private void loadCrls() {
+
+	private X509CertChainValidator createKeystoreValidator(String truststore, char[] password) {
+		KeystoreCertChainValidator validator = null;
 		
 		try {
-			List<File> crlFiles = getCrlFiles(crlLocation);			
-						
-			for ( File f : crlFiles ){
-				InputStream inStream = new FileInputStream(f);
-				
-				try {
-					CertificateFactory cf = CertificateFactory.getInstance("X.509");
-					X509CRL crl = (X509CRL)cf.generateCRL(inStream);
-
-					this.crls.add(crl);
-				} finally {
-					closeReliably(inStream);
-				}
-			}	
-
-		} catch (FileNotFoundException e) {
-			LOGGER.severe("Unable to load crl: " + e.getMessage());
+			String type = "JKS";
+			if(truststore.endsWith(".jks")){
+				type = "JKS";
+			} else if(truststore.endsWith(".p12")){
+				type = "PKCS12";
+			}
+			
+			validator = new KeystoreCertChainValidator(
+					truststore, 
+					password,
+					type, 
+					DEFAULT_UPDATE_INTERVAL);
+			
+			validator.setCrls(crls);
+			validator.setCRLUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+			
+		} catch (KeyStoreException e) {
+			LOGGER.severe("Error creating cert validator: " + e.getMessage());
 			this.enabled = false;
-		} catch (CertificateException e) {
-			LOGGER.severe("Unable to load crl: " + e.getMessage());
-			this.enabled = false;
-		} catch (CRLException e) {
-			LOGGER.severe("Unable to load crl: " + e.getMessage());
+		} catch (IOException e) {
+			LOGGER.severe("Error creating cert validator: " + e.getMessage());
 			this.enabled = false;
 		}
+		
+		return validator;
+	}
+
+	public EndorserWhitelist(String truststore, String password, String crl,
+			List<X500Principal> list) {
+		
+		whitelist = list;
+		crls.add(crl);
+		
+		validator = createKeystoreValidator(truststore, password.toCharArray());
+	}
+
+	private void loadCrls() {
+		
+		List<File> crlFiles = getCrlFiles(crlLocation);			
+		
+		for ( File f : crlFiles ){
+			crls.add(f.getAbsolutePath());
+		}	
+		
 	}
 
 	private List<File> getCrlFiles(String crlLocation) {
@@ -179,35 +201,6 @@ public class EndorserWhitelist {
 		return crlFiles;
 	}
 
-	private void loadTrustStore(String truststore, String password) {
-		
-		try {
-			InputStream trustStoreInput = new FileInputStream(truststore);
-
-			try {
-				KeyStore anchors = KeyStore.getInstance(KeyStore.getDefaultType());
-				anchors.load(trustStoreInput, password.toCharArray());
-
-				this.truststore = anchors;
-			} finally {
-				closeReliably(trustStoreInput);
-			}
-			
-		} catch(IOException e){
-			LOGGER.severe("Unable to load truststore: " + e.getMessage());
-			this.enabled = false;
-		} catch (KeyStoreException e) {
-			LOGGER.severe("Unable to load truststore: " + e.getMessage());
-			this.enabled = false;
-		} catch (NoSuchAlgorithmException e) {
-			LOGGER.severe("Unable to load truststore: " + e.getMessage());
-			this.enabled = false;
-		} catch (CertificateException e) {
-			LOGGER.severe("Invalid certificate in truststore: " + e.getMessage());
-			this.enabled = false;
-		}
-	}
-
 	private void loadWhitelist(String location) {
 		
 		List<X500Principal> lines = new ArrayList<X500Principal>();
@@ -236,15 +229,7 @@ public class EndorserWhitelist {
 		this.whitelist = lines;
 	}
 
-	public void stop(){
-		
-		if(reloadCrls != null){
-			reloadCrls.cancel(true);
-		}
-	}
-	
 	public boolean isEnabled(){
-		
 		return enabled;
 	}
 	
@@ -252,8 +237,13 @@ public class EndorserWhitelist {
 		
 		boolean verified = false;
 		try {
-			ValidateXMLSignature.validateCertificate(doc, this.truststore, this.crls);
-			verified = true;
+			Node signature = extractSignature(doc);
+			KeyInfo keyInfo = MetadataUtils.extractKeyInfoFromNode(signature);
+			X509Certificate[] chain = extractX509CertChainFromKeyInfo(keyInfo);        
+            
+			ValidationResult result = validator.validate(chain);
+			verified = result.isValid();
+						
 		} catch(MetadataException e){
 			verified = false;
 		}
@@ -329,16 +319,30 @@ public class EndorserWhitelist {
 
 	}
 	
-	 /**
-     * A simple utility class that implements the timer that updates the CRLs.
-     */
-    class ReloadCRLs implements Runnable {
-        /**
-         * The actual method run by the timer.
-         */
-        public void run() {
-           loadCrls();
-        }
+	private static Node extractSignature(Document doc){
+    	NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS,
+        "Signature");
+    	Node node = null;
+    	
+    	if (nl.getLength() > 0) {
+    		node = nl.item(0);
+    	} else {
+			throw new MetadataException("no signature");
+		}
+    	
+    	return node;
     }
-	
+    
+   public static X509Certificate[] extractX509CertChainFromKeyInfo(
+            KeyInfo keyInfo) {
+        List<X509Certificate> chain = MetadataUtils.extractX509CertChainFromKeyInfo(keyInfo);
+        
+        X509Certificate[] certs = new X509Certificate[chain.size()];
+        for(int i = 0; i < chain.size(); i++){
+        	certs[i] = chain.get(i);
+        }
+        
+        return certs;
+    }
+    	
 }

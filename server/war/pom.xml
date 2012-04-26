@@ -82,9 +82,18 @@
                         <artifactId>json-simple</artifactId>
                 </dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
+			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
+                <dependency>
+                    <groupId>eu.emi.security</groupId>
+                    <artifactId>authlib</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk16</artifactId>
+                    <version>1.46</version>
+                </dependency>
 
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
