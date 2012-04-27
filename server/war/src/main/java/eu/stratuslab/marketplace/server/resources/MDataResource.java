@@ -138,6 +138,8 @@ public class MDataResource extends BaseResource {
 
 		EndorserWhitelist whitelist = getWhitelist();
 		
+		String baseUrl = getRequest().getRootRef().toString() + "/metadata/";
+				
 		if (!validateEmail
 				|| (whitelist.isEnabled() && whitelist
 						.isEndorserWhitelisted(validatedUpload))) {
@@ -148,14 +150,13 @@ public class MDataResource extends BaseResource {
 			Representation status = createStatusRepresentation("Upload", 
 			"metadata entry created");
 			
-			String ref = getRequest().getRootRef().toString() + "/metadata/";
-			status.setLocationRef(ref + iri);
+			status.setLocationRef(baseUrl + iri);
 
 			return status;
 
 		} else {
 			
-			confirmMetadataEntry(upload, validatedUpload);
+			confirmMetadataEntry(baseUrl, upload, validatedUpload);
 			
 			setStatus(Status.SUCCESS_ACCEPTED);
 			return createStatusRepresentation("Upload",
@@ -181,11 +182,11 @@ public class MDataResource extends BaseResource {
 		return status;
 	}
     
-    private static void confirmMetadataEntry(File upload, Document metadata) {
+    private static void confirmMetadataEntry(String baseUrl, File upload, Document metadata) {
 
         try {
             String[] coords = getMetadataEntryCoordinates(metadata);
-            sendEmailConfirmation(coords[1], upload);
+            sendEmailConfirmation(baseUrl, coords[1], upload);
         } catch (Exception e) {
             String msg = "error sending confirmation email";
             LOGGER.severe(msg + ": " + e.getMessage());
@@ -236,10 +237,9 @@ public class MDataResource extends BaseResource {
                 "no valid file uploaded");
     }
 
-    private static void sendEmailConfirmation(String email, File file)
+    private static void sendEmailConfirmation(String baseUrl, String email, File file)
             throws Exception {
 
-        String baseUrl = "http://localhost:8080/";
         String message = MessageUtils.createNotification(baseUrl, file);
         Notifier.sendNotification(email, message);
     }
