@@ -147,7 +147,9 @@ public class MDataResource extends BaseResource {
 			setStatus(Status.SUCCESS_CREATED);
 			Representation status = createStatusRepresentation("Upload", 
 			"metadata entry created");
-			status.setLocationRef(iri);
+			
+			String ref = getRequest().getRootRef().toString() + "/metadata/";
+			status.setLocationRef(ref + iri);
 
 			return status;
 

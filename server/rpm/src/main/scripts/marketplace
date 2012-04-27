@@ -4,7 +4,7 @@
 
 # To get the service to restart correctly on reboot, uncomment below (3 lines):
 # ========================
-# chkconfig: 3 99 99
+# chkconfig: - 80 20
 # description: Jetty 7 webserver
 # processname: jetty
 # ========================
