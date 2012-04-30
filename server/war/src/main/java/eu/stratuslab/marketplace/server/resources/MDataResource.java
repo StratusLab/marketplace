@@ -28,12 +28,8 @@ import static org.restlet.data.MediaType.TEXT_PLAIN;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -116,7 +112,7 @@ public class MDataResource extends BaseResource {
 
 		isUploadPermitted();
 		
-        File upload = writeContentsToDisk(entity);
+		File upload = MetadataFileUtils.writeContentsToDisk(entity);
         
         return acceptMetadataEntry(upload);
     }
@@ -254,7 +250,7 @@ public class MDataResource extends BaseResource {
             stream = new FileInputStream(upload);
 
             metadataXml = MetadataFileUtils.extractXmlDocument(stream);
-
+            
             ValidateXMLSignature.validate(metadataXml);
             ValidateMetadataConstraints.validate(metadataXml);
             ValidateRDFModel.validate(metadataXml);
@@ -298,40 +294,7 @@ public class MDataResource extends BaseResource {
         }
 		
 	}
-
-	private static File writeContentsToDisk(Representation entity) {
-
-        char[] buffer = new char[4096];
-
-        File storeDirectory = Configuration
-                .getParameterValueAsFile(PENDING_DIR);
-
-        File output = new File(storeDirectory, UUID.randomUUID().toString());
-
-        Reader reader = null;
-        Writer writer = null;
-
-        try {
-
-            reader = entity.getReader();
-            writer = new OutputStreamWriter(
-            		new FileOutputStream(output), "UTF-8");
-
-            int nchars = reader.read(buffer);
-            while (nchars >= 0) {
-                writer.write(buffer, 0, nchars);
-                nchars = reader.read(buffer);
-            }
-
-        } catch (IOException consumed) {
-
-        } finally {
-            MetadataFileUtils.closeReliably(reader);
-            MetadataFileUtils.closeReliably(writer);
-        }
-        return output;
-    }
-
+	
     @Get("html")
     public Representation toHtml() throws IOException {
     	
