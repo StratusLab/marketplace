@@ -26,7 +26,6 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.WHITELIST_PASSWORD;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.WHITELIST_CRL;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -81,7 +80,7 @@ public class EndorserWhitelist {
     
     public EndorserWhitelist(){
     	
-    	this.enabled = Configuration.getParameterValueAsBoolean(WHITELIST_ENABLED);	
+    	enabled = Configuration.getParameterValueAsBoolean(WHITELIST_ENABLED);	
 		
 		String location = Configuration.getParameterValue(WHITELIST_LOCATION);
 		String truststore = Configuration.getParameterValue(WHITELIST_TRUSTSTORE);
@@ -93,14 +92,25 @@ public class EndorserWhitelist {
 			loadWhitelist(location);
 			
 			if(new File(truststore).isFile()){
+				
 				loadCrls();
-				validator = createKeystoreValidator(truststore, password.toCharArray());	
-			} else {
+				
+				if(password != null){
+					validator = createKeystoreValidator(truststore, password.toCharArray());
+				} else {
+					LOGGER.severe("No password specified");
+					enabled = false;
+				}
+				
+			} else if (new File(truststore).isDirectory()) {
 				validator = createOpensslValidator(truststore);
+			} else {
+				LOGGER.severe("Truststore (" + truststore + ")  not found");
+				enabled = false;
 			}
 		}
 		
-		if(this.enabled){
+		if(enabled){
 			LOGGER.warning("Endorser whitelist enabled.");
 		}
     }
@@ -215,8 +225,8 @@ public class EndorserWhitelist {
 				lines.add(new X500Principal(line));
 			}
 
-			closeReliably(bufferedReader);
-			closeReliably(fileReader);
+			MetadataFileUtils.closeReliably(bufferedReader);
+			MetadataFileUtils.closeReliably(fileReader);
 
 		}catch(FileNotFoundException e){
 			LOGGER.severe("Unable to find whitelist file: " + location);
@@ -294,16 +304,6 @@ public class EndorserWhitelist {
 		}
 		
 		return false;
-	}
-	
-	public static void closeReliably(Closeable closeable) {
-		
-		if (closeable != null) {
-			try {
-				closeable.close();
-			} catch (IOException consumed) {
-			}
-		}
 	}
 	
 	public class CrlFileFilter implements FileFilter {

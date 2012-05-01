@@ -65,7 +65,7 @@ public class MetadataFileUtils {
 
         try {
         	reader = Channels.newReader(entity.getChannel(), ENCODING);
-            writer = new OutputStreamWriter(
+        	writer = new OutputStreamWriter(
             		new FileOutputStream(output), ENCODING);
 
             int nchars = reader.read(buffer);
