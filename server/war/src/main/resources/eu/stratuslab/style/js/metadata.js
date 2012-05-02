@@ -211,6 +211,7 @@ jQuery.fn.dataTableExt.oApi.fnSetFilteringDelay = function ( oSettings, iDelay )
 	return this;
 }
 
+
 $(document).ready(function() {
 	/*
 	 * Initialise DataTables, with no sorting on the 'details' column
@@ -243,6 +244,56 @@ $(document).ready(function() {
 		"sDom": '<"top"fl<"clear">>rt<"bottom"ip<"clear">>'
 	});
 
+        var search_timeout = undefined;
+        $("#filterBy input").keyup( function (event) {
+                if(event.keyCode!='9') {
+                        if(search_timeout != undefined) {
+                                clearTimeout(search_timeout);
+                        }
+                        $this = this;
+                        search_timeout = setTimeout(function() {
+                                search_timeout = undefined;
+                                oTable.fnFilter( $this.value, 
+                                                 $("#filterBy input").index($this) + 1 );
+                        }, 250);
+                }
+        } );
+
+        $("#filterBy input").focusout( function () {
+                if(search_timeout != undefined) {
+                        clearTimeout(search_timeout);
+                }
+                $this = this;
+                oTable.fnFilter( $this.value, $("#filterBy input").index($this) + 1 );
+        } );
+
+        /*
+         * Support functions to provide a little bit of 'user friendliness' to the textboxes in
+         * the footer
+         */
+        $("#filterBy input").each( function (i) {
+                asInitVals[i] = this.value;
+        } );
+
+        $("#filterBy input").focus( function () {
+                if ( this.className == "search_init" )
+                {
+                        this.className = "";
+                        this.value = "";
+                }
+        } );
+
+        $("#filterBy input").blur( function (i) {
+                if ( this.value == "" )
+                {
+                        this.className = "search_init";
+                        this.value = asInitVals[$("#filterBy input").index(this)];
+                }
+        } );
+
+        /*
+         * sorting select
+         */ 
 	$('#sortBy').change( function () {
 		switch ($(this).val()) {
 		case "_none_":  // first option chosen, not associated with any column,

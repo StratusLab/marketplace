@@ -23,6 +23,14 @@ On</a> |
 Only</a>
 </p>
 
+<form id="filterBy" name="filterBy">
+<label for="filterBy">Filter:</label><br/>
+<input type="text" name="search_os" value="Search os" class="search_init"><br/>
+<input type="text" name="search_version" value="Search version" class="search_init"><br/>
+<input type="text" name="search_arch" value="Search arch" class="search_init"><br/>
+<input type="text" name="search_arch" value="Search endorser" class="search_init">
+</form>
+
 <form>
 <label for="sortBy">Sort by:</label>
 <select name="sortBy" id="sortBy">
@@ -33,6 +41,7 @@ Only</a>
 <option value="endorser">Endorser</option>
 <option value="date">Date</option>
 </select>
+</form>
 
 <table id="search_table" class="search">
     <thead>
@@ -54,7 +63,7 @@ Only</a>
 
 <script type="text/javascript" language="javascript" src="/js/metadata.js"></script>
 
-</br>
+<br/>
 
 </div>
 </div>

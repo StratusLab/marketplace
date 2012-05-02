@@ -113,7 +113,7 @@ public class MDataResource extends BaseResource {
 		isUploadPermitted();
 		
 		File upload = MetadataFileUtils.writeContentsToDisk(entity);
-        
+        		
         return acceptMetadataEntry(upload);
     }
 
@@ -129,12 +129,12 @@ public class MDataResource extends BaseResource {
 	private Representation acceptMetadataEntry(File upload){
 		boolean validateEmail = Configuration
 		.getParameterValueAsBoolean(VALIDATE_EMAIL);
-
+		
 		Document validatedUpload = validateMetadata(upload);
 
 		EndorserWhitelist whitelist = getWhitelist();
 		
-		String baseUrl = getRequest().getRootRef().toString() + "/metadata/";
+		String baseUrl = getRequest().getRootRef().toString();
 				
 		if (!validateEmail
 				|| (whitelist.isEnabled() && whitelist
@@ -146,12 +146,11 @@ public class MDataResource extends BaseResource {
 			Representation status = createStatusRepresentation("Upload", 
 			"metadata entry created");
 			
-			status.setLocationRef(baseUrl + iri);
+			status.setLocationRef(baseUrl + "/metadata/" + iri);
 
 			return status;
 
 		} else {
-			
 			confirmMetadataEntry(baseUrl, upload, validatedUpload);
 			
 			setStatus(Status.SUCCESS_ACCEPTED);
@@ -602,41 +601,68 @@ public class MDataResource extends BaseResource {
     	
     	return paging;
     }
-    
-    /*
-     * Build the search filter based on the entries in the search text box.
-     * 
-     * @return sparql filter string
-     */
+             
     private String buildSearchingFilter(){
     	String sSearch = getRequestQueryValues().get("sSearch");
-    	String filter = "";
     	
-    	if(sSearch != null && sSearch.length() > 0){		    		
-    		String[] searchTerms = sSearch.split(" ");
-    		StringBuilder searchFilter = new StringBuilder(" FILTER (");
-    		for(int i = 0; i < searchTerms.length; i++){
-    			
-    			searchFilter.append("(");
-    			for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
-    				searchFilter.append(SparqlUtils.buildRegex(
-    						SparqlUtils.getColumn(j), searchTerms[i]));
-    		        
-    				if(j < SparqlUtils.getColumnCount() - 1)
-    					searchFilter.append(" || ");
-    			}
-    			searchFilter.append(")");
-    			
-    			if(i < searchTerms.length -1)
-					searchFilter.append(" && ");    			
-    		}
-    		searchFilter.append(") . ");
-    		filter = searchFilter.toString();
-    	}
-    	
-    	return filter;
-    }
+    	String[] sSearchCols = new String[9];
+        for(int i = 0; i < SparqlUtils.getColumnCount();i++){
+                sSearchCols[i] = getRequestQueryValues().get("sSearch_" + i);
+        }
         
+        String searching = "";
+
+        if(sSearch != null && sSearch.length() > 0){
+                String[] searchTerms = sSearch.split(" ");
+                StringBuilder searchAllFilter = new StringBuilder(" FILTER (");
+                for(int i = 0; i < searchTerms.length; i++){
+
+                        searchAllFilter.append("(");
+                        for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
+                                searchAllFilter.append(SparqlUtils.buildRegex(
+                                                SparqlUtils.getColumn(j), searchTerms[i]));
+
+                                if(j < SparqlUtils.getColumnCount() - 1)
+                                        searchAllFilter.append(" || ");
+                        }
+                        searchAllFilter.append(")");
+
+                        if(i < searchTerms.length -1)
+                                        searchAllFilter.append(" && ");
+                }
+                searchAllFilter.append(") . ");
+                searching = searchAllFilter.toString();
+        }
+
+        StringBuilder searchColumnsPredicate = new StringBuilder();
+        
+        //first 4 columns are searchable
+        for(int i = 1; i <= 4; i++){
+                if ( sSearchCols[i] != null && sSearchCols[i].length() > 0 )
+                {
+                        if ( searchColumnsPredicate.length() == 0 )
+                        {
+                                searchColumnsPredicate.append(" FILTER (");
+                        }
+                        else
+                        {
+                                searchColumnsPredicate.append(" && ");
+                        }
+                        String word = sSearchCols[i];
+                        searchColumnsPredicate.append(SparqlUtils.buildRegex(
+                                        SparqlUtils.getColumn(i), word));
+                }
+        }
+        
+        if(searchColumnsPredicate.length() != 0){
+                searchColumnsPredicate.append(" ) . ");
+        }
+        
+        searching += searchColumnsPredicate.toString();
+        
+        return searching;
+    }
+    
     private Map<String, String> getRequestQueryValues(){
     	Form form = getRequest().getResourceRef().getQueryAsForm();
     	

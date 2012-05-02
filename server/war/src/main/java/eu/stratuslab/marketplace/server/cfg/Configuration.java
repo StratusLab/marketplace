@@ -30,9 +30,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public final class Configuration {
 
+	private static Logger LOGGER = Logger.getLogger("org.restlet");
+	
     private static final String CONFIG_FILENAME = "marketplace.cfg";
 
     private static final Properties PROPERTIES;
@@ -69,6 +72,7 @@ public final class Configuration {
 
         for (File f : configFileLocations) {
             if (f.canRead()) {
+            	LOGGER.info("Using configuration: " + f.getAbsolutePath());
                 Properties properties = loadProperties(f);
                 validateConfiguration(properties);
                 return properties;

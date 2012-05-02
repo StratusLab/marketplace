@@ -71,10 +71,12 @@ public final class Notifier {
             InternetAddress admin = getAdminEmail();
             Session session = createSmtpSession();
             String password = getMailPassword();
-
+            
             StringBuilder sb = new StringBuilder();
             sb.append("Sending notification to " + email + "\n");
             sb.append("Message: " + message + "\n");
+            
+            logger.info(sb.toString());
             
             Message msg = new MimeMessage(session);
             msg.setFrom(admin);

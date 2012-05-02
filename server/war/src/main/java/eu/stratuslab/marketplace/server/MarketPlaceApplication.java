@@ -91,8 +91,12 @@ public class MarketPlaceApplication extends Application {
     private EndorserWhitelist whitelist;
 
 	public MarketPlaceApplication() {
-        String storeType = Configuration.getParameterValue(STORE_TYPE);
-        init(storeType);
+		try {		
+			String storeType = Configuration.getParameterValue(STORE_TYPE);
+			init(storeType);
+		} catch(ExceptionInInitializerError e){
+			LOGGER.severe("Incorrect configuration: " + e.getCause().getMessage());
+		}
     }
 
     public MarketPlaceApplication(String storeType) {
@@ -233,7 +237,9 @@ public class MarketPlaceApplication extends Application {
 
     @Override
     public void stop() {
-        store.shutdown();
+    	if(store != null){
+    		store.shutdown();
+    	}
 
         if (reminderHandle != null) {
             reminderHandle.cancel(true);

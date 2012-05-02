@@ -41,9 +41,9 @@ public final class MessageUtils {
     public static String createNotification(String baseUrl, File file) {
         String uuid = extractUUIDFromFile(file);
 
-        String confirmUrl = baseUrl + "action/" + uuid + "/confirm/";
-        String abortUrl = baseUrl + "action/" + uuid + "/abort/";
-        String abuseUrl = baseUrl + "action/" + uuid + "/abuse/";
+        String confirmUrl = baseUrl + "/action/" + uuid + "/confirm/";
+        String abortUrl = baseUrl + "/action/" + uuid + "/abort/";
+        String abuseUrl = baseUrl + "/action/" + uuid + "/abuse/";
         return String.format(CONFIRM_MSG, confirmUrl, abortUrl, abuseUrl);
     }
 
