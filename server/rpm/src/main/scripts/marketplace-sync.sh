@@ -13,4 +13,6 @@ fi
 
 /usr/bin/rsync -avz $USER@$MASTER:$MASTER_DIR/* $DATADIR | grep .xml |sort > $DATADIR/.sync
 
-curl $SLAVE/sync
+curl -sS $SLAVE/sync
+
+echo ""

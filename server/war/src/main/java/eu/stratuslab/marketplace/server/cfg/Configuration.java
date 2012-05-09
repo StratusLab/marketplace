@@ -72,7 +72,7 @@ public final class Configuration {
 
         for (File f : configFileLocations) {
             if (f.canRead()) {
-            	LOGGER.info("Using configuration: " + f.getAbsolutePath());
+            	LOGGER.info("using configuration: " + f.getAbsolutePath());
                 Properties properties = loadProperties(f);
                 validateConfiguration(properties);
                 return properties;

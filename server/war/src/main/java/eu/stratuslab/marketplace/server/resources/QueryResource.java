@@ -185,7 +185,7 @@ public class QueryResource extends BaseResource {
 		return results;
 	}
 	
-	class SparqlQuery {	
+	static class SparqlQuery {	
 
 		public static final int OUTPUT_MAP = 0;
 		private static final int OUTPUT_XML = 1;

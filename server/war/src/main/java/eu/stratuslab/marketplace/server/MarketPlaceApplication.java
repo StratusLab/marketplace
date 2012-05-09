@@ -48,6 +48,7 @@ import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Directory;
+import org.restlet.routing.Filter;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
@@ -215,7 +216,10 @@ public class MarketPlaceApplication extends Application {
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
 
-        return router;
+        Filter filter = new DoubleSlashFilter();
+        filter.setNext(router);
+        
+        return filter;
     }
 
     private static void attachDirectory(Router router, Context context,
@@ -287,6 +291,20 @@ public class MarketPlaceApplication extends Application {
         }
     }
 
+    static class DoubleSlashFilter extends Filter {
+    	@Override
+    	protected int beforeHandle(Request request, Response response) {
+    		Reference ref = request.getResourceRef();
+    		String originalPath = ref.getPath();
+    		if (originalPath.contains("//"))
+    		{
+    			String newPath = originalPath.replaceAll("//", "/");
+    			ref.setPath(newPath);
+    		}
+    		return Filter.CONTINUE;
+    	}
+    }
+    
     class MarketPlaceStatusService extends StatusService {
 
         public Representation getRepresentation(Status status, Request request,
