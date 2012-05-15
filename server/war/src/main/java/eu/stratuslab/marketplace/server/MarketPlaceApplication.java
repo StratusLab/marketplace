@@ -310,7 +310,7 @@ public class MarketPlaceApplication extends Application {
         public Representation getRepresentation(Status status, Request request,
                 Response response) {
 
-            if (request.getClientInfo().getAcceptedMediaTypes().get(0)
+        	if (request.getClientInfo().getAcceptedMediaTypes().get(0)
                     .getMetadata().equals(MediaType.TEXT_XML)
                     || request.getClientInfo().getAcceptedMediaTypes().get(0)
                             .getMetadata().equals(MediaType.APPLICATION_XML)

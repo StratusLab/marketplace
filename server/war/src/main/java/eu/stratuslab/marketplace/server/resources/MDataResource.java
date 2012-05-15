@@ -23,7 +23,6 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.METADATA_MAX_BYTES;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.MARKETPLACE_TYPE;
-import static org.restlet.data.MediaType.TEXT_PLAIN;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -146,7 +145,7 @@ public class MDataResource extends BaseResource {
 			Representation status = createStatusRepresentation("Upload", 
 			"metadata entry created");
 			
-			status.setLocationRef(baseUrl + "/metadata/" + iri);
+			status.setLocationRef(baseUrl + "/metadata" + iri);
 
 			return status;
 
@@ -159,25 +158,7 @@ public class MDataResource extends BaseResource {
 		}
 	}
 	
-	private Representation createStatusRepresentation(String title,
-			String message) {
-		Representation status = null;
-		if (getRequest().getClientInfo().getAcceptedMediaTypes().size() > 0
-			&& getRequest().getClientInfo().getAcceptedMediaTypes()
-				.get(0).getMetadata().equals(MediaType.TEXT_HTML)) {
-			Map<String, Object> dataModel = createInfoStructure(title);
-			dataModel.put("statusName", getResponse().getStatus().getReasonPhrase());
-			dataModel.put("statusDescription", message);
-			status = createTemplateRepresentation("status.ftl", dataModel,
-				MediaType.TEXT_HTML);
-		} else {
-			status = new StringRepresentation(message, TEXT_PLAIN);
-		}
-
-		return status;
-	}
-    
-    private static void confirmMetadataEntry(String baseUrl, File upload, Document metadata) {
+	private static void confirmMetadataEntry(String baseUrl, File upload, Document metadata) {
 
         try {
             String[] coords = getMetadataEntryCoordinates(metadata);

@@ -34,6 +34,9 @@ public final class MessageUtils {
             + "Abuse:  %s%n%n"
             + "We will then investigate how this entry was uploaded.%n";
 
+    private static final String ABUSE_MSG = "%n"
+    	+ "Abuse has been reported for the following entry: %s%n";
+    
     private MessageUtils() {
 
     }
@@ -47,6 +50,12 @@ public final class MessageUtils {
         return String.format(CONFIRM_MSG, confirmUrl, abortUrl, abuseUrl);
     }
 
+    public static String createAbuseNotification(File file){
+    	String uuid = extractUUIDFromFile(file);
+    	
+    	return String.format(ABUSE_MSG, uuid);
+    }
+    
     private static String extractUUIDFromFile(File file) {
         String name = file.getName();
         int index = name.indexOf('.');

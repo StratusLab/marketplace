@@ -51,6 +51,10 @@ public final class Notifier {
 
     }
 
+    public static boolean sendNotification(String message){
+    	return sendNotification(getAdminEmail(), message);
+    }
+    
     public static boolean sendNotification(String email, String message)
             throws Exception {
 

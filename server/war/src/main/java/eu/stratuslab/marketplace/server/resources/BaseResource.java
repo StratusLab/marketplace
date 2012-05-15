@@ -22,6 +22,7 @@ package eu.stratuslab.marketplace.server.resources;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.CREATED_DATE;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.EMAIL;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEMENT;
+import static org.restlet.data.MediaType.TEXT_PLAIN;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +38,8 @@ import java.util.logging.Logger;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
@@ -287,6 +290,24 @@ public abstract class BaseResource extends ServerResource {
 				queryString);
 
 		return list;
+	}
+	
+	protected Representation createStatusRepresentation(String title,
+			String message) {
+		Representation status = null;
+		if (getRequest().getClientInfo().getAcceptedMediaTypes().size() > 0
+			&& getRequest().getClientInfo().getAcceptedMediaTypes()
+				.get(0).getMetadata().equals(MediaType.TEXT_HTML)) {
+			Map<String, Object> dataModel = createInfoStructure(title);
+			dataModel.put("statusName", getResponse().getStatus().getReasonPhrase());
+			dataModel.put("statusDescription", message);
+			status = createTemplateRepresentation("status.ftl", dataModel,
+				MediaType.TEXT_HTML);
+		} else {
+			status = new StringRepresentation(message, TEXT_PLAIN);
+		}
+
+		return status;
 	}
 
 	protected String getCurrentDate() {
