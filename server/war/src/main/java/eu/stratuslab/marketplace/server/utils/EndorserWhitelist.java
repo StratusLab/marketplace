@@ -43,10 +43,7 @@ import java.util.logging.Logger;
 import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
-import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
-import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 
 import org.w3c.dom.Document;
@@ -62,6 +59,7 @@ import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
+@SuppressWarnings("restriction")
 public class EndorserWhitelist {
 	
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");

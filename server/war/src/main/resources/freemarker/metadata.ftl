@@ -55,6 +55,7 @@ Only</a>
             <th>identifier</th>
             <th>location</th>
             <th>description</th>
+            <th>title</th>
         </tr>
     </thead>
     <tbody>

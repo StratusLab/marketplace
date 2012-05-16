@@ -27,7 +27,7 @@
       <Bug pattern="DM_DEFAULT_ENCODING" />
     </Match>
     <Match>
-      <Class name="eu.stratuslab.marketplace.server.resources.MDataResource" />
+      <Class name="eu.stratuslab.marketplace.server.resources.MDataResourceBase" />
       <Bug pattern="DLS_DEAD_LOCAL_STORE" />
     </Match> 
      <Match>

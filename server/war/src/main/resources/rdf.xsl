@@ -28,6 +28,7 @@
 <xsl:choose>
    <xsl:when test="string(dcterms:title)">
     <h1><xsl:value-of select="dcterms:title"/></h1>
+    <h2><xsl:value-of select="dcterms:identifier"/></h2>
    </xsl:when>
 
    <xsl:otherwise>

@@ -33,17 +33,24 @@ function buildHtmlDisplay( aData )
         var osversion = aData[2];
         var arch = aData[3];
 
-        var header = createHeader(os, osversion, arch);
+        var title = aData[9];
+
+        var header = createHeader(title, os, osversion, arch);
         if( header.length == 0 )
         {
-            header = aData[6];
+            header = aData[6]; //identifier
         }
+
+        var downloadLink = "";
+        if(aData[7].substring(0, "http".length) == "http"){
+            downloadLink = "<a href='" + aData[7]
+                        + "'><img src='/css/download.png'/></a>";
+        } 
 
         var display = "<table class='vmpanel'>"
                         + "<tr><td colspan='3'><div id='header'>" + header
                         + "</div></td><td></td><td></td></tr>"
-                        + "<tr><td></td><td></td><td rowspan='5'><a href='" + aData[7]
-                        + "'><img src='/css/download.png'/></a></td></tr>"
+                        + "<tr><td></td><td></td><td rowspan='5'>" + downloadLink + "</td></tr>"
                         + "<tr><td><div id='detail'>Endorser:</div></td>"
                         + "<td><div id='detail'>" + aData[4] + "</div></td></tr>"
                         + "<tr><td><div id='detail'>Identifier:</div></td>"
@@ -57,22 +64,30 @@ function buildHtmlDisplay( aData )
         return display;
 }
 
-function createHeader( os, osversion, arch ){
-        var header = os;
-        if(osversion.length > 0)
+function createHeader( title, os, osversion, arch ){
+        var header = "";
+
+        if(title.length > 0 && title != "null")
         {
-            header = header + " v" + osversion;
-        }       
-        if(arch.length > 0)
-        {
-            header = header + " " + arch;
-        }       
+            header = title;
+        } else if(os.length > 0 && os != "null"){
+            header = os;
+
+            if(osversion.length > 0 && osversion != "null")
+            {
+                header = header + " v" + osversion;
+            }       
+            if(arch.length > 0 && arch != "null")
+            {
+                header = header + " " + arch;
+            }       
+        }
 
         return header;
 }
 
 function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
-	var iPipe = 5; /* Ajust the pipe size */
+	var iPipe = 5; /* Adjust the pipe size */
 
 	var bNeedServer = false;
 	var sEcho = fnGetKey(aoData, "sEcho");
@@ -235,6 +250,7 @@ $(document).ready(function() {
                                  { "bSearchable": false, "bVisible": false, "aTargets": [6] }, //identifier
                                  { "bSearchable": false, "bVisible": false, "aTargets": [7] }, //location
                                  { "bSearchable": false, "bVisible": false, "aTargets": [8] }, //description
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [9] }, //title
 		                 ],
 		                 "aaSorting": [[5, 'desc']],
 		                 'sPaginationType': 'listbox',
