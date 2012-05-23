@@ -149,6 +149,19 @@ public enum Parameter {
         }
     },
 
+    MARKETPLACE_ENDPOINT(false, "http://marketplace.stratuslab.eu", 
+    		"Endpoint for this Marketplace instance.") {
+    	public void validate(String value) {
+            super.validate(value);
+            try {
+                new URL(value);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("invalid master URL: "
+                        + value);
+            }
+        }
+    },
+    
     MARKETPLACE_TYPE(false, "Type of Marketplace instance.") {
     	@Override
     	public void validate(String value) {

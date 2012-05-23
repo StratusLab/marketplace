@@ -75,14 +75,15 @@ import eu.stratuslab.marketplace.server.utils.Reminder;
 public class MarketPlaceApplication extends Application {
 
     private static final Logger LOGGER = Logger.getLogger("org.restlet");
-
+    
     private final ScheduledExecutorService scheduler = Executors
-            .newScheduledThreadPool(1);
-
+            .newScheduledThreadPool(2);
+    
     private ScheduledFuture<?> reminderHandle;
 
     private Reminder reminder;
-
+    private Reminder expiry;
+    
     private RdfStore store = null;
     
     private String dataDir = null;
@@ -140,9 +141,21 @@ public class MarketPlaceApplication extends Application {
             }
         };
 
+        final Runnable expiry = new Runnable() {
+            public void run() {
+                expiry();
+            }
+        };
+        
         this.reminder = new Reminder(this);
         if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
             reminderHandle = scheduler.scheduleWithFixedDelay(remind, 30, 30,
+                    TimeUnit.DAYS);
+        }
+        
+        this.expiry = new Reminder(this);
+        if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
+            reminderHandle = scheduler.scheduleWithFixedDelay(expiry, 1, 1,
                     TimeUnit.DAYS);
         }
 
@@ -236,9 +249,13 @@ public class MarketPlaceApplication extends Application {
     }
 
     private void remind() {
-        this.reminder.remind();
+        reminder.remind();
     }
 
+    private void expiry() {
+        expiry.expiry();
+    }
+    
     @Override
     public void stop() {
     	if(store != null){

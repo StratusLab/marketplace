@@ -311,9 +311,13 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected String getCurrentDate() {
-		return getDateFormat().format(new Date());
+		return getFormattedDate(new Date());
 	}
 
+	protected String getFormattedDate(Date date){
+		return getDateFormat().format(date);
+	}
+	
 	private DateFormat getDateFormat() {
 		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
 		format.setLenient(false);
