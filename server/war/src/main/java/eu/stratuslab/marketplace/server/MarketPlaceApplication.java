@@ -148,17 +148,14 @@ public class MarketPlaceApplication extends Application {
         };
         
         this.reminder = new Reminder(this);
+        this.expiry = new Reminder(this);
         if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
             reminderHandle = scheduler.scheduleWithFixedDelay(remind, 30, 30,
                     TimeUnit.DAYS);
-        }
-        
-        this.expiry = new Reminder(this);
-        if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
             reminderHandle = scheduler.scheduleWithFixedDelay(expiry, 1, 1,
                     TimeUnit.DAYS);
         }
-
+        
     }
 
     /**

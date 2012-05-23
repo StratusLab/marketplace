@@ -218,7 +218,7 @@ public class Reminder extends BaseResource {
 				String valid = e.get("valid");
 				
 				mailContents.append("\n" + identifier + "\texpires: " + valid);
-				mailContents.append("\n\t Retrieve entry: " + marketplaceEndpoint
+				mailContents.append("\nRetrieve entry: " + marketplaceEndpoint
 				+ "/metadata/" + identifier + "/" + endorser + "/" + created + "?media=xml"); 
 			}
 			
