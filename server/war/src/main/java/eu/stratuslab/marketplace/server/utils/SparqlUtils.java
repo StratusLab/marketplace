@@ -44,7 +44,7 @@ public class SparqlUtils {
     	"?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; " +
     	"<http://purl.org/dc/terms/created> ?created . " +
     	"?endorser <http://mp.stratuslab.eu/slreq#email> ?email . " +
-    	"FILTER (?email = \"%s\") }";
+    	"FILTER (?email = \"%s\") . FILTER(?created > \"%s\") }";
 	
 	public static final String LATEST_ENTRY_QUERY_TEMPLATE = //
 		"SELECT ?created " +

@@ -19,10 +19,13 @@
  */
 package eu.stratuslab.marketplace.server.resources;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
+import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -42,8 +45,11 @@ public class EndorserResource extends BaseResource {
             
     @Override
     protected void doInit() {
-        this.email = (String) getRequest().getAttributes().get("email");
-        query = String.format(ENDORSER_HISTORY_QUERY_TEMPLATE, email);
+        email = (String) getRequest().getAttributes().get("email");
+        
+        String range = getRangeFromRequest();
+        
+        query = String.format(ENDORSER_HISTORY_QUERY_TEMPLATE, email, getHistoryRange(range));
     }
 
     @Get("html")
@@ -98,4 +104,30 @@ public class EndorserResource extends BaseResource {
         // Returns the XML representation of this document.
         return representation;
     }
+    
+    private String getRangeFromRequest(){
+		Form form = getRequest().getResourceRef().getQueryAsForm();
+		String range = form.getFirstValue("range", "30");
+
+		return range;
+	}
+    
+    private String getHistoryRange(String range){
+		Date today = new Date();
+		Calendar cal = Calendar.getInstance();  
+		cal.setTime(today);    
+		
+		int r = 30;
+		
+		try {
+			r = Integer.parseInt(range);
+		} catch(NumberFormatException n){
+			LOGGER.warning("incorrect range value entered: " + range);
+		}
+		
+		cal.add(Calendar.DATE, -r);
+		Date expiration = cal.getTime();
+				
+		return getFormattedDate(expiration);
+	}
 }

@@ -8,6 +8,7 @@
   <script type="text/javascript" language="javascript" src="/js/jquery.min.js"></script>
   <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript" language="javascript" src="/js/jquery.datatable.listbox.plugin.js"></script>
+  <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.pipelining.js"></script>
 
   <link rel="shortcut icon" href="css/favicon.ico"/>
   <link rel="stylesheet" type="text/css" href="css/service.css"/>
