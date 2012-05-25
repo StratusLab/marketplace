@@ -15,7 +15,7 @@
 <br/>
 
 <p>Deprecated entries:
-<a HREF="/metadata">
+<a href="/metadata">
 Off</a> |
 <a href="/metadata?deprecated">
 On</a> |

@@ -12,15 +12,15 @@
 
 <h1>${title}</h1>
 
-     <form>
+    <form>
         <label for="range">Last </label>
         <select name="range" id="range">
-        <option value="_none_"></option>
-        <option value="30">30 days</option>
+        <option value="30"></option>
+        <option selected="selected" value="30">30 days</option>
         <option value="60">60 days</option>
         <option value="90">90 days</option>
         </select>
-     </form>
+     </form> 
 
      <table cellpadding="0" cellspacing="0" border="0" class="display" id="endorserhistory">
 	  <thead>
@@ -51,11 +51,30 @@
 	});
 	} );
 
+        function getParameterByName(name)
+        {
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regexS = "[\\?&]" + name + "=([^&#]*)";
+            var regex = new RegExp(regexS);
+            var results = regex.exec(window.location.search);
+            if(results == null)
+                return "";
+            else
+                return decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+        var text1 = getParameterByName("range");
+        var text2 = text1 + " days";
+        $("select option").filter(function() {
+        //may want to use $.trim in here
+            return $(this).text() == text2; 
+        }).attr('selected', true);
+
         $(function() {
             $('#range').change(function() {
                 $(this).closest('form').submit();
         });
-});
+        });
 
 </script>
 
