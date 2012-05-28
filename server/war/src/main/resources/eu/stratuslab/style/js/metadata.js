@@ -186,7 +186,7 @@ $(document).ready(function() {
 		switch ($(this).val()) {
 		case "_none_":  // first option chosen, not associated with any column,
 			// do some default
-			oTable.fnSort( [ [1,'asc'] ] );
+			oTable.fnSort( [ [5,'desc'] ] );
 			break;
 
 		case "os":

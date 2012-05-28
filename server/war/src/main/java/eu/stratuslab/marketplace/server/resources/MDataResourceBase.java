@@ -309,7 +309,7 @@ public class MDataResourceBase extends BaseResource {
     	
     	if(iDisplayStart != null && iDisplayLength != null){
     		int sort = (iSortCol != null) ? 
-    				Integer.parseInt(iSortCol) : 5;
+    				Integer.parseInt(iSortCol) : SparqlUtils.DEFAULT_SEARCH_COL;
     		String sortCol = SparqlUtils.getColumn(sort);
     		      		
     		paging = SparqlUtils.buildLimit(sortCol, iDisplayLength, iDisplayStart, sSortDir);
@@ -353,8 +353,7 @@ public class MDataResourceBase extends BaseResource {
 
         StringBuilder searchColumnsPredicate = new StringBuilder();
         
-        //first 4 columns are searchable
-        for(int i = 1; i <= 4; i++){
+        for(int i = 1; i <= SparqlUtils.SEARCHABLE_COLUMNS; i++){
                 if ( sSearchCols[i] != null && sSearchCols[i].length() > 0 )
                 {
                         if ( searchColumnsPredicate.length() == 0 )

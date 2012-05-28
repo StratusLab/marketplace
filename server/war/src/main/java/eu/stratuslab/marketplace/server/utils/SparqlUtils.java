@@ -24,6 +24,10 @@ public class SparqlUtils {
 	private static final String[] aColumns = { "", "os", "osversion", "arch", "email", "created",
 			"identifier", "location", "description", "title"};
 	
+	public static final int SEARCHABLE_COLUMNS = 4;
+	
+	public static final int DEFAULT_SEARCH_COL = 5;
+	
 	public static final String EMAIL_QUERY = //
         "SELECT DISTINCT ?email ?subject ?issuer "
                 + " WHERE {"
