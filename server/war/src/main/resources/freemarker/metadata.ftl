@@ -14,14 +14,14 @@
 
 <br/>
 
-<p>Deprecated entries:
-<a href="/metadata">
-Off</a> |
-<a href="/metadata?deprecated">
-On</a> |
-<a href="/metadata?deprecated=only">
-Only</a>
-</p>
+<form>
+    <label for="deprecated">Deprecated entries: </label>
+    <select name="deprecated" id="deprecated">
+        <option selected="selected" value="off">off</option>
+        <option value="on">on</option>
+        <option value="only">only</option>
+    </select>
+</form>
 
 <form id="filterBy" name="filterBy">
 <label for="filterBy">Filter:</label><br/>

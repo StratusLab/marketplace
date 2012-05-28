@@ -40,6 +40,8 @@ import static eu.stratuslab.marketplace.server.utils.SparqlUtils.ENDORSER_HISTOR
  */
 public class EndorserResource extends BaseResource {
 
+	private final static int DEFAULT_RANGE = 30;
+	
     private String query = null;
     private String email = null;
             
@@ -117,7 +119,7 @@ public class EndorserResource extends BaseResource {
 		Calendar cal = Calendar.getInstance();  
 		cal.setTime(today);    
 		
-		int r = 30;
+		int r = DEFAULT_RANGE;
 		
 		try {
 			r = Integer.parseInt(range);

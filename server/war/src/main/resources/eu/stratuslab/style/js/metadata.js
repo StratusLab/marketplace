@@ -213,3 +213,26 @@ $(document).ready(function() {
 
 	oTable.fnSetFilteringDelay();
 } );
+
+function getParameterByName(name)
+{
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.search);
+    if(results == null)
+        return "";
+    else
+        return decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+var text1 = getParameterByName("deprecated");
+$("select option").filter(function() {
+    return $(this).text() == text1;
+}).attr('selected', true);
+
+$(function() {
+   $('#deprecated').change(function() {
+       $(this).closest('form').submit();
+   });
+ });
