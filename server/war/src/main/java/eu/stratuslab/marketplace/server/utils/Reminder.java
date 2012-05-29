@@ -174,15 +174,11 @@ public class Reminder extends BaseResource {
 				String os = entryRow.get("os");
 				String osversion = entryRow.get("osversion");
 				String location = entryRow.get("location");
-				String description = entryRow.get("description");
-
+				
 				mailContents.append(identifier 
 						+ "\n\tcreated:\t" + created
 						+ "\n\tos:     \t" + os + " " + osversion + "\n");
 
-				if(description != "null" && description.length() > 0){
-					mailContents.append("\tdescription:\t" + description + "\n");
-				}
 				if(location != "null" && location.length() > 0){
 					mailContents.append("\tlocation:\t" + location + "\n");
 				}
@@ -219,7 +215,7 @@ public class Reminder extends BaseResource {
 				
 				mailContents.append("\n" + identifier + "\texpires: " + valid);
 				mailContents.append("\nRetrieve entry: " + marketplaceEndpoint
-				+ "/metadata/" + identifier + "/" + endorser + "/" + created + "?media=xml"); 
+				+ "/metadata/" + identifier + "/" + endorser + "/" + created + "?media=xml\n"); 
 			}
 			
 			try {
