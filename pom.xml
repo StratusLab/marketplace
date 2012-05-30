@@ -51,8 +51,8 @@ metadata.
   </ciManagement>
 
   <scm>
-    <connection>scm:git:ssh://apache@code.stratuslab.eu/ext/git/stratuslab-marketplace.git</connection>
-    <developerConnection>scm:git:ssh://apache@code.stratuslab.eu/ext/git/stratuslab-marketplace.git</developerConnection>
+    <connection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</developerConnection>
   </scm>
 
   <repositories>
