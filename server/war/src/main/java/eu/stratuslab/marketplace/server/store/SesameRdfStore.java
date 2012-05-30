@@ -1,3 +1,22 @@
+/**
+ * Created as part of the StratusLab project (http://stratuslab.eu),
+ * co-funded by the European Commission under the Grant Agreement
+ * INSFO-RI-261552.
+ *
+ * Copyright (c) 2011
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.stratuslab.marketplace.server.store;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.RDBMS_DBNAME;
@@ -11,6 +30,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,7 +50,10 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.openrdf.query.resultio.TupleQueryResultWriter;
+import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
+import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriterFactory;
+import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriterFactory;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -101,7 +124,6 @@ public class SesameRdfStore extends RdfStore {
 		}
 	}
 
-	@Override
 	public boolean store(String identifier, String entry) {
 		boolean success = false;
 		try {
@@ -128,6 +150,10 @@ public class SesameRdfStore extends RdfStore {
 	}
 
 	@Override
+	public String getRdfEntry(String uri) throws MarketplaceException {
+		return null;
+	}
+	
 	public List<Map<String, String>> getRdfEntriesAsMap(String query)
 			throws MarketplaceException {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
@@ -178,24 +204,41 @@ public class SesameRdfStore extends RdfStore {
 		return list;
 	}
 
-	public String getRdfEntriesAsString(String query) throws MarketplaceException {
+	public String getRdfEntriesAsXml(String query) throws MarketplaceException {
+		TupleQueryResultWriterFactory writerFactory = new SPARQLResultsXMLWriterFactory();
+		
+		return getRdfEntriesAsString(query, writerFactory);
+	}
+	
+	public String getRdfEntriesAsJson(String query) throws MarketplaceException {
+		TupleQueryResultWriterFactory writerFactory = new SPARQLResultsJSONWriterFactory();
+		
+		return getRdfEntriesAsString(query, writerFactory);
+	}
+	
+	public String getRdfEntriesAsString(String query,
+			TupleQueryResultWriterFactory writerFactory)
+			throws MarketplaceException {
 		String resultString = null;
 
 		try {
 			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 			BufferedOutputStream out = new BufferedOutputStream(bytes);
-			SPARQLResultsXMLWriter sparqlWriter = new SPARQLResultsXMLWriter(
-					out);
+			TupleQueryResultWriter writer = writerFactory.getWriter(out);
 
 			RepositoryConnection con = getMetadataStore().getConnection();
+
 			try {
 				TupleQuery tupleQuery = con.prepareTupleQuery(
 						QueryLanguage.SPARQL, query);
-				tupleQuery.evaluate(sparqlWriter);
-				resultString = bytes.toString();
+				tupleQuery.evaluate(writer);
+				resultString = bytes.toString("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new MarketplaceException(e.getMessage());
 			} finally {
 				con.close();
 			}
+
 		} catch (RepositoryException e) {
 			throw new MarketplaceException(e.getMessage());
 		} catch (MalformedQueryException e) {
@@ -208,7 +251,6 @@ public class SesameRdfStore extends RdfStore {
 		return resultString;
 	}
 
-	@Override
 	public void remove(String identifier) {
 		try {
 			RepositoryConnection con = getMetadataStore().getConnection();
@@ -299,7 +341,6 @@ public class SesameRdfStore extends RdfStore {
 		return pgsqlStore;
 	}
 
-	@Override
 	public void shutdown() {
 		if (store != null) {
 			try {

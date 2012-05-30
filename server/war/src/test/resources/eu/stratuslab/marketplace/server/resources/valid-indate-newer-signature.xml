@@ -23,7 +23,7 @@
             <slreq:value>70cd8ad17fab1abe7fae230ff70f682ed3af4892225b3100e6a07fc2471b657def80fce93afd02aa7f3e716bb8cab02b745d032cdc4895d5fd242a7ac8403693</slreq:value>
         </slreq:checksum>
 
-        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2011-09-12T09:58:55Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</issuer></endorser></slreq:endorsement>
+        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2012-03-05T19:14:58Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</issuer></endorser></slreq:endorsement>
 
         <dcterms:type>base</dcterms:type>
         <slterms:kind>machine</slterms:kind>
@@ -40,7 +40,7 @@
         <dcterms:creator>Jane Tester</dcterms:creator>
 
         <dcterms:created>2011-09-09T14:12:57Z</dcterms:created>
-        <dcterms:valid>2012-03-05T14:12:57Z</dcterms:valid>
+        <dcterms:valid>2014-03-05T14:12:57Z</dcterms:valid>
 
         <dcterms:description/>
 
@@ -50,11 +50,11 @@
         
 
     </rdf:Description>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>FJ8HwxvmcdCKPN519KjcDxENPh0=</DigestValue></Reference></SignedInfo><SignatureValue>zeHXTZ1c7paRwF33uirQPM7zNrrlt0yE/y3laIEK2MrrE6dp6UzCKfXNwoh+U2RXv7brFmt3VeRN
-vw2SxVfnxMWYlHb8yDVMYmyTIOgZU3tnYflgWWEsf3RMknSuOUn0hE0uVT/iKRx1mBCObkXu8Mzj
-yjlmvDNXM57U2OBB022L1++mFQpcMnC9LeGOdFNmy4iK4MGT7SkukieNkFubpI4k7ZDJYyShDTkB
-f4bZWVS+SyK2z6h0b5K2ltowA/liUb35MfjCHHP3VD2xoQ6rArlg/P59Dhz0xR7gSvC1pGJY+ZSl
-kviOz4YChrStTy8s2g37V5jf3v9RtTI2nxv1tw==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIERjCCAy6gAwIBAgIJALTElVKI0aJGMA0GCSqGSIb3DQEBBQUAMF0xCzAJBgNVBAYTAkVVMRsw
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>JjpeQqt00ZqKfKX1WfaMBJclZc4=</DigestValue></Reference></SignedInfo><SignatureValue>uFpZyhj02WiYNjdKGiQVNyN3W3IuZKO87Ug2PygRdFT028LJLGQoH5nDv+v5kP85GPgynivi4t1G
+wfRifo4H/nXTScjuaK88WBuQx7IPBoXNObg1rwBSCGxOTkTUpz61gUzjOwpvIun9s0VX3t1jHACE
+E+Ls4QVCq9YyAEMk41kOEbYknzJvmkGFK3dmqUJrJ38GFKJ13fWP3bdV6KME767M66KN5QpC0qPU
+naCbVfk6beiWQjNcPHD+tCCiinU8mk1SOnHZDFPfrCk4pl60i7X/Lnj/31f3V4CMdrkZpjWhyJgS
+GPhk2eAJmebBmRc1+UmcsaYTT7EVdDaKd85Vrg==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIERjCCAy6gAwIBAgIJALTElVKI0aJGMA0GCSqGSIb3DQEBBQUAMF0xCzAJBgNVBAYTAkVVMRsw
 GQYDVQQKExJTdHJhdHVzTGFiIFByb2plY3QxGzAZBgNVBAsTElRlc3RpbmcgRGVwYXJ0bWVudDEU
 MBIGA1UEAxMLSmFuZSBUZXN0ZXIwHhcNMTEwOTA1MTEyODA1WhcNMTIwOTA0MTEyODA1WjBdMQsw
 CQYDVQQGEwJFVTEbMBkGA1UEChMSU3RyYXR1c0xhYiBQcm9qZWN0MRswGQYDVQQLExJUZXN0aW5n

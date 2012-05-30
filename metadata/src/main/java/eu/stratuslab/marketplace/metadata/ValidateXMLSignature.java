@@ -2,14 +2,10 @@ package eu.stratuslab.marketplace.metadata;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLREQ_NS_URI;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.crypto.dsig.XMLSignature;
-
-import java.security.KeyStore;
-import java.security.cert.X509CRL;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -41,25 +37,7 @@ public final class ValidateXMLSignature {
     	}      
     }
 
-	public static String validateCertificate(Document doc,
-			KeyStore anchors, Collection<X509CRL> crls) {
-		boolean isVerified = true;
-		
-		Node signature = extractSignature(doc);
-		
-		Object[] result = MetadataUtils.isCertificateVerified(signature, anchors, crls);
-
-		isVerified = ((Boolean) result[0]).booleanValue();
-		String message = (String) result[1];
-
-		if (isVerified) {
-			return message;
-		} else {
-			throw new MetadataException(message);
-		}
-	}
-    
-    private static Map<String, String> getEndorserInfo(Document doc) {
+	private static Map<String, String> getEndorserInfo(Document doc) {
 
         Map<String, String> info = new HashMap<String, String>();
 

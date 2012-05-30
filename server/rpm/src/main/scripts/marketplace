@@ -4,7 +4,7 @@
 
 # To get the service to restart correctly on reboot, uncomment below (3 lines):
 # ========================
-# chkconfig: 3 99 99
+# chkconfig: - 80 20
 # description: Jetty 7 webserver
 # processname: jetty
 # ========================
@@ -73,6 +73,13 @@
 # JETTY_PID
 #   The Jetty PID file, defaults to $JETTY_RUN/jetty.pid
 #   
+# JETTY_LOCKDIR
+#   Where the lock file should be stored. It defaults to the first available of
+#   /var/lock/subsys and /tmp if not set.
+#
+# JETTY_LOCKFILE
+#   The Jetty lock file, defaults to $JETTY_LOCKDIR/marketplace
+#
 # JETTY_ARGS
 #   The default arguments to pass to jetty.
 #
@@ -293,12 +300,22 @@ then
   JETTY_RUN=$(findDirectory -w /var/run /usr/var/run /tmp)
 fi
 
+if [ -z "$JETTY_LOCKDIR" ]
+then
+  JETTY_LOCKDIR=$(findDirectory -w /var/lock/subsys /tmp)
+fi
+
 #####################################################
 # Find a PID for the pid file
 #####################################################
 if [ -z "$JETTY_PID" ] 
 then
   JETTY_PID="$JETTY_RUN/marketplace.pid"
+fi
+
+if [ -z "$JETTY_LOCKFILE" ]
+then
+  JETTY_LOCKFILE="$JETTY_LOCKDIR/marketplace"
 fi
 
 ##################################################
@@ -370,6 +387,8 @@ then
   echo "JETTY_CONF     =  $JETTY_CONF"
   echo "JETTY_RUN      =  $JETTY_RUN"
   echo "JETTY_PID      =  $JETTY_PID"
+  echo "JETTY_LOCKDIR  =  $JETTY_LOCKDIR"
+  echo "JETTY_LOCKFILE =  $JETTY_LOCKFILE"
   echo "JETTY_ARGS     =  $JETTY_ARGS"
   echo "CONFIGS        =  ${CONFIGS[*]}"
   echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
@@ -403,6 +422,7 @@ case "$ACTION" in
         sleep 1
         if running "$JETTY_PID"
         then
+          touch $JETTY_LOCKFILE
           echo "OK"
         else
           echo "FAILED"
@@ -420,6 +440,7 @@ case "$ACTION" in
         else
           # dead pid file - remove
           rm -f "$JETTY_PID"
+          rm -f "$JETTY_LOCKFILE"
         fi
       fi
 
@@ -437,6 +458,7 @@ case "$ACTION" in
         disown $!
         echo $! > "$JETTY_PID"
       fi
+      touch $JETTY_LOCKFILE
 
       echo "STARTED Jetty `date`" 
     fi
@@ -458,6 +480,7 @@ case "$ACTION" in
       done
 
       rm -f "$JETTY_PID"
+      rm -f "$JETTY_LOCKFILE"
       echo OK
     else
       PID=$(cat "$JETTY_PID" 2>/dev/null)
@@ -473,6 +496,7 @@ case "$ACTION" in
       done
 
       rm -f "$JETTY_PID"
+      rm -f "$JETTY_LOCKFILE"
       echo OK
     fi
 
@@ -514,6 +538,7 @@ case "$ACTION" in
       else
         # dead pid file - remove
         rm -f "$JETTY_PID"
+        rm -f "$JETTY_LOCKFILE"
       fi
     fi
 
@@ -527,6 +552,8 @@ case "$ACTION" in
     echo "JETTY_CONF     =  $JETTY_CONF"
     echo "JETTY_RUN      =  $JETTY_RUN"
     echo "JETTY_PID      =  $JETTY_PID"
+    echo "JETTY_LOCKDIR  =  $JETTY_LOCKDIR"
+    echo "JETTY_LOCKFILE =  $JETTY_LOCKFILE"
     echo "JETTY_PORT     =  $JETTY_PORT"
     echo "JETTY_LOGS     =  $JETTY_LOGS"
     echo "START_INI      =  $START_INI"

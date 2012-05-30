@@ -14,21 +14,11 @@
 
 ${content}
 
+
+<input type="button" value="xml" onClick="window.location='${url}?media=xml'">
+<input type="button" value="json" onClick="window.location='${url}?media=json'">
+
 </div>
-
-<br>
-
-<!-- <div class='image_rating'>
-    Rate this image:
-    <div id="${identifier}" class="rate_image">
-        <div class="star_1 ratings_stars"></div>
-        <div class="star_2 ratings_stars"></div>
-        <div class="star_3 ratings_stars"></div>
-        <div class="star_4 ratings_stars"></div>
-        <div class="star_5 ratings_stars"></div>
-        <div class="total_votes">vote data</div>
-    </div>
-</div> -->
 
 </div>
 

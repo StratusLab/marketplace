@@ -9,7 +9,7 @@
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
     <artifactId>marketplace-server</artifactId>
-    <version>1.0.10-SNAPSHOT</version>
+    <version>1.0.17-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -17,7 +17,7 @@
       <groupId>eu.stratuslab.marketplace</groupId>
       <artifactId>marketplace-server-war</artifactId>
       <type>war</type>
-      <version>1.0.10-SNAPSHOT</version>
+      <version>1.0.17-SNAPSHOT</version>
     </dependency>
   </dependencies>
   
@@ -25,7 +25,7 @@
     <installation.dir>/opt/stratuslab/marketplace</installation.dir>
     <marketplace-war>marketplace-server-war-${project.version}.war</marketplace-war>
     <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format> 
-    <RELEASE>0.${maven.build.timestamp}</RELEASE>
+    <RELEASE>0.${maven.build.timestamp}.${package.os}</RELEASE>
   </properties>
   <build>
     
@@ -148,6 +148,7 @@
 		  <location>src/main/scripts</location>
 		  <includes>
 		    <include>generate-jetty-certificate.sh</include>
+                    <include>marketplace-sync.sh</include>
 		  </includes>
 		</source>
 	      </sources>
@@ -167,6 +168,7 @@
 		  </includes>
 		  <excludes>
                     <exclude>marketplace.cfg</exclude>
+                    <exclude>marketplace-sync.cfg</exclude>
 		    <exclude>etc/login/*</exclude>
 		    <exclude>etc/overrides/*</exclude>
 		  </excludes>
@@ -224,6 +226,7 @@
                   <location>src/main/jetty-config</location>
                   <includes>
                     <include>marketplace.cfg</include>
+                    <include>marketplace-sync.cfg</include>
                   </includes>
                 </source>
               </sources>

@@ -1,3 +1,22 @@
+/**
+ * Created as part of the StratusLab project (http://stratuslab.eu),
+ * co-funded by the European Commission under the Grant Agreement
+ * INSFO-RI-261552.
+ *
+ * Copyright (c) 2011
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
@@ -13,6 +32,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
+import org.restlet.data.Disposition;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -33,13 +53,14 @@ public class MDatumResource extends BaseResource {
 
     private String datum = null;
     private String identifier = null;
-        
+    private String url = null;        
+
     @Override
     protected void doInit() {
-        String iri = getRequest().getResourceRef().getPath();
-        iri = iri.substring(iri.indexOf("metadata") + 9);
-        this.datum = getMetadatum(getDataDir() + "/" + iri + ".xml");
-        this.identifier = iri.substring(0, iri.indexOf("/"));
+        url = getRequest().getResourceRef().getPath();
+        String iri = url.substring(url.indexOf("metadata") + 9);
+        datum = getMetadatum(iri);
+        identifier = iri.substring(0, iri.indexOf("/"));
     }
 
     @Get("xml")
@@ -51,6 +72,11 @@ public class MDatumResource extends BaseResource {
     	
     	StringRepresentation representation = new StringRepresentation(
                 new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
+
+        Disposition disposition = new Disposition();
+        disposition.setFilename(identifier + ".xml");
+        disposition.setType(Disposition.TYPE_ATTACHMENT);
+        representation.setDisposition(disposition);            	
 
         // Returns the XML representation of this document.
         return representation;
@@ -66,14 +92,19 @@ public class MDatumResource extends BaseResource {
         Model rdfModel = ModelFactory.createMemModelMaker()
                 .createDefaultModel();
         rdfModel.read(new ByteArrayInputStream((MetadataFileUtils.stripSignature(datum))
-                .getBytes()), MARKETPLACE_URI);
-
+			        .getBytes()), MARKETPLACE_URI);
+		
         JSONJenaWriter jenaWriter = new JSONJenaWriter();
         ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
         jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);
 
         StringRepresentation representation = new StringRepresentation(jsonOut
                 .toString(), MediaType.APPLICATION_JSON);
+
+        Disposition disposition = new Disposition();
+        disposition.setFilename(identifier + ".json");
+        representation.setDisposition(disposition);
+        disposition.setType(Disposition.TYPE_ATTACHMENT);
 
         return representation;
     }
@@ -108,8 +139,9 @@ public class MDatumResource extends BaseResource {
         }
 
         Map<String, Object> data = createInfoStructure("Metadata");
-        data.put("identifier", this.identifier);
+        data.put("identifier", identifier);
         data.put("content", stringBuilder.toString());
+        data.put("url", url);
 
         // Load the FreeMarker template
         // Wraps the bean with a FreeMarker representation

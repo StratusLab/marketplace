@@ -14,14 +14,22 @@
 
 <br/>
 
-<p>View:
-<a HREF="/metadata">
-All</a> |
-<a href="/metadata?deprecated">
-With deprecated</a> |
-<a href="/metadata?deprecated=only">
-Deprecated only</a>
-</p>
+<form>
+    <label for="deprecated">Deprecated entries: </label>
+    <select name="deprecated" id="deprecated">
+        <option selected="selected" value="off">off</option>
+        <option value="on">on</option>
+        <option value="only">only</option>
+    </select>
+</form>
+
+<form id="filterBy" name="filterBy">
+<label for="filterBy">Filter:</label><br/>
+<input type="text" name="search_os" value="Search os" class="search_init"><br/>
+<input type="text" name="search_version" value="Search version" class="search_init"><br/>
+<input type="text" name="search_arch" value="Search arch" class="search_init"><br/>
+<input type="text" name="search_arch" value="Search endorser" class="search_init">
+</form>
 
 <form>
 <label for="sortBy">Sort by:</label>
@@ -33,6 +41,7 @@ Deprecated only</a>
 <option value="endorser">Endorser</option>
 <option value="date">Date</option>
 </select>
+</form>
 
 <table id="search_table" class="search">
     <thead>
@@ -43,6 +52,10 @@ Deprecated only</a>
             <th>arch</th>
             <th>endorser</th>
             <th>date</th>
+            <th>identifier</th>
+            <th>location</th>
+            <th>description</th>
+            <th>title</th>
         </tr>
     </thead>
     <tbody>
@@ -51,7 +64,7 @@ Deprecated only</a>
 
 <script type="text/javascript" language="javascript" src="/js/metadata.js"></script>
 
-</br>
+<br/>
 
 </div>
 </div>
