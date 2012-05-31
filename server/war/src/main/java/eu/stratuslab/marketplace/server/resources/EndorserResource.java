@@ -40,7 +40,7 @@ import static eu.stratuslab.marketplace.server.utils.SparqlUtils.ENDORSER_HISTOR
  */
 public class EndorserResource extends BaseResource {
 
-	private final static int DEFAULT_RANGE = 30;
+	private static final int DEFAULT_RANGE = 30;
 	
     private String query = null;
     private String email = null;
@@ -69,11 +69,13 @@ public class EndorserResource extends BaseResource {
         	String deprecated = resultRow.get("deprecated");
         	String location = resultRow.get("location");
         	
-        	if(deprecated.equals("null"))
+        	if(deprecated.equals("null")){
         		resultRow.put("deprecated", "");
-        	
-        	if(location.equals("null"))
+        	}
+        	        	
+        	if(location.equals("null")){
         		resultRow.put("location", "");
+        	}
         	
         	results.set(i, resultRow);
         }

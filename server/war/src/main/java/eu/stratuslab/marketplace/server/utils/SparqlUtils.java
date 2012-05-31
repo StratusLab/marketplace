@@ -20,7 +20,7 @@
 package eu.stratuslab.marketplace.server.utils;
 
 
-public class SparqlUtils {
+public final class SparqlUtils {
 	private static final String[] aColumns = { "", "os", "osversion", "arch", "email", "created",
 			"identifier", "location", "description", "title"};
 	
@@ -104,6 +104,8 @@ public class SparqlUtils {
     
     public static final String DEPRECATED_ON = "FILTER (EXISTS " +
     		"{?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated}) ";
+    
+    private SparqlUtils(){}
     
 	public static String buildFilterEq(String arg, String value){
 		return String.format(FILTER_TEMPLATE, arg, value);

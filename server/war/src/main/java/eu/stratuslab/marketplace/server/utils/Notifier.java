@@ -41,6 +41,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
 public final class Notifier {
@@ -56,13 +57,13 @@ public final class Notifier {
     }
     
     public static boolean sendNotification(String email, String message)
-            throws Exception {
+            throws MarketplaceException {
 
         try {
             InternetAddress address = new InternetAddress(email);
             return sendNotification(address, message);
         } catch (AddressException e) {
-            throw new Exception(e.getMessage());
+            throw new MarketplaceException(e.getMessage(), e);
         }
     }
 
@@ -117,15 +118,14 @@ public final class Notifier {
                 logger.severe(m.toString());
                 sendOk = false;
             }
-
+        
         } catch (MessagingException consumed) {
-            // FIXME: Is this logic actually correct?
-            consumed.printStackTrace();
+        	StringBuilder m = new StringBuilder();
+            m.append("error sending message to " + email + "\n");
+            m.append(consumed.getMessage() + "\n");
             sendOk = false;
-
-        } finally {
-
         }
+        
         return sendOk;
     }
 
@@ -134,13 +134,15 @@ public final class Notifier {
         try {
 
             String adminEmail = Configuration.getParameterValue(ADMIN_EMAIL);
-            return new InternetAddress(adminEmail);
+            if(adminEmail != null) {
+            	return new InternetAddress(adminEmail);
+            } else {
+            	throw new MarketplaceException(
+                        "administrator email undefined");
+            }
 
-        } catch (NullPointerException e) {
-            throw new RuntimeException(
-                    "administrator email undefined or invalid", e);
         } catch (AddressException e) {
-            throw new RuntimeException(
+            throw new MarketplaceException(
                     "administrator email undefined or invalid", e);
         }
 

@@ -78,7 +78,7 @@ public class QueryResource extends BaseResource {
         	
         } catch (MalformedQueryException e) {
         	throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
-                    .getMessage());
+                    .getMessage(), e);
         }
         
         return representation;
@@ -109,7 +109,7 @@ public class QueryResource extends BaseResource {
                     MediaType.APPLICATION_SPARQL_RESULTS_XML);
         } catch (MalformedQueryException e) {
         	throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
-                    .getMessage());
+                    .getMessage(), e);
         }
         
         return representation;	
@@ -133,7 +133,7 @@ public class QueryResource extends BaseResource {
                     MediaType.APPLICATION_SPARQL_RESULTS_JSON);
         } catch (MalformedQueryException e) {
         	throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
-                    .getMessage());
+                    .getMessage(), e);
         }
         
         return representation;

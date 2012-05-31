@@ -81,6 +81,9 @@ public class MarketPlaceApplication extends Application {
     
     private ScheduledFuture<?> reminderHandle;
 
+    private final static int REMINDER_INTERVAL = 30;
+    private final static int EXPIRY_INTERVAL = 1;
+    
     private Reminder reminder;
     private Reminder expiry;
     
@@ -141,19 +144,20 @@ public class MarketPlaceApplication extends Application {
             }
         };
 
-        final Runnable expiry = new Runnable() {
+        final Runnable expires = new Runnable() {
             public void run() {
                 expiry();
             }
         };
         
-        this.reminder = new Reminder(this);
-        this.expiry = new Reminder(this);
+        reminder = new Reminder(this);
+        expiry = new Reminder(this);
+        
         if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
-        	reminderHandle = scheduler.scheduleWithFixedDelay(remind, 30, 30,
-                    TimeUnit.DAYS);
-            reminderHandle = scheduler.scheduleWithFixedDelay(expiry, 1, 1,
-                    TimeUnit.DAYS);
+        	reminderHandle = scheduler.scheduleWithFixedDelay(remind, REMINDER_INTERVAL, 
+        			REMINDER_INTERVAL, TimeUnit.DAYS);
+            reminderHandle = scheduler.scheduleWithFixedDelay(expires, EXPIRY_INTERVAL, 
+            		EXPIRY_INTERVAL, TimeUnit.DAYS);
         }
         
     }

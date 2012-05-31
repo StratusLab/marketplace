@@ -42,7 +42,8 @@ public class RemoteStore extends RdfStore {
 		try {
 			master = new URI(Configuration.getParameterValue(MASTER_URL));
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			LOGGER.severe("Incorrect master url configured: " 
+					+ Configuration.getParameterValue(MASTER_URL));
 		}
 	}
 	
@@ -69,7 +70,7 @@ public class RemoteStore extends RdfStore {
 		try {
 			metadata = get(metadatumResource, MediaType.APPLICATION_RDF_XML);
 		} catch (IOException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		}
 		metadatumResource.release();
 		
@@ -98,9 +99,9 @@ public class RemoteStore extends RdfStore {
 			queryResource.release();
 			
 		} catch (URIException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch(IOException e){
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} finally {
 			if(queryResource != null){
 				queryResource.release();
@@ -127,9 +128,9 @@ public class RemoteStore extends RdfStore {
 			queryResource.release();
 			
 		} catch (URIException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch(IOException e){
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} finally {
 			if(queryResource != null){
 				queryResource.release();
@@ -156,9 +157,9 @@ public class RemoteStore extends RdfStore {
 			queryResource.release();
 			
 		} catch (URIException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch(IOException e){
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} finally {
 			if(queryResource != null){
 				queryResource.release();
@@ -209,13 +210,13 @@ public class RemoteStore extends RdfStore {
 		
 			xmlRes.parse(is);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			
 		} catch (QueryResultParseException e) {
-			e.printStackTrace();
+			
 		} catch (TupleQueryResultHandlerException e) {
-			e.printStackTrace();
+			
 		} catch (IOException e) {
-			e.printStackTrace();
+			
 		}
 
 		TupleQueryResult tupleRes = build.getQueryResult();
@@ -251,8 +252,7 @@ public class RemoteStore extends RdfStore {
 			
 			tuples.close();
 		} catch (QueryEvaluationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error evaluating query: " + e.getMessage());
 		}
 
 		return list;

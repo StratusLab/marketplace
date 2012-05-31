@@ -51,6 +51,8 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
  */
 public class MDatumResource extends BaseResource {
 
+	private static final String metadataRoute = "metadata/";
+	
     private String datum = null;
     private String identifier = null;
     private String url = null;        
@@ -58,9 +60,10 @@ public class MDatumResource extends BaseResource {
     @Override
     protected void doInit() {
         url = getRequest().getResourceRef().getPath();
-        String iri = url.substring(url.indexOf("metadata") + 9);
-        datum = getMetadatum(iri);
-        identifier = iri.substring(0, iri.indexOf("/"));
+                
+        String metadataPath = url.substring(metadataRoute.length());
+        datum = getMetadatum(metadataPath);
+        identifier = metadataPath.substring(metadataPath.indexOf('/'));
     }
 
     @Get("xml")
@@ -133,9 +136,9 @@ public class MDatumResource extends BaseResource {
 
             stringBuilder.append(xmlOutWriter.toString());
         } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.severe("Error parsing metadata stylesheet: " + e.getMessage());
         } catch (TransformerException e) {
-            e.printStackTrace();
+        	LOGGER.severe("Error parsing metadata stylesheet: " + e.getMessage());
         }
 
         Map<String, Object> data = createInfoStructure("Metadata");

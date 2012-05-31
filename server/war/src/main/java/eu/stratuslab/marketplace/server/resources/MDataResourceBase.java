@@ -1,3 +1,22 @@
+/**
+ * Created as part of the StratusLab project (http://stratuslab.eu),
+ * co-funded by the European Commission under the Grant Agreement
+ * INSFO-RI-261552.
+ *
+ * Copyright (c) 2011
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.stratuslab.marketplace.server.resources;
 
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
@@ -31,6 +50,10 @@ import eu.stratuslab.marketplace.server.utils.SparqlUtils;
 
 public class MDataResourceBase extends BaseResource {
 
+	private static final String IDENTIFIER = "identifier";
+	private static final String EMAIL = "email";
+	private static final String CREATED = "created";
+	
 	protected Representation acceptMetadataEntry(File upload){
 		boolean validateEmail = Configuration
 		.getParameterValueAsBoolean(VALIDATE_EMAIL);
@@ -70,8 +93,7 @@ public class MDataResourceBase extends BaseResource {
         Document metadataXml = null;
 
         try {
-
-            stream = new FileInputStream(upload);
+        	stream = new FileInputStream(upload);
 
             metadataXml = MetadataFileUtils.extractXmlDocument(stream);
             
@@ -92,7 +114,6 @@ public class MDataResourceBase extends BaseResource {
         } finally {
             MetadataFileUtils.closeReliably(stream);
         }
-
         return metadataXml;
     }
     
@@ -114,7 +135,7 @@ public class MDataResourceBase extends BaseResource {
         		throw new MetadataException("older than latest entry");
         	}
         } catch(MarketplaceException e){
-        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
         }
 		
 	}
@@ -124,7 +145,7 @@ public class MDataResourceBase extends BaseResource {
         try {
             String[] coords = getMetadataEntryCoordinates(metadata);
             sendEmailConfirmation(baseUrl, coords[1], upload);
-        } catch (Exception e) {
+        } catch (MarketplaceException e) {
             String msg = "error sending confirmation email";
             LOGGER.severe(msg + ": " + e.getMessage());
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
@@ -133,10 +154,11 @@ public class MDataResourceBase extends BaseResource {
     }
 	
 	private static void sendEmailConfirmation(String baseUrl, String email, File file)
-	throws Exception {
+	throws MarketplaceException {
 
 		String message = MessageUtils.createNotification(baseUrl, file);
 		Notifier.sendNotification(email, message);
+		
 	}
 	
 	/*
@@ -162,7 +184,7 @@ public class MDataResourceBase extends BaseResource {
     	if(filter.length() > 0){
     		hasFilter = true;
     		
-    		if(filter.contains("created")){
+    		if(filter.contains(CREATED)){
     			hasDate = true;
     		}
     	}
@@ -175,9 +197,11 @@ public class MDataResourceBase extends BaseResource {
     	StringBuilder dataQuery = new StringBuilder(SparqlUtils.SELECT_ALL);
         StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
                 
+        String where = " WHERE {"
+            + SparqlUtils.WHERE_BLOCK;
+        
         StringBuilder wherePredicate = new StringBuilder(
-                    " WHERE {"
-                    + SparqlUtils.WHERE_BLOCK);
+                    where);
 
         wherePredicate.append(filter);
 
@@ -243,14 +267,14 @@ public class MDataResourceBase extends BaseResource {
 	private void addQueryParametersToRequest(Map<String, String> formValues) {
     	
 		//Create filter from request parameters.    	    	 	
-    	if(formValues.containsKey("identifier")){
-    		getRequest().getAttributes().put("identifier", formValues.get("identifier"));
+    	if(formValues.containsKey(IDENTIFIER)){
+    		getRequest().getAttributes().put(IDENTIFIER, formValues.get(IDENTIFIER));
     	}
-    	if(formValues.containsKey("email")){
-    		getRequest().getAttributes().put("email", formValues.get("email"));
+    	if(formValues.containsKey(EMAIL)){
+    		getRequest().getAttributes().put(EMAIL, formValues.get(EMAIL));
     	}
-    	if(formValues.containsKey("created")){
-    		getRequest().getAttributes().put("created", formValues.get("created"));
+    	if(formValues.containsKey(CREATED)){
+    		getRequest().getAttributes().put(CREATED, formValues.get(CREATED));
     	}   
     }
     
@@ -263,15 +287,15 @@ public class MDataResourceBase extends BaseResource {
     			switch (classifyArg((String) arg.getValue())) {
     			case ARG_EMAIL:
     				filter.append(
-    						SparqlUtils.buildFilterEq("email", (String)arg.getValue()));
+    						SparqlUtils.buildFilterEq(EMAIL, (String)arg.getValue()));
     				break;
     			case ARG_DATE:
     				filter.append(
-    						SparqlUtils.buildFilterEq("created", (String)arg.getValue()));
+    						SparqlUtils.buildFilterEq(CREATED, (String)arg.getValue()));
     				break;
     			case ARG_OTHER:
     				filter.append(
-    						SparqlUtils.buildFilterEq("identifier", (String)arg.getValue()));
+    						SparqlUtils.buildFilterEq(IDENTIFIER, (String)arg.getValue()));
     				break;
     			default:
     				break;
@@ -327,31 +351,44 @@ public class MDataResourceBase extends BaseResource {
                 sSearchCols[i] = requestQueryValues.get("sSearch_" + i);
         }
         
-        String searching = "";
+        String searching = buildSearchAllFilter(sSearch)
+        					+ buildSearchColsFilter(sSearchCols);      
+        
+        return searching;
+    }
+           
+    private String buildSearchAllFilter(String sSearch){
+    	String searching = "";
+    	
+    	if(sSearch != null && sSearch.length() > 0){
+            String[] searchTerms = sSearch.split(" ");
+            StringBuilder searchAllFilter = new StringBuilder(" FILTER (");
+            for(int i = 0; i < searchTerms.length; i++){
 
-        if(sSearch != null && sSearch.length() > 0){
-                String[] searchTerms = sSearch.split(" ");
-                StringBuilder searchAllFilter = new StringBuilder(" FILTER (");
-                for(int i = 0; i < searchTerms.length; i++){
+                    searchAllFilter.append("(");
+                    for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
+                            searchAllFilter.append(SparqlUtils.buildRegex(
+                                            SparqlUtils.getColumn(j), searchTerms[i]));
 
-                        searchAllFilter.append("(");
-                        for(int j = 1; j < SparqlUtils.getColumnCount(); j++){
-                                searchAllFilter.append(SparqlUtils.buildRegex(
-                                                SparqlUtils.getColumn(j), searchTerms[i]));
+                            if(j < SparqlUtils.getColumnCount() - 1){
+                                    searchAllFilter.append(" || ");
+                            }
+                    }
+                    searchAllFilter.append(")");
 
-                                if(j < SparqlUtils.getColumnCount() - 1)
-                                        searchAllFilter.append(" || ");
-                        }
-                        searchAllFilter.append(")");
-
-                        if(i < searchTerms.length -1)
-                                        searchAllFilter.append(" && ");
-                }
-                searchAllFilter.append(") . ");
-                searching = searchAllFilter.toString();
-        }
-
-        StringBuilder searchColumnsPredicate = new StringBuilder();
+                    if(i < searchTerms.length -1){
+                                    searchAllFilter.append(" && ");
+                    }
+            }
+            searchAllFilter.append(") . ");
+            searching = searchAllFilter.toString();
+    	}
+    	
+    	return searching;    	
+    }
+    
+    private String buildSearchColsFilter(String[] sSearchCols) {
+    	StringBuilder searchColumnsPredicate = new StringBuilder();
         
         for(int i = 1; i <= SparqlUtils.SEARCHABLE_COLUMNS; i++){
                 if ( sSearchCols[i] != null && sSearchCols[i].length() > 0 )
@@ -374,11 +411,9 @@ public class MDataResourceBase extends BaseResource {
                 searchColumnsPredicate.append(" ) . ");
         }
         
-        searching += searchColumnsPredicate.toString();
-        
-        return searching;
+        return searchColumnsPredicate.toString();
     }
-                 
+    
     /*
      * Gets the total number of unfiltered records
      * 
@@ -387,11 +422,12 @@ public class MDataResourceBase extends BaseResource {
      * @return the total number of records
      */
     private String getTotalRecords(String deprecatedFlag){
-    	StringBuilder query = new StringBuilder(
-        		SparqlUtils.SELECT_COUNT
-                + " WHERE {"
-                + SparqlUtils.WHERE_BLOCK
-                + SparqlUtils.getLatestFilter(getCurrentDate()));
+    	String q = SparqlUtils.SELECT_COUNT
+        + " WHERE {"
+        + SparqlUtils.WHERE_BLOCK
+        + SparqlUtils.getLatestFilter(getCurrentDate());
+    	
+    	StringBuilder query = new StringBuilder(q);
     	
     	appendDeprecated(deprecatedFlag, query);
     	

@@ -131,7 +131,7 @@ public class MDataResource extends MDataResourceBase {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, e
-                    .getMessage());
+                    .getMessage(), e);
         }
 
         for (FileItem fi : items) {
@@ -268,7 +268,7 @@ public class MDataResource extends MDataResourceBase {
     	Map<String, Object> json = new HashMap<String, Object>();
     	
     	Integer sEcho = (getRequestQueryValues().get("sEcho") != null 
-    			? new Integer(getRequestQueryValues().get("sEcho")) : 0);
+    			? Integer.valueOf(getRequestQueryValues().get("sEcho")) : 0);
     	
         json.put("sEcho", sEcho);
         json.put("iTotalRecords", Long.valueOf(iTotalRecords));

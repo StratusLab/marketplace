@@ -157,17 +157,12 @@ public enum Parameter {
                 new URL(value);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("invalid master URL: "
-                        + value);
+                        + value, e);
             }
         }
     },
     
-    MARKETPLACE_TYPE(false, "Type of Marketplace instance.") {
-    	@Override
-    	public void validate(String value) {
-    		super.validate(value);
-    	}
-    },
+    MARKETPLACE_TYPE(false, "Type of Marketplace instance."),
     
     MASTER_URL(true, "URL of the master instance.") {
         @Override
@@ -177,7 +172,7 @@ public enum Parameter {
                 new URL(value);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("invalid master URL: "
-                        + value);
+                        + value, e);
             }
         }
     },
@@ -198,7 +193,7 @@ public enum Parameter {
                 new URL(value);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("invalid support URL: "
-                        + value);
+                        + value, e);
             }
         }
     },
@@ -212,50 +207,20 @@ public enum Parameter {
     },
 
     WHITELIST_LOCATION(false, "/etc/stratuslab/marketplace.whitelist",
-            "Endorser whitelist location.") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-        }
-    },
+            "Endorser whitelist location."),
 
     WHITELIST_TRUSTSTORE(false, "/etc/stratuslab/marketplace.truststore",
-            "Marketplace truststore location.") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-        }
-    },
+            "Marketplace truststore location."),
 
     WHITELIST_CRL(false, "/etc/stratuslab/marketplace.crl",
-            "Location of CRLs.") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-        }
-    },
+            "Location of CRLs."),
     
-    WHITELIST_PASSWORD(false, "Truststore password.") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-        }
-    },
+    WHITELIST_PASSWORD(false, "Truststore password."),
     
     STYLE_PATH(true, "/eu/stratuslab/style/css/",
-            "Path for CSS and style information.") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-        }
-    },
+            "Path for CSS and style information."),
 
-    JS_PATH(true, "/eu/stratuslab/style/js/", "Path for JavaScript files.") {
-        @Override
-        public void validate(String value) {
-            super.validate(value);
-        }
-    };
+    JS_PATH(true, "/eu/stratuslab/style/js/", "Path for JavaScript files.");
 
     private final String key;
     private final boolean required;
@@ -328,19 +293,22 @@ public enum Parameter {
             }
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(key
-                    + " must be a positive integer: " + e.getMessage());
+                    + " must be a positive integer: " + e.getMessage(), e);
         }
     }
 
     private static void isValidPort(String s) {
+    	final int minPort = 1;
+    	final int maxPort = 65535;
+    	
         try {
             int port = Integer.parseInt(s);
-            if (port < 1 || port > 65535) {
+            if (port < minPort || port > maxPort) {
                 throw new IllegalArgumentException("invalid port number("
                         + port + ")");
             }
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
@@ -354,7 +322,7 @@ public enum Parameter {
             }
         } catch (AddressException e) {
             throw new IllegalArgumentException("invalid email address: "
-                    + e.getMessage());
+                    + e.getMessage(), e);
         }
     }
 

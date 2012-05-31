@@ -81,6 +81,8 @@ public class SesameRdfStore extends RdfStore {
 	private static final String PGSQL_URL_MESSAGE = "using postgres datastore: postgresql://%s:xxxxxx@%s:%d/%s";
 	private static final String MEMORY_STORE_WARNING = "memory store being used; data is NOT persistent";
 
+	private static final int HOUR_IN_SECONDS = 3600;
+	
 	private final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
 
@@ -111,7 +113,7 @@ public class SesameRdfStore extends RdfStore {
 		 * Ping the repository once an hour to make sure 
 		 * the connection is not closed
 		 */
-		pingerHandle = scheduler.scheduleAtFixedRate(pinger, 3600, 3600,
+		pingerHandle = scheduler.scheduleAtFixedRate(pinger, HOUR_IN_SECONDS, HOUR_IN_SECONDS,
 				TimeUnit.SECONDS);
 	}
 	
@@ -192,13 +194,13 @@ public class SesameRdfStore extends RdfStore {
 				con.close();
 			}
 		} catch (RepositoryException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch (IllegalStateException e) {
-			throw new MarketplaceException(e.getMessage());
-		} catch (MalformedQueryException m) {
-			throw new MarketplaceException(m.getMessage());
-		} catch (QueryEvaluationException q) {
-			throw new MarketplaceException(q.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
+		} catch (MalformedQueryException e) {
+			throw new MarketplaceException(e.getMessage(), e);
+		} catch (QueryEvaluationException e) {
+			throw new MarketplaceException(e.getMessage(), e);
 		}
 
 		return list;
@@ -234,19 +236,19 @@ public class SesameRdfStore extends RdfStore {
 				tupleQuery.evaluate(writer);
 				resultString = bytes.toString("UTF-8");
 			} catch (UnsupportedEncodingException e) {
-				throw new MarketplaceException(e.getMessage());
+				throw new MarketplaceException(e.getMessage(), e);
 			} finally {
 				con.close();
 			}
 
 		} catch (RepositoryException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch (MalformedQueryException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch (QueryEvaluationException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		} catch (org.openrdf.query.TupleQueryResultHandlerException e) {
-			throw new MarketplaceException(e.getMessage());
+			throw new MarketplaceException(e.getMessage(), e);
 		}
 		return resultString;
 	}

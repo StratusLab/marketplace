@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import eu.stratuslab.marketplace.server.MarketplaceException;
+
 public final class Configuration {
 
 	private static Logger LOGGER = Logger.getLogger("org.restlet");
@@ -78,7 +80,7 @@ public final class Configuration {
                 return properties;
             }
         }
-        throw new RuntimeException("cannot locate configuration file");
+        throw new MarketplaceException("cannot locate configuration file");
     }
 
     private static Properties loadProperties(File configFile) {

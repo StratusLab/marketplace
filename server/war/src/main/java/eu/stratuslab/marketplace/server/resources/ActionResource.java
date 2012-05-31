@@ -141,7 +141,7 @@ public class ActionResource extends BaseResource {
 
         } catch (IOException e) {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, e
-                    .getMessage());
+                    .getMessage(), e);
         } finally {
             if (stream != null) {
                 try {

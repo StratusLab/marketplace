@@ -38,6 +38,8 @@ public class Reminder extends BaseResource {
 
 	private String marketplaceEndpoint;
 		
+	private static final int MAX_EXPIRY_RANGE = 3;
+	
 	public Reminder(Application app){
 		setApplication(app);
 		
@@ -51,6 +53,8 @@ public class Reminder extends BaseResource {
 	}
 	
 	public void remind() {
+		String cn = "CN=";
+		
 		List<Map<String, String>> results = new ArrayList<Map<String, String>>();
 		
 		try {
@@ -62,8 +66,8 @@ public class Reminder extends BaseResource {
         	Map<String, String> resultRow = results.get(i);
         	
         	String subject = resultRow.get("subject");
-        	String name = subject.substring(subject.indexOf("CN=")+3, 
-        			subject.indexOf(",", subject.indexOf("CN=")+3));
+        	String name = subject.substring(subject.indexOf(cn)+cn.length(), 
+        			subject.indexOf(",", subject.indexOf(cn)+cn.length()));
         	String email = resultRow.get("email");
         	
         	StringBuilder mailContents = new StringBuilder("Dear " + name + ",\n\n" +
@@ -125,9 +129,9 @@ public class Reminder extends BaseResource {
 		//Build the full SPARQL query
 		StringBuilder query = new StringBuilder(SparqlUtils.SELECT_ALL);
 
-		StringBuilder filter = new StringBuilder(
-				" WHERE {"
-				+ SparqlUtils.WHERE_BLOCK);
+		String where = " WHERE {" + SparqlUtils.WHERE_BLOCK;
+		
+		StringBuilder filter = new StringBuilder(where);
 
 		filter.append(filterPredicate.toString());
 		filter
@@ -142,13 +146,15 @@ public class Reminder extends BaseResource {
 	}
 	
 	private String buildExpiryQuery(){
+		String select = "SELECT " +
+		"?identifier ?email ?created ?valid";
+		String where = " WHERE {" + SparqlUtils.WHERE_BLOCK;
+		
 		//Build the full SPARQL query
-		StringBuilder query = new StringBuilder("SELECT " +
-				"?identifier ?email ?created ?valid");
+		StringBuilder query = new StringBuilder(select);
 
 		StringBuilder filter = new StringBuilder(
-				" WHERE {"
-				+ SparqlUtils.WHERE_BLOCK);
+				where);
 
 		filter
 		.append(SparqlUtils.getLatestFilter(getCurrentDate()));
@@ -179,7 +185,7 @@ public class Reminder extends BaseResource {
 						+ "\n\tcreated:\t" + created
 						+ "\n\tos:     \t" + os + " " + osversion + "\n");
 
-				if(location != "null" && location.length() > 0){
+				if(!location.equals("null") && location.length() > 0){
 					mailContents.append("\tlocation:\t" + location + "\n");
 				}
 
@@ -230,7 +236,7 @@ public class Reminder extends BaseResource {
 		Date today = new Date();
 		Calendar cal = Calendar.getInstance();  
 		cal.setTime(today);    
-		cal.add(Calendar.DATE, 3);
+		cal.add(Calendar.DATE, MAX_EXPIRY_RANGE);
 		Date expiration = cal.getTime();
 				
 		return getFormattedDate(expiration);

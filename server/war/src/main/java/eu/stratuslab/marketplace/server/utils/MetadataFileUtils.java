@@ -47,9 +47,11 @@ import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
-public class MetadataFileUtils {
+public final class MetadataFileUtils {
 
 	private static final String ENCODING = "UTF-8";
+	
+	private MetadataFileUtils(){}
 	
 	public static File writeContentsToDisk(Representation entity) {
 
@@ -127,7 +129,7 @@ public class MetadataFileUtils {
             rdfEntry = XMLUtils.documentToString(copy);
         } catch (SAXException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-                    "Unable to parse metadata: " + e.getMessage());
+                    "Unable to parse metadata: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new ResourceException(e);
         }
@@ -146,7 +148,7 @@ public class MetadataFileUtils {
 
         } catch (SAXException e) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
-                    "unable to parse metadata: " + e.getMessage());
+                    "unable to parse metadata: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new ResourceException(e);
         }

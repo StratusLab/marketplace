@@ -40,6 +40,8 @@ public class EndorsersResource extends BaseResource {
    
 	@Get("html")
     public Representation toHtml() {
+		String cn = "CN=";
+		
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
         	results = query(EMAIL_QUERY);
@@ -50,9 +52,9 @@ public class EndorsersResource extends BaseResource {
         for(int i = 0; i < results.size(); i++){
         	Map<String, String> resultRow = results.get(i);
         	String subject = resultRow.get("subject");
-        	String cn = subject.substring(subject.indexOf("CN=")+3, 
-        			subject.indexOf(",", subject.indexOf("CN=")+3));
-        	resultRow.put("name", cn);
+        	String name = subject.substring(subject.indexOf(cn)+cn.length(), 
+        			subject.indexOf(",", subject.indexOf(cn)+cn.length()));
+        	resultRow.put("name", name);
         	results.set(i, resultRow);
         }
         Map<String, Object> data = createInfoStructure("Endorsers");

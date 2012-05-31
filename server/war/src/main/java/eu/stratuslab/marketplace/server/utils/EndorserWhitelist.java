@@ -115,16 +115,16 @@ public class EndorserWhitelist {
 
 	private X509CertChainValidator createOpensslValidator(String truststore) {
 		
-		OpensslCertChainValidator validator = new OpensslCertChainValidator(
+		OpensslCertChainValidator v = new OpensslCertChainValidator(
 				truststore, 
 				NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, 
 				DEFAULT_UPDATE_INTERVAL);
 			
-		return validator;
+		return v;
 	}
 
 	private X509CertChainValidator createKeystoreValidator(String truststore, char[] password) {
-		KeystoreCertChainValidator validator = null;
+		KeystoreCertChainValidator v = null;
 		
 		try {
 			String type = "JKS";
@@ -134,14 +134,14 @@ public class EndorserWhitelist {
 				type = "PKCS12";
 			}
 			
-			validator = new KeystoreCertChainValidator(
+			v = new KeystoreCertChainValidator(
 					truststore, 
 					password,
 					type, 
 					DEFAULT_UPDATE_INTERVAL);
 			
-			validator.setCrls(crls);
-			validator.setCRLUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+			v.setCrls(crls);
+			v.setCRLUpdateInterval(DEFAULT_UPDATE_INTERVAL);
 			
 		} catch (KeyStoreException e) {
 			LOGGER.severe("Error creating cert validator: " + e.getMessage());
@@ -151,7 +151,7 @@ public class EndorserWhitelist {
 			this.enabled = false;
 		}
 		
-		return validator;
+		return v;
 	}
 
 	public EndorserWhitelist(String truststore, String password, String crl,
@@ -177,14 +177,14 @@ public class EndorserWhitelist {
 		
 		List<File> crlFiles = new ArrayList<File>();
 		
-		File crls = new File(crlLocation);
+		File crl = new File(crlLocation);
 				
-		if(crls.isDirectory()){
-			crlFiles = Arrays.asList(crls.listFiles());
-		} else if (crls.isFile()) {
-	        crlFiles.add(crls);
+		if(crl.isDirectory()){
+			crlFiles = Arrays.asList(crl.listFiles());
+		} else if (crl.isFile()) {
+	        crlFiles.add(crl);
 		} else {
-			crlFiles = getFilesFromPattern(crls);			
+			crlFiles = getFilesFromPattern(crl);			
 		}
 		
 		return crlFiles;
@@ -297,8 +297,9 @@ public class EndorserWhitelist {
 	private boolean isEndorserListed(String endorser){
 		
 		for(X500Principal s : this.whitelist){
-			if(s.getName().equals(endorser))
+			if(s.getName().equals(endorser)){
 				return true;
+			}
 		}
 		
 		return false;

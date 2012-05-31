@@ -124,7 +124,7 @@ public abstract class BaseResource extends ServerResource {
 		} catch (ResourceException e) {
 			// transaction has failed, so rollback
 			deleteMetadataFromDisk(getDataDir(), doc);
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
 		}
 
 		if (!uploadedFile.delete()) {
