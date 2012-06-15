@@ -333,7 +333,7 @@ public class MDataResourceBase extends BaseResource {
     	
     	if(iDisplayStart != null && iDisplayLength != null){
     		int sort = (iSortCol != null) ? 
-    				Integer.parseInt(iSortCol) : SparqlUtils.DEFAULT_SEARCH_COL;
+    				Integer.parseInt(iSortCol) : SparqlUtils.DEFAULT_SORT_COL;
     		String sortCol = SparqlUtils.getColumn(sort);
     		      		
     		paging = SparqlUtils.buildLimit(sortCol, iDisplayLength, iDisplayStart, sSortDir);

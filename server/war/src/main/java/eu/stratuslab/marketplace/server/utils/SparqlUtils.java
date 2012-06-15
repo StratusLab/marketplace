@@ -26,7 +26,7 @@ public final class SparqlUtils {
 	
 	public static final int SEARCHABLE_COLUMNS = 4;
 	
-	public static final int DEFAULT_SEARCH_COL = 5;
+	public static final int DEFAULT_SORT_COL = 5;
 	
 	public static final String EMAIL_QUERY = //
         "SELECT DISTINCT ?email ?subject ?issuer "
