@@ -57,9 +57,12 @@ import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriterFactory;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.RepositoryLockedException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.sail.LockManager;
 import org.openrdf.sail.SailException;
+import org.openrdf.sail.SailLockedException;
 import org.openrdf.sail.helpers.SailBase;
 import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.sail.rdbms.mysql.MySqlStore;
@@ -121,6 +124,29 @@ public class SesameRdfStore extends RdfStore {
 		metadata = new SailRepository(store);
 		try {
 			metadata.initialize();
+		} catch (RepositoryLockedException l) {
+			if (l.getCause() instanceof SailLockedException) {
+				SailLockedException sle = (SailLockedException)l.getCause();
+				
+				LockManager lockManager = sle.getLockManager();
+				if (lockManager != null && lockManager.isLocked()) {
+					LOGGER.warning("repository already locked, attempting to revoke.");
+					
+					boolean revoked = lockManager.revokeLock();
+					if(revoked){
+						try {
+							metadata.initialize();
+						} catch (RepositoryException e) {
+							LOGGER.severe("error initializing repository: " 
+									+ e.getMessage());
+						}
+					}
+				}
+				
+			} else {
+				// nothing can be done
+				LOGGER.severe("error initializing repository: " + l.getMessage());
+			}
 		} catch (RepositoryException r) {
 			LOGGER.severe("error initializing repository: " + r.getMessage());
 		}
