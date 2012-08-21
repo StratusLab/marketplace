@@ -64,6 +64,18 @@ public enum Parameter {
             isBoolean(value);
         }
     },
+    
+    FILESTORE_TYPE(true, "file",
+    "Storage type for image metadata files (file only)") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    		if (!("file".equals(value))) {
+    			throw new IllegalArgumentException(getKey()
+    					+ " must be 'file'");
+    		}
+    	}
+    },
 
     PENDING_DIR(true, "/var/lib/stratuslab/pending",
             "Directory for pending (unconfirmed) entries.") {

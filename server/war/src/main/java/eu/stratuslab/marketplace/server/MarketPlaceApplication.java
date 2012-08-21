@@ -23,8 +23,8 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.FILESTORE_TYPE;
 
-import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
@@ -66,10 +66,13 @@ import eu.stratuslab.marketplace.server.resources.QueryResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.SyncResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
+import eu.stratuslab.marketplace.server.store.FileStore;
+import eu.stratuslab.marketplace.server.store.FlatFileStore;
 import eu.stratuslab.marketplace.server.store.RdfStore;
 import eu.stratuslab.marketplace.server.store.RdfStoreFactory;
 import eu.stratuslab.marketplace.server.store.RdfStoreFactoryImpl;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
+import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Reminder;
 
 public class MarketPlaceApplication extends Application {
@@ -88,6 +91,7 @@ public class MarketPlaceApplication extends Application {
     private Reminder expiry;
     
     private RdfStore store = null;
+    private FileStore fileStore = null;
     
     private String dataDir = null;
 
@@ -128,15 +132,29 @@ public class MarketPlaceApplication extends Application {
         getTunnelService().setUserAgentTunnel(true);
 
         dataDir = Configuration.getParameterValue(DATA_DIR);
-        createIfNotExists(dataDir);
-        createIfNotExists(Configuration.getParameterValue(PENDING_DIR));
-
-        this.whitelist = new EndorserWhitelist();
+        boolean success = MetadataFileUtils.createIfNotExists(dataDir);
+        if(!success){
+        	LOGGER.severe("Unable to create directory: " + dataDir);
+        }
+        
+        success = MetadataFileUtils.createIfNotExists(
+        		Configuration.getParameterValue(PENDING_DIR));
+        if(!success){
+        	LOGGER.severe("Unable to create directory: " 
+        			+ Configuration.getParameterValue(PENDING_DIR));
+        }
+        
+        whitelist = new EndorserWhitelist();
 
         RdfStoreFactory factory = new RdfStoreFactoryImpl();
         store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
                 storeType);
         store.initialize();
+        
+        String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
+        if(fileStoreType.equals("file")){
+        	fileStore = new FlatFileStore();
+        }
 
         final Runnable remind = new Runnable() {
             public void run() {
@@ -269,10 +287,14 @@ public class MarketPlaceApplication extends Application {
 
     }
 
-    public RdfStore getMetadataStore() {
+    public RdfStore getMetadataRdfStore() {
         return store;
     }
 
+    public FileStore getMetadataFileStore(){
+    	return fileStore;
+    }
+    
     public String getDataDir() {
         return dataDir;
     }
@@ -297,16 +319,6 @@ public class MarketPlaceApplication extends Application {
         cfg.setTemplateLoader(new ContextTemplateLoader(context, fmBaseRef));
 
         return cfg;
-    }
-
-    private void createIfNotExists(String path) {
-        File dir = new File(path);
-        if (!dir.exists()) {
-            LOGGER.warning("directory does not exist: " + path);
-            if (!dir.mkdirs()) {
-                LOGGER.severe("Unable to create directory: " + path);
-            }
-        }
     }
 
     static class DoubleSlashFilter extends Filter {

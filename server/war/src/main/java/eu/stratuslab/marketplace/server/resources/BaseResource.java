@@ -25,7 +25,6 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEME
 import static org.restlet.data.MediaType.TEXT_PLAIN;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,10 +47,10 @@ import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.MarketplaceException;
+import eu.stratuslab.marketplace.server.store.FileStore;
 import eu.stratuslab.marketplace.server.store.RdfStore;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
-import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 /**
 
@@ -59,7 +58,7 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
  *  all resources.
  */
 /**
- * @author stkenny
+ * @author Stuart Kenny
  * 
  */
 public abstract class BaseResource extends ServerResource {
@@ -75,8 +74,12 @@ public abstract class BaseResource extends ServerResource {
 	protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 	protected static final String NO_TITLE = null;
 	
-	protected RdfStore getMetadataStore() {
-		return ((MarketPlaceApplication) getApplication()).getMetadataStore();
+	protected RdfStore getMetadataRdfStore() {
+		return ((MarketPlaceApplication) getApplication()).getMetadataRdfStore();
+	}
+	
+	protected FileStore getMetadataFileStore() {
+		return ((MarketPlaceApplication) getApplication()).getMetadataFileStore();
 	}
 
 	protected String getDataDir() {
@@ -117,13 +120,14 @@ public abstract class BaseResource extends ServerResource {
 	}
 
 	protected String commitMetadataEntry(File uploadedFile, Document doc) {
-		writeMetadataToDisk(getDataDir(), doc);
-		String iri = null;
+		writeMetadataToFileStore(doc);
+		
+		String metadataPath = null;
 		try {
-			iri = writeMetadataToStore(doc);
+			metadataPath = writeMetadataToRdfStore(doc);
 		} catch (ResourceException e) {
 			// transaction has failed, so rollback
-			deleteMetadataFromDisk(getDataDir(), doc);
+			deleteMetadataFromFileStore(doc);
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
 		}
 
@@ -131,10 +135,10 @@ public abstract class BaseResource extends ServerResource {
 			LOGGER.severe("uploaded file could not be deleted: " + uploadedFile);
 		}
 
-		return iri;
+		return metadataPath;
 	}
-
-	protected static void writeMetadataToDisk(String dataDir, Document doc) {
+	
+	protected void writeMetadataToFileStore(Document doc) {
 
 		String[] coordinates = getMetadataEntryCoordinates(doc);
 
@@ -142,23 +146,15 @@ public abstract class BaseResource extends ServerResource {
 		String endorser = coordinates[1];
 		String created = coordinates[2];
 
-		File rdfFile = new File(dataDir, identifier + File.separator + endorser
-				+ File.separator + created + ".xml");
-
-		File rdfFileParent = rdfFile.getParentFile();
-		if (!rdfFileParent.exists()) {
-			if (!rdfFileParent.mkdirs()) {
-				LOGGER.severe("Unable to create directory structure for file.");
-				throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-			}
-		}
-
-		String contents = XMLUtils.documentToString(doc);
-		MetadataUtils.writeStringToFile(contents, rdfFile);
-
+		String key = 
+			identifier + File.separator 
+		+ endorser + File.separator 
+		+ created;
+		
+		getMetadataFileStore().store(key, doc);
 	}
 
-	protected static void deleteMetadataFromDisk(String dataDir, Document doc) {
+	protected void deleteMetadataFromFileStore(Document doc) {
 
 		String[] coordinates = getMetadataEntryCoordinates(doc);
 
@@ -166,19 +162,14 @@ public abstract class BaseResource extends ServerResource {
 		String endorser = coordinates[1];
 		String created = coordinates[2];
 
-		File rdfFile = new File(dataDir, identifier + File.separator + endorser
-				+ File.separator + created + ".xml");
+		String key = identifier + File.separator + endorser
+				+ File.separator + created;
 
-		if (rdfFile.exists()) {
-			if (!rdfFile.delete()) {
-				throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-			}
-		}
-
+		getMetadataFileStore().remove(key);
 	}
-
+	
 	// Create a deep copy of the document and strip signature elements.
-	protected static String createRdfEntry(Document doc) {
+	protected String createRdfEntry(Document doc) {
 		Document copy = (Document) doc.cloneNode(true);
 		MetadataUtils.stripSignatureElements(copy);
 		String rdfEntry = XMLUtils.documentToString(copy);
@@ -189,7 +180,7 @@ public abstract class BaseResource extends ServerResource {
 		return rdfEntry;
 	}
 
-	protected static String[] getMetadataEntryCoordinates(Document doc) {
+	protected String[] getMetadataEntryCoordinates(Document doc) {
 
 		String[] coords = new String[3];
 
@@ -200,7 +191,7 @@ public abstract class BaseResource extends ServerResource {
 		return coords;
 	}
 
-	protected String writeMetadataToStore(Document datumDoc) {
+	protected String writeMetadataToRdfStore(Document datumDoc) {
 
 		String[] coordinates = getMetadataEntryCoordinates(datumDoc);
 
@@ -208,26 +199,26 @@ public abstract class BaseResource extends ServerResource {
 		String endorser = coordinates[1];
 		String created = coordinates[2];
 
-		String iri = "/" + identifier + "/" + endorser + "/" + created;
+		String metadataPath = identifier + "/" + endorser + "/" + created;
 
 		String rdfEntry = createRdfEntry(datumDoc);
-		if (!storeMetadatum(iri, rdfEntry)) {
+		if (!storeMetadatum(metadataPath, rdfEntry)) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 
-		return iri;
+		return metadataPath;
 	}
 
 	/**
 	 * Stores a new metadata entry
 	 * 
-	 * @param iri
+	 * @param metadataPath
 	 *            identifier of the metadata entry
 	 * @param rdf
 	 *            the metadata entry to store
 	 */
-	protected boolean storeMetadatum(String iri, String rdf) {
-		boolean success = getMetadataStore().store(iri, rdf);
+	protected boolean storeMetadatum(String metadataPath, String rdf) {
+		boolean success = getMetadataRdfStore().store(metadataPath, rdf);
 
 		return success;
 	}
@@ -235,18 +226,12 @@ public abstract class BaseResource extends ServerResource {
 	/**
 	 * Retrieve a particular metadata entry
 	 * 
-	 * @param iri
+	 * @param metadataPath
 	 *            identifier of the metadata entry
-	 * @return metadata entry as a Jena model
+	 * @return metadata entry
 	 */
-	protected String getMetadatum(String iri) {
-		String model = null;
-		try {
-			model = MetadataFileUtils.readFileAsString(getDataDir() 
-					+ File.separator + iri + ".xml");
-		} catch (IOException e) {
-			LOGGER.severe("Unable to read metadata file: " + iri);
-		}
+	protected String getMetadatum(String metadataPath) {
+		String model = getMetadataFileStore().read(metadataPath);
 
 		return model;
 	}
@@ -257,13 +242,13 @@ public abstract class BaseResource extends ServerResource {
 	 * @param iri
 	 *            identifier of the metadata entry
 	 */
-	protected void removeMetadatum(String iri) {
-		getMetadataStore().remove(iri);
+	protected void removeMetadatum(String metadataPath) {
+		getMetadataRdfStore().remove(metadataPath);
 	}
 
 	protected String queryResultsAsXml(String queryString)
 			throws MarketplaceException {
-		String resultString = getMetadataStore()
+		String resultString = getMetadataRdfStore()
 				.getRdfEntriesAsXml(queryString);
 
 		return resultString;
@@ -271,7 +256,7 @@ public abstract class BaseResource extends ServerResource {
 
 	protected String queryResultsAsJson(String queryString)
 			throws MarketplaceException {
-		String resultString = getMetadataStore().getRdfEntriesAsJson(
+		String resultString = getMetadataRdfStore().getRdfEntriesAsJson(
 				queryString);
 
 		return resultString;
@@ -286,7 +271,7 @@ public abstract class BaseResource extends ServerResource {
 	 */
 	protected List<Map<String, String>> query(String queryString)
 			throws MarketplaceException {
-		List<Map<String, String>> list = getMetadataStore().getRdfEntriesAsMap(
+		List<Map<String, String>> list = getMetadataRdfStore().getRdfEntriesAsMap(
 				queryString);
 
 		return list;

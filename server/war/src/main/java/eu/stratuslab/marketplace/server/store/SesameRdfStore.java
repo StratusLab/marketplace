@@ -154,6 +154,8 @@ public class SesameRdfStore extends RdfStore {
 
 	public boolean store(String identifier, String entry) {
 		boolean success = false;
+		identifier = "/" + identifier;
+		
 		try {
 			RepositoryConnection con = getMetadataStore().getConnection();
 			ValueFactory vf = con.getValueFactory();
@@ -280,6 +282,8 @@ public class SesameRdfStore extends RdfStore {
 	}
 
 	public void remove(String identifier) {
+		identifier = "/" + identifier;
+		
 		try {
 			RepositoryConnection con = getMetadataStore().getConnection();
 			ValueFactory vf = con.getValueFactory();

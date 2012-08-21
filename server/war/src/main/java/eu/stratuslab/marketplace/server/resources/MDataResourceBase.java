@@ -68,13 +68,13 @@ public class MDataResourceBase extends BaseResource {
 				|| (whitelist.isEnabled() && whitelist
 						.isEndorserWhitelisted(validatedUpload))) {
 
-			String iri = commitMetadataEntry(upload, validatedUpload);
+			String metadataPath = commitMetadataEntry(upload, validatedUpload);
 
 			setStatus(Status.SUCCESS_CREATED);
 			Representation status = createStatusRepresentation("Upload", 
 			"metadata entry created");
 			
-			status.setLocationRef(baseUrl + "/metadata" + iri);
+			status.setLocationRef(baseUrl + "/metadata/" + metadataPath);
 
 			return status;
 
@@ -140,7 +140,7 @@ public class MDataResourceBase extends BaseResource {
 		
 	}
 	
-	protected static void confirmMetadataEntry(String baseUrl, File upload, Document metadata) {
+	protected void confirmMetadataEntry(String baseUrl, File upload, Document metadata) {
 
         try {
             String[] coords = getMetadataEntryCoordinates(metadata);
@@ -153,7 +153,7 @@ public class MDataResourceBase extends BaseResource {
         }
     }
 	
-	private static void sendEmailConfirmation(String baseUrl, String email, File file)
+	private void sendEmailConfirmation(String baseUrl, String email, File file)
 	throws MarketplaceException {
 
 		String message = MessageUtils.createNotification(baseUrl, file);

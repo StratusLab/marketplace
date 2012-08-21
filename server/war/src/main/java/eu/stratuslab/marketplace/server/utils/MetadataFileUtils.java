@@ -155,4 +155,16 @@ public final class MetadataFileUtils {
 
         return datumDoc;
     }
+	
+	public static boolean createIfNotExists(String path) {
+		
+        File dir = new File(path);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
 }
