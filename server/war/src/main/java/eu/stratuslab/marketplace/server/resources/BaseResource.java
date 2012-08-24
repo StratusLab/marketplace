@@ -47,8 +47,8 @@ import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.MarketplaceException;
-import eu.stratuslab.marketplace.server.store.FileStore;
-import eu.stratuslab.marketplace.server.store.RdfStore;
+import eu.stratuslab.marketplace.server.store.file.FileStore;
+import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
