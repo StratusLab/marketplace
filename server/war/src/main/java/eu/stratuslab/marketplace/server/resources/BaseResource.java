@@ -25,13 +25,9 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.IDENTIFIER_ELEME
 import static org.restlet.data.MediaType.TEXT_PLAIN;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
@@ -47,6 +43,7 @@ import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.MarketplaceException;
+import eu.stratuslab.marketplace.server.query.QueryBuilder;
 import eu.stratuslab.marketplace.server.store.file.FileStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
@@ -63,14 +60,8 @@ import eu.stratuslab.marketplace.server.utils.XPathUtils;
  */
 public abstract class BaseResource extends ServerResource {
 
-	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
 	protected static final Logger LOGGER = Logger.getLogger("org.restlet");
-
-	protected static final int ARG_EMAIL = 1;
-	protected static final int ARG_DATE = 2;
-	protected static final int ARG_OTHER = 3;
-
+   
 	protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 	protected static final String NO_TITLE = null;
 	
@@ -82,6 +73,10 @@ public abstract class BaseResource extends ServerResource {
 		return ((MarketPlaceApplication) getApplication()).getMetadataFileStore();
 	}
 
+	protected QueryBuilder getQueryBuilder() {
+		return ((MarketPlaceApplication) getApplication()).getQueryBuilder();
+	}
+	
 	protected String getDataDir() {
 		return ((MarketPlaceApplication) getApplication()).getDataDir();
 	}
@@ -293,22 +288,6 @@ public abstract class BaseResource extends ServerResource {
 		}
 
 		return status;
-	}
-
-	protected String getCurrentDate() {
-		return getFormattedDate(new Date());
-	}
-
-	protected String getFormattedDate(Date date){
-		return getDateFormat().format(date);
-	}
-	
-	private DateFormat getDateFormat() {
-		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-		format.setLenient(false);
-		format.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-		return format;
 	}
 
 }

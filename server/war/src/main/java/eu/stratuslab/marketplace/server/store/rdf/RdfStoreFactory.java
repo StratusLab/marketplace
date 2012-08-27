@@ -27,5 +27,5 @@ public interface RdfStoreFactory {
 	String MEMORY_BACKEND = "memory";
 	String REMOTE_BACKEND = "remote";
 	
-	public RdfStore createRdfStore(String provider, String type);
+	RdfStore createRdfStore(String provider, String type);
 }

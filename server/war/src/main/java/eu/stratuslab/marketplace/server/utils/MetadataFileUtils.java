@@ -89,12 +89,12 @@ public final class MetadataFileUtils {
 	throws IOException {
 		
 		StringBuilder text = new StringBuilder();
-	    String NL = System.getProperty("line.separator");
+	    String nl = System.getProperty("line.separator");
 	    Scanner scanner = new Scanner(new FileInputStream(filePath), 
 	    		ENCODING);
 	    try {
 	      while (scanner.hasNextLine()){
-	        text.append(scanner.nextLine() + NL);
+	        text.append(scanner.nextLine() + nl);
 	      }
 	    }
 	    finally{

@@ -33,8 +33,7 @@ import org.restlet.resource.Get;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
-import static eu.stratuslab.marketplace.server.utils.SparqlUtils.ENDORSER_HISTORY_QUERY_TEMPLATE;
-
+import eu.stratuslab.marketplace.server.utils.MarketplaceUtils;
 /**
  * This resource represents a single endorser
  */
@@ -51,7 +50,7 @@ public class EndorserResource extends BaseResource {
         
         String range = getRangeFromRequest();
         
-        query = String.format(ENDORSER_HISTORY_QUERY_TEMPLATE, email, getHistoryRange(range));
+        query = getQueryBuilder().buildEndorserQuery(email, getHistoryRange(range));
     }
 
     @Get("html")
@@ -132,6 +131,6 @@ public class EndorserResource extends BaseResource {
 		cal.add(Calendar.DATE, -r);
 		Date expiration = cal.getTime();
 				
-		return getFormattedDate(expiration);
+		return MarketplaceUtils.getFormattedDate(expiration);
 	}
 }

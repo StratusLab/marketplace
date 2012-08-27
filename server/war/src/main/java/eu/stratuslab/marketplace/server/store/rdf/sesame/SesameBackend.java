@@ -4,7 +4,7 @@ import org.openrdf.sail.helpers.SailBase;
 
 public interface SesameBackend {
 	
-	public SailBase getSailBase();
-	public boolean keepAlive();
+	SailBase getSailBase();
+	boolean keepAlive();
 	
 }

@@ -51,7 +51,7 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
  */
 public class MDatumResource extends BaseResource {
 
-	private static final String metadataRoute = "/metadata/";
+	private static final String METADATA_ROUTE = "/metadata/";
 	
     private String datum = null;
     private String identifier = null;
@@ -61,7 +61,7 @@ public class MDatumResource extends BaseResource {
     protected void doInit() {
         url = getRequest().getResourceRef().getPath();
                 
-        String metadataPath = url.substring(metadataRoute.length());
+        String metadataPath = url.substring(METADATA_ROUTE.length());
         datum = getMetadatum(metadataPath);
         identifier = metadataPath.substring(0, metadataPath.indexOf('/'));
     }

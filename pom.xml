@@ -24,8 +24,9 @@ metadata.
 
   <properties>
     <jetty.version>7.5.4.v20111024</jetty.version>
-
-    <restlet.version>2.1-RC4</restlet.version>
+    <restlet.version>2.1-RC6</restlet.version>
+    <sesame.version>2.6.9</sesame.version>
+    <slf4j.version>1.6.1</slf4j.version>
 
     <package.os>fc14</package.os>
     <nexus.release.repository.name>fedora-14-releases</nexus.release.repository.name>
@@ -130,14 +131,19 @@ metadata.
         <version>2.8.7</version>
       </dependency>
       <dependency>
-	<groupId>log4j</groupId>
-	<artifactId>log4j</artifactId>
-	<version>1.2.16</version>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.5.8</version>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>eu.emi.security</groupId>
@@ -197,42 +203,42 @@ metadata.
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-sail-api</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-repository-sail</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-sail-memory</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-sail-rdbms</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-rio-rdfxml</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryparser-sparql</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryresultio-sparqljson</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-queryresultio-sparqlxml</artifactId>
-        <version>2.5.1</version>
+        <version>${sesame.version}</version>
       </dependency>
       <dependency>
          <groupId>com.talis.jena</groupId>

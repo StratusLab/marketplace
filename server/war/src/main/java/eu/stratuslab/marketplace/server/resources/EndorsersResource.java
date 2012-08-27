@@ -30,7 +30,6 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
-import static eu.stratuslab.marketplace.server.utils.SparqlUtils.EMAIL_QUERY;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
@@ -44,7 +43,7 @@ public class EndorsersResource extends BaseResource {
 		
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
-        	results = query(EMAIL_QUERY);
+        	results = query(getQueryBuilder().buildEndorsersQuery());
         } catch(MarketplaceException e){
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
@@ -76,7 +75,7 @@ public class EndorsersResource extends BaseResource {
         // Generate the right representation according to its media type.
         String results = "";
 		try {
-			results = queryResultsAsXml(EMAIL_QUERY);
+			results = queryResultsAsXml(getQueryBuilder().buildEndorsersQuery());
 		} catch (MarketplaceException e) {
 			LOGGER.severe(e.getMessage());
 		}

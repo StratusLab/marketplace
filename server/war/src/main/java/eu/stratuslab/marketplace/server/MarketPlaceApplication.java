@@ -56,6 +56,8 @@ import org.restlet.service.StatusService;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.cfg.Parameter;
+import eu.stratuslab.marketplace.server.query.QueryBuilder;
+import eu.stratuslab.marketplace.server.query.SparqlBuilder;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
@@ -84,14 +86,15 @@ public class MarketPlaceApplication extends Application {
     
     private ScheduledFuture<?> reminderHandle;
 
-    private final static int REMINDER_INTERVAL = 30;
-    private final static int EXPIRY_INTERVAL = 1;
+    private static final int REMINDER_INTERVAL = 30;
+    private static final int EXPIRY_INTERVAL = 1;
     
     private Reminder reminder;
     private Reminder expiry;
     
     private RdfStore store = null;
     private FileStore fileStore = null;
+    private QueryBuilder queryBuilder = null;
     
     private String dataDir = null;
 
@@ -156,6 +159,8 @@ public class MarketPlaceApplication extends Application {
         	fileStore = new FlatFileStore();
         }
 
+        queryBuilder = new SparqlBuilder();
+        
         final Runnable remind = new Runnable() {
             public void run() {
                 remind();
@@ -295,6 +300,10 @@ public class MarketPlaceApplication extends Application {
     	return fileStore;
     }
     
+    public QueryBuilder getQueryBuilder() {
+		return queryBuilder;
+	}
+    
     public String getDataDir() {
         return dataDir;
     }
@@ -394,5 +403,5 @@ public class MarketPlaceApplication extends Application {
         }
 
     }
-
+	
 }

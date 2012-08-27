@@ -34,5 +34,6 @@ public abstract class RdfStore {
     public abstract String getRdfEntriesAsJson(String query) throws MarketplaceException;
     public abstract String getRdfEntry(String uri) throws MarketplaceException;
     public abstract void remove(String identifier);
+    public abstract int size();
 }
 	

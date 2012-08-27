@@ -73,6 +73,8 @@ public class SesameRdfStore extends RdfStore {
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
 	private static final int HOUR_IN_SECONDS = 3600;
+
+	private static final String ERROR_INITIALIZE = "error initializing repository: ";
 	
 	private final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
@@ -105,9 +107,9 @@ public class SesameRdfStore extends RdfStore {
 		metadata = new SailRepository(store);
 		try {
 			metadata.initialize();
-		} catch (RepositoryLockedException l) {
-			if (l.getCause() instanceof SailLockedException) {
-				SailLockedException sle = (SailLockedException)l.getCause();
+		} catch (RepositoryLockedException locked) {
+			if (locked.getCause() instanceof SailLockedException) {
+				SailLockedException sle = (SailLockedException)locked.getCause();
 				
 				LockManager lockManager = sle.getLockManager();
 				if (lockManager != null && lockManager.isLocked()) {
@@ -118,7 +120,7 @@ public class SesameRdfStore extends RdfStore {
 						try {
 							metadata.initialize();
 						} catch (RepositoryException e) {
-							LOGGER.severe("error initializing repository: " 
+							LOGGER.severe(ERROR_INITIALIZE
 									+ e.getMessage());
 						}
 					}
@@ -126,25 +128,25 @@ public class SesameRdfStore extends RdfStore {
 				
 			} else {
 				// nothing can be done
-				LOGGER.severe("error initializing repository: " + l.getMessage());
+				LOGGER.severe(ERROR_INITIALIZE + locked.getMessage());
 			}
 		} catch (RepositoryException r) {
-			LOGGER.severe("error initializing repository: " + r.getMessage());
+			LOGGER.severe(ERROR_INITIALIZE + r.getMessage());
 		}
 	}
 
 	public boolean store(String identifier, String entry) {
 		boolean success = false;
-		identifier = "/" + identifier;
+		String idURI = "/" + identifier;
 		
 		try {
 			RepositoryConnection con = getMetadataStore().getConnection();
 			ValueFactory vf = con.getValueFactory();
 			Reader reader = new StringReader(entry);
 			try {
-				con.clear(vf.createURI(identifier));
+				con.clear(vf.createURI(idURI));
 				con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML,
-						vf.createURI(identifier));
+						vf.createURI(idURI));
 			} finally {
 				con.close();
 			}
@@ -264,13 +266,13 @@ public class SesameRdfStore extends RdfStore {
 	}
 
 	public void remove(String identifier) {
-		identifier = "/" + identifier;
+		String idURI = "/" + identifier;
 		
 		try {
 			RepositoryConnection con = getMetadataStore().getConnection();
 			ValueFactory vf = con.getValueFactory();
 			try {
-				con.clear(vf.createURI(identifier));
+				con.clear(vf.createURI(idURI));
 			} finally {
 				con.close();
 			}
@@ -279,6 +281,22 @@ public class SesameRdfStore extends RdfStore {
 		}
 	}
 
+	public int size(){
+		int size = 0;
+		try {
+			RepositoryConnection con = getMetadataStore().getConnection();
+			try {
+				size = con.getContextIDs().asList().size();
+			} finally {
+				con.close();
+			}
+		} catch (RepositoryException e) {
+			LOGGER.severe("Error removing metadata entry: " + e.getMessage());
+		}
+		
+		return size;
+	}
+	
 	private void reInitialize() {
 		if (store != null) {
 			try {
@@ -292,7 +310,7 @@ public class SesameRdfStore extends RdfStore {
 		try {
 			metadata.initialize();
 		} catch (RepositoryException r) {
-			LOGGER.severe("error initializing repository: " + r.getMessage());
+			LOGGER.severe(ERROR_INITIALIZE + r.getMessage());
 		}
 	}
 

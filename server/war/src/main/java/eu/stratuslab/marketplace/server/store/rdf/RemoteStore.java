@@ -257,4 +257,10 @@ public class RemoteStore extends RdfStore {
 
 		return list;
 	}
+
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

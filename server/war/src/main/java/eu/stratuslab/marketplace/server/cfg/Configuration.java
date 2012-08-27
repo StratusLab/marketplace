@@ -36,7 +36,7 @@ import eu.stratuslab.marketplace.server.MarketplaceException;
 
 public final class Configuration {
 
-	private static Logger LOGGER = Logger.getLogger("org.restlet");
+	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
     private static final String CONFIG_FILENAME = "marketplace.cfg";
 

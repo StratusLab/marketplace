@@ -58,7 +58,7 @@ public class Reminder extends BaseResource {
 		List<Map<String, String>> results = new ArrayList<Map<String, String>>();
 		
 		try {
-        	results = query(SparqlUtils.EMAIL_QUERY);
+        	results = query(getQueryBuilder().buildEndorsersQuery());
         } catch(MarketplaceException e){
         	LOGGER.severe(e.getMessage());
         }
@@ -80,7 +80,7 @@ public class Reminder extends BaseResource {
             List<Map<String, String>> entries = new ArrayList<Map<String, String>>();
             
             try {
-				entries = query(buildReminderQuery(email));
+				entries = query(getQueryBuilder().buildReminderQuery(email));
 			} catch (MarketplaceException e) {
 				LOGGER.warning(e.getMessage());
 			}
@@ -93,7 +93,7 @@ public class Reminder extends BaseResource {
 		List<Map<String, String>> results = new ArrayList<Map<String, String>>();
 		
 		try {
-			String expiringEntries = buildExpiryQuery();
+			String expiringEntries = getQueryBuilder().buildExpiryQuery(getExpiryDate());
 			
 			results = query(expiringEntries);
         } catch(MarketplaceException e){
@@ -120,55 +120,7 @@ public class Reminder extends BaseResource {
 		
 		buildAndSendExpiryEmail(entries);
 	}
-	
-	private String buildReminderQuery(String email){
-		StringBuilder filterPredicate = new StringBuilder();
-
-		filterPredicate.append(
-				SparqlUtils.buildFilterEq("email", email));
-		//Build the full SPARQL query
-		StringBuilder query = new StringBuilder(SparqlUtils.SELECT_ALL);
-
-		String where = " WHERE {" + SparqlUtils.WHERE_BLOCK;
 		
-		StringBuilder filter = new StringBuilder(where);
-
-		filter.append(filterPredicate.toString());
-		filter
-		.append(SparqlUtils.getLatestFilter(getCurrentDate()));
-
-		filter.append(" " + SparqlUtils.DEPRECATED_OFF);
-		filter.append(" }");
-
-		query.append(filter);
-
-		return query.toString();
-	}
-	
-	private String buildExpiryQuery(){
-		String select = "SELECT " +
-		"?identifier ?email ?created ?valid";
-		String where = " WHERE {" + SparqlUtils.WHERE_BLOCK;
-		
-		//Build the full SPARQL query
-		StringBuilder query = new StringBuilder(select);
-
-		StringBuilder filter = new StringBuilder(
-				where);
-
-		filter
-		.append(SparqlUtils.getLatestFilter(getCurrentDate()));
-			
-		filter.append(" FILTER (?valid < \"" + getExpiryDate() + "\") .");
-				
-		filter.append(" " + SparqlUtils.DEPRECATED_OFF);
-		filter.append(" }");
-
-		query.append(filter);
-
-		return query.toString();
-	}
-	
 	private void buildAndSendReminderEmail(String email, 
 			List<Map<String, String>> entries, StringBuilder mailContents){
 		if(entries.size() > 0){
@@ -239,7 +191,7 @@ public class Reminder extends BaseResource {
 		cal.add(Calendar.DATE, MAX_EXPIRY_RANGE);
 		Date expiration = cal.getTime();
 				
-		return getFormattedDate(expiration);
+		return MarketplaceUtils.getFormattedDate(expiration);
 	}
 		
 }
