@@ -1,6 +1,7 @@
 package eu.stratuslab.marketplace.server.utils;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -15,6 +16,10 @@ public final class MarketplaceUtils {
 		return getFormattedDate(new Date());
 	}
 
+	public static Date getFormattedDate(String timestamp) throws ParseException{
+		return getDateFormat().parse(timestamp);
+	}
+	
 	public static String getFormattedDate(Date date){
 		return getDateFormat().format(date);
 	}

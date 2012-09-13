@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface QueryBuilder {
 	
-	String buildMoreRecentEntriesQuery(String identifier, String email, String created);
+	String buildLatestEntryQuery(String identifier, String email);
 	
 	String buildGetMetadataQuery(String deprecatedFlag, 
 			Map<String, String> requestQueryValues, 

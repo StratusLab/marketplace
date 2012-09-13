@@ -175,6 +175,40 @@ public abstract class BaseResource extends ServerResource {
 		return rdfEntry;
 	}
 
+	private void tagEntry(String[] coordinates){
+		String newPath = coordinates[0] + "/" + coordinates[1] + "/" + coordinates[2];
+		getMetadataRdfStore().tag(newPath, "latest");
+	}
+	
+	private void removeTag(String[] coordinates, String previousLatest){
+		if(previousLatest != null && !previousLatest.equals("null")){
+			String path = coordinates[0] + "/" + coordinates[1] + "/" + previousLatest;
+			getMetadataRdfStore().removeTag(path, "latest");
+		}
+	}
+	
+	private String getPreviousLatest(String[] coordinates) {
+		String previousLatest = null;
+						
+		String identifier = coordinates[0];
+        String endorser = coordinates[1];
+        
+        String query = getQueryBuilder().buildLatestEntryQuery(
+        		identifier, endorser);
+        
+        try {
+        	List<Map<String, String>> results = query(query);
+        	
+        	if(results.size() > 0){
+        		previousLatest = results.get(0).get("latest");
+        	}
+        } catch(MarketplaceException e){
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+        }
+		
+		return previousLatest;
+	}
+
 	protected String[] getMetadataEntryCoordinates(Document doc) {
 
 		String[] coords = new String[3];
@@ -195,12 +229,16 @@ public abstract class BaseResource extends ServerResource {
 		String created = coordinates[2];
 
 		String metadataPath = identifier + "/" + endorser + "/" + created;
-
+		String previousLatest = getPreviousLatest(coordinates);
+				
 		String rdfEntry = createRdfEntry(datumDoc);
 		if (!storeMetadatum(metadataPath, rdfEntry)) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
-
+		
+		removeTag(coordinates, previousLatest);
+		tagEntry(coordinates);
+				
 		return metadataPath;
 	}
 
@@ -241,20 +279,20 @@ public abstract class BaseResource extends ServerResource {
 		getMetadataRdfStore().remove(metadataPath);
 	}
 
-	protected String queryResultsAsXml(String queryString)
+	protected String queryResultsAsXml(String query)
 			throws MarketplaceException {
-		String resultString = getMetadataRdfStore()
-				.getRdfEntriesAsXml(queryString);
+		String result = getMetadataRdfStore()
+				.getRdfEntriesAsXml(query);
 
-		return resultString;
+		return result;
 	}
 
-	protected String queryResultsAsJson(String queryString)
+	protected String queryResultsAsJson(String query)
 			throws MarketplaceException {
-		String resultString = getMetadataRdfStore().getRdfEntriesAsJson(
-				queryString);
+		String result = getMetadataRdfStore().getRdfEntriesAsJson(
+				query);
 
-		return resultString;
+		return result;
 	}
 
 	/**
@@ -264,10 +302,10 @@ public abstract class BaseResource extends ServerResource {
 	 *            the query
 	 * @return the resultset as a Java Collection
 	 */
-	protected List<Map<String, String>> query(String queryString)
+	protected List<Map<String, String>> query(String query)
 			throws MarketplaceException {
 		List<Map<String, String>> list = getMetadataRdfStore().getRdfEntriesAsMap(
-				queryString);
+				query);
 
 		return list;
 	}

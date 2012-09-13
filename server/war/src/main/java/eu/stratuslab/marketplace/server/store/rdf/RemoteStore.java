@@ -263,4 +263,16 @@ public class RemoteStore extends RdfStore {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public void tag(String identifier, String tag) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeTag(String identifier, String tag) {
+		// TODO Auto-generated method stub
+		
+	}
 }

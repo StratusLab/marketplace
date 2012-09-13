@@ -31,14 +31,14 @@ import javax.mail.internet.InternetAddress;
 public enum Parameter {
 
     STORE_TYPE(true, "memory",
-            "Storage type for image metadata database (memory, mysql or postgres)") {
+            "Storage type for image metadata database (memory, native, mysql or postgres)") {
         @Override
         public void validate(String value) {
             super.validate(value);
-            if (!("memory".equals(value) || "mysql".equals(value) || "postgres"
+            if (!("memory".equals(value) || "native".equals(value) || "mysql".equals(value) || "postgres"
                     .equals(value))) {
                 throw new IllegalArgumentException(getKey()
-                        + " must be 'memory', 'mysql' or 'postgres'");
+                        + " must be 'memory', 'native', 'mysql' or 'postgres'");
             }
         }
     },

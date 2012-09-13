@@ -17,10 +17,9 @@ public class SparqlBuilder implements QueryBuilder {
 	
 	private static final String WHERE = " WHERE {";
 	
-	public String buildMoreRecentEntriesQuery(String identifier, String endorser,
-			String created) {
+	public String buildLatestEntryQuery(String identifier, String endorser) {
 		String query = String.format(SparqlUtils.LATEST_ENTRY_QUERY_TEMPLATE, 
-        		identifier, endorser, created);
+        		identifier, endorser);
 		
 		return query;
 	}

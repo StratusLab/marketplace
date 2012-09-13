@@ -51,15 +51,14 @@ public final class SparqlUtils {
     	"FILTER (?email = \"%s\") . FILTER(?created > \"%s\") }";
 	
 	public static final String LATEST_ENTRY_QUERY_TEMPLATE = //
-		"SELECT ?created " +
+		"SELECT (MAX(?created) AS ?latest)" +
 		"WHERE { ?x <http://purl.org/dc/terms/identifier>  ?identifier . " +
 		"?x <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
     	"?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; " +
     	"<http://purl.org/dc/terms/created> ?created . " +
     	"?endorser <http://mp.stratuslab.eu/slreq#email> ?email . " +
     	"FILTER (?identifier = \"%s\") . " +
-    	"FILTER (?email = \"%s\") . " +
-    	"FILTER (?created > \"%s\") }";
+    	"FILTER (?email = \"%s\") }";
     	
 	private static final String FILTER_TEMPLATE = " FILTER (?%s = \"%s\") . ";
 	
@@ -69,6 +68,7 @@ public final class SparqlUtils {
 	
 	private static final String REGEX_TEMPLATE = "regex(?%s, \"%s\", \"i\") ";
 	
+	/*
 	private static final String LATEST_FILTER_TEMPLATE = " OPTIONAL { "
     + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
     + " <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ."
@@ -79,6 +79,11 @@ public final class SparqlUtils {
     + " FILTER (?lemail = ?email) ."
     + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) ."
     + " FILTER (?valid > \"%s\") .";
+	*/
+	
+	//<tag xmlns="http://mp.stratuslab.eu/slterms#">latest</tag></rdf:Description>
+	private static final String LATEST_FILTER_TEMPLATE = " FILTER (?tag = \"latest\") ." +
+			" FILTER (?valid > \"%s\") .";
 	
 	public static final String WHERE_BLOCK =
 		" ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
@@ -88,6 +93,7 @@ public final class SparqlUtils {
         + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
         + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
         + " OPTIONAL { ?x <http://purl.org/dc/terms/title> ?title . }"
+        + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#tag> ?tag . }"
         + " ?x <http://purl.org/dc/terms/valid> ?valid;"
         + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
         + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"

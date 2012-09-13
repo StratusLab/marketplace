@@ -29,6 +29,8 @@ public abstract class RdfStore {
 	public abstract void shutdown();
 	public abstract void initialize();
     public abstract boolean store(String identifier, String entry);
+    public abstract void tag(String identifier, String tag);
+    public abstract void removeTag(String identifier, String tag);
     public abstract List<Map<String, String>> getRdfEntriesAsMap(String query) throws MarketplaceException;
     public abstract String getRdfEntriesAsXml(String query) throws MarketplaceException;
     public abstract String getRdfEntriesAsJson(String query) throws MarketplaceException;

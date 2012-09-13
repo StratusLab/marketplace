@@ -20,6 +20,7 @@
 package eu.stratuslab.marketplace.server.store.rdf.sesame;
 
 import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.MARKETPLACE_URI;
+import static eu.stratuslab.marketplace.metadata.MetadataNamespaceContext.SLTERMS_NS_URI;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
 
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -135,6 +137,48 @@ public class SesameRdfStore extends RdfStore {
 		}
 	}
 
+	public void tag(String identifier, String tag){
+		String idURI = "/" + identifier;
+		
+		try {
+			RepositoryConnection con = getMetadataStore().getConnection();
+			ValueFactory vf = con.getValueFactory();
+			
+			try {
+				con.add(vf.createURI(MARKETPLACE_URI + "#" + identifier),
+						vf.createURI(SLTERMS_NS_URI + "tag"),
+						new LiteralImpl(tag),
+						vf.createURI(idURI));									
+			} finally {
+				con.close();
+			}
+		
+		} catch (RepositoryException e) {
+			LOGGER.severe("Unable to clear metadata entry: " + e.getMessage());
+		}
+	}
+	
+	public void removeTag(String identifier, String tag){
+		String idURI = "/" + identifier;
+		
+		try {
+			RepositoryConnection con = getMetadataStore().getConnection();
+			ValueFactory vf = con.getValueFactory();
+			
+			try {
+				con.remove(vf.createURI(MARKETPLACE_URI + "#" + identifier),
+						vf.createURI(SLTERMS_NS_URI + "tag"),
+						new LiteralImpl(tag),
+						vf.createURI(idURI));									
+			} finally {
+				con.close();
+			}
+		
+		} catch (RepositoryException e) {
+			LOGGER.severe("Unable to clear metadata entry: " + e.getMessage());
+		}
+	}
+	
 	public boolean store(String identifier, String entry) {
 		boolean success = false;
 		String idURI = "/" + identifier;
@@ -146,7 +190,7 @@ public class SesameRdfStore extends RdfStore {
 			try {
 				con.clear(vf.createURI(idURI));
 				con.add(reader, MARKETPLACE_URI, RDFFormat.RDFXML,
-						vf.createURI(idURI));
+						vf.createURI(idURI));				
 			} finally {
 				con.close();
 			}

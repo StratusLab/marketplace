@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.channels.Channels;
 import java.util.Scanner;
@@ -137,6 +138,21 @@ public final class MetadataFileUtils {
         return rdfEntry;
     }
 
+	public static Document extractXmlDocument(String rdf){
+		Document datumDoc = null;
+
+		try {
+			
+			datumDoc = extractXmlDocument(new ByteArrayInputStream(
+					rdf.getBytes(ENCODING)));
+			
+		} catch (UnsupportedEncodingException e) {
+			throw new ResourceException(e);
+		}	
+
+		return datumDoc;
+	}
+	
 	public static Document extractXmlDocument(InputStream stream) {
 
         DocumentBuilder db = XMLUtils.newDocumentBuilder(false);
@@ -167,4 +183,5 @@ public final class MetadataFileUtils {
         
         return true;
     }
+
 }

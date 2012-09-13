@@ -25,7 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +36,6 @@ import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
-
 import eu.stratuslab.marketplace.metadata.MetadataException;
 import eu.stratuslab.marketplace.metadata.ValidateMetadataConstraints;
 import eu.stratuslab.marketplace.metadata.ValidateRDFModel;
@@ -42,6 +43,7 @@ import eu.stratuslab.marketplace.metadata.ValidateXMLSignature;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
+import eu.stratuslab.marketplace.server.utils.MarketplaceUtils;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
@@ -119,14 +121,29 @@ public class MDataResourceBase extends BaseResource {
         String endorser = coordinates[1];
         String created = coordinates[2];
         
-        String query = getQueryBuilder().buildMoreRecentEntriesQuery(
-        		identifier, endorser, created);
+        String query = getQueryBuilder().buildLatestEntryQuery(
+        		identifier, endorser);
         
         try {
         	List<Map<String, String>> results = query(query);
         	
         	if(results.size() > 0){
-        		throw new MetadataException("older than latest entry");
+        		
+        		String latest = results.get(0).get("latest");
+        		if(!latest.equals("null")){
+
+        			try {
+        				Date newEntry = MarketplaceUtils.getFormattedDate(created);
+        				Date existingEntry = MarketplaceUtils.getFormattedDate(latest);
+
+        				if(newEntry.before(existingEntry)){        		
+        					throw new MetadataException("older than latest entry");
+        				}
+        				        				        				
+        			} catch (ParseException e) {
+        				throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+        			}
+        		}
         	}
         } catch(MarketplaceException e){
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
