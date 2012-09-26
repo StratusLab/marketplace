@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>marketplace-server-war</artifactId>
@@ -37,10 +38,10 @@
 			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet.ext.fileupload</artifactId>
 		</dependency>
-                <dependency>
-                     <groupId>org.restlet.jee</groupId>
-                     <artifactId>org.restlet.ext.httpclient</artifactId>
-                 </dependency>
+		<dependency>
+			<groupId>org.restlet.jee</groupId>
+			<artifactId>org.restlet.ext.httpclient</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-sail</artifactId>
@@ -49,10 +50,10 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-sail-memory</artifactId>
 		</dependency>
-                <dependency>
-                        <groupId>org.openrdf.sesame</groupId>
-                        <artifactId>sesame-sail-nativerdf</artifactId>
-                </dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-sail-nativerdf</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-sail-rdbms</artifactId>
@@ -65,58 +66,60 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryresultio-sparqlxml</artifactId>
 		</dependency>
-                <dependency>
-                        <groupId>org.openrdf.sesame</groupId>
-                        <artifactId>sesame-queryresultio-sparqljson</artifactId>
-                </dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-queryresultio-sparqljson</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>
 			<artifactId>jena</artifactId>
 		</dependency>
 		<dependency>
-		        <groupId>com.hp.hpl.jena</groupId>
-		        <artifactId>arq</artifactId>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.talis.jena</groupId>
 			<artifactId>rdf-json</artifactId>
 		</dependency>
-                <dependency>
-                        <groupId>com.googlecode.json-simple</groupId>
-                        <artifactId>json-simple</artifactId>
-                </dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
-                <dependency>
-                    <groupId>eu.emi.security</groupId>
-                    <artifactId>authlib</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcprov-jdk16</artifactId>
-                </dependency>
+
+		<dependency>
+			<groupId>eu.eu-emi.security</groupId>
+			<artifactId>canl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk16</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-                <dependency>
-                        <groupId>org.restlet.jee</groupId>
-                        <artifactId>org.restlet.ext.ssl</artifactId>
-                </dependency>
+		<dependency>
+			<groupId>org.restlet.jee</groupId>
+			<artifactId>org.restlet.ext.ssl</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-                <dependency>
-                    <groupId>postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <scope>runtime</scope>
-                </dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
@@ -138,9 +141,9 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<configuration>
 					<war>${basedir}/target/${project.artifactId}-${project.version}.war</war>
-                                        <webApp>
-                                          <extraClasspath>${basedir}/target/altstyle</extraClasspath>
-                                        </webApp>
+					<webApp>
+						<extraClasspath>${basedir}/target/altstyle</extraClasspath>
+					</webApp>
 
 					<systemProperties>
 
@@ -151,19 +154,20 @@
 							<value>${basedir}/src/main/config</value>
 						</systemProperty>
 					</systemProperties>
-                                        <connectors>
-                                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                                            <port>8080</port>
-                                            <maxIdleTime>60000</maxIdleTime>
-                                        </connector>
-                                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
-                                             <port>8443</port>
-                                             <maxIdleTime>60000</maxIdleTime>
-                                             <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
-                                             <password>jetty7</password>
-                                             <keyPassword>jetty7</keyPassword>
-                                        </connector>
-                                        </connectors>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>8080</port>
+							<maxIdleTime>60000</maxIdleTime>
+						</connector>
+						<connector
+							implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+							<port>8443</port>
+							<maxIdleTime>60000</maxIdleTime>
+							<keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
+							<password>jetty7</password>
+							<keyPassword>jetty7</keyPassword>
+						</connector>
+					</connectors>
 				</configuration>
 
 				<executions>
@@ -186,41 +190,41 @@
 				</executions>
 			</plugin>
 
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>keytool-maven-plugin</artifactId>
-                                <executions>
-                                    <execution>
-                                        <phase>generate-resources</phase>
-                                        <id>clean</id>
-                                        <goals>
-                                            <goal>clean</goal>
-                                        </goals>
-                                    </execution>
-                                    <execution>
-                                        <phase>generate-resources</phase>
-                                        <id>genkey</id>
-                                        <goals>
-                                            <goal>genkey</goal>
-                                        </goals>
-                                    </execution>
-                                </executions>
-                                <configuration>
-                                    <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
-                                    <dname>cn=marketplace.stratuslab.eu</dname>
-                                    <keypass>jetty7</keypass>
-                                    <storepass>jetty7</storepass>
-                                    <alias>jetty7</alias>
-                                    <keyalg>RSA</keyalg>
-                                </configuration>
-                        </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>keytool-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<id>clean</id>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+					<execution>
+						<phase>generate-resources</phase>
+						<id>genkey</id>
+						<goals>
+							<goal>genkey</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
+					<dname>cn=marketplace.stratuslab.eu</dname>
+					<keypass>jetty7</keypass>
+					<storepass>jetty7</storepass>
+					<alias>jetty7</alias>
+					<keyalg>RSA</keyalg>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<configuration>
 					<excludeFilterFile>${basedir}/src/test/findbugs/findbugs-exclude.xml</excludeFilterFile>
-                                        <xmlOutput>true</xmlOutput>
+					<xmlOutput>true</xmlOutput>
 				</configuration>
 				<executions>
 					<execution>
