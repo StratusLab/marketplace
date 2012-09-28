@@ -17,43 +17,20 @@ metadata.
 
   <packaging>pom</packaging>
 
+  <parent>
+    <groupId>eu.stratuslab</groupId>
+    <artifactId>distribution</artifactId>
+    <version>2.1-SNAPSHOT</version>
+  </parent>
+
   <modules>
-    <module>metadata</module>
     <module>server</module>
   </modules>
 
-  <properties>
-    <jetty.version>7.5.4.v20111024</jetty.version>
-    <restlet.version>2.1-RC6</restlet.version>
-    <sesame.version>2.6.9</sesame.version>
-    <slf4j.version>1.6.1</slf4j.version>
-
-    <package.os>fc14</package.os>
-    <nexus.release.repository.name>fedora-14-releases</nexus.release.repository.name>
-    <nexus.snapshot.repository.name>fedora-14-snapshots</nexus.snapshot.repository.name>
-  </properties>
-
-  <licenses>
-    <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
-
-  <organization>
-    <name>StratusLab</name>
-    <url>http://stratuslab.eu/</url>
-  </organization>
-
   <issueManagement>
-    <system>JIRA</system>
-    <url>http://jira.stratuslab.eu:8080/</url>
+    <system>GitHub Issues</system>
+    <url>https://github.com/StratusLab/marketplace/issues</url>
   </issueManagement>
-
-  <ciManagement>
-    <system>Hudson</system>
-    <url>http://hudson.stratuslab.eu:8080/</url>
-  </ciManagement>
 
   <scm>
     <connection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</connection>
@@ -61,366 +38,41 @@ metadata.
   </scm>
 
   <repositories>
+
     <repository>
       <releases>
 	<enabled>true</enabled>
-	<updatePolicy>always</updatePolicy>
-	<checksumPolicy>fail</checksumPolicy>
       </releases>
       <snapshots>
 	<enabled>false</enabled>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>fail</checksumPolicy>
       </snapshots>
-      <id>StratusLabReleases</id>
-      <name>StratusLab Releases</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/${nexus.release.repository.name}</url>
-      <layout>default</layout>
+      <id>POMReleases</id>
+      <name>POM Releases</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/releases</url>
     </repository>
 
-    <repository>  
-      <id>maven-restlet</id>  
-      <name>Public online Restlet repository</name>  
-      <url>http://maven.restlet.org</url>  
-    </repository>
     <repository>
-      <id>openrdf</id>
-      <name>Public online sesame repository</name>                  
-      <url>http://repo.aduna-software.org/maven2/releases</url>
+      <releases>
+	<enabled>false</enabled>
+      </releases>
+      <snapshots>
+	<enabled>true</enabled>
+      </snapshots>
+      <id>POMSnapshots</id>
+      <name>POM Snapshots</name>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots</url>
     </repository>
-    <repository>
-    <id>talis</id>
-    <name>Public online talis repository</name>
-    <url>http://oss.talisplatform.com/content/repositories/talis-releases</url>
-    </repository>
-    
+
   </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>stratuslab.releases</id>
-      <name>Releases</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/${nexus.release.repository.name}</url>
-    </repository>
-    <snapshotRepository>
-      <id>stratuslab.snapshots</id>
-      <name>Snapshots</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/${nexus.snapshot.repository.name}</url>
-    </snapshotRepository>
-    <site>
-      <id>hudson.webserver</id>
-      <url>scp://hudson.stratuslab.eu/var/www/one</url>
-    </site>
-  </distributionManagement>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-	<groupId>org.bouncycastle</groupId>
-	<artifactId>bcprov-jdk16</artifactId>
-	<version>1.46</version>
-      </dependency>
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>jena</artifactId>
-        <version>2.6.4</version>
-      </dependency>
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>arq</artifactId>
-        <version>2.8.7</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>eu.emi.security</groupId>
-        <artifactId>authlib</artifactId>
-        <version>1.3-rc3-sl</version>
-      </dependency>
-      <dependency>
-	<groupId>org.eclipse.jetty</groupId>
-	<artifactId>jetty-server</artifactId>
-	<version>${jetty.version}</version>
-      </dependency>
-      <dependency>
-	<groupId>org.eclipse.jetty</groupId>
-	<artifactId>jetty-plus</artifactId>
-	<version>${jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.10</version>
-      </dependency>
-      <dependency>  
-        <groupId>org.restlet.jee</groupId>  
-        <artifactId>org.restlet</artifactId>  
-        <version>${restlet.version}</version>  
-      </dependency>  
-      <dependency>  
-        <groupId>org.restlet.jee</groupId>  
-        <artifactId>org.restlet.ext.xml</artifactId>  
-        <version>${restlet.version}</version>  
-      </dependency>
-      <dependency>
-        <groupId>org.restlet.jee</groupId>
-        <artifactId>org.restlet.ext.servlet</artifactId>
-        <version>${restlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.restlet.jee</groupId>
-        <artifactId>org.restlet.ext.httpclient</artifactId>
-        <version>${restlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.restlet.jee</groupId>
-        <artifactId>org.restlet.ext.freemarker</artifactId>
-        <version>${restlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.restlet.jee</groupId>
-        <artifactId>org.restlet.ext.fileupload</artifactId>
-        <version>${restlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.restlet.jee</groupId>
-        <artifactId>org.restlet.ext.ssl</artifactId>
-        <version>${restlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-sail-api</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-repository-sail</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-sail-memory</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-sail-nativerdf</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-sail-rdbms</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-rio-rdfxml</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-queryparser-sparql</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-queryresultio-sparqljson</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openrdf.sesame</groupId>
-        <artifactId>sesame-queryresultio-sparqlxml</artifactId>
-        <version>${sesame.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>com.talis.jena</groupId>
-         <artifactId>rdf-json</artifactId>
-         <version>0.3</version>
-      </dependency>
-      <dependency>
-        <groupId>com.googlecode.json-simple</groupId>
-        <artifactId>json-simple</artifactId>
-        <version>1.1</version>
-      </dependency>
-      <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.15</version>
-      </dependency> 
-      <dependency>
-        <groupId>postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>9.1-901.jdbc4</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
-      </dependency> 
-      <dependency>
-        <groupId>javax.mail</groupId>
-        <artifactId>mail</artifactId>
-        <version>1.4.1</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>1.4</version>
-      </dependency>
-      <dependency>
- 	<groupId>eu.stratuslab.marketplace</groupId>
-	<artifactId>marketplace-metadata</artifactId>
-	<version>2.3-SNAPSHOT</version>
+	<groupId>eu.stratuslab.metadata</groupId>
+	<artifactId>metadata</artifactId>
+	<version>3.0-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
-  
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.4.0</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
-        <configuration>
-          <show>public</show>
-        </configuration>
-      </plugin>
-      <plugin>
-	<groupId>org.codehaus.mojo</groupId>
-	<artifactId>jdepend-maven-plugin</artifactId>
-        <version>2.0-beta-2</version>
-      </plugin>
-    </plugins>
-  </reporting>
-  
-  <build>
-
-    <pluginManagement>
-      <plugins>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-clean-plugin</artifactId>
-	  <version>2.4.1</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-deploy-plugin</artifactId>
-	  <version>2.7</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-dependency-plugin</artifactId>
-	  <version>2.4</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-install-plugin</artifactId>
-	  <version>2.3.1</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-jar-plugin</artifactId>
-	  <version>2.3.2</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-war-plugin</artifactId>
-	  <version>2.1.1</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-resources-plugin</artifactId>
-	  <version>2.5</version>
-	  <configuration>
-	    <encoding>UTF-8</encoding>
-	  </configuration>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-site-plugin</artifactId>
-	  <version>3.0</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-surefire-plugin</artifactId>
-	  <version>2.11</version>
-	</plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-compiler-plugin</artifactId>
-	  <version>2.3.2</version>
-	  <configuration>
-	    <encoding>UTF-8</encoding>
-	    <target>1.5</target>
-	    <source>1.5</source>
-	  </configuration>
-	</plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.8</version>
-	  <configuration>
-	    <encoding>UTF-8</encoding>
-	  </configuration>
-        </plugin>
-	<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-assembly-plugin</artifactId>
-	  <version>2.2.2</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.mortbay.jetty</groupId>
-	  <artifactId>jetty-maven-plugin</artifactId>
-	  <version>${jetty.version}</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>exec-maven-plugin</artifactId>
-	  <version>1.2.1</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>findbugs-maven-plugin</artifactId>
-	  <version>2.4.0</version>
-	</plugin>
-
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>jdepend-maven-plugin</artifactId>
-	  <version>2.0-beta-2</version>
-	</plugin>
-
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>keytool-maven-plugin</artifactId>
-          <version>1.1</version>
-        </plugin>
-
-      </plugins>
-
-    </pluginManagement>
-
-  </build>
 
 </project>
