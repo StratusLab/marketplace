@@ -68,20 +68,6 @@ public final class SparqlUtils {
 	
 	private static final String REGEX_TEMPLATE = "regex(?%s, \"%s\", \"i\") ";
 	
-	/*
-	private static final String LATEST_FILTER_TEMPLATE = " OPTIONAL { "
-    + " ?lx <http://purl.org/dc/terms/identifier>  ?lidentifier; "
-    + " <http://mp.stratuslab.eu/slreq#endorsement> ?lendorsement ."
-    + " ?lendorsement <http://mp.stratuslab.eu/slreq#endorser> ?lendorser;"
-    + " <http://purl.org/dc/terms/created> ?latestcreated ."
-    + " ?lendorser <http://mp.stratuslab.eu/slreq#email> ?lemail ."
-    + " FILTER (?lidentifier = ?identifier) ."
-    + " FILTER (?lemail = ?email) ."
-    + " FILTER (?latestcreated > ?created) . } FILTER (!bound (?lendorsement)) ."
-    + " FILTER (?valid > \"%s\") .";
-	*/
-	
-	//<tag xmlns="http://mp.stratuslab.eu/slterms#">latest</tag></rdf:Description>
 	private static final String LATEST_FILTER_TEMPLATE = " FILTER (?tag = \"latest\") ." +
 			" FILTER (?valid > \"%s\") .";
 	
