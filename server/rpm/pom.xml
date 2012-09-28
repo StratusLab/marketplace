@@ -148,11 +148,27 @@
 		  <location>src/main/scripts</location>
 		  <includes>
 		    <include>generate-jetty-certificate.sh</include>
-                    <include>marketplace-sync.sh</include>
 		  </includes>
 		</source>
 	      </sources>
 	    </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/bin</directory>
+              <filemode>755</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/scripts</location>
+                  <includes>
+                    <include>marketplace-sync</include>
+                    <include>marketplace-rebuild-db</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
 
 	    <mapping>
 	      <directory>${installation.dir}/</directory>
