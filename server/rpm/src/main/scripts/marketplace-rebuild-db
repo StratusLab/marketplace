@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ ! $# == 2 ]; then
+   echo "Usage: $0 <data.dir> <marketplace.url>"
+   exit
+fi
+
+if [ ! -d $1 ]; then
+   echo "Data directory not found"
+   exit
+fi
+
+metadata=`find $1 -name "*.xml"|sort`
+
+echo -ne "Rebuilding database, please wait"
+
+for meta in $metadata
+do
+echo -ne "."
+curl -X POST -sS -H "Content-Type:application/xml" -T $meta $2/metadata 1> /dev/null
+done
+
+echo -e "\nRebuild complete."
