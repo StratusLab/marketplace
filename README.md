@@ -10,6 +10,144 @@ users, and cloud administrators.
 This repository also contains the metadata utilities associated 
 with the descriptions of the virtual appliances.
 
+System Requirements
+-------------------
+The only requirement is JDK v1.6+. As such the Marketplace should install on most systems, once this dependency is met.
+
+The metadata files and searchable metadata index, are stored locally as flat files. The Marketplace host should have adequate storage for these.
+
+The default port for the Marketplace service is 8080 for HTTP, and 8443 for HTTPS. The host should be accessible on these ports. Alternatively proxying via an Apache web-server is possible. Please contact support if you require help with this.
+Installation
+
+Installation
+-------------
+StratusLab runs its own YUM repository, so you must add it to your YUM configuration. Drop a file (named say stratuslab-releases.repo) in the /etc/yum.repos.d/ with the following content:
+```
+[StratusLab-Releases]
+name=StratusLab-Releases
+baseurl=http://yum.stratuslab.eu/releases/centos-6.2
+gpgcheck=0
+enabled=1
+```
+With this in place, you can now install the package:
+
+```
+yum install stratuslab-marketplace
+```
+
+This will install the Marketplace, along with a default configuration file /etc/stratuslab/marketplace.cfg. This file should be modified to configure the Marketplace as required.
+
+An important step is to ensure that the two directories data.dir and pending.dir exist and are writeable by the user that will be running the Marketplace instance.
+
+By default the Marketplace will use a Memory store as the backend. This type of store is volatile, and any uploaded metadata will not persist if the Marketplace is restarted. For this reason, for use in a production environment the Marketplace should be configured to use a Native store as the storage backend.
+
+Email verification
+-------------------
+It is possible to configure the Marketplace to require email verification of uploaded metadata. The Marketplace will send an email to the metadata endorser requiring them to verify their uploaded entry. Whilst awaiting verification the metadata will be stored in the pending.dir.
+
+The relevant configuration parameters are:
+
+```
+validate.email=true
+admin.email=admin@example.org
+mail.host=smtp.example.org
+mail.port=465
+mail.user=no-reply@example.org
+mail.password=xxxxxxx
+mail.ssl=true
+mail.debug=false
+```
+
+Jetty
+------
+The Marketplace can be started with the following command:
+
+/etc/init.d/marketplace start
+
+This will start the Jetty server. By default this will start on port 8081, meaning the Marketplace can be accessed on http://localhost:8081. The port can be changed by modifying the file /opt/stratuslab/marketplace/etc/jetty-stratuslab.xml.
+
+
+Configuration reference
+------------------------
+The following describes the parameters in the Marketplace configuration file.
+```
+# Email address for account approvals, etc.
+admin.email=admin@example.org
+
+# Host for SMTP server for email notifications.
+mail.host=smtp.example.org
+
+Port on SMTP server (defaults to standard ports).
+mail.port=465
+
+# Username for SMTP server.
+mail.user=no-reply@example.org
+
+Password for SMTP server.
+mail.password=xxxxxxx
+
+# Use SSL for SMTP server (default is 'true').
+mail.ssl=true
+
+# Debug mail sending (default is 'false').
+mail.debug=false
+
+# Directory containing raw metadata data entries.
+data.dir=/var/lib/stratuslab/marketplace
+
+# Directory for pending (unconfirmed) entries.
+pending.dir=/var/lib/stratuslab/pending
+
+# Flag to determine email must be validated.
+validate.email=false
+
+# Storage type for image metadata database (memory or native)
+store.type=native
+```
+Changing the Marketplace Style
+-------------------------------
+The current release contains code to allow the page style to be changed easily. The instructions are the following:
+
+1. Copy the current web archive (war) for the service to a temporary directory.
+```
+$ cp /opt/stratuslab/marketplace/webapps/marketplace-server-war-1.0.13-SNAPSHOT.war . 
+```
+2. Extract the contents of the archive. (You must have the java development tools installed.)
+```
+$ jar xf marketplace-server-war-1.0.13-SNAPSHOT.war 
+```
+3. Create a new directory hierarchy to hold the modified style files. You can choose any path here, but it is best to follow the usual java conventions and use an inverted domain name. This CANNOT be eu/stratuslab/style/css if you want your changes to be visible.
+```
+$ mkdir -p eu/egi/style/css 
+```
+4. Copy the current style files into your new directory hierarchy.
+```
+$ cp WEB-INF/classes/eu/stratuslab/style/css/* eu/egi/style/css/ 
+```
+5. Change the CSS and other files as you like. Note that some of the images are used by the javascript for the service, so it is better to replace images or add new ones rather than delete existing ones.
+
+6. Create a new jar file with your modified style files and verify the correct hierarchy within the jar file.
+```
+$ jar cf egi-style.jar eu 
+$ jar tf egi-style.jar 
+```
+7. Drop this jar file into the Marketplace server's extensions directory.
+```
+$ cp egi-style.jar /opt/stratuslab/marketplace/lib/ext/ 
+```
+8. Modify the server's configuration file by adding the style.path option. NOTE: The path must match the path in the jar file and MUST start and end with a slash!
+```
+style.path=/eu/egi/style/css/ 
+```
+9. Restart the service.
+```
+$ service marketplace restart 
+```
+At this point your new style should be active.
+
+If necessary you can also perform the same operation for the service javascript. The configuration option is named js.path and the procedure is complete analogous to the one used for style.path.
+
+
 License
 -------
 
