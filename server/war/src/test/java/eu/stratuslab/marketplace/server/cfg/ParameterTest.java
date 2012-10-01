@@ -42,8 +42,7 @@ public class ParameterTest {
     @Test
     public void checkValidStoreTypeValues() {
         STORE_TYPE.validate("memory");
-        STORE_TYPE.validate("mysql");
-        STORE_TYPE.validate("postgres");
+        STORE_TYPE.validate("native");
     }
 
     @Test(expected = IllegalArgumentException.class)

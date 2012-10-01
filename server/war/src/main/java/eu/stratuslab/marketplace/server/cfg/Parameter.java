@@ -31,14 +31,18 @@ import javax.mail.internet.InternetAddress;
 public enum Parameter {
 
     STORE_TYPE(true, "memory",
-            "Storage type for image metadata database (memory, native, mysql or postgres)") {
+            "Storage type for image metadata database (memory or native)") {
         @Override
         public void validate(String value) {
             super.validate(value);
-            if (!("memory".equals(value) || "native".equals(value) || "mysql".equals(value) || "postgres"
-                    .equals(value))) {
+            if("mysql".equals(value) || "postgres".equals(value)){
+                throw new IllegalArgumentException(getKey() +
+                        " RDBMS support has been removed, please reconfigure"
+                        + " the Marketplace to use store.type=native, restart, and"
+                        + " execute the marketplace-rebuild-db script.");
+            } else if (!("memory".equals(value) || "native".equals(value))) {
                 throw new IllegalArgumentException(getKey()
-                        + " must be 'memory', 'native', 'mysql' or 'postgres'");
+                        + " must be 'memory' or 'native'");
             }
         }
     },

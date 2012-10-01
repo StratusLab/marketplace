@@ -21,29 +21,21 @@ package eu.stratuslab.marketplace.server.store.rdf;
 
 import eu.stratuslab.marketplace.server.store.rdf.sesame.SesameBackend;
 import eu.stratuslab.marketplace.server.store.rdf.sesame.SesameMemoryBackend;
-import eu.stratuslab.marketplace.server.store.rdf.sesame.SesameMySQLBackend;
 import eu.stratuslab.marketplace.server.store.rdf.sesame.SesameNativeBackend;
-import eu.stratuslab.marketplace.server.store.rdf.sesame.SesamePostgresBackend;
 import eu.stratuslab.marketplace.server.store.rdf.sesame.SesameRdfStore;
 
 public class RdfStoreFactoryImpl implements RdfStoreFactory {
-	public RdfStore createRdfStore(String provider, String type){
-		if(type.equals("remote")){
-			return new RemoteStore();
+    
+    public RdfStore createRdfStore(String provider, String type){
+		
+		SesameBackend backend = null;
+
+		if(type.equals("native")) {
+			backend = new SesameNativeBackend();
 		} else {
-			SesameBackend backend = null;
-			
-			if(type.equals("mysql")){
-				backend = new SesameMySQLBackend();
-			} else if(type.equals("postgres")){
-				backend = new SesamePostgresBackend();
-			} else if(type.equals("native")) {
-				backend = new SesameNativeBackend();
-			} else {
-				backend = new SesameMemoryBackend();
-			}
-			
-			return new SesameRdfStore(backend);
+			backend = new SesameMemoryBackend();
 		}
+
+		return new SesameRdfStore(backend);
 	}
 }

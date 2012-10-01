@@ -107,9 +107,9 @@ public class MarketPlaceApplication extends Application {
 			String storeType = Configuration.getParameterValue(STORE_TYPE);
 			init(storeType);
 		} catch(ExceptionInInitializerError e){
-			LOGGER.severe("Incorrect configuration: " + e.getCause().getMessage());
-		}
-    }
+			LOGGER.severe("incorrect configuration: " + e.getCause().getMessage());
+		}	
+	}
 
     public MarketPlaceApplication(String storeType) {
         init(storeType);
@@ -190,7 +190,6 @@ public class MarketPlaceApplication extends Application {
      */
     @Override
     public Restlet createInboundRoot() {
-
         Context context = getContext();
 
         // Create the FreeMarker configuration.
@@ -199,7 +198,7 @@ public class MarketPlaceApplication extends Application {
 
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
-
+                
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
         router.attach("/metadata/", MDataResource.class);
@@ -231,9 +230,9 @@ public class MarketPlaceApplication extends Application {
         router.attach("/upload", UploadResource.class);
         router.attach("/upload/", UploadResource.class);
 
-         // Defines a route for the sync resource
-         router.attach("/sync", SyncResource.class);
-         router.attach("/sync/", SyncResource.class);
+        // Defines a route for the sync resource
+        router.attach("/sync", SyncResource.class);
+        router.attach("/sync/", SyncResource.class);
 
         // Define a route for the about page
         router.attach("/about", AboutResource.class);
@@ -244,11 +243,13 @@ public class MarketPlaceApplication extends Application {
         route = router.attach("/action/", new ActionRouter());
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
-        attachDirectory(router, getContext(), "/css/",
-                Configuration.getParameterValue(Parameter.STYLE_PATH));
+        attachDirectory(router, getContext(), "/css/", 
+        		Configuration.getParameterValue(Parameter.STYLE_PATH)
+        		);
 
-        attachDirectory(router, getContext(), "/js/",
-                Configuration.getParameterValue(Parameter.JS_PATH));
+        attachDirectory(router, getContext(), "/js/", 
+        		Configuration.getParameterValue(Parameter.JS_PATH)
+        		);
 
         // Unknown root pages get the home page.
         router.attachDefault(HomeResource.class);
