@@ -12,20 +12,19 @@ with the descriptions of the virtual appliances.
 
 System Requirements
 -------------------
+
 The only requirement is JDK v1.6+. As such the Marketplace should install on most systems, once this dependency is met.
 
 The metadata files and searchable metadata index, are stored locally as flat files. The Marketplace host should have adequate storage for these.
 
-The default port for the Marketplace service is 8080 for HTTP, and 8443 for HTTPS. The host should be accessible on these ports. Alternatively proxying via an Apache web-server is possible. Please contact support if you require help with this.
-Installation
-
 Installation
 -------------
+
 StratusLab runs its own YUM repository, so you must add it to your YUM configuration. Drop a file (named say stratuslab-releases.repo) in the /etc/yum.repos.d/ with the following content:
 ```
 [StratusLab-Releases]
 name=StratusLab-Releases
-baseurl=http://yum.stratuslab.eu/releases/centos-6.2
+baseurl=http://yum.stratuslab.eu/releases/centos-6.2-v2.0
 gpgcheck=0
 enabled=1
 ```
@@ -41,34 +40,9 @@ An important step is to ensure that the two directories data.dir and pending.dir
 
 By default the Marketplace will use a Memory store as the backend. This type of store is volatile, and any uploaded metadata will not persist if the Marketplace is restarted. For this reason, for use in a production environment the Marketplace should be configured to use a Native store as the storage backend.
 
-Email verification
--------------------
-It is possible to configure the Marketplace to require email verification of uploaded metadata. The Marketplace will send an email to the metadata endorser requiring them to verify their uploaded entry. Whilst awaiting verification the metadata will be stored in the pending.dir.
-
-The relevant configuration parameters are:
-
-```
-validate.email=true
-admin.email=admin@example.org
-mail.host=smtp.example.org
-mail.port=465
-mail.user=no-reply@example.org
-mail.password=xxxxxxx
-mail.ssl=true
-mail.debug=false
-```
-
-Jetty
-------
-The Marketplace can be started with the following command:
-
-/etc/init.d/marketplace start
-
-This will start the Jetty server. By default this will start on port 8081, meaning the Marketplace can be accessed on http://localhost:8081. The port can be changed by modifying the file /opt/stratuslab/marketplace/etc/jetty-stratuslab.xml.
-
-
 Configuration reference
 ------------------------
+
 The following describes the parameters in the Marketplace configuration file.
 ```
 # Email address for account approvals, etc.
@@ -104,8 +78,37 @@ validate.email=false
 # Storage type for image metadata database (memory or native)
 store.type=native
 ```
+
+Starting the service
+---------------------
+
+The Marketplace can be started with the following command:
+
+/etc/init.d/marketplace start
+
+This will start the Jetty server. By default this will start on port 8081, meaning the Marketplace can be accessed on http://localhost:8081. The port can be changed by modifying the file /opt/stratuslab/marketplace/etc/jetty-stratuslab.xml.
+
+Email verification
+-------------------
+
+It is possible to configure the Marketplace to require email verification of uploaded metadata. The Marketplace will send an email to the metadata endorser requiring them to verify their uploaded entry. Whilst awaiting verification the metadata will be stored in the pending.dir.
+
+The relevant configuration parameters are:
+
+```
+validate.email=true
+admin.email=admin@example.org
+mail.host=smtp.example.org
+mail.port=465
+mail.user=no-reply@example.org
+mail.password=xxxxxxx
+mail.ssl=true
+mail.debug=false
+```
+
 Changing the Marketplace Style
 -------------------------------
+
 The current release contains code to allow the page style to be changed easily. The instructions are the following:
 
 1. Copy the current web archive (war) for the service to a temporary directory.
@@ -146,7 +149,6 @@ $ service marketplace restart
 At this point your new style should be active.
 
 If necessary you can also perform the same operation for the service javascript. The configuration option is named js.path and the procedure is complete analogous to the one used for style.path.
-
 
 License
 -------
