@@ -46,7 +46,7 @@ public final class MessageUtils {
     		String[] coords, String deprecated) {
         String identifier = coords[0];
         String created = coords[2];
-    	String tag = (deprecated != "") ? "deprecating" : "for";
+    	String tag = (!deprecated.equals("")) ? "deprecating" : "for";
         
     	String uuid = extractUUIDFromFile(file);
         
