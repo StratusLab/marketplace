@@ -24,8 +24,9 @@ import java.io.File;
 public final class MessageUtils {
 
     private static final String CONFIRM_MSG = "%n"
-            + "A new metadata entry has been uploaded to the StratusLab%n"
-            + "marketplace with this email address.%n%n"
+            + "A new metadata entry %s image ID %s,%n"
+            + "endorsed at %s with this email address,%n"
+            + "has been uploaded to the StratusLab marketplace.%n%n "
             + "Please either confirm or abort this request by visiting%n"
             + "one of the following links:%n%n"
             + "Confirm:  %s%n%nAbort:  %s%n%n"
@@ -41,13 +42,19 @@ public final class MessageUtils {
 
     }
 
-    public static String createNotification(String baseUrl, File file) {
-        String uuid = extractUUIDFromFile(file);
-
+    public static String createNotification(String baseUrl, File file, 
+    		String[] coords, String deprecated) {
+        String identifier = coords[0];
+        String created = coords[2];
+    	String tag = (deprecated != "") ? "deprecating" : "for";
+        
+    	String uuid = extractUUIDFromFile(file);
+        
         String confirmUrl = baseUrl + "/action/" + uuid + "/confirm/";
         String abortUrl = baseUrl + "/action/" + uuid + "/abort/";
         String abuseUrl = baseUrl + "/action/" + uuid + "/abuse/";
-        return String.format(CONFIRM_MSG, confirmUrl, abortUrl, abuseUrl);
+        return String.format(CONFIRM_MSG, tag, identifier, created, 
+        		confirmUrl, abortUrl, abuseUrl);
     }
 
     public static String createAbuseNotification(File file){

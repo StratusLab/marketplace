@@ -50,6 +50,8 @@ public final class XPathUtils {
             "//rdf:RDF/rdf:Description/slterms:location", "", "");
     public static final XPathQuery VALID = new XPathQuery(
             "//rdf:RDF/rdf:Description/dcterms:valid", "", "");
+    public static final XPathQuery DEPRECATED = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slterms:deprecated", "", "");
     
     private XPathUtils() {
 

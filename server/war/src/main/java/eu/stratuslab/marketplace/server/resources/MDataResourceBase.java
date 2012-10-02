@@ -19,6 +19,7 @@
  */
 package eu.stratuslab.marketplace.server.resources;
 
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.DEPRECATED;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.VALIDATE_EMAIL;
 
 import java.io.File;
@@ -47,6 +48,7 @@ import eu.stratuslab.marketplace.server.utils.MarketplaceUtils;
 import eu.stratuslab.marketplace.server.utils.MessageUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Notifier;
+import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 public class MDataResourceBase extends BaseResource {
 
@@ -154,8 +156,7 @@ public class MDataResourceBase extends BaseResource {
 	protected void confirmMetadataEntry(String baseUrl, File upload, Document metadata) {
 
         try {
-            String[] coords = getMetadataEntryCoordinates(metadata);
-            sendEmailConfirmation(baseUrl, coords[1], upload);
+        	sendEmailConfirmation(baseUrl, upload, metadata);
         } catch (MarketplaceException e) {
             String msg = "error sending confirmation email";
             LOGGER.severe(msg + ": " + e.getMessage());
@@ -164,12 +165,16 @@ public class MDataResourceBase extends BaseResource {
         }
     }
 	
-	private void sendEmailConfirmation(String baseUrl, String email, File file)
+	private void sendEmailConfirmation(String baseUrl, File file, Document metadata)
 	throws MarketplaceException {
-
-		String message = MessageUtils.createNotification(baseUrl, file);
-		Notifier.sendNotification(email, message);
+		String[] coords = getMetadataEntryCoordinates(metadata);
+		String emailAddress = coords[1];		
 		
+		String deprecated = XPathUtils.getValue(metadata, DEPRECATED);
+		
+		String message = MessageUtils.createNotification(baseUrl, 
+				file, coords, deprecated);
+		Notifier.sendNotification(emailAddress, message);	
 	}
 	
 	/*
