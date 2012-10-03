@@ -20,7 +20,7 @@ The metadata files and searchable metadata index, are stored locally as flat fil
 Installation
 -------------
 
-StratusLab runs its own YUM repository, so you must add it to your YUM configuration. Drop a file (named say stratuslab-releases.repo) in the /etc/yum.repos.d/ with the following content:
+StratusLab runs its own YUM repository, so you must add it to your YUM configuration. Drop a file (named say stratuslab-releases.repo) in the /etc/yum.repos.d/ with the following content, modifying the OS as required:
 ```
 [StratusLab-Releases]
 name=StratusLab-Releases
@@ -45,10 +45,25 @@ Configuration reference
 
 The following describes the parameters in the Marketplace configuration file.
 ```
-# Email address for account approvals, etc.
+# Directory containing raw metadata data entries.
+data.dir=/var/lib/stratuslab/marketplace
+
+# Directory for pending (unconfirmed) entries.
+pending.dir=/var/lib/stratuslab/pending
+
+# Storage type for image metadata database (memory or native)
+store.type=native
+
+# Flag to determine if endorser email address must be validated.
+validate.email=false
+
+# Flag to enable/disable Endorser reminder emails
+endorser.reminder=false
+
+# Email address for Marketplace administrator.
 admin.email=admin@example.org
 
-# Host for SMTP server for email notifications.
+# Host for SMTP server for sending email notifications.
 mail.host=smtp.example.org
 
 Port on SMTP server (defaults to standard ports).
@@ -66,17 +81,6 @@ mail.ssl=true
 # Debug mail sending (default is 'false').
 mail.debug=false
 
-# Directory containing raw metadata data entries.
-data.dir=/var/lib/stratuslab/marketplace
-
-# Directory for pending (unconfirmed) entries.
-pending.dir=/var/lib/stratuslab/pending
-
-# Flag to determine email must be validated.
-validate.email=false
-
-# Storage type for image metadata database (memory or native)
-store.type=native
 ```
 
 Starting the service
