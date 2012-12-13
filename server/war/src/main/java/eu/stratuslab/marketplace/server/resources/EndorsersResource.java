@@ -30,6 +30,8 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
+import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.stratuslab.marketplace.server.MarketplaceException;
 
 /**
@@ -39,9 +41,8 @@ public class EndorsersResource extends BaseResource {
    
 	@Get("html")
     public Representation toHtml() {
-		String cn = "CN=";
 		
-        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+		List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
         	results = query(getQueryBuilder().buildEndorsersQuery());
         } catch(MarketplaceException e){
@@ -51,8 +52,15 @@ public class EndorsersResource extends BaseResource {
         for(int i = 0; i < results.size(); i++){
         	Map<String, String> resultRow = results.get(i);
         	String subject = resultRow.get("subject");
-        	String name = subject.substring(subject.indexOf(cn)+cn.length(), 
-        			subject.indexOf(",", subject.indexOf(cn)+cn.length()));
+        	
+        	String name = "";
+        	String[] cns = X500NameUtils.getAttributeValues(subject, JavaAndBCStyle.CN);
+        	if(cns.length > 0){
+        		name = cns[0];
+        	} else {
+        		name = subject;
+        	}
+        		
         	resultRow.put("name", name);
         	results.set(i, resultRow);
         }
