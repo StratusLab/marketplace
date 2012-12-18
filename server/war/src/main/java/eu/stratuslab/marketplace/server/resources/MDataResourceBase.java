@@ -185,7 +185,7 @@ public class MDataResourceBase extends BaseResource {
      *                        
      * @return a metadata list
      */
-    protected List<Map<String, String>> getMetadata(String deprecatedValue, 
+    protected List<Map<String, String>> getMetadata(String status,
     		Map<String, String> requestQueryValues) {
     	boolean hasFilter = false;
     	    	
@@ -197,13 +197,13 @@ public class MDataResourceBase extends BaseResource {
     	
     	Map<String, String> recordCounts = new HashMap<String, String>();
     	
-    	String iTotalRecords = getTotalRecords(deprecatedValue);
+    	String iTotalRecords = getTotalRecords(status);
     	recordCounts.put("iTotalRecords", iTotalRecords);
     	
-    	String dataQuery = getQueryBuilder().buildGetMetadataQuery(deprecatedValue, 
+    	String dataQuery = getQueryBuilder().buildGetMetadataQuery(status,
     			requestQueryValues, attributes);
     	
-    	String countQuery = getQueryBuilder().buildGetMetadataCountQuery(deprecatedValue, 
+    	String countQuery = getQueryBuilder().buildGetMetadataCountQuery(status,
     			requestQueryValues, attributes);
     	    	
     	recordCounts.put("iTotalDisplayRecords", getTotalDisplayRecords(countQuery));       
@@ -270,8 +270,8 @@ public class MDataResourceBase extends BaseResource {
      * 
      * @return the total number of records
      */
-    private String getTotalRecords(String deprecatedFlag){
-    	String query = getQueryBuilder().buildGetTotalRecordsQuery(deprecatedFlag);
+    private String getTotalRecords(String status){
+    	String query = getQueryBuilder().buildGetTotalRecordsQuery(status);
     	
     	String iTotalRecords = "0";
     	

@@ -176,7 +176,7 @@ public class MDataResourceTest extends ResourceTestBase {
 		attributes.put("created", getValueFromDoc(metadata, "created"));
 
 		Request getRequest = createGetRequest(attributes);
-		getRequest.getResourceRef().addQueryParameter("deprecated", "");
+		getRequest.getResourceRef().addQueryParameter("status", "deprecated");
 		response = executeRequest(getRequest);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
@@ -207,8 +207,10 @@ public class MDataResourceTest extends ResourceTestBase {
 				getValueFromDoc(metadata, "identifier"));
 		attributes.put("email", getValueFromDoc(metadata, "email"));
 		attributes.put("created", getValueFromDoc(metadata, "created"));
-
+        
 		Request getRequest = createGetRequest(attributes);
+		getRequest.getResourceRef().addQueryParameter("status", "expired");
+		
 		response = executeRequest(getRequest);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));

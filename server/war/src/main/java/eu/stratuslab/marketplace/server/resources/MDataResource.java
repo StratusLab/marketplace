@@ -170,9 +170,9 @@ public class MDataResource extends MDataResourceBase {
     @Get("xml")
     public Representation toXml() {
     	
-    	String deprecatedFlag = getDeprecatedFlag();
-    		
-    	List<Map<String, String>> metadata = getMetadata(deprecatedFlag, 
+    	String status = getRequestFlag("status");
+    	
+    	List<Map<String, String>> metadata = getMetadata(status,
     			getRequestQueryValues());
     	metadata.remove(0);
     	
@@ -227,14 +227,14 @@ public class MDataResource extends MDataResourceBase {
      */
     @Get("json")
     public Representation toJSON() {
-    	String deprecatedFlag = getDeprecatedFlag();
-    	            	
+    	String status = getRequestFlag("status");
+    	
     	List<Map<String, String>> metadata = null;
     	
     	String msg = "no metadata matching query found";
     	
     	try {
-    		metadata = getMetadata(deprecatedFlag, 
+    		metadata = getMetadata(status,
     				getRequestQueryValues());
     	} catch(ResourceException r){
     		metadata = new ArrayList<Map<String, String>>();
@@ -304,13 +304,13 @@ public class MDataResource extends MDataResourceBase {
     	return aaData;
     }
     
-    private String getDeprecatedFlag(){
+    private String getRequestFlag(String flag){
     	Map<String, String> requestValues = getRequestQueryValues();
     	
-    	String deprecatedFlag = (requestValues.containsKey("deprecated")) ? 
-    			getDeprecatedFlag(requestValues.get("deprecated")) : "off";
+    	String value = (requestValues.containsKey(flag)) ? 
+    			getFlagValue(requestValues.get(flag)) : "valid";
     			
-        return deprecatedFlag;
+        return value;
     }
     
     /*
@@ -320,8 +320,8 @@ public class MDataResource extends MDataResourceBase {
      * 
      * @return the value of the deprecated flag
      */
-    private String getDeprecatedFlag(String deprecated){
-    	return (deprecated == null) ? "on" : deprecated;
+    private String getFlagValue(String flag){
+    	return (flag == null) ? "valid" : flag;
     }
     
     private Map<String, String> getRequestQueryValues(){

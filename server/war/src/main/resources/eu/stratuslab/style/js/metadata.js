@@ -226,13 +226,13 @@ function getParameterByName(name)
         return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-var text1 = getParameterByName("deprecated");
+var text1 = getParameterByName("status");
 $("select option").filter(function() {
     return $(this).text() == text1;
 }).attr('selected', true);
 
 $(function() {
-   $('#deprecated').change(function() {
+   $('#status').change(function() {
        $(this).closest('form').submit();
    });
  });

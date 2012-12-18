@@ -15,11 +15,11 @@
 <br/>
 
 <form>
-    <label for="deprecated">Deprecated entries: </label>
-    <select name="deprecated" id="deprecated">
-        <option selected="selected" value="off">off</option>
-        <option value="on">on</option>
-        <option value="only">only</option>
+    <label for="status">Status: </label>
+    <select name="status" id="status">
+        <option selected="selected" value="valid">valid</option>
+        <option value="expired">expired</option>
+        <option value="deprecated">deprecated</option>
     </select>
 </form>
 

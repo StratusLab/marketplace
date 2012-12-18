@@ -6,15 +6,15 @@ public interface QueryBuilder {
 	
 	String buildLatestEntryQuery(String identifier, String email);
 	
-	String buildGetMetadataQuery(String deprecatedFlag, 
+	String buildGetMetadataQuery(String status,
 			Map<String, String> requestQueryValues, 
 			Map<String, Object> requestAttributes);
 	
-	String buildGetMetadataCountQuery(String deprecatedFlag, 
+	String buildGetMetadataCountQuery(String status,
 			Map<String, String> requestQueryValues, 
 			Map<String, Object> requestAttributes);
 	
-	String buildGetTotalRecordsQuery(String deprecatedFlag);
+	String buildGetTotalRecordsQuery(String status);
 	
 	String buildEndorserQuery(String email, String historyRange);
 	

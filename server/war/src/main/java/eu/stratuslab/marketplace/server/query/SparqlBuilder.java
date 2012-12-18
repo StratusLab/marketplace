@@ -24,12 +24,12 @@ public class SparqlBuilder implements QueryBuilder {
 		return query;
 	}
 
-	public String buildGetMetadataQuery(String deprecatedFlag,
+	public String buildGetMetadataQuery(String status,
 			Map<String, String> requestQueryValues,
 			Map<String, Object> requestAttributes) {
 				
 		StringBuilder dataQuery = new StringBuilder(SparqlUtils.SELECT_ALL);
-		buildBaseQuery(dataQuery, deprecatedFlag,
+		buildBaseQuery(dataQuery, status,
 				requestQueryValues, requestAttributes);
 		
 		//Build the paging query
@@ -39,18 +39,18 @@ public class SparqlBuilder implements QueryBuilder {
         return dataQuery.toString();
 	}
 
-	public String buildGetMetadataCountQuery(String deprecatedFlag,
+	public String buildGetMetadataCountQuery(String status,
 			Map<String, String> requestQueryValues,
 			Map<String, Object> requestAttributes) {
 		
 		StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
-        buildBaseQuery(countQuery, deprecatedFlag,
+        buildBaseQuery(countQuery, status,
 				requestQueryValues, requestAttributes);
 
         return countQuery.toString();        
     }
 	
-	private void buildBaseQuery(StringBuilder query, String deprecatedFlag,
+	private void buildBaseQuery(StringBuilder query, String status,
 			Map<String, String> requestQueryValues,
 			Map<String, Object> requestAttributes){
 		
@@ -78,16 +78,32 @@ public class SparqlBuilder implements QueryBuilder {
 
         if (!hasDate) {
                 wherePredicate
-                        .append(SparqlUtils.getLatestFilter(MarketplaceUtils.getCurrentDate()));
+                        .append(SparqlUtils.getLatestFilter());
         }
                      
-        appendDeprecated(deprecatedFlag, wherePredicate);
+        setStatus(wherePredicate, status);
                         
         wherePredicate.append(searching);
         wherePredicate.append(" }");
 
         query.append(wherePredicate);
     }
+	
+	private void setStatus(StringBuilder wherePredicate, String status){
+		if(status.equals("expired")){ //implies validity date in the past and not deprecated
+        	wherePredicate
+              	.append(SparqlUtils.getExpiredFilter(
+              			MarketplaceUtils.getCurrentDate()));
+        	wherePredicate.append(SparqlUtils.DEPRECATED_OFF);
+        } else if(status.equals("valid")){ //implies in date and not deprecated
+        	  wherePredicate
+              	.append(SparqlUtils.getValidFilter(
+              			MarketplaceUtils.getCurrentDate()));
+        	  wherePredicate.append(SparqlUtils.DEPRECATED_OFF);
+        } else if(status.equals("deprecated")){ //implies contains a deprecated field
+        	appendDeprecated(wherePredicate);
+        }
+	}
 	
 	private void addQueryParametersToRequest(Map<String, Object> attributes, Map<String, String> formValues) {
     	
@@ -239,27 +255,25 @@ public class SparqlBuilder implements QueryBuilder {
         return searchColumnsPredicate.toString();
     }
     
-	public String buildGetTotalRecordsQuery(String deprecatedFlag) {
+	public String buildGetTotalRecordsQuery(String status) {
 		String q = SparqlUtils.SELECT_COUNT
         + WHERE
         + SparqlUtils.WHERE_BLOCK
-        + SparqlUtils.getLatestFilter(MarketplaceUtils.getCurrentDate());
-    	
+        + SparqlUtils.getLatestFilter();
+		
+		StringBuilder wherePredicate = new StringBuilder();
+		setStatus(wherePredicate, status);
+		
     	StringBuilder query = new StringBuilder(q);
-    	
-    	appendDeprecated(deprecatedFlag, query);
+    	query.append(wherePredicate);    	
     	
     	query.append(" }");
     	
     	return query.toString();
 	}
 	
-	private void appendDeprecated(String deprecated, StringBuilder filter) {
-		if (deprecated.equals("off")){
-        	filter.append(SparqlUtils.DEPRECATED_OFF);
-        } else if (deprecated.equals("only")){
-        	filter.append(SparqlUtils.DEPRECATED_ON);
-        }
+	private void appendDeprecated(StringBuilder filter) {
+		filter.append(SparqlUtils.DEPRECATED_ON);
 	}
 
 	public String buildEndorserQuery(String email, String historyRange) {
@@ -283,9 +297,12 @@ public class SparqlBuilder implements QueryBuilder {
 		StringBuilder filter = new StringBuilder(where);
 
 		filter.append(filterPredicate.toString());
+		
 		filter
-		.append(SparqlUtils.getLatestFilter(MarketplaceUtils.getCurrentDate()));
-
+		.append(SparqlUtils.getLatestFilter());
+        filter.append(SparqlUtils.getValidFilter(
+        		MarketplaceUtils.getCurrentDate()));
+		
 		filter.append(" " + SparqlUtils.DEPRECATED_OFF);
 		filter.append(" }");
 
@@ -306,9 +323,11 @@ public class SparqlBuilder implements QueryBuilder {
 				where);
 
 		filter
-		.append(SparqlUtils.getLatestFilter(MarketplaceUtils.getCurrentDate()));
-			
-		filter.append(" FILTER (?valid < \"" + expiryDate + "\") .");
+		.append(SparqlUtils.getLatestFilter());
+		filter.append(
+				SparqlUtils.getValidFilter(MarketplaceUtils.getCurrentDate()));	
+		
+		filter.append(SparqlUtils.getExpiredFilter(expiryDate));
 				
 		filter.append(" " + SparqlUtils.DEPRECATED_OFF);
 		filter.append(" }");

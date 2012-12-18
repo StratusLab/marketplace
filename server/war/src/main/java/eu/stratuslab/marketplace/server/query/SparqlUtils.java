@@ -68,8 +68,11 @@ public final class SparqlUtils {
 	
 	private static final String REGEX_TEMPLATE = "regex(?%s, \"%s\", \"i\") ";
 	
-	private static final String LATEST_FILTER_TEMPLATE = " FILTER (?tag = \"latest\") ." +
-			" FILTER (?valid > \"%s\") .";
+	private static final String LATEST_FILTER_TEMPLATE = " FILTER (?tag = \"latest\") .";
+	
+	private static final String VALID_ENTRIES_FILTER = "FILTER (?valid > \"%s\") .";
+	
+	private static final String EXPIRED_ENTRIES_FILTER = "FILTER (?valid < \"%s\") .";
 	
 	public static final String WHERE_BLOCK =
 		" ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
@@ -115,8 +118,16 @@ public final class SparqlUtils {
 		return aColumns[i];
 	}
 	
-	public static String getLatestFilter(String date){
-		return String.format(LATEST_FILTER_TEMPLATE, date);
+	public static String getLatestFilter(){
+		return String.format(LATEST_FILTER_TEMPLATE);
+	}
+	
+	public static String getValidFilter(String date){
+		return String.format(VALID_ENTRIES_FILTER, date);
+	}
+	
+	public static String getExpiredFilter(String date){
+		return String.format(EXPIRED_ENTRIES_FILTER, date);
 	}
 	
 	public static int getColumnCount() {
