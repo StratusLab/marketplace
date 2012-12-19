@@ -7,7 +7,7 @@ body {
   background-repeat: no-repeat;
   background-position: -25px 0px;
   
-  width: 500px;
+  width: 680px;
 }
 
 .breadcrumbs {
@@ -170,6 +170,28 @@ table.vmpanel {
 #description
 {
 	width: 100%;
+}
+
+#sidebar {
+    width: 130px;
+    height: auto;
+    overflow: hidden;
+    background: #ffffff;
+    margin: 0 auto;
+    float: left;
+    clear: right;
+    padding: 8px;
+    background: #e5e5e5;
+    border: 2px solid #E2E4FF;
+}
+
+#content {
+    width: 500px;
+    height: auto;
+    overflow: hidden;
+    margin: 0 auto;
+    float: left;
+    padding: 10px;
 }
 
 img

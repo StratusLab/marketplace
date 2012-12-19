@@ -212,6 +212,7 @@ $(document).ready(function() {
 	});
 
 	oTable.fnSetFilteringDelay();
+
 } );
 
 function getParameterByName(name)
@@ -235,4 +236,5 @@ $(function() {
    $('#status').change(function() {
        $(this).closest('form').submit();
    });
- });
+});
+

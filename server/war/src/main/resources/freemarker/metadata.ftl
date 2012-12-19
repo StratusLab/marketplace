@@ -9,11 +9,35 @@
      <div class="Banner">
      </div>
   </div>
-<div class="Content">
 <h1>${title}</h1>
 
 <br/>
 
+<div id="content">
+<table id="search_table" class="search">
+    <thead>
+        <tr>
+            <th>details</th>
+            <th>os</th>
+            <th>os-version</th>
+            <th>arch</th>
+            <th>endorser</th>
+            <th>date</th>
+            <th>identifier</th>
+            <th>location</th>
+            <th>description</th>
+            <th>title</th>
+        </tr>
+    </thead>
+    <tbody>
+     </tbody>
+</table>
+
+
+<br/>
+</div>
+
+<div id="sidebar">
 <form>
     <label for="status">Status: </label>
     <select name="status" id="status">
@@ -42,31 +66,10 @@
 <option value="date">Date</option>
 </select>
 </form>
-
-<table id="search_table" class="search">
-    <thead>
-        <tr>
-            <th>details</th>
-            <th>os</th>
-            <th>os-version</th>
-            <th>arch</th>
-            <th>endorser</th>
-            <th>date</th>
-            <th>identifier</th>
-            <th>location</th>
-            <th>description</th>
-            <th>title</th>
-        </tr>
-    </thead>
-    <tbody>
-     </tbody>
-</table>
+</div>
 
 <script type="text/javascript" language="javascript" src="/js/metadata.js"></script>
 
-<br/>
-
-</div>
 </div>
 
 </body>
