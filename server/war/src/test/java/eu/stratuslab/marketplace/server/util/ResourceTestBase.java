@@ -8,15 +8,11 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.restlet.Application;
-import org.restlet.Component;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Method;
-import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 import org.restlet.representation.InputRepresentation;
 import org.restlet.representation.Representation;
@@ -24,30 +20,12 @@ import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.XMLUtils;
-import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 public class ResourceTestBase {
 
-	static Application application;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		// Create a new Component.
-        Component component = new Component();
-		application = new MarketPlaceApplication("memory");
-		component.getDefaultHost().attach("/", application);
-		component.getClients().add(Protocol.CLAP);
-		application.setContext(component.getDefaultHost().getContext());
-		application.createInboundRoot();
-	}
-	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		application.stop();
-	}
-	
+	protected static Application application;
 	
 	public Request createRequest(Map<String, Object> attributes, Method method)
 			throws Exception {

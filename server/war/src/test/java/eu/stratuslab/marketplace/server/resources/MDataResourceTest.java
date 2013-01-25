@@ -9,22 +9,48 @@ import java.util.Map;
 import org.w3c.dom.Document;
 
 import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
+import org.restlet.Component;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.ClientInfo;
 import org.restlet.data.MediaType;
 import org.restlet.data.Preference;
+import org.restlet.data.Protocol;
 import org.restlet.data.Status;
 import org.restlet.data.Method;
 
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MDataResourceTest extends ResourceTestBase {
-
+	
+	static final Logger logger = 
+			LoggerFactory.getLogger(MDataResourceTest.class);
+	
+	@Before
+	public void setUpBeforeClass() throws Exception {
+		// Create a new Component.
+        Component component = new Component();
+		application = new MarketPlaceApplication("memory");
+		component.getDefaultHost().attach("/", application);
+		component.getClients().add(Protocol.CLAP);
+		application.setContext(component.getDefaultHost().getContext());
+		application.createInboundRoot();
+	}
+	
+	@After
+	public void tearDownAfterClass() throws Exception {
+		application.stop();
+	}
+	
 	@Test
 	public void testInvalidPostNoSignature() throws Exception {
 		Response response = postMetadataFile("valid.xml");
@@ -32,7 +58,7 @@ public class MDataResourceTest extends ResourceTestBase {
 		assertThat(response.getStatus().getDescription(),
 				is("invalid metadata: no signature"));
 	}
-
+	
 	@Test
 	public void testValidPostSignature() throws Exception {
 		Response response = postMetadataFile("valid-indate-signature.xml");
@@ -41,6 +67,9 @@ public class MDataResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testGetMetadataEntry() throws Exception {
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-signature.xml"));
 		Map<String, Object> attributes = createAttributes("identifier",
@@ -48,30 +77,36 @@ public class MDataResourceTest extends ResourceTestBase {
 		attributes.put("email", getValueFromDoc(metadata, "email"));
 		attributes.put("created", getValueFromDoc(metadata, "created"));
 		Request getRequest = createGetRequest(attributes);
-		Response response = executeRequest(getRequest);
+		response = executeRequest(getRequest);
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 	}
-
+    
 	@Test
 	public void testGetMetadataEntryByIdentifier() throws Exception {
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-signature.xml"));
 		Map<String, Object> attributes = createAttributes("identifier",
 				getValueFromDoc(metadata, "identifier"));
 		Request getRequest = createGetRequest(attributes);
-		Response response = executeRequest(getRequest);
+		response = executeRequest(getRequest);
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 	}
 
 	@Test
 	public void testIdentifierQueryString() throws Exception {
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-signature.xml"));
 		String identifier = getValueFromDoc(metadata, "identifier");
 		Request getRequest = createRequest(null, Method.GET, null,
 				"/test?identifier=" + identifier);
-		Response response = executeRequest(getRequest);
+		response = executeRequest(getRequest);
 		Document responseDoc = extractXmlDocument(response.getEntity()
 				.getStream());
 		String responseId = getValueFromDoc(responseDoc, "identifier");
@@ -81,13 +116,16 @@ public class MDataResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testIdentifierEmailQueryString() throws Exception {
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-signature.xml"));
 		String identifier = getValueFromDoc(metadata, "identifier");
 		Request getRequest = createRequest(null, Method.GET, null,
 				"/test?identifier=" + identifier
 						+ "&email=jane.tester@example.org");
-		Response response = executeRequest(getRequest);
+		response = executeRequest(getRequest);
 		Document responseDoc = extractXmlDocument(response.getEntity()
 				.getStream());
 		String responseId = getValueFromDoc(responseDoc, "identifier");
@@ -97,26 +135,32 @@ public class MDataResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testIdentifierUnknownEmailQueryString() throws Exception {
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-signature.xml"));
 		String identifier = getValueFromDoc(metadata, "identifier");
 		Request getRequest = createRequest(null, Method.GET, null,
 				"/test?identifier=" + identifier
 						+ "&email=j.tester@example.org");
-		Response response = executeRequest(getRequest);
+		response = executeRequest(getRequest);
 
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_NOT_FOUND));
 	}
 
 	@Test
 	public void testCreatedQuery() throws Exception {
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-signature.xml"));
 		String identifier = getValueFromDoc(metadata, "identifier");
 		String created = getValueFromDoc(metadata, "created");
 		Request getRequest = createRequest(null, Method.GET, null,
 				"/test?created=" + created);
-		Response response = executeRequest(getRequest);
+		response = executeRequest(getRequest);
 		Document responseDoc = extractXmlDocument(response.getEntity()
 				.getStream());
 		String responseId = getValueFromDoc(responseDoc, "identifier");
@@ -126,7 +170,10 @@ public class MDataResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testIdentifierReturnsLatest() throws Exception {
-		Response response = postMetadataFile("valid-indate-newer-signature.xml");
+		Response response = postMetadataFile("valid-indate-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
+		response = postMetadataFile("valid-indate-newer-signature.xml");
 
 		Document metadata = extractXmlDocument(this.getClass()
 				.getResourceAsStream("valid-indate-newer-signature.xml"));
@@ -143,7 +190,10 @@ public class MDataResourceTest extends ResourceTestBase {
 
 	@Test
 	public void testUploadingOlderMetadataFails() throws Exception {
-		Response response = postMetadataFile("valid-indate-signature.xml");
+		Response response = postMetadataFile("valid-indate-newer-signature.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
+		response = postMetadataFile("valid-indate-signature.xml");
 
 		assertThat(response.getStatus(), is(Status.CLIENT_ERROR_BAD_REQUEST));
 		assertThat(response.getStatus().getDescription(),
@@ -215,7 +265,7 @@ public class MDataResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 	}
-
+    
 	@Test
 	public void testCreatesValidJson() throws Exception {
 		postMetadataFile("invalid-special-characters-signature.xml");
@@ -251,7 +301,7 @@ public class MDataResourceTest extends ResourceTestBase {
 				
 		assertTrue(valid);
 	}
-
+	
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDataResource());
 	}
