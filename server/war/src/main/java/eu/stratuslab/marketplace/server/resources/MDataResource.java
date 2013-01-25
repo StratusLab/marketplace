@@ -170,9 +170,10 @@ public class MDataResource extends MDataResourceBase {
     @Get("xml")
     public Representation toXml() {
     	
-    	String status = getRequestFlag("status");
+    	String status = getRequestFlag("status", "valid");
+    	String access = getRequestFlag("access", "public");
     	
-    	List<Map<String, String>> metadata = getMetadata(status,
+    	List<Map<String, String>> metadata = getMetadata(status, access,
     			getRequestQueryValues());
     	metadata.remove(0);
     	
@@ -227,14 +228,15 @@ public class MDataResource extends MDataResourceBase {
      */
     @Get("json")
     public Representation toJSON() {
-    	String status = getRequestFlag("status");
+    	String status = getRequestFlag("status", "valid");
+    	String access = getRequestFlag("access", "public");
     	
     	List<Map<String, String>> metadata = null;
     	
     	String msg = "no metadata matching query found";
     	
     	try {
-    		metadata = getMetadata(status,
+    		metadata = getMetadata(status, access,
     				getRequestQueryValues());
     	} catch(ResourceException r){
     		metadata = new ArrayList<Map<String, String>>();
@@ -304,24 +306,24 @@ public class MDataResource extends MDataResourceBase {
     	return aaData;
     }
     
-    private String getRequestFlag(String flag){
+    private String getRequestFlag(String flag, String defaultValue){
     	Map<String, String> requestValues = getRequestQueryValues();
     	
     	String value = (requestValues.containsKey(flag)) ? 
-    			getFlagValue(requestValues.get(flag)) : "valid";
+    			getFlagValue(requestValues.get(flag), defaultValue) : defaultValue;
     			
         return value;
     }
     
     /*
-     * Gets the value of the deprecated flag from the query
+     * Gets the value of the request flag from the query
      * 
      * @param the value taken from the request
      * 
-     * @return the value of the deprecated flag
+     * @return the value of flag
      */
-    private String getFlagValue(String flag){
-    	return (flag == null) ? "valid" : flag;
+    private String getFlagValue(String flag, String defaultValue){
+    	return (flag == null) ? defaultValue : flag;
     }
     
     private Map<String, String> getRequestQueryValues(){

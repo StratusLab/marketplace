@@ -24,12 +24,12 @@ public class SparqlBuilder implements QueryBuilder {
 		return query;
 	}
 
-	public String buildGetMetadataQuery(String status,
+	public String buildGetMetadataQuery(String status, String access,
 			Map<String, String> requestQueryValues,
 			Map<String, Object> requestAttributes) {
 				
 		StringBuilder dataQuery = new StringBuilder(SparqlUtils.SELECT_ALL);
-		buildBaseQuery(dataQuery, status,
+		buildBaseQuery(dataQuery, status, access,
 				requestQueryValues, requestAttributes);
 		
 		//Build the paging query
@@ -39,18 +39,18 @@ public class SparqlBuilder implements QueryBuilder {
         return dataQuery.toString();
 	}
 
-	public String buildGetMetadataCountQuery(String status,
+	public String buildGetMetadataCountQuery(String status, String access,
 			Map<String, String> requestQueryValues,
 			Map<String, Object> requestAttributes) {
 		
 		StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
-        buildBaseQuery(countQuery, status,
+        buildBaseQuery(countQuery, status, access,
 				requestQueryValues, requestAttributes);
 
         return countQuery.toString();        
     }
 	
-	private void buildBaseQuery(StringBuilder query, String status,
+	private void buildBaseQuery(StringBuilder query, String status, String access,
 			Map<String, String> requestQueryValues,
 			Map<String, Object> requestAttributes){
 		
@@ -82,6 +82,7 @@ public class SparqlBuilder implements QueryBuilder {
         }
                      
         setStatus(wherePredicate, status);
+        setAccess(wherePredicate, access);
                         
         wherePredicate.append(searching);
         wherePredicate.append(" }");
@@ -102,6 +103,16 @@ public class SparqlBuilder implements QueryBuilder {
         	  wherePredicate.append(SparqlUtils.DEPRECATED_OFF);
         } else if(status.equals("deprecated")){ //implies contains a deprecated field
         	appendDeprecated(wherePredicate);
+        }
+	}
+	
+	private void setAccess(StringBuilder wherePredicate, String access){
+		if(access.equals("private")){ 
+        	wherePredicate
+              	.append(SparqlUtils.ACCESS_PRIVATE_FILTER);
+        } else if(access.equals("public")){ 
+        	  wherePredicate
+              	.append(SparqlUtils.ACCESS_PUBLIC_FILTER);
         }
 	}
 	
@@ -255,7 +266,7 @@ public class SparqlBuilder implements QueryBuilder {
         return searchColumnsPredicate.toString();
     }
     
-	public String buildGetTotalRecordsQuery(String status) {
+	public String buildGetTotalRecordsQuery(String status, String access) {
 		String q = SparqlUtils.SELECT_COUNT
         + WHERE
         + SparqlUtils.WHERE_BLOCK

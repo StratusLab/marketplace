@@ -100,6 +100,10 @@ public final class SparqlUtils {
     public static final String DEPRECATED_ON = "FILTER (EXISTS " +
     		"{?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated}) ";
     
+    public static final String ACCESS_PUBLIC_FILTER = "FILTER (!BOUND(?location) || regex(?location, \"^(https?|ftp)://.*$\")) ";
+    public static final String ACCESS_PRIVATE_FILTER = "FILTER regex(?location, \"^pdisk.*\") ";
+    
+    
     private SparqlUtils(){}
     
 	public static String buildFilterEq(String arg, String value){

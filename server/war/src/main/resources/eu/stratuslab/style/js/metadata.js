@@ -227,13 +227,24 @@ function getParameterByName(name)
         return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-var text1 = getParameterByName("status");
+var state = getParameterByName("status");
 $("select option").filter(function() {
-    return $(this).text() == text1;
+    return $(this).text() == state;
 }).attr('selected', true);
 
 $(function() {
    $('#status').change(function() {
+       $(this).closest('form').submit();
+   });
+});
+
+var access = getParameterByName("access");
+$("select option").filter(function() {
+    return $(this).text() == access;
+}).attr('selected', true);
+
+$(function() {
+   $('#access').change(function() {
        $(this).closest('form').submit();
    });
 });

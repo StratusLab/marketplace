@@ -45,6 +45,13 @@
         <option value="expired">expired</option>
         <option value="deprecated">deprecated</option>
     </select>
+
+    <label for="access">Access: </label>
+    <select name="access" id="access">
+        <option selected="selected" value="public">public</option>
+        <option value="private">private</option>
+        <option value="all">all</option>
+     </select>
 </form>
 
 <form id="filterBy" name="filterBy">

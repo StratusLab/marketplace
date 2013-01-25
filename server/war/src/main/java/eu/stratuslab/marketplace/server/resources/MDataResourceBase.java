@@ -180,12 +180,11 @@ public class MDataResourceBase extends BaseResource {
 	/*
      * Retrieves the metadata from the repository
      * 
-     * @param deprecatedValue indicates whether deprecated values should be included
-     *                        possible values are on, off, only.
+     * @param status indicates status of entries to include (valid, deprecated, expired)
      *                        
      * @return a metadata list
      */
-    protected List<Map<String, String>> getMetadata(String status,
+    protected List<Map<String, String>> getMetadata(String status, String access,
     		Map<String, String> requestQueryValues) {
     	boolean hasFilter = false;
     	    	
@@ -197,13 +196,13 @@ public class MDataResourceBase extends BaseResource {
     	
     	Map<String, String> recordCounts = new HashMap<String, String>();
     	
-    	String iTotalRecords = getTotalRecords(status);
+    	String iTotalRecords = getTotalRecords(status, access);
     	recordCounts.put("iTotalRecords", iTotalRecords);
     	
-    	String dataQuery = getQueryBuilder().buildGetMetadataQuery(status,
+    	String dataQuery = getQueryBuilder().buildGetMetadataQuery(status, access,
     			requestQueryValues, attributes);
     	
-    	String countQuery = getQueryBuilder().buildGetMetadataCountQuery(status,
+    	String countQuery = getQueryBuilder().buildGetMetadataCountQuery(status, access,
     			requestQueryValues, attributes);
     	    	
     	recordCounts.put("iTotalDisplayRecords", getTotalDisplayRecords(countQuery));       
@@ -270,8 +269,8 @@ public class MDataResourceBase extends BaseResource {
      * 
      * @return the total number of records
      */
-    private String getTotalRecords(String status){
-    	String query = getQueryBuilder().buildGetTotalRecordsQuery(status);
+    private String getTotalRecords(String status, String access){
+    	String query = getQueryBuilder().buildGetTotalRecordsQuery(status, access);
     	
     	String iTotalRecords = "0";
     	
