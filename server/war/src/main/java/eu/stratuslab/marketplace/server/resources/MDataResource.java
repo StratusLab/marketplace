@@ -171,7 +171,7 @@ public class MDataResource extends MDataResourceBase {
     public Representation toXml() {
     	
     	String status = getRequestFlag("status", "valid");
-    	String access = getRequestFlag("access", "public");
+    	String access = getRequestFlag("location", "web");
     	
     	List<Map<String, String>> metadata = getMetadata(status, access,
     			getRequestQueryValues());
@@ -229,7 +229,7 @@ public class MDataResource extends MDataResourceBase {
     @Get("json")
     public Representation toJSON() {
     	String status = getRequestFlag("status", "valid");
-    	String access = getRequestFlag("access", "public");
+    	String access = getRequestFlag("location", "web");
     	
     	List<Map<String, String>> metadata = null;
     	

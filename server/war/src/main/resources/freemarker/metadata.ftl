@@ -46,10 +46,10 @@
         <option value="deprecated">deprecated</option>
     </select>
 
-    <label for="access">Access: </label>
-    <select name="access" id="access">
-        <option selected="selected" value="public">public</option>
-        <option value="private">private</option>
+    <label for="location">Location: </label>
+    <select name="location" id="location">
+        <option selected="selected" value="web">web</option>
+        <option value="pdisk">pdisk</option>
         <option value="all">all</option>
      </select>
 </form>

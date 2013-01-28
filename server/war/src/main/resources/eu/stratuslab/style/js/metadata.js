@@ -238,13 +238,13 @@ $(function() {
    });
 });
 
-var access = getParameterByName("access");
+var access = getParameterByName("location");
 $("select option").filter(function() {
     return $(this).text() == access;
 }).attr('selected', true);
 
 $(function() {
-   $('#access').change(function() {
+   $('#location').change(function() {
        $(this).closest('form').submit();
    });
 });

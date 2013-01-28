@@ -107,10 +107,10 @@ public class SparqlBuilder implements QueryBuilder {
 	}
 	
 	private void setAccess(StringBuilder wherePredicate, String access){
-		if(access.equals("private")){ 
+		if(access.equals("pdisk")){ 
         	wherePredicate
               	.append(SparqlUtils.ACCESS_PRIVATE_FILTER);
-        } else if(access.equals("public")){ 
+        } else if(access.equals("web")){ 
         	  wherePredicate
               	.append(SparqlUtils.ACCESS_PUBLIC_FILTER);
         }
