@@ -22,6 +22,7 @@
             <th>os-version</th>
             <th>arch</th>
             <th>endorser</th>
+            <th>kind</th>
             <th>date</th>
             <th>identifier</th>
             <th>location</th>
@@ -59,13 +60,15 @@
 <input type="text" name="search_os" value="Search os" class="search_init"><br/>
 <input type="text" name="search_version" value="Search version" class="search_init"><br/>
 <input type="text" name="search_arch" value="Search arch" class="search_init"><br/>
-<input type="text" name="search_arch" value="Search endorser" class="search_init">
+<input type="text" name="search_endorser" value="Search endorser" class="search_init"><br/>
+<input type="text" name="search_kind" value="search kind" class="search_init">
 </form>
 
 <form>
 <label for="sortBy">Sort by:</label>
 <select name="sortBy" id="sortBy">
 <option value="_none_"></option>
+<option value="kind">Kind</option>
 <option value="os">OS</option>
 <option value="osversion">OS Version</option>
 <option value="arch">Arch</option>

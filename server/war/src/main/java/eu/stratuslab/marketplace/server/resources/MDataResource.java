@@ -294,6 +294,7 @@ public class MDataResource extends MDataResourceBase {
             row.add(resultRow.get("osversion"));
             row.add(resultRow.get("arch"));
             row.add(resultRow.get("email"));
+            row.add(resultRow.get("kind"));
             row.add(resultRow.get("created"));
             row.add(resultRow.get("identifier"));
             row.add(resultRow.get("location"));

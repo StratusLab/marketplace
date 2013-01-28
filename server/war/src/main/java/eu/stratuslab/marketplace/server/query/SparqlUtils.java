@@ -21,12 +21,12 @@ package eu.stratuslab.marketplace.server.query;
 
 
 public final class SparqlUtils {
-	private static final String[] aColumns = { "", "os", "osversion", "arch", "email", "created",
-			"identifier", "location", "description", "title"};
+	private static final String[] aColumns = { "", "os", "osversion", "arch", "email", "kind", 
+		"created", "identifier", "location", "description", "title"};
 	
-	public static final int SEARCHABLE_COLUMNS = 4;
+	public static final int SEARCHABLE_COLUMNS = 5;
 	
-	public static final int DEFAULT_SORT_COL = 5;
+	public static final int DEFAULT_SORT_COL = 6;
 	
 	public static final String EMAIL_QUERY = //
         "SELECT DISTINCT ?email ?subject ?issuer "
@@ -82,6 +82,7 @@ public final class SparqlUtils {
         + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#location> ?location . }"
         + " OPTIONAL { ?x <http://purl.org/dc/terms/description> ?description . }"
         + " OPTIONAL { ?x <http://purl.org/dc/terms/title> ?title . }"
+        + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#kind> ?kind . }"
         + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#tag> ?tag . }"
         + " ?x <http://purl.org/dc/terms/valid> ?valid;"
         + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
@@ -92,7 +93,7 @@ public final class SparqlUtils {
     public static final String SELECT_COUNT = "SELECT DISTINCT(COUNT(*) AS ?count)";
         
     public static final String SELECT_ALL = "SELECT ?identifier ?email ?created"
-		+ " ?os ?osversion ?arch ?location ?description ?title";
+		+ " ?os ?osversion ?arch ?location ?description ?title ?kind";
     
     public static final String DEPRECATED_OFF = "FILTER (NOT EXISTS " +
     		"{?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated}) ";

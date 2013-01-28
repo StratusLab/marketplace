@@ -7,7 +7,7 @@ function buildHtmlDisplay( aData )
         var osversion = aData[2];
         var arch = aData[3];
 
-        var title = aData[9];
+        var title = aData[10];
 
         var header = createHeader(title, os, osversion, arch);
         if( header.length == 0 )
@@ -16,8 +16,8 @@ function buildHtmlDisplay( aData )
         }
 
         var downloadLink = "";
-        if(aData[7].substring(0, "http".length) == "http"){
-            downloadLink = "<a href='" + aData[7]
+        if(aData[8].substring(0, "http".length) == "http"){
+            downloadLink = "<a href='" + aData[8]
                         + "'><img src='/css/download.png'/></a>";
         } 
 
@@ -28,11 +28,13 @@ function buildHtmlDisplay( aData )
                         + "<tr><td><div id='detail'>Endorser:</div></td>"
                         + "<td><div id='detail'>" + aData[4] + "</div></td></tr>"
                         + "<tr><td><div id='detail'>Identifier:</div></td>"
-                        + "<td><div id='detail'>" + aData[6] + "</div></td></tr>"
+                        + "<td><div id='detail'>" + aData[7] + "</div></td></tr>"
                         + "<tr><td><div id='detail'>Created:</div></td>"
+                        + "<td><div id='detail'>" + aData[6] + "</div></td></tr>"
+                        + "<tr><td><div id='detail'>Kind:</div></td>" 
                         + "<td><div id='detail'>" + aData[5] + "</div></td></tr>" + "<tr></tr></div>"
-                        + "<tr><td colspan='3'><div id='description'>" + aData[8] + "</div></td></tr>"
-                        + "<tr><td><a href='/metadata/" + aData[6] + "/" + aData[4] + "/" + aData[5] + "'>More...</a></td></tr>"
+                        + "<tr><td colspan='3'><div id='description'>" + aData[9] + "</div></td></tr>"
+                        + "<tr><td><a href='/metadata/" + aData[7] + "/" + aData[4] + "/" + aData[6] + "'>More...</a></td></tr>"
                         + "</table>";
 
         return display;
@@ -118,13 +120,14 @@ $(document).ready(function() {
 		                 { "bSearchable": false, "bVisible": false, "aTargets": [2] }, //osversion
 		                 { "bSearchable": false, "bVisible": false, "aTargets": [3] }, //arch
 		                 { "bSearchable": false, "bVisible": false, "aTargets": [4] }, //endorser
-		                 { "bSearchable": false, "bVisible": false, "aTargets": [5] }, //created
-                                 { "bSearchable": false, "bVisible": false, "aTargets": [6] }, //identifier
-                                 { "bSearchable": false, "bVisible": false, "aTargets": [7] }, //location
-                                 { "bSearchable": false, "bVisible": false, "aTargets": [8] }, //description
-                                 { "bSearchable": false, "bVisible": false, "aTargets": [9] }, //title
+		                 { "bSearchable": false, "bVisible": false, "aTargets": [5] }, //kind
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [6] }, //created
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [7] }, //identifier
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [8] }, //location
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [9] }, //description
+                                 { "bSearchable": false, "bVisible": false, "aTargets": [10] }, //title
 		                 ],
-		                 "aaSorting": [[5, 'desc']],
+		                 "aaSorting": [[6, 'desc']],
 		                 'sPaginationType': 'listbox',
 		                 "oLanguage": {
 		                	 "sSearch": "Search:"
@@ -186,7 +189,7 @@ $(document).ready(function() {
 		switch ($(this).val()) {
 		case "_none_":  // first option chosen, not associated with any column,
 			// do some default
-			oTable.fnSort( [ [5,'desc'] ] );
+			oTable.fnSort( [ [6,'desc'] ] );
 			break;
 
 		case "os":
@@ -206,8 +209,12 @@ $(document).ready(function() {
 			break;
 
 		case "date":
-			oTable.fnSort( [ [5,'desc'] ] );
+			oTable.fnSort( [ [6,'desc'] ] );
 			break;
+
+                case "kind":
+                        oTable.fnSort( [ [5,'asc'] ] );
+                        break;
 		}
 	});
 
@@ -248,4 +255,3 @@ $(function() {
        $(this).closest('form').submit();
    });
 });
-
