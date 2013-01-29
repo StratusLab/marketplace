@@ -49,9 +49,9 @@
 
     <label for="location">Location: </label>
     <select name="location" id="location">
-        <option selected="selected" value="web">web</option>
+        <option value="web">web</option>
         <option value="pdisk">pdisk</option>
-        <option value="all">all</option>
+        <option selected="selected" value="all">all</option>
      </select>
 </form>
 
