@@ -10,6 +10,7 @@ import javax.security.auth.x500.X500Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -19,6 +20,7 @@ import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
+@Ignore
 public class EndorserWhitelistTest extends ResourceTestBase {
 	
 	private String password = "XYZXYZ";
