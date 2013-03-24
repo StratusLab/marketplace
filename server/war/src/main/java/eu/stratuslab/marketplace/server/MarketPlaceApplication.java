@@ -198,7 +198,10 @@ public class MarketPlaceApplication extends Application {
 
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
-                
+        
+        TemplateRoute route = router.attach("/metadata/{email}?tag={tag}", MDatumResource.class);       
+        route.setMatchingQuery(true);
+        
         // Defines a route for the resource "list of metadata entries"
         router.attach("/metadata", MDataResource.class);
         router.attach("/metadata/", MDataResource.class);
@@ -213,7 +216,7 @@ public class MarketPlaceApplication extends Application {
                 MDatumResource.class);
         router.attach("/metadata/{identifier}/{email}/{date}/",
                 MDatumResource.class);
-
+        
         // Defines a route for the resource "endorsers"
         router.attach("/endorsers", EndorsersResource.class);
         router.attach("/endorsers/", EndorsersResource.class);
@@ -239,7 +242,6 @@ public class MarketPlaceApplication extends Application {
         router.attach("/about/", AboutResource.class);
 
         // Defines a router for actions
-        TemplateRoute route;
         route = router.attach("/action/", new ActionRouter());
         route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 

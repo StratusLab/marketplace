@@ -25,6 +25,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -44,6 +49,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.talis.rdfwriters.json.JSONJenaWriter;
 
+import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 /**
@@ -51,6 +57,8 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
  */
 public class MDatumResource extends BaseResource {
 
+	private static final String ENCODING = "UTF-8";
+	
 	private static final String METADATA_ROUTE = "/metadata/";
 	
     private String datum = null;
@@ -59,13 +67,62 @@ public class MDatumResource extends BaseResource {
 
     @Override
     protected void doInit() {
-        url = getRequest().getResourceRef().getPath();
-                
-        String metadataPath = url.substring(METADATA_ROUTE.length());
-        datum = getMetadatum(metadataPath);
-        identifier = metadataPath.substring(0, metadataPath.indexOf('/'));
+    	String metadataPath = "";
+    	
+    	if(getRequest().getAttributes().containsKey("tag")){
+    		String email = (String)getRequest().getAttributes().get("email");
+    		String tag = getTag((String)getRequest().getAttributes().get("tag"));
+			
+    		url = getTaggedEntry(tag, email);
+    		metadataPath = url;
+    	} else {
+    		url = getRequest().getResourceRef().getPath();
+    		metadataPath = url.substring(METADATA_ROUTE.length());
+    	}
+    	
+    	datum = getMetadatum(metadataPath);
+    	identifier = metadataPath.substring(0, metadataPath.indexOf('/'));
     }
 
+    private String getTag(String tag){
+    	String decodedTag = "";
+    	
+    	try {
+			decodedTag = URLDecoder.decode((String)getRequest().getAttributes().get("tag"), ENCODING)
+					.replaceAll("^\"|\"$", "");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.severe("Unable to decode tag query: " + e.getMessage());
+		}
+    	
+    	return decodedTag;
+    }
+    
+    private String getTaggedEntry(String tag, String email){
+    	
+    	List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+        try {
+        	String query = getQueryBuilder().buildTagQuery(tag, email);
+        	results = query(query);
+        } catch(MarketplaceException e){
+        	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
+        }
+        
+        String identifier = "";
+        String created = "";
+        
+        if (results.size() > 0) {
+        	Map<String, String> resultRow = results.get(0);
+        	identifier = resultRow.get("identifier");
+        	created = resultRow.get("created");
+        }
+        
+        if (identifier == "null" || created == "null")
+        	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
+                    "metadata entry not found.\n");
+        
+    	return identifier + "/" + email + "/" + created;
+    }
+    
     @Get("xml")
     public Representation toXml() {
     	if (this.datum == null) {
@@ -95,14 +152,14 @@ public class MDatumResource extends BaseResource {
         Model rdfModel = ModelFactory.createMemModelMaker()
                 .createDefaultModel();
         rdfModel.read(new ByteArrayInputStream((MetadataFileUtils.stripSignature(datum))
-			        .getBytes()), MARKETPLACE_URI);
+				        .getBytes(Charset.forName(ENCODING))), MARKETPLACE_URI);
 		
         JSONJenaWriter jenaWriter = new JSONJenaWriter();
         ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
         jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);
 
-        StringRepresentation representation = new StringRepresentation(jsonOut
-                .toString(), MediaType.APPLICATION_JSON);
+        StringRepresentation representation = new StringRepresentation(jsonOut.toString(), 
+        		MediaType.APPLICATION_JSON);
 
         Disposition disposition = new Disposition();
         disposition.setFilename(identifier + ".json");

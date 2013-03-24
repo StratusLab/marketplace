@@ -20,7 +20,10 @@ public interface QueryBuilder {
 	
 	String buildEndorsersQuery();
 	
+	String buildExpiryQuery(String expiryDate);
+
 	String buildReminderQuery(String email);
 	
-	String buildExpiryQuery(String expiryDate);
+	String buildTagQuery(String email, String tag);
+	
 }

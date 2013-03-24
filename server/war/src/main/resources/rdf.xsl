@@ -28,13 +28,23 @@
 <xsl:choose>
    <xsl:when test="string(dcterms:title)">
     <h1><xsl:value-of select="dcterms:title"/></h1>
+
+    <xsl:if test="string(dcterms:alternative)">
+      <h2><xsl:value-of select="dcterms:alternative"/></h2>
+    </xsl:if>
+
     <h2><xsl:value-of select="dcterms:identifier"/></h2>
    </xsl:when>
 
    <xsl:otherwise>
     <h1><xsl:value-of select="dcterms:identifier"/></h1>
+
+    <xsl:if test="string(dcterms:alternative)">
+      <h2><xsl:value-of select="dcterms:alternative"/></h2>
+    </xsl:if>
    </xsl:otherwise>
 </xsl:choose>
+
 <p><xsl:value-of select="dcterms:description"/></p>
 <table class="inline">
 

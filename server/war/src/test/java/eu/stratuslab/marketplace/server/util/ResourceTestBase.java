@@ -135,6 +135,10 @@ public class ResourceTestBase {
 			value = XPathUtils.getValue(doc, XPathUtils.IDENTIFIER_ELEMENT);
 		} else if (key.equals("email")){
 			value = XPathUtils.getValue(doc, XPathUtils.EMAIL);
+		} else if (key.equals("alternative")){
+			value = XPathUtils.getValue(doc, XPathUtils.ALTERNATIVE);
+		} else if (key.equals("description")){
+			value = XPathUtils.getValue(doc, XPathUtils.DESCRIPTION);
 		}
 				
 		return value;

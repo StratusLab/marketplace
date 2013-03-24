@@ -348,4 +348,8 @@ public class SparqlBuilder implements QueryBuilder {
 		return query.toString();
 	}
 	
+	public String buildTagQuery(String tag, String email) {
+		return String.format(SparqlUtils.TAG_QUERY_TEMPLATE, tag, email);
+	}
+	
 }

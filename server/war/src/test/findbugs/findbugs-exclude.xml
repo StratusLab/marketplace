@@ -24,7 +24,10 @@
     </Match>
     <Match>
       <Class name="eu.stratuslab.marketplace.server.resources.MDatumResource" />
+      <Or>
       <Bug pattern="DM_DEFAULT_ENCODING" />
+      <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+      </Or>
     </Match>
     <Match>
       <Class name="eu.stratuslab.marketplace.server.resources.MDataResourceBase" />

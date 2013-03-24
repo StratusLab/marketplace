@@ -3,6 +3,8 @@ package eu.stratuslab.marketplace.server.resources;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.Map;
+
 import org.w3c.dom.Document;
 
 import org.junit.AfterClass;
@@ -90,6 +92,67 @@ public class MDatumResourceTest extends ResourceTestBase {
 				is("application/json"));
 	}
 	
+   @Test
+   	public void testGetTag() throws Exception {
+   		postMetadataFile("valid-alternative.xml");
+   		
+   		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-alternative.xml"));
+		
+   		String identifier = getValueFromDoc(metadata, "identifier");
+   		String email = getValueFromDoc(metadata, "email");
+   		String alternative = getValueFromDoc(metadata, "alternative");
+   		
+   		Map<String, Object> attributes = createAttributes("email", email);
+   		attributes.put("tag", alternative);
+   		
+		Request getRequest = createGetRequest(attributes);
+		Response response = executeRequest(getRequest);
+		
+		Document responseDoc = extractXmlDocument(response.getEntity()
+				.getStream());
+		String responseId = getValueFromDoc(responseDoc, "identifier");
+   		String responseAlt = getValueFromDoc(responseDoc, "alternative");
+		
+		assertThat(identifier, is(responseId));
+		assertThat(alternative, is(responseAlt));
+	}
+	
+   @Test
+  	public void testGetTagReturnsLates() throws Exception {
+  		postMetadataFile("valid-alternative.xml");
+  		postMetadataFile("valid-alternative-newid.xml");
+  		
+  		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-alternative-newid.xml"));
+  				
+  		String identifier = getValueFromDoc(metadata, "identifier");
+  		String email = getValueFromDoc(metadata, "email");
+  		String created = getValueFromDoc(metadata, "created");
+  		String alternative = getValueFromDoc(metadata, "alternative");
+  		String description = getValueFromDoc(metadata, "description");
+  		
+  		Map<String, Object> attributes = createAttributes("email", email);
+  		attributes.put("tag", alternative);
+  		
+		Request getRequest = createGetRequest(attributes);
+		Response response = executeRequest(getRequest);
+		
+		Document responseDoc = extractXmlDocument(response.getEntity()
+				.getStream());
+		String responseId = getValueFromDoc(responseDoc, "identifier");
+		String responseEmail = getValueFromDoc(metadata, "email");
+  		String responseAlt = getValueFromDoc(responseDoc, "alternative");
+  		String responseCreated = getValueFromDoc(responseDoc, "created");
+  		String responseDesc = getValueFromDoc(responseDoc, "description");
+		
+		assertThat(identifier, is(responseId));
+		assertThat(email, is(responseEmail));
+		assertThat(alternative, is(responseAlt));
+		assertThat(description, is(responseDesc));
+		assertThat(created, is(responseCreated));
+	}
+   
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDatumResource());
 	}
