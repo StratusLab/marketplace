@@ -7,9 +7,8 @@ import java.util.Map;
 
 import org.w3c.dom.Document;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.restlet.Component;
@@ -26,10 +25,8 @@ import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
 public class MDatumResourceTest extends ResourceTestBase {
 	
-	private String iri;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		// Create a new Component.
         Component component = new Component();
 		application = new MarketPlaceApplication("memory");
@@ -39,27 +36,24 @@ public class MDatumResourceTest extends ResourceTestBase {
 		application.createInboundRoot();
 	}
 	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		application.stop();
-	}
-	
-	@Before 
-	public void setUp() throws Exception {
-		postMetadataFile("valid-indate-signature.xml");
-		
-		Document metadata = extractXmlDocument(
-				this.getClass().getResourceAsStream("valid-indate-signature.xml"));
-		
-		this.iri = "/metadata/" + getValueFromDoc(metadata, "identifier")
-			+ "/" + getValueFromDoc(metadata, "email")
-			+ "/" + getValueFromDoc(metadata, "created");
 	}
 	
 	@Test
 	public void testGetHtml() throws Exception {
+		postMetadataFile("valid-indate-signature.xml");
+
+		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-indate-signature.xml"));
+
+		String iri = "/metadata/" + getValueFromDoc(metadata, "identifier")
+				+ "/" + getValueFromDoc(metadata, "email")
+				+ "/" + getValueFromDoc(metadata, "created");
+
 		Request request = createRequest(null, Method.GET,
-				 null, iri);
+				null, iri);
 		ClientInfo info = new ClientInfo(MediaType.TEXT_HTML);
 		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.TEXT_HTML));
 		request.setClientInfo(info);
@@ -70,8 +64,17 @@ public class MDatumResourceTest extends ResourceTestBase {
 	
 	@Test
 	public void testGetXml() throws Exception {
+		postMetadataFile("valid-indate-signature.xml");
+
+		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-indate-signature.xml"));
+
+		String iri = "/metadata/" + getValueFromDoc(metadata, "identifier")
+				+ "/" + getValueFromDoc(metadata, "email")
+				+ "/" + getValueFromDoc(metadata, "created");
+
 		Request request = createRequest(null, Method.GET,
-				 null, iri);
+				null, iri);
 		ClientInfo info = new ClientInfo(MediaType.TEXT_XML);
 		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.TEXT_XML));
 		request.setClientInfo(info);
@@ -82,8 +85,17 @@ public class MDatumResourceTest extends ResourceTestBase {
 	
 	@Test
 	public void testGetJson() throws Exception {
+		postMetadataFile("valid-indate-signature.xml");
+
+		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-indate-signature.xml"));
+
+		String iri = "/metadata/" + getValueFromDoc(metadata, "identifier")
+				+ "/" + getValueFromDoc(metadata, "email")
+				+ "/" + getValueFromDoc(metadata, "created");
+
 		Request request = createRequest(null, Method.GET,
-				 null, iri);
+				null, iri);
 		ClientInfo info = new ClientInfo(MediaType.APPLICATION_JSON);
 		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
 		request.setClientInfo(info);
@@ -92,7 +104,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 				is("application/json"));
 	}
 	
-   @Test
+        @Test
    	public void testGetTag() throws Exception {
    		postMetadataFile("valid-alternative.xml");
    		
@@ -118,8 +130,8 @@ public class MDatumResourceTest extends ResourceTestBase {
 		assertThat(alternative, is(responseAlt));
 	}
 	
-   @Test
-  	public void testGetTagReturnsLates() throws Exception {
+        @Test
+  	public void testGetTagReturnsLatest() throws Exception {
   		postMetadataFile("valid-alternative.xml");
   		postMetadataFile("valid-alternative-newid.xml");
   		
