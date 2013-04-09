@@ -122,7 +122,7 @@
           <mappings>
 
             <mapping>
-              <directory>${installation.dir}/webapps</directory>
+              <directory>${installation.dir}/stratuslab-webapps</directory>
               <filemode>644</filemode>
               <username>root</username>
               <groupname>root</groupname>
@@ -136,6 +136,39 @@
                 </source>
               </sources>
             </mapping>
+
+	    <mapping>
+	      <directory>${installation.dir}/resources</directory>
+	      <filemode>644</filemode>
+	      <username>root</username>
+	      <groupname>root</groupname>
+	      <directoryIncluded>false</directoryIncluded>
+	      <sources>
+		<source>
+		  <location>src/main/scripts</location>
+		  <location>target/dependency/jetty-distribution-${jetty.version}/resources</location>
+		  <excludes>
+		    <exclude>log4j.properties</exclude>
+		  </excludes>
+		</source>
+	      </sources>
+	    </mapping>
+
+	    <mapping>
+	      <directory>${installation.dir}/start.d</directory>
+	      <filemode>644</filemode>
+	      <username>root</username>
+	      <groupname>root</groupname>
+	      <directoryIncluded>true</directoryIncluded>
+	      <sources>
+		<source>
+		  <location>target/dependency/jetty-distribution-${jetty.version}/start.d</location>
+		  <excludes>
+		    <exclude>test-webapp.ini</exclude>
+		  </excludes>
+		</source>
+	      </sources>
+	    </mapping>
 
 	    <mapping>
 	      <directory>${installation.dir}/etc</directory>
@@ -210,6 +243,12 @@
                     <include>logs/**/*</include>
                     <include>contexts/README.txt</include>
                   </includes>
+                  <!-- remove references to binary files -->
+                  <excludes>
+                    <exclude>lib/setuid/**/*</exclude>
+                    <exclude>etc/jetty-setuid.xml</exclude>
+                    <exclude>etc/jetty.conf</exclude>
+		  </excludes>
                 </source>
               </sources>
             </mapping>
