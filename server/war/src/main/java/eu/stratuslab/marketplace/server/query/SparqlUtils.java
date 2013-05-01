@@ -74,6 +74,15 @@ public final class SparqlUtils {
 	
 	private static final String EXPIRED_ENTRIES_FILTER = "FILTER (?valid < \"%s\") .";
 	
+	public static final String COUNT_WHERE_BLOCK =
+			" ?x <http://purl.org/dc/terms/identifier>  ?identifier;"
+		    + " <http://mp.stratuslab.eu/slterms#tag> ?tag;"
+			+ " <http://purl.org/dc/terms/valid> ?valid;"
+	        + " <http://mp.stratuslab.eu/slreq#endorsement> ?endorsement ."
+	        + " ?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser;"
+	        + " <http://purl.org/dc/terms/created> ?created ."
+	        + " ?endorser <http://mp.stratuslab.eu/slreq#email> ?email .";
+	
 	public static final String WHERE_BLOCK =
 		" ?x <http://purl.org/dc/terms/identifier>  ?identifier ."
         + " OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#os> ?os . }"
@@ -93,7 +102,9 @@ public final class SparqlUtils {
     public static final String SELECT_COUNT = "SELECT DISTINCT(COUNT(*) AS ?count)";
         
     public static final String SELECT_ALL = "SELECT ?identifier ?email ?created"
-		+ " ?os ?osversion ?arch ?location ?description ?title ?kind";
+		+ " (sample(?os) as ?os) (sample(?osversion) as ?osversion) (sample(?arch) as ?arch) " +
+		"(sample(?location) as ?location) (sample(?description) as ?description) " +
+		"(sample(?title) as ?title) (sample(?kind) as ?kind)";
     
     public static final String DEPRECATED_OFF = "FILTER (NOT EXISTS " +
     		"{?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated}) ";
@@ -112,6 +123,8 @@ public final class SparqlUtils {
             + "<http://purl.org/dc/terms/created> ?created . "
     		+ "?endorser <http://mp.stratuslab.eu/slreq#email> \"%s\" . "
             + "} GROUP BY ?identifier ORDER BY desc(?created) LIMIT 1";
+    
+    public static final String GROUP_BY = " GROUP BY ?identifier ?email ?created";
     
     private SparqlUtils(){}
     

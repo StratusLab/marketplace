@@ -199,14 +199,14 @@ public class MDataResourceBase extends BaseResource {
     	String iTotalRecords = getTotalRecords(status, access);
     	recordCounts.put("iTotalRecords", iTotalRecords);
     	
-    	String dataQuery = getQueryBuilder().buildGetMetadataQuery(status, access,
+     	String dataQuery = getQueryBuilder().buildGetMetadataQuery(status, access,
     			requestQueryValues, attributes);
     	
     	String countQuery = getQueryBuilder().buildGetMetadataCountQuery(status, access,
     			requestQueryValues, attributes);
-    	    	
-    	recordCounts.put("iTotalDisplayRecords", getTotalDisplayRecords(countQuery));       
-            	
+    	String iTotalDisplayRecords = getTotalDisplayRecords(countQuery);
+    	recordCounts.put("iTotalDisplayRecords", iTotalDisplayRecords);       
+        
         //Get the results
         List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
@@ -215,7 +215,7 @@ public class MDataResourceBase extends BaseResource {
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
 
-        if(results.size() <= 0 && hasFilter){
+        if(results.size() <= 0 && hasFilter || (results.get(0).get("identifier").equals("null"))){
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
         } else {
