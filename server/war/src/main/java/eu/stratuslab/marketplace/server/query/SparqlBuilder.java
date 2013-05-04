@@ -44,8 +44,10 @@ public class SparqlBuilder implements QueryBuilder {
 			Map<String, Object> requestAttributes) {
 		
 		StringBuilder countQuery = new StringBuilder(SparqlUtils.SELECT_COUNT);
+		countQuery.append("{" + SparqlUtils.SELECT_ALL);
         buildBaseQuery(countQuery, status, access,
 				requestQueryValues, requestAttributes);
+        countQuery.append("}");
 
         return countQuery.toString();        
     }
@@ -88,6 +90,7 @@ public class SparqlBuilder implements QueryBuilder {
         wherePredicate.append(" }");
 
         query.append(wherePredicate);
+        query.append(SparqlUtils.GROUP_BY);
     }
 	
 	private void setStatus(StringBuilder wherePredicate, String status){
@@ -269,7 +272,7 @@ public class SparqlBuilder implements QueryBuilder {
 	public String buildGetTotalRecordsQuery(String status, String access) {
 		String q = SparqlUtils.SELECT_COUNT
         + WHERE
-        + SparqlUtils.WHERE_BLOCK
+        + SparqlUtils.COUNT_WHERE_BLOCK
         + SparqlUtils.getLatestFilter();
 		
 		StringBuilder wherePredicate = new StringBuilder();

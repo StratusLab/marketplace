@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Map;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -300,6 +301,24 @@ public class MDataResourceTest extends ResourceTestBase {
 		}
 				
 		assertTrue(valid);
+	}
+	
+	@Test
+	public void testDuplicateMetadataFields() throws Exception {
+		Response response = postMetadataFile("valid-two-locations.xml");
+		assertThat(response.getStatus(), is(Status.SUCCESS_CREATED));
+		
+		Document metadata = extractXmlDocument(this.getClass()
+				.getResourceAsStream("valid-two-locations.xml"));
+		Map<String, Object> attributes = createAttributes("identifier",
+				getValueFromDoc(metadata, "identifier"));
+		Request getRequest = createGetRequest(attributes);
+		response = executeRequest(getRequest);
+		
+		Document responseDoc = extractXmlDocument(response.getEntity()
+				.getStream());
+		NodeList list = responseDoc.getElementsByTagName("rdf:RDF");
+		assertThat(list.getLength(), is(1));
 	}
 	
 	private Response executeRequest(Request request) {
