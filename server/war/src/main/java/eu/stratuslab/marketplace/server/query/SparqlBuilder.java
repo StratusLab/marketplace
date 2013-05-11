@@ -355,4 +355,8 @@ public class SparqlBuilder implements QueryBuilder {
 		return String.format(SparqlUtils.TAG_QUERY_TEMPLATE, tag, email);
 	}
 	
+	public String buildEndorserTagsQuery(String email){
+		return String.format(SparqlUtils.ENDORSER_TAG_QUERY_TEMPLATE, email);
+	}
+	
 }
