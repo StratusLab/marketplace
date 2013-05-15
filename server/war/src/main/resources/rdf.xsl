@@ -27,21 +27,23 @@
 <xsl:template match="rdf:Description">
 <xsl:choose>
    <xsl:when test="string(dcterms:title)">
-    <h1><xsl:value-of select="dcterms:title"/></h1>
+    <h1><xsl:value-of select="dcterms:title"/>
 
     <xsl:if test="string(dcterms:alternative)">
-      <h2><xsl:value-of select="dcterms:alternative"/></h2>
+      (<xsl:value-of select="dcterms:alternative"/>)
     </xsl:if>
+    </h1>
 
     <h2><xsl:value-of select="dcterms:identifier"/></h2>
    </xsl:when>
 
    <xsl:otherwise>
-    <h1><xsl:value-of select="dcterms:identifier"/></h1>
+    <h1><xsl:value-of select="dcterms:identifier"/>
 
     <xsl:if test="string(dcterms:alternative)">
-      <h2><xsl:value-of select="dcterms:alternative"/></h2>
+      (<xsl:value-of select="dcterms:alternative"/>)
     </xsl:if>
+    </h1>
    </xsl:otherwise>
 </xsl:choose>
 
