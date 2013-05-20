@@ -26,4 +26,6 @@ public interface QueryBuilder {
 	
 	String buildTagQuery(String email, String tag);
 	
+	String buildEndorserTagsQuery(String email);
+	
 }

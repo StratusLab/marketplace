@@ -124,6 +124,14 @@ public final class SparqlUtils {
     		+ "?endorser <http://mp.stratuslab.eu/slreq#email> \"%s\" . "
             + "} GROUP BY ?identifier ORDER BY desc(?created) LIMIT 1";
     
+    public static final String ENDORSER_TAG_QUERY_TEMPLATE = "SELECT DISTINCT ?tag "
+    		+ "WHERE { ?x <http://purl.org/dc/terms/alternative> ?tag; "
+    		+  "<http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
+    		+ "?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; "
+            + "<http://purl.org/dc/terms/created> ?created . "
+    		+ "?endorser <http://mp.stratuslab.eu/slreq#email> \"%s\""
+            + "}";
+    
     public static final String GROUP_BY = " GROUP BY ?identifier ?email ?created";
     
     private SparqlUtils(){}
