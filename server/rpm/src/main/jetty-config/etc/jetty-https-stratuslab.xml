@@ -81,7 +81,7 @@
             </Array>
           </Arg>
           <Set name="host"><Property name="jetty.host" /></Set>
-          <Set name="port"><Property name="jetty.tls.port" default="8081" /></Set>
+          <Set name="port"><Property name="jetty.tls.port" default="8443" /></Set>
           <Set name="idleTimeout">30000</Set>
         </New>
     </Arg>
