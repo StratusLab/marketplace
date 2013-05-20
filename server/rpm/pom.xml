@@ -164,7 +164,7 @@
 		<source>
 		  <location>target/dependency/jetty-distribution-${jetty.version}/start.d</location>
 		  <excludes>
-		    <exclude>test-webapp.ini</exclude>
+		    <exclude>*</exclude>
 		  </excludes>
 		</source>
 	      </sources>
