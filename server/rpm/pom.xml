@@ -154,6 +154,7 @@
 	      </sources>
 	    </mapping>
 
+<!--
 	    <mapping>
 	      <directory>${installation.dir}/start.d</directory>
 	      <filemode>644</filemode>
@@ -169,7 +170,7 @@
 		</source>
 	      </sources>
 	    </mapping>
-
+-->
 	    <mapping>
 	      <directory>${installation.dir}/etc</directory>
 	      <filemode>755</filemode>
