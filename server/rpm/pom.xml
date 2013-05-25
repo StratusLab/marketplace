@@ -154,13 +154,13 @@
 	      </sources>
 	    </mapping>
 
-<!--
 	    <mapping>
 	      <directory>${installation.dir}/start.d</directory>
 	      <filemode>644</filemode>
 	      <username>root</username>
 	      <groupname>root</groupname>
 	      <directoryIncluded>true</directoryIncluded>
+<!--
 	      <sources>
 		<source>
 		  <location>target/dependency/jetty-distribution-${jetty.version}/start.d</location>
@@ -169,8 +169,9 @@
 		  </excludes>
 		</source>
 	      </sources>
-	    </mapping>
 -->
+	    </mapping>
+
 	    <mapping>
 	      <directory>${installation.dir}/etc</directory>
 	      <filemode>755</filemode>
