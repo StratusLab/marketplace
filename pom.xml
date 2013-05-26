@@ -79,8 +79,7 @@ metadata.
     <pluginManagement>
       <plugins>
         <plugin>
-          <!-- <groupId>org.eclipse.jetty</groupId> -->
-          <groupId>org.mortbay.jetty</groupId>
+          <groupId>org.eclipse.jetty</groupId>
           <artifactId>jetty-maven-plugin</artifactId>
           <version>${jetty.version}</version>
         </plugin>

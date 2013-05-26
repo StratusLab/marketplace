@@ -42,15 +42,13 @@
   <!-- Add a SecureRequestCustomizer to extract certificate and    -->
   <!-- session information                                         -->
   <!-- =========================================================== -->
-<!-- Jetty 9 -->
-<!--
   <New id="sslHttpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
     <Arg><Ref refid="httpConfig"/></Arg>
     <Call name="addCustomizer">
       <Arg><New class="org.eclipse.jetty.server.SecureRequestCustomizer"/></Arg>
     </Call>
   </New>
--->
+
 
   <!-- =========================================================== -->
   <!-- Add a HTTPS Connector.                                      -->
@@ -63,20 +61,6 @@
   <!-- o.e.j.server.HttpConnectionFactory for all configuration    -->
   <!-- that may be set here.                                       -->
   <!-- =========================================================== -->
-  <!-- Jetty 8 -->
-  <Call name="addConnector">
-    <Arg>
-      <New class="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
-        <Arg><Ref id="sslContextFactory" /></Arg>
-        <Set name="Port">8443</Set>
-        <Set name="maxIdleTime">30000</Set>
-        <Set name="Acceptors">2</Set>
-        <Set name="AcceptQueueSize">100</Set>
-      </New>
-    </Arg>
-  </Call>
-<!-- Jetty 9 -->
-<!--
   <Call id="sslConnector" name="addConnector">
     <Arg>
       <New class="org.eclipse.jetty.server.ServerConnector">
@@ -102,5 +86,4 @@
         </New>
     </Arg>
   </Call>
--->
 </Configure>
