@@ -20,7 +20,7 @@ metadata.
   <parent>
     <groupId>eu.stratuslab</groupId>
     <artifactId>distribution</artifactId>
-    <version>13.05-SNAPSHOT</version>
+    <version>13.05-RC1</version>
   </parent>
 
   <modules>
@@ -70,7 +70,7 @@ metadata.
       <dependency>
 	<groupId>eu.stratuslab.metadata</groupId>
 	<artifactId>metadata</artifactId>
-	<version>13.05.0-SNAPSHOT</version>
+	<version>13.05.0-RC1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
