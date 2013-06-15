@@ -130,6 +130,8 @@ public class MarketPlaceApplication extends Application {
                 MediaType.APPLICATION_RDF_XML, true);
         getMetadataService().addExtension("application_xml",
                 MediaType.APPLICATION_XML, false);
+        
+        getMetadataService().setDefaultMediaType(MediaType.APPLICATION_XML);
 
         setStatusService(new MarketPlaceStatusService());
 
