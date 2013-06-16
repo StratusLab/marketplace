@@ -61,6 +61,7 @@ import eu.stratuslab.marketplace.server.query.SparqlBuilder;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
+import eu.stratuslab.marketplace.server.resources.ErrorResource;
 import eu.stratuslab.marketplace.server.resources.HomeResource;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.resources.MDatumResource;
@@ -103,13 +104,16 @@ public class MarketPlaceApplication extends Application {
 
     private EndorserWhitelist whitelist;
 
+	private boolean invalidConfig = false;
+
 	public MarketPlaceApplication() {
 		try {		
 			String storeType = Configuration.getParameterValue(STORE_TYPE);
 			init(storeType);
 		} catch(ExceptionInInitializerError e){
 			LOGGER.severe("incorrect configuration: " + e.getCause().getMessage());
-		}	
+			invalidConfig = true;
+		}
 	}
 
     public MarketPlaceApplication(String storeType) {
@@ -202,66 +206,70 @@ public class MarketPlaceApplication extends Application {
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
         
-        TemplateRoute route = router.attach("/metadata/{email}?tag={tag}", MDatumResource.class);       
-        route.setMatchingQuery(true);
+        if(invalidConfig){
+        	router.attach("/", ErrorResource.class);
+        } else {
+        	TemplateRoute route = router.attach("/metadata/{email}?tag={tag}", MDatumResource.class);       
+        	route.setMatchingQuery(true);
+
+        	// Defines a route for the resource "list of metadata entries"
+        	router.attach("/metadata", MDataResource.class);
+        	router.attach("/metadata/", MDataResource.class);
+        	router.attach("/metadata/{arg1}", MDataResource.class);
+        	router.attach("/metadata/{arg1}/", MDataResource.class);
+        	router.attach("/metadata/{arg1}/{arg2}", MDataResource.class);
+        	router.attach("/metadata/{arg1}/{arg2}/", MDataResource.class);
+        	router.attach("/metadata?query={query}", MDataResource.class);
+
+        	// Defines a route for the resource "metadatum"
+        	router.attach("/metadata/{identifier}/{email}/{date}",
+        			MDatumResource.class);
+        	router.attach("/metadata/{identifier}/{email}/{date}/",
+        			MDatumResource.class);
+
+        	// Defines a route for the resource "endorsers"
+        	router.attach("/endorsers", EndorsersResource.class);
+        	router.attach("/endorsers/", EndorsersResource.class);
+
+        	// Defines a route for the resource "endorser"
+        	router.attach("/endorsers/{email}", EndorserResource.class);
+        	router.attach("/endorsers/{email}/", EndorserResource.class);
+
+        	router.attach("/endorsers/{email}/tags", TagsResource.class);
+        	router.attach("/endorsers/{email}/tags/", TagsResource.class);
+
+        	// Defines a route for queries
+        	router.attach("/query", QueryResource.class);
+        	router.attach("/query/", QueryResource.class);
+
+        	// Defines a route for the upload form
+        	router.attach("/upload", UploadResource.class);
+        	router.attach("/upload/", UploadResource.class);
+
+        	// Defines a route for the sync resource
+        	router.attach("/sync", SyncResource.class);
+        	router.attach("/sync/", SyncResource.class);
+
+        	// Define a route for the about page
+        	router.attach("/about", AboutResource.class);
+        	router.attach("/about/", AboutResource.class);
+
+        	// Defines a router for actions
+        	route = router.attach("/action/", new ActionRouter());
+        	route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
+
+        	attachDirectory(router, getContext(), "/css/", 
+        			Configuration.getParameterValue(Parameter.STYLE_PATH)
+        			);
+
+        	attachDirectory(router, getContext(), "/js/", 
+        			Configuration.getParameterValue(Parameter.JS_PATH)
+        			);
+
+        	// Unknown root pages get the home page.
+        	router.attachDefault(HomeResource.class);
+        }
         
-        // Defines a route for the resource "list of metadata entries"
-        router.attach("/metadata", MDataResource.class);
-        router.attach("/metadata/", MDataResource.class);
-        router.attach("/metadata/{arg1}", MDataResource.class);
-        router.attach("/metadata/{arg1}/", MDataResource.class);
-        router.attach("/metadata/{arg1}/{arg2}", MDataResource.class);
-        router.attach("/metadata/{arg1}/{arg2}/", MDataResource.class);
-        router.attach("/metadata?query={query}", MDataResource.class);
-        
-        // Defines a route for the resource "metadatum"
-        router.attach("/metadata/{identifier}/{email}/{date}",
-                MDatumResource.class);
-        router.attach("/metadata/{identifier}/{email}/{date}/",
-                MDatumResource.class);
-        
-        // Defines a route for the resource "endorsers"
-        router.attach("/endorsers", EndorsersResource.class);
-        router.attach("/endorsers/", EndorsersResource.class);
-
-        // Defines a route for the resource "endorser"
-        router.attach("/endorsers/{email}", EndorserResource.class);
-        router.attach("/endorsers/{email}/", EndorserResource.class);
-        
-        router.attach("/endorsers/{email}/tags", TagsResource.class);
-        router.attach("/endorsers/{email}/tags/", TagsResource.class);
-
-        // Defines a route for queries
-        router.attach("/query", QueryResource.class);
-        router.attach("/query/", QueryResource.class);
-
-        // Defines a route for the upload form
-        router.attach("/upload", UploadResource.class);
-        router.attach("/upload/", UploadResource.class);
-
-        // Defines a route for the sync resource
-        router.attach("/sync", SyncResource.class);
-        router.attach("/sync/", SyncResource.class);
-
-        // Define a route for the about page
-        router.attach("/about", AboutResource.class);
-        router.attach("/about/", AboutResource.class);
-
-        // Defines a router for actions
-        route = router.attach("/action/", new ActionRouter());
-        route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
-
-        attachDirectory(router, getContext(), "/css/", 
-        		Configuration.getParameterValue(Parameter.STYLE_PATH)
-        		);
-
-        attachDirectory(router, getContext(), "/js/", 
-        		Configuration.getParameterValue(Parameter.JS_PATH)
-        		);
-
-        // Unknown root pages get the home page.
-        router.attachDefault(HomeResource.class);
-
         Filter filter = new DoubleSlashFilter();
         filter.setNext(router);
         
