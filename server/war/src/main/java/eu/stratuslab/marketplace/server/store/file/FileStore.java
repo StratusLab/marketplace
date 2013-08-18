@@ -26,5 +26,6 @@ public abstract class FileStore {
 	public abstract void store(String key, Document metadata);
 	public abstract void remove(String key);
 	public abstract String read(String key);
+	public abstract void shutdown();
 
 }

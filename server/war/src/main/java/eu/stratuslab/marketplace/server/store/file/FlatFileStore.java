@@ -84,5 +84,10 @@ public class FlatFileStore extends FileStore {
 
 		return model;
 	}
+
+	@Override
+	public void shutdown() {
+				
+	}
 	
 }

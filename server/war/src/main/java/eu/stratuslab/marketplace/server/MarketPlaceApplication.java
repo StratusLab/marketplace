@@ -70,6 +70,7 @@ import eu.stratuslab.marketplace.server.resources.TagsResource;
 import eu.stratuslab.marketplace.server.resources.UploadResource;
 import eu.stratuslab.marketplace.server.resources.SyncResource;
 import eu.stratuslab.marketplace.server.routers.ActionRouter;
+import eu.stratuslab.marketplace.server.store.file.CouchbaseStore;
 import eu.stratuslab.marketplace.server.store.file.FileStore;
 import eu.stratuslab.marketplace.server.store.file.FlatFileStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
@@ -164,6 +165,8 @@ public class MarketPlaceApplication extends Application {
         String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
         if(fileStoreType.equals("file")){
         	fileStore = new FlatFileStore();
+        } else if(fileStoreType.equals("couchbase")){
+        	fileStore = new CouchbaseStore();
         }
 
         queryBuilder = new SparqlBuilder();
@@ -303,6 +306,10 @@ public class MarketPlaceApplication extends Application {
     		store.shutdown();
     	}
 
+    	if(fileStore != null){
+    		fileStore.shutdown();
+    	}
+    	
         if (reminderHandle != null) {
             reminderHandle.cancel(true);
         }

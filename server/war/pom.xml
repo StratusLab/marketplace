@@ -17,6 +17,13 @@
 			<groupId>eu.stratuslab.metadata</groupId>
 			<artifactId>metadata</artifactId>
 		</dependency>
+                <dependency>
+                  <groupId>couchbase</groupId>
+                  <artifactId>couchbase-client</artifactId>
+                  <version>1.1.9</version>
+                </dependency>
+
+
 		<dependency>
 			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet</artifactId>
@@ -84,6 +91,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
 		</dependency>
 
 		<dependency>

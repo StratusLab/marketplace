@@ -21,6 +21,8 @@ package eu.stratuslab.marketplace.server.cfg;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -47,6 +49,26 @@ public enum Parameter {
         }
     },
 
+    COUCHBASE_BUCKET(false, "default", "Couchbase bucket name ('default')"),
+    
+    COUCHBASE_PASSWORD(false, "", "Couchbase password"),
+    
+    COUCHBASE_URIS(false, "http://127.0.0.1:8091/pools", "List of Couchbase URIs") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    		String[] uris = value.split("\\s+");
+    		for(String uri : uris){
+    			try {
+    				new URI(uri);
+    			} catch (URISyntaxException e) {
+    				throw new IllegalArgumentException("invalid Couchbase URI: "
+    						+ value, e);
+    			}
+    		}
+    	}
+    },
+    
     DATA_DIR(true, "/var/lib/stratuslab/metadata",
             "Directory containing raw metadata data entries.") {
         @Override
@@ -70,13 +92,13 @@ public enum Parameter {
     },
     
     FILESTORE_TYPE(true, "file",
-    "Storage type for image metadata files (file only)") {
+    "Storage type for image metadata files (file or couchbase)") {
     	@Override
     	public void validate(String value) {
     		super.validate(value);
-    		if (!("file".equals(value))) {
+    		if (!("file".equals(value) || "couchbase".equals(value))) {
     			throw new IllegalArgumentException(getKey()
-    					+ " must be 'file'");
+    					+ " must be 'file' or 'couchbase'");
     		}
     	}
     },

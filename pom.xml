@@ -27,6 +27,10 @@ metadata.
     <module>server</module>
   </modules>
 
+  <properties>
+    <sesame.version>2.7.5</sesame.version>
+  </properties>
+
   <issueManagement>
     <system>GitHub Issues</system>
     <url>https://github.com/StratusLab/marketplace/issues</url>
@@ -61,6 +65,12 @@ metadata.
       <id>POMSnapshots</id>
       <name>POM Snapshots</name>
       <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots</url>
+    </repository>
+
+    <repository>
+      <id>couchbase</id>
+      <name>Couchbase Maven Repository</name>
+      <url>http://files.couchbase.com/maven2/</url>
     </repository>
 
   </repositories>
