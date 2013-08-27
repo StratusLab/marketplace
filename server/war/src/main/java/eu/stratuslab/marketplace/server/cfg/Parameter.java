@@ -53,6 +53,8 @@ public enum Parameter {
     
     COUCHBASE_PASSWORD(false, "", "Couchbase password"),
     
+    COUCHBASE_MARKETPLACEID(false, "", "Identifier for this Marketplace host"),
+    
     COUCHBASE_URIS(false, "http://127.0.0.1:8091/pools", "List of Couchbase URIs") {
     	@Override
     	public void validate(String value) {
