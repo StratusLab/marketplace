@@ -114,12 +114,12 @@ public class CouchbaseStore extends FileStore {
 		String jsonDocument = (String)client.get(key);
 		
 		@SuppressWarnings("unchecked")
-		Map<String, String> document = (HashMap<String, String>) JSONValue.parse(jsonDocument);
+		Map<String, String> document = (HashMap<String, String>)JSONValue.parse(jsonDocument);
 		
 		return (String)document.get("metadata");
 	}
 
-	public List<String> get(){
+	public List<String> updates(int limit){
 		String startKey = getLastKey();
 		String lastKey = "";
 		

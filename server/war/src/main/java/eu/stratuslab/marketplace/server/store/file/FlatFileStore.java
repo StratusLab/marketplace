@@ -21,6 +21,7 @@ package eu.stratuslab.marketplace.server.store.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.restlet.data.Status;
@@ -88,6 +89,11 @@ public class FlatFileStore extends FileStore {
 	@Override
 	public void shutdown() {
 				
+	}
+
+	@Override
+	public List<String> updates(int limit) {
+		throw new UnsupportedOperationException("Not implemented.");
 	}
 	
 }

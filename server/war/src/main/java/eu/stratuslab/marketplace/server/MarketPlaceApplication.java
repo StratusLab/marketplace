@@ -76,7 +76,7 @@ import eu.stratuslab.marketplace.server.store.file.FlatFileStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStoreFactory;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStoreFactoryImpl;
-import eu.stratuslab.marketplace.server.utils.CouchbaseReader;
+import eu.stratuslab.marketplace.server.utils.RdfStoreUpdater;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Reminder;
@@ -109,7 +109,7 @@ public class MarketPlaceApplication extends Application {
 
     private EndorserWhitelist whitelist;
     
-    private CouchbaseReader couchbaseReader;
+    private RdfStoreUpdater rdfUpdater;
 
 	private boolean invalidConfig = false;
 
@@ -180,8 +180,9 @@ public class MarketPlaceApplication extends Application {
             	}
             };
         	
-        	couchbaseReader = new CouchbaseReader(this, fileStore);
-        	couchbaseHandle = couchbaseUpdater.scheduleWithFixedDelay(couchbase, 1, 1, TimeUnit.MINUTES);
+        	rdfUpdater = new RdfStoreUpdater(this, fileStore);
+        	couchbaseHandle = couchbaseUpdater.scheduleWithFixedDelay(couchbase, 
+        			1, 1, TimeUnit.MINUTES);
         }
 
         queryBuilder = new SparqlBuilder();
@@ -316,7 +317,7 @@ public class MarketPlaceApplication extends Application {
     }
     
     private void couchbaseUpdate() {
-    	couchbaseReader.readFeed();
+    	rdfUpdater.update();
     }
     
     @Override
