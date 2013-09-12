@@ -21,9 +21,12 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONValue;
+import org.restlet.data.Status;
+import org.restlet.resource.ResourceException;
 import org.w3c.dom.Document;
 
 import com.couchbase.client.CouchbaseClient;
+import com.couchbase.client.protocol.views.ComplexKey;
 import com.couchbase.client.protocol.views.DesignDocument;
 import com.couchbase.client.protocol.views.Query;
 import com.couchbase.client.protocol.views.View;
@@ -47,15 +50,18 @@ public class CouchbaseStore extends FileStore {
 	private String dataDir;
 	private String lastKeyPath;
 	
+	private FileStore fileStore;
+	
 	
 	public CouchbaseStore(){
 		String bucket = Configuration.getParameterValue(COUCHBASE_BUCKET);
 		String password = Configuration.getParameterValue(COUCHBASE_PASSWORD);
-		
 		marketplaceId = Configuration.getParameterValue(COUCHBASE_MARKETPLACEID);
 		dataDir = Configuration.getParameterValue(DATA_DIR);
 		
 		lastKeyPath = dataDir + File.separator + ".lastkey";
+		
+		fileStore = new FlatFileStore();
 		
 		String[] uris = Configuration.getParameterValue(COUCHBASE_URIS).split("\\s+");
 		
@@ -69,13 +75,12 @@ public class CouchbaseStore extends FileStore {
 			client = new CouchbaseClient(hosts, bucket, password);
 			
 			createView();
-		} catch (IOException e) {
-			LOGGER.severe("Error connecting to Couchbase: " + e.getMessage());
+	    } catch (Exception e){
+	    	LOGGER.severe("Error connecting to Couchbase: " + e.getMessage());
 		}
 	}
 	
 	private void createView() {
-		// TODO Auto-generated method stub
 		DesignDocument designDoc = new DesignDocument(DESIGN_DOC);
 
 	    String viewName = VIEW;
@@ -99,9 +104,16 @@ public class CouchbaseStore extends FileStore {
 		jsonDocument.put("marketplaceId", marketplaceId);
 		jsonDocument.put("metadata", contents);
 		
-		if(client.get(key) == null){
-			client.set(key, JSONValue.toJSONString(jsonDocument));
+		try {
+			if(client.get(key) == null){
+				client.set(key, JSONValue.toJSONString(jsonDocument));
+			}
+		} catch(Exception e){
+			LOGGER.severe("unable to store to couchbase: " + e.getMessage());
+			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage());
 		}
+		
+		fileStore.store(key, metadata);
 	}
 
 	@Override
@@ -111,12 +123,25 @@ public class CouchbaseStore extends FileStore {
 
 	@Override
 	public String read(String key) {
-		String jsonDocument = (String)client.get(key);
+		String metadata = null;
 		
-		@SuppressWarnings("unchecked")
-		Map<String, String> document = (HashMap<String, String>)JSONValue.parse(jsonDocument);
+		metadata = fileStore.read(key);
 		
-		return (String)document.get("metadata");
+		if(metadata == null){
+			try {
+				String jsonDocument = (String)client.get(key);
+		
+				@SuppressWarnings("unchecked")
+				Map<String, String> document = (HashMap<String, String>)JSONValue.parse(jsonDocument);
+		
+				metadata = (String)document.get("metadata");
+			} catch(Exception e){
+				LOGGER.severe("unable to read from couchbase: " + e.getMessage());
+				throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage());
+			}
+		}
+		
+		return metadata;
 	}
 
 	public List<String> updates(int limit){
@@ -125,29 +150,35 @@ public class CouchbaseStore extends FileStore {
 		
 		View view = client.getView(DESIGN_DOC, VIEW);
 		Query query = new Query();
+		query.setLimit(limit);
 		
-		if(startKey != null){
-			query.setRangeStart(startKey);
+		if(startKey != null && !startKey.equals("")){
+			query.setRangeStart(ComplexKey.of(startKey));
+			query.setSkip(1);
 		}
 		query.setIncludeDocs(true);
 		
 		List<String> documents = new ArrayList<String>();
 		
-		ViewResponse response = client.query(view, query);
-		for(ViewRow row : response) {
-			String rawDocument = (String)row.getDocument();
-			
-			@SuppressWarnings("unchecked")
-			Map<String, String> document = (HashMap<String, String>)JSONValue.parse(rawDocument);
-						
-			if(!document.get("marketplaceId").equals(marketplaceId)){
-				documents.add(document.get("metadata"));
+		try {
+			ViewResponse response = client.query(view, query);
+			for (ViewRow row : response) {
+				String rawDocument = (String) row.getDocument();
+
+				@SuppressWarnings("unchecked")
+				Map<String, String> document = (HashMap<String, String>) JSONValue
+						.parse(rawDocument);
+
+				if (!document.get("marketplaceId").equals(marketplaceId)) {
+					documents.add(document.get("metadata"));
+				}
+
+				lastKey = row.getKey();
 			}
-			
-			lastKey = row.getKey();
+			setLastKey(lastKey);
+		} catch (Exception e) {
+			LOGGER.severe("unable to retrieve updates: " + e.getMessage());
 		}
-		
-		setLastKey(lastKey);
 		
 		return documents;
 	}
@@ -174,27 +205,31 @@ public class CouchbaseStore extends FileStore {
 	}
 	
 	private void setLastKey(String lastKey){
-		Properties props = new Properties();
-		
-		FileOutputStream out = null;
-		
-		try {
-			out = new FileOutputStream(new File(lastKeyPath));
-			
-			props.setProperty("lastKey", lastKey);
-        
-			props.store(out, null);
-			MetadataFileUtils.closeReliably(out);
-		} catch (FileNotFoundException f) {
-			MetadataFileUtils.closeReliably(out);
-		} catch (IOException e) {
-			MetadataFileUtils.closeReliably(out);
+		if (!lastKey.equals("")) {
+			Properties props = new Properties();
+
+			FileOutputStream out = null;
+
+			try {
+				out = new FileOutputStream(new File(lastKeyPath));
+				props.setProperty("lastKey", lastKey);
+				props.store(out, null);
+				MetadataFileUtils.closeReliably(out);
+			} catch (FileNotFoundException f) {
+				MetadataFileUtils.closeReliably(out);
+			} catch (IOException e) {
+				MetadataFileUtils.closeReliably(out);
+			}
 		}
     }
-
+	
 	@Override
 	public void shutdown() {
-		client.shutdown();
+		if (client != null) {
+			client.shutdown();
+		} else {
+			LOGGER.warning("no connection to Couchbase");
+		}
 	}
 
 }

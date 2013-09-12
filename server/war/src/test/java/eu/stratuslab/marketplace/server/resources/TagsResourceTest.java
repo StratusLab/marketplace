@@ -29,7 +29,7 @@ public class TagsResourceTest extends ResourceTestBase {
 	public static void setUpBeforeClass() throws Exception {
 		// Create a new Component.
         Component component = new Component();
-		application = new MarketPlaceApplication("memory");
+		application = new MarketPlaceApplication("memory", "file");
 		component.getDefaultHost().attach("/", application);
 		component.getClients().add(Protocol.CLAP);
 		application.setContext(component.getDefaultHost().getContext());

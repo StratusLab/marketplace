@@ -87,7 +87,6 @@ public class MarketPlaceApplication extends Application {
     
     private final ScheduledExecutorService scheduler = Executors
             .newScheduledThreadPool(2);
-    
     private final ScheduledExecutorService couchbaseUpdater = Executors.newScheduledThreadPool(1);
     
     private ScheduledFuture<?> reminderHandle;
@@ -110,24 +109,25 @@ public class MarketPlaceApplication extends Application {
     private EndorserWhitelist whitelist;
     
     private RdfStoreUpdater rdfUpdater;
-
+   
 	private boolean invalidConfig = false;
 
 	public MarketPlaceApplication() {
 		try {		
 			String storeType = Configuration.getParameterValue(STORE_TYPE);
-			init(storeType);
+			String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
+			init(storeType, fileStoreType);
 		} catch(ExceptionInInitializerError e){
 			LOGGER.severe("incorrect configuration: " + e.getCause().getMessage());
 			invalidConfig = true;
 		}
 	}
 
-    public MarketPlaceApplication(String storeType) {
-        init(storeType);
+    public MarketPlaceApplication(String storeType, String fileStoreType) {
+        init(storeType, fileStoreType);
     }
 
-    private void init(String storeType) {
+    private void init(String storeType, String fileStoreType) {
         setName("StratusLab Marketplace");
         setDescription("Marketplace for StratusLab images");
         setOwner("StratusLab");
@@ -167,8 +167,7 @@ public class MarketPlaceApplication extends Application {
         store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
                 storeType);
         store.initialize();
-        
-        String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
+                
         if(fileStoreType.equals("file")){
         	fileStore = new FlatFileStore();
         } else if(fileStoreType.equals("couchbase")){
@@ -182,7 +181,7 @@ public class MarketPlaceApplication extends Application {
         	
         	rdfUpdater = new RdfStoreUpdater(this, fileStore);
         	couchbaseHandle = couchbaseUpdater.scheduleWithFixedDelay(couchbase, 
-        			1, 1, TimeUnit.MINUTES);
+        			1, 5, TimeUnit.MINUTES);
         }
 
         queryBuilder = new SparqlBuilder();

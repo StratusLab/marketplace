@@ -19,11 +19,10 @@ import eu.stratuslab.marketplace.server.store.file.FileStore;
 public class RdfStoreUpdater {
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 
-	private static final int LIMIT = 1000;
-	
+	private static final int LIMIT = 1000;	
 	private Application application;
-
 	private FileStore store;
+	private boolean updating = false;
 
 	public RdfStoreUpdater(Application app, FileStore fileStore) {
 		application = app;
@@ -32,17 +31,22 @@ public class RdfStoreUpdater {
 	}
 
 	public void update() {
-		List<String> documents;
+		if (!updating) {
+			LOGGER.info("update started");
+			List<String> documents;
 		
-		do {
-			documents = store.updates(LIMIT);
+			do {
+				documents = store.updates(LIMIT);
+				
+				for (String document : documents){
+					processEntry(document);
+				}
 			
-			for (String document : documents){
-				processEntry(document);
-			}
-			
-		} while (documents.size() == LIMIT);
+			} while (documents.size() == LIMIT);
 		
+			updating = false;
+			LOGGER.info("update completed");
+		}
 	}
 
 	private void processEntry(String metadata) {
@@ -62,6 +66,8 @@ public class RdfStoreUpdater {
 		if (response.getStatus().isSuccess()) {
 			resource.handle();
 		}		
+		
+		resource.release();
 	}
 
 }
