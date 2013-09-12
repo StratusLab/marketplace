@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>eu.stratuslab.marketplace</groupId>
 		<artifactId>marketplace-server</artifactId>
-		<version>13.05.1-SNAPSHOT</version>
+		<version>13.10.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -17,12 +17,6 @@
 			<groupId>eu.stratuslab.metadata</groupId>
 			<artifactId>metadata</artifactId>
 		</dependency>
-                <dependency>
-                  <groupId>couchbase</groupId>
-                  <artifactId>couchbase-client</artifactId>
-                  <version>1.1.9</version>
-                </dependency>
-
 
 		<dependency>
 			<groupId>org.restlet.jee</groupId>
@@ -91,7 +85,6 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 
 		<dependency>
@@ -113,6 +106,15 @@
 			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet.ext.ssl</artifactId>
 		</dependency>
+                <dependency>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
+                </dependency>
+                <dependency>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpcore</artifactId>
+                        <version>4.3</version>
+                </dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
@@ -123,7 +125,10 @@
 			<artifactId>servlet-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
+                <dependency>
+                        <groupId>couchbase</groupId>
+                        <artifactId>couchbase-client</artifactId>
+                </dependency>
 	</dependencies>
 
 	<build>
@@ -195,9 +200,9 @@
 					</execution>
 					<execution>
 						<phase>generate-resources</phase>
-						<id>genkey</id>
+						<id>generateKeyPair</id>
 						<goals>
-							<goal>genkey</goal>
+							<goal>generateKeyPair</goal>
 						</goals>
 					</execution>
 				</executions>
