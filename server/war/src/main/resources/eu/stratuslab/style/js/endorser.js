@@ -1,8 +1,10 @@
 $(document).ready(function() {
     $('#endorserhistory').dataTable({
     'sPaginationType':'listbox',
-    "aaSorting": [[ 1, "desc" ]]
+    "aaSorting": [[ 1, "desc" ]],
+    "oLanguage": { "sSearch": "" }
     });
+    $('#endorserhistory_filter input').attr("placeholder", "Search...");
 } );
 
 function getParameterByName(name)

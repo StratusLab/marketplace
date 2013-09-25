@@ -260,6 +260,8 @@ public enum Parameter {
     STYLE_PATH(true, "/eu/stratuslab/style/css/",
             "Path for CSS and style information."),
 
+    IMG_PATH(true, "/eu/stratuslab/style/img/", "Path for image files."),
+            
     JS_PATH(true, "/eu/stratuslab/style/js/", "Path for JavaScript files.");
 
     private final String key;

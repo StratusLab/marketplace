@@ -284,6 +284,10 @@ public class MarketPlaceApplication extends Application {
         			Configuration.getParameterValue(Parameter.JS_PATH)
         			);
 
+                attachDirectory(router, getContext(), "/img/",
+                                Configuration.getParameterValue(Parameter.IMG_PATH)
+                                );
+
         	// Unknown root pages get the home page.
         	router.attachDefault(HomeResource.class);
         }
