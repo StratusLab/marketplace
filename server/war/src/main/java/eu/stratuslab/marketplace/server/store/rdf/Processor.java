@@ -1,7 +1,4 @@
-package eu.stratuslab.marketplace.server.utils;
-
-import java.util.List;
-import java.util.logging.Logger;
+package eu.stratuslab.marketplace.server.store.rdf;
 
 import org.restlet.Application;
 import org.restlet.Request;
@@ -14,43 +11,17 @@ import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ServerResource;
 
 import eu.stratuslab.marketplace.server.resources.MDataResource;
-import eu.stratuslab.marketplace.server.store.file.FileStore;
 
-public class RdfStoreUpdater {
-	private static final Logger LOGGER = Logger.getLogger("org.restlet");
-
-	private static final int LIMIT = 1000;	
+public class Processor {
+	
 	private Application application;
-	private FileStore store;
-	private boolean updating = false;
-
-	public RdfStoreUpdater(Application app, FileStore fileStore) {
+	
+	public Processor(Application app){
 		application = app;
-		store = fileStore;
-		
 	}
-
-	public void update() {
-		if (!updating) {
-			LOGGER.info("update started");
-			List<String> documents;
-		
-			do {
-				documents = store.updates(LIMIT);
-				
-				for (String document : documents){
-					processEntry(document);
-				}
-			
-			} while (documents.size() == LIMIT);
-		
-			updating = false;
-			LOGGER.info("update completed");
-		}
-	}
-
-	private void processEntry(String metadata) {
-		Representation rdf = new StringRepresentation(metadata,
+	
+	public void processEntry(String entry) {
+		Representation rdf = new StringRepresentation(entry,
 				MediaType.APPLICATION_RDF_XML);
 		Request request = new Request(Method.POST, "http://localhost.replica");
 		request.setEntity(rdf);
@@ -69,6 +40,4 @@ public class RdfStoreUpdater {
 		
 		resource.release();
 	}
-
 }
-
