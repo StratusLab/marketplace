@@ -18,7 +18,7 @@ function buildHtmlDisplay( aData )
         var downloadLink = "";
         if(aData[8].substring(0, "http".length) == "http"){
             downloadLink = "<a href='" + aData[8]
-                        + "'><img src='/css/download.png'/></a>";
+                        + "'><img src='/img/download.png'/></a>";
         } 
 
         var display = "<table class='vmpanel'>"
@@ -130,10 +130,12 @@ $(document).ready(function() {
 		                 "aaSorting": [[6, 'desc']],
 		                 'sPaginationType': 'listbox',
 		                 "oLanguage": {
-		                	 "sSearch": "Search:"
+		                	 "sSearch": ""
 		                 },
 		"sDom": '<"top"fl<"clear">>rt<"bottom"ip<"clear">>'
 	});
+
+        $('.dataTables_filter input').attr("placeholder", "Search...");
 
         var search_timeout = undefined;
         $("#filterBy input").keyup( function (event) {

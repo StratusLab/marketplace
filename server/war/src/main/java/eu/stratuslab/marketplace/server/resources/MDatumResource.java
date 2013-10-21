@@ -175,7 +175,6 @@ public class MDatumResource extends BaseResource {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
-        
         TransformerFactory tFactory = TransformerFactory.newInstance();
 
         StringBuilder stringBuilder = new StringBuilder();

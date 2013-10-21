@@ -1,3 +1,5 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
   <meta http-equiv="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
 
@@ -30,5 +32,4 @@
 
   <link rel="shortcut icon" href="css/favicon.ico"/>
   <link rel="stylesheet" type="text/css" href="css/service.css"/>
-
 </head>

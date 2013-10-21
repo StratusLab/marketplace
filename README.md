@@ -51,8 +51,11 @@ data.dir=/var/lib/stratuslab/marketplace
 # Directory for pending (unconfirmed) entries.
 pending.dir=/var/lib/stratuslab/pending
 
-# Storage type for image metadata database (memory or native)
+# Storage type for metadata database (memory or native)
 store.type=native
+
+# Storage type for the metadata XML files (file or couchbase)
+filestore.type=file
 
 # Flag to determine if endorser email address must be validated.
 validate.email=false
@@ -80,6 +83,20 @@ mail.ssl=true
 
 # Debug mail sending (default is 'false').
 mail.debug=false
+
+# Couchbase connection settings for couchbase filestore
+
+# Bucket name
+couchbase.bucket=default
+
+# Bucket password
+couchbase.password=
+
+# List of URIs for Couchbase hosts
+couchbase.uris=http://127.0.0.1:8091/pools
+
+# Identifier for this Marketplace host
+couchbase.marketplaceid=
 
 ```
 

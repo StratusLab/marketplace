@@ -76,7 +76,8 @@ import eu.stratuslab.marketplace.server.store.file.FlatFileStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStoreFactory;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStoreFactoryImpl;
-import eu.stratuslab.marketplace.server.utils.RdfStoreUpdater;
+import eu.stratuslab.marketplace.server.store.rdf.Processor;
+import eu.stratuslab.marketplace.server.store.rdf.RdfStoreUpdater;
 import eu.stratuslab.marketplace.server.utils.EndorserWhitelist;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.Reminder;
@@ -179,7 +180,7 @@ public class MarketPlaceApplication extends Application {
             	}
             };
         	
-        	rdfUpdater = new RdfStoreUpdater(this, fileStore);
+        	rdfUpdater = new RdfStoreUpdater(fileStore, new Processor(this));
         	couchbaseHandle = couchbaseUpdater.scheduleWithFixedDelay(couchbase, 
         			1, 5, TimeUnit.MINUTES);
         }
@@ -283,6 +284,10 @@ public class MarketPlaceApplication extends Application {
         	attachDirectory(router, getContext(), "/js/", 
         			Configuration.getParameterValue(Parameter.JS_PATH)
         			);
+
+                attachDirectory(router, getContext(), "/img/",
+                                Configuration.getParameterValue(Parameter.IMG_PATH)
+                                );
 
         	// Unknown root pages get the home page.
         	router.attachDefault(HomeResource.class);
