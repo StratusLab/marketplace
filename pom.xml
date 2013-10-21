@@ -44,11 +44,11 @@ metadata.
 	<enabled>true</enabled>
       </releases>
       <snapshots>
-	<enabled>false</enabled>
+	<enabled>true</enabled>
       </snapshots>
       <id>POMReleases</id>
       <name>POM Releases</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/releases</url>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/centos-6.2-releases</url>
     </repository>
 
     <repository>
@@ -60,7 +60,7 @@ metadata.
       </snapshots>
       <id>POMSnapshots</id>
       <name>POM Snapshots</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots</url>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/centos-6.2-snapshots</url>
     </repository>
 
     <repository>
@@ -76,7 +76,7 @@ metadata.
       <dependency>
 	<groupId>eu.stratuslab.metadata</groupId>
 	<artifactId>metadata</artifactId>
-	<version>13.10.0-SNAPSHOT</version>
+	<version>13.10.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
