@@ -36,7 +36,7 @@ CN = ${FULL_HOSTNAME}
 
 [ v3_ca ]
 basicConstraints = CA:false
-nsCertType=client, email, objsign
+nsCertType=server, client, email, objsign
 keyUsage=critical, digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always,issuer:always

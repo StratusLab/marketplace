@@ -3,7 +3,7 @@
  
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>marketplace</artifactId>
-  <version>13.10.0-SNAPSHOT</version>
+  <version>13.12.0-SNAPSHOT</version>
   <name>Marketplace (POM)</name>
 
   <url>http://hudson.stratuslab.eu/marketplace</url>
@@ -20,7 +20,7 @@ metadata.
   <parent>
     <groupId>eu.stratuslab</groupId>
     <artifactId>distribution</artifactId>
-    <version>13.10.0-SNAPSHOT</version>
+    <version>13.12.0-SNAPSHOT</version>
   </parent>
 
   <modules>
@@ -35,6 +35,7 @@ metadata.
   <scm>
     <connection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
@@ -44,11 +45,11 @@ metadata.
 	<enabled>true</enabled>
       </releases>
       <snapshots>
-	<enabled>false</enabled>
+	<enabled>true</enabled>
       </snapshots>
       <id>POMReleases</id>
       <name>POM Releases</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/releases</url>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/centos-6.2-releases</url>
     </repository>
 
     <repository>
@@ -60,7 +61,7 @@ metadata.
       </snapshots>
       <id>POMSnapshots</id>
       <name>POM Snapshots</name>
-      <url>http://repo.stratuslab.eu:8081/content/repositories/snapshots</url>
+      <url>http://repo.stratuslab.eu:8081/content/repositories/centos-6.2-snapshots</url>
     </repository>
 
     <repository>
@@ -81,7 +82,7 @@ metadata.
       <dependency>
 	<groupId>eu.stratuslab.metadata</groupId>
 	<artifactId>metadata</artifactId>
-	<version>13.10.0-SNAPSHOT</version>
+	<version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

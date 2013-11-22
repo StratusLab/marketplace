@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>eu.stratuslab.marketplace</groupId>
 		<artifactId>marketplace-server</artifactId>
-		<version>13.10.0-SNAPSHOT</version>
+		<version>13.12.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
