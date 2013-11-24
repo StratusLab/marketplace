@@ -4,11 +4,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
@@ -36,11 +38,15 @@ public class MDataResourceTest extends ResourceTestBase {
 	static final Logger logger = 
 			LoggerFactory.getLogger(MDataResourceTest.class);
 	
+	private String tmpPath;
+	
 	@Before
 	public void setUpBeforeClass() throws Exception {
+		tmpPath = getTempDir("marketplace");
+		
 		// Create a new Component.
         Component component = new Component();
-		application = new MarketPlaceApplication("memory", "file");
+		application = new MarketPlaceApplication(tmpPath, "memory", "file");
 		component.getDefaultHost().attach("/", application);
 		component.getClients().add(Protocol.CLAP);
 		application.setContext(component.getDefaultHost().getContext());
@@ -50,6 +56,8 @@ public class MDataResourceTest extends ResourceTestBase {
 	@After
 	public void tearDownAfterClass() throws Exception {
 		application.stop();
+		
+		FileUtils.deleteDirectory(new File(tmpPath));
 	}
 	
 	@Test
@@ -324,5 +332,5 @@ public class MDataResourceTest extends ResourceTestBase {
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDataResource());
 	}
-
+	
 }

@@ -119,18 +119,19 @@ public class MarketPlaceApplication extends Application {
 		try {		
 			String storeType = Configuration.getParameterValue(STORE_TYPE);
 			String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
-			init(storeType, fileStoreType);
+			String dataDir = Configuration.getParameterValue(DATA_DIR);
+			init(dataDir, storeType, fileStoreType);
 		} catch(ExceptionInInitializerError e){
 			LOGGER.severe("incorrect configuration: " + e.getCause().getMessage());
 			invalidConfig = true;
 		}
 	}
 
-    public MarketPlaceApplication(String storeType, String fileStoreType) {
-        init(storeType, fileStoreType);
+    public MarketPlaceApplication(String dataDir, String storeType, String fileStoreType) {
+        init(dataDir, storeType, fileStoreType);
     }
 
-    private void init(String storeType, String fileStoreType) {
+    private void init(String dataDir, String storeType, String fileStoreType) {
         setName("StratusLab Marketplace");
         setDescription("Marketplace for StratusLab images");
         setOwner("StratusLab");
@@ -150,8 +151,9 @@ public class MarketPlaceApplication extends Application {
         setStatusService(new MarketPlaceStatusService());
 
         getTunnelService().setUserAgentTunnel(true);
-
-        dataDir = Configuration.getParameterValue(DATA_DIR);
+        
+        this.dataDir = dataDir;
+        
         boolean success = MetadataFileUtils.createIfNotExists(dataDir);
         if(!success){
         	LOGGER.severe("Unable to create directory: " + dataDir);
@@ -174,9 +176,9 @@ public class MarketPlaceApplication extends Application {
         FileStore internalStore = null;
         
         if(fileStoreType.equals("file")){
-        	internalStore = new FlatFileStore();
+        	internalStore = new FlatFileStore(dataDir);
         } else if(fileStoreType.equals("couchbase")){
-        	internalStore = new CouchbaseStore();
+        	internalStore = new CouchbaseStore(dataDir);
         }
         
         if(Configuration.getParameterValueAsBoolean(REPLICATION_ENABLED)){

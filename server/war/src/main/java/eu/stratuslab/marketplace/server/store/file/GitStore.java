@@ -7,10 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FilenameUtils;
@@ -22,12 +18,8 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 public class GitStore extends FileStore {
 
 	private FileStore fileStore;
-	private String dataDir;
 	
 	private HashMap<String, Document> localUpdates = new HashMap<String, Document>();
-	
-	private final ScheduledExecutorService repoUpdater = Executors.newScheduledThreadPool(1);
-	private ScheduledFuture<?> updaterHandle;
 	
 	private GitManager manager;
 	
@@ -36,23 +28,10 @@ public class GitStore extends FileStore {
 	private FileMonitor monitor;
 	
 	public GitStore(FileStore store) {
-		dataDir = Configuration.getParameterValue(DATA_DIR);
-		
+		String dataDir = Configuration.getParameterValue(DATA_DIR);
 		monitor = new FileMonitor(dataDir, ".xml");
-		
 		manager = new GitManager(dataDir);
-		
 		fileStore = store;
-		
-		final Runnable updater = new Runnable() {
-        	public void run() {
-        		LOGGER.info("Updating from git repository.");
-        		manager.pull();
-        	}
-        };
-        
-        updaterHandle = repoUpdater.scheduleWithFixedDelay(updater, 
-    			5, 5, TimeUnit.MINUTES);
     }
 	
 	private String getKeyFromPath(String path) {
@@ -118,7 +97,6 @@ public class GitStore extends FileStore {
 	public void shutdown() {
 		manager.close();
 		fileStore.shutdown();
-		updaterHandle.cancel(true);
 	}
 	
 }

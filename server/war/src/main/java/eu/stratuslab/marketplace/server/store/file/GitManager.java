@@ -7,6 +7,10 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.REPLICATION_TYPE;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.eclipse.jgit.api.Git;
@@ -35,6 +39,9 @@ public class GitManager {
 
 	private String gitDir;
 	
+	private final ScheduledExecutorService repoUpdater = Executors.newScheduledThreadPool(1);
+	private ScheduledFuture<?> updaterHandle;
+	
 	public GitManager(String dataDir) {
 		gitDir = dataDir;
 		
@@ -47,6 +54,16 @@ public class GitManager {
 		} else {
 			pull();
 		}
+		
+		final Runnable updater = new Runnable() {
+        	public void run() {
+        		LOGGER.info("Updating from git repository.");
+        		pull();
+        	}
+        };
+        
+        updaterHandle = repoUpdater.scheduleWithFixedDelay(updater, 
+    			5, 5, TimeUnit.MINUTES);
 	}
 	
 	void addToRepo(String key){
@@ -92,9 +109,11 @@ public class GitManager {
 		if (repository != null){
 			repository.close();
 		}
+		
+		updaterHandle.cancel(true);
 	}
 	
-	void pull() {
+	private void pull() {
 		if (repository == null)
 			openGitRepository();
 
