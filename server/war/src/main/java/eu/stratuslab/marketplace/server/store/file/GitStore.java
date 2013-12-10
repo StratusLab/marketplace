@@ -1,7 +1,5 @@
 package eu.stratuslab.marketplace.server.store.file;
 
-import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 
-import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 public class GitStore extends FileStore {
@@ -27,12 +24,17 @@ public class GitStore extends FileStore {
 	
 	private FileMonitor monitor;
 	
-	public GitStore(FileStore store) {
-		String dataDir = Configuration.getParameterValue(DATA_DIR);
+	public GitStore(String dataDir, FileStore store) {
 		monitor = new FileMonitor(dataDir, ".xml");
 		manager = new GitManager(dataDir);
 		fileStore = store;
     }
+	
+	GitStore(FileStore store, FileMonitor monitor, GitManager manager){
+		this.fileStore = store;
+		this.monitor = monitor;
+		this.manager = manager;
+	}
 	
 	private String getKeyFromPath(String path) {
 		String[] elements = path.split(File.separatorChar == '\\' ? "\\\\"
@@ -66,7 +68,7 @@ public class GitStore extends FileStore {
 	@Override
 	public List<String> updates(int limit) {
 		List<String> updates = new ArrayList<String>();
-		int i = 0;
+		int i = 1;
 
 		File file = monitor.getFile();
 
@@ -84,7 +86,7 @@ public class GitStore extends FileStore {
 					localUpdates.remove(key);
 				}
 				file = monitor.getFile();
-
+				
 			} catch (IOException e) {
 				LOGGER.severe("Unable to read file: " + e.getMessage());
 			}

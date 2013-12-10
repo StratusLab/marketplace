@@ -182,12 +182,12 @@ public class MarketPlaceApplication extends Application {
         }
         
         if(Configuration.getParameterValueAsBoolean(REPLICATION_ENABLED)){
-        	 fileStore = new GitStore(internalStore);
+        	 fileStore = new GitStore(dataDir, internalStore);
 
 
         	final Runnable update = new Runnable() {
         		public void run() {
-        			couchbaseUpdate();
+        			rdfIndexUpdate();
         		}
         	};
 
@@ -333,7 +333,7 @@ public class MarketPlaceApplication extends Application {
         expiry.expiry();
     }
     
-    private void couchbaseUpdate() {
+    private void rdfIndexUpdate() {
     	rdfUpdater.update();
     }
     
