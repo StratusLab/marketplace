@@ -3,8 +3,10 @@ package eu.stratuslab.marketplace.server.store.rdf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,12 +25,15 @@ import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 public class ProcessorTest extends ResourceTestBase {
 
 	private String classPrefix = "/eu/stratuslab/marketplace/server/resources/";
+	private static String tmpPath;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		tmpPath = getTempDir("marketplace");
+		
 		// Create a new Component.
         Component component = new Component();
-		application = new MarketPlaceApplication("memory", "file");
+		application = new MarketPlaceApplication(tmpPath, "memory", "file");
 		component.getDefaultHost().attach("/", application);
 		component.getClients().add(Protocol.CLAP);
 		application.setContext(component.getDefaultHost().getContext());
@@ -38,6 +43,8 @@ public class ProcessorTest extends ResourceTestBase {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		application.stop();
+		
+		FileUtils.deleteDirectory(new File(tmpPath));
 	}
 	
 	@Test
@@ -60,5 +67,5 @@ public class ProcessorTest extends ResourceTestBase {
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDataResource());
 	}
-	
+
 }

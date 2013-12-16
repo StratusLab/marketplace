@@ -130,6 +130,11 @@
                         <artifactId>couchbase-client</artifactId>
                 </dependency>
                 <dependency>
+                  <groupId>org.eclipse.jgit</groupId>
+                  <artifactId>org.eclipse.jgit</artifactId>
+                  <version>3.1.0.201310021548-r</version>
+                </dependency>
+                <dependency>
                 	<groupId>org.easymock</groupId>
                		<artifactId>easymock</artifactId>
                 	<version>3.2</version>

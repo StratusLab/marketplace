@@ -94,7 +94,7 @@ public enum Parameter {
     },
     
     FILESTORE_TYPE(true, "file",
-    "Storage type for image metadata files (file or couchbase)") {
+    "Storage type for image metadata files (file, couchbase)") {
     	@Override
     	public void validate(String value) {
     		super.validate(value);
@@ -105,6 +105,10 @@ public enum Parameter {
     	}
     },
 
+    GIT_URI(false, "URI of Git repository"),
+    GIT_USER(false, "User credential for Git repository"),
+    GIT_PASSWORD(false, "Password credential for Git repository"),
+    
     PENDING_DIR(true, "/var/lib/stratuslab/pending",
             "Directory for pending (unconfirmed) entries.") {
         @Override
@@ -150,7 +154,27 @@ public enum Parameter {
     RDBMS_DBUSER(false, "sesame", "RDBMS username."),
 
     RDBMS_DBPASS(false, "sesame", "RDBMS password."),
+    
+    REPLICATION_ENABLED(false, "false", "Enable replication.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            isBoolean(value);
+        }
+    },
 
+    REPLICATION_TYPE(false, "public",
+    "Type of replication (public, private)") {
+    	@Override
+    	public void validate(String value) {
+    		super.validate(value);
+    		if (!("public".equals(value) || "private".equals(value))) {
+    			throw new IllegalArgumentException(getKey()
+    					+ " must be 'public' or 'private'");
+    		}
+    	}
+    },
+    
     ADMIN_EMAIL(true, "Email address for account approvals, etc.") {
         @Override
         public void validate(String value) {

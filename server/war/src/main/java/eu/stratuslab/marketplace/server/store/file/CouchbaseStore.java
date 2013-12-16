@@ -4,7 +4,6 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.COUCHBASE_BUCKET;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.COUCHBASE_PASSWORD;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.COUCHBASE_URIS;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.COUCHBASE_MARKETPLACEID;
-import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,21 +46,19 @@ public class CouchbaseStore extends FileStore {
 	
 	CouchbaseClient client = null;
 	private String marketplaceId;
-	private String dataDir;
 	private String lastKeyPath;
 	
 	private FileStore fileStore;
 	
 	
-	public CouchbaseStore(){
+	public CouchbaseStore(String dataDir){
 		String bucket = Configuration.getParameterValue(COUCHBASE_BUCKET);
 		String password = Configuration.getParameterValue(COUCHBASE_PASSWORD);
 		marketplaceId = Configuration.getParameterValue(COUCHBASE_MARKETPLACEID);
-		dataDir = Configuration.getParameterValue(DATA_DIR);
 		
 		lastKeyPath = dataDir + File.separator + ".lastkey";
 		
-		fileStore = new FlatFileStore();
+		fileStore = new FlatFileStore(dataDir);
 		
 		String[] uris = Configuration.getParameterValue(COUCHBASE_URIS).split("\\s+");
 		

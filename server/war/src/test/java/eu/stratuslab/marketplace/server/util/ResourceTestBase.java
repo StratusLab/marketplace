@@ -1,6 +1,7 @@
 package eu.stratuslab.marketplace.server.util;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.apache.commons.io.FileUtils;
 import org.restlet.Application;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -152,5 +154,28 @@ public class ResourceTestBase {
 			}
 		}
 	}
+	
+	public static String getTempDir(String prefix)
+		    throws IOException
+		  {
+		    String tmpDirStr = FileUtils.getTempDirectoryPath();
+		     
+		    File resultDir = null;
+		    int suffix = (int)System.currentTimeMillis();
+		    int failureCount = 0;
+		    do {
+		      resultDir = new File(tmpDirStr, prefix + suffix % 10000);
+		      suffix++;
+		      failureCount++;
+		    }
+		    while (resultDir.exists() && failureCount < 50);
+		    
+		    if (resultDir.exists()) {
+		      throw new IOException(failureCount + 
+		        " attempts to generate a non-existent directory name failed, giving up");
+		    }
+		    
+		    return resultDir.getCanonicalPath();
+		  }
 	
 }

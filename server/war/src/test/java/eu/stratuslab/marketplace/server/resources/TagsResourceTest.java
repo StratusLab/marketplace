@@ -4,8 +4,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,11 +27,15 @@ public class TagsResourceTest extends ResourceTestBase {
 	String email;
 	String tag;
 	
+	static String tmpDir;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		tmpDir = getTempDir("marketplace");
+		
 		// Create a new Component.
         Component component = new Component();
-		application = new MarketPlaceApplication("memory", "file");
+		application = new MarketPlaceApplication(tmpDir, "memory", "file");
 		component.getDefaultHost().attach("/", application);
 		component.getClients().add(Protocol.CLAP);
 		application.setContext(component.getDefaultHost().getContext());
@@ -39,6 +45,8 @@ public class TagsResourceTest extends ResourceTestBase {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		application.stop();
+		
+		FileUtils.deleteDirectory(new File(tmpDir));
 	}
 	
 	@Before 

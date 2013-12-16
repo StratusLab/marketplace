@@ -30,10 +30,7 @@ import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.metadata.MetadataUtils;
-import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
-
-import static eu.stratuslab.marketplace.server.cfg.Parameter.DATA_DIR;
 
 public class FlatFileStore extends FileStore {
 	
@@ -41,8 +38,8 @@ public class FlatFileStore extends FileStore {
 	
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
-	public FlatFileStore(){
-		dataDir = Configuration.getParameterValue(DATA_DIR);
+	public FlatFileStore(String dataDir){
+		this.dataDir = dataDir;
 		MetadataFileUtils.createIfNotExists(dataDir);
 	}
 	

@@ -24,6 +24,7 @@ import static eu.stratuslab.marketplace.server.cfg.Parameter.ENDORSER_REMINDER;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.PENDING_DIR;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.STORE_TYPE;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.FILESTORE_TYPE;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.REPLICATION_ENABLED;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -73,6 +74,7 @@ import eu.stratuslab.marketplace.server.routers.ActionRouter;
 import eu.stratuslab.marketplace.server.store.file.CouchbaseStore;
 import eu.stratuslab.marketplace.server.store.file.FileStore;
 import eu.stratuslab.marketplace.server.store.file.FlatFileStore;
+import eu.stratuslab.marketplace.server.store.file.GitStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStoreFactory;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStoreFactoryImpl;
@@ -88,10 +90,10 @@ public class MarketPlaceApplication extends Application {
     
     private final ScheduledExecutorService scheduler = Executors
             .newScheduledThreadPool(2);
-    private final ScheduledExecutorService couchbaseUpdater = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService indexUpdater = Executors.newScheduledThreadPool(1);
     
     private ScheduledFuture<?> reminderHandle;
-    private ScheduledFuture<?> couchbaseHandle;
+    private ScheduledFuture<?> indexUpdateHandle;
 
     private static final int REMINDER_INTERVAL = 30;
     private static final int EXPIRY_INTERVAL = 1;
@@ -117,18 +119,19 @@ public class MarketPlaceApplication extends Application {
 		try {		
 			String storeType = Configuration.getParameterValue(STORE_TYPE);
 			String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
-			init(storeType, fileStoreType);
+			String dataDir = Configuration.getParameterValue(DATA_DIR);
+			init(dataDir, storeType, fileStoreType);
 		} catch(ExceptionInInitializerError e){
 			LOGGER.severe("incorrect configuration: " + e.getCause().getMessage());
 			invalidConfig = true;
 		}
 	}
 
-    public MarketPlaceApplication(String storeType, String fileStoreType) {
-        init(storeType, fileStoreType);
+    public MarketPlaceApplication(String dataDir, String storeType, String fileStoreType) {
+        init(dataDir, storeType, fileStoreType);
     }
 
-    private void init(String storeType, String fileStoreType) {
+    private void init(String dataDir, String storeType, String fileStoreType) {
         setName("StratusLab Marketplace");
         setDescription("Marketplace for StratusLab images");
         setOwner("StratusLab");
@@ -148,8 +151,9 @@ public class MarketPlaceApplication extends Application {
         setStatusService(new MarketPlaceStatusService());
 
         getTunnelService().setUserAgentTunnel(true);
-
-        dataDir = Configuration.getParameterValue(DATA_DIR);
+        
+        this.dataDir = dataDir;
+        
         boolean success = MetadataFileUtils.createIfNotExists(dataDir);
         if(!success){
         	LOGGER.severe("Unable to create directory: " + dataDir);
@@ -168,21 +172,30 @@ public class MarketPlaceApplication extends Application {
         store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
                 storeType);
         store.initialize();
-                
+               
+        FileStore internalStore = null;
+        
         if(fileStoreType.equals("file")){
-        	fileStore = new FlatFileStore();
+        	internalStore = new FlatFileStore(dataDir);
         } else if(fileStoreType.equals("couchbase")){
-        	fileStore = new CouchbaseStore();
-        	
-        	final Runnable couchbase = new Runnable() {
-            	public void run() {
-            		couchbaseUpdate();
-            	}
-            };
-        	
+        	internalStore = new CouchbaseStore(dataDir);
+        }
+        
+        if(Configuration.getParameterValueAsBoolean(REPLICATION_ENABLED)){
+        	 fileStore = new GitStore(dataDir, internalStore);
+
+
+        	final Runnable update = new Runnable() {
+        		public void run() {
+        			rdfIndexUpdate();
+        		}
+        	};
+
         	rdfUpdater = new RdfStoreUpdater(fileStore, new Processor(this));
-        	couchbaseHandle = couchbaseUpdater.scheduleWithFixedDelay(couchbase, 
+        	indexUpdateHandle = indexUpdater.scheduleWithFixedDelay(update, 
         			1, 5, TimeUnit.MINUTES);
+        } else {
+        	fileStore = internalStore;
         }
 
         queryBuilder = new SparqlBuilder();
@@ -320,7 +333,7 @@ public class MarketPlaceApplication extends Application {
         expiry.expiry();
     }
     
-    private void couchbaseUpdate() {
+    private void rdfIndexUpdate() {
     	rdfUpdater.update();
     }
     
@@ -338,8 +351,8 @@ public class MarketPlaceApplication extends Application {
             reminderHandle.cancel(true);
         }
         
-        if(couchbaseHandle != null){
-        	couchbaseHandle.cancel(true);
+        if(indexUpdateHandle != null){
+        	indexUpdateHandle.cancel(true);
         }
     }
 
