@@ -54,9 +54,6 @@ pending.dir=/var/lib/stratuslab/pending
 # Storage type for metadata database (memory or native)
 store.type=native
 
-# Storage type for the metadata XML files (file or couchbase)
-filestore.type=file
-
 # Flag to determine if endorser email address must be validated.
 validate.email=false
 
@@ -84,20 +81,26 @@ mail.ssl=true
 # Debug mail sending (default is 'false').
 mail.debug=false
 
-# Couchbase connection settings for couchbase filestore
+```
 
-# Bucket name
-couchbase.bucket=default
+Replication settings
+---------------------
 
-# Bucket password
-couchbase.password=
+The Marketplace can be configured to allow for replication. This is done through a central Git repository. 
 
-# List of URIs for Couchbase hosts
-couchbase.uris=http://127.0.0.1:8091/pools
+```
+replication.enabled=true|false
+replication.type=public|private
+```
 
-# Identifier for this Marketplace host
-couchbase.marketplaceid=
+With replication enabled the Marketplace will periodically pull metadata files from the configured Git repository in order to update its internal index. If the replication type is set to public, metadata files uploaded to the Marketplace will be pushed to the Git repository. With private replication the files will not be pushed, and will only be available locally.
 
+The following settings are used to configure the Git repository to use.
+
+```
+git.uri=https://github.com/repo/metadata.git
+git.user=
+git.password=
 ```
 
 Starting the service
