@@ -3,6 +3,9 @@ package eu.stratuslab.marketplace.server.store.file;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.GIT_URI;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.GIT_PASSWORD;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.GIT_USER;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.GIT_KEY;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.GIT_KEY_PASSPHRASE;
+import static eu.stratuslab.marketplace.server.cfg.Parameter.GIT_KNOWN_HOSTS;
 import static eu.stratuslab.marketplace.server.cfg.Parameter.REPLICATION_TYPE;
 
 import java.io.File;
@@ -13,8 +16,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.GitCommand;
+import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
@@ -22,9 +29,22 @@ import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialItem;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.CredentialsProviderUserInfo;
+import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.jgit.transport.OpenSshConfig;
+import org.eclipse.jgit.transport.SshSessionFactory;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
 
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 
@@ -36,8 +56,13 @@ public class GitManager {
 	
 	private String gitUser;
 	private String gitPassword;
-
+	private String gitKey;
+	private String gitKeyPass;
+	private String gitKnownHosts;
+	
 	private String gitDir;
+	
+	private boolean keyAuth = false;
 	
 	private final ScheduledExecutorService repoUpdater = Executors.newScheduledThreadPool(1);
 	private ScheduledFuture<?> updaterHandle;
@@ -47,6 +72,16 @@ public class GitManager {
 		
 		gitUser = Configuration.getParameterValue(GIT_USER);
 		gitPassword = Configuration.getParameterValue(GIT_PASSWORD);
+		
+		if (gitUser == null || gitPassword == null){
+			keyAuth = true;
+		
+			gitKey = Configuration.getParameterValue(GIT_KEY);
+			gitKeyPass = Configuration.getParameterValue(GIT_KEY_PASSPHRASE);
+			gitKnownHosts = Configuration.getParameterValue(GIT_KNOWN_HOSTS);
+			
+			initKeyAuth();
+		}
 		
 		if (!isGitRepository(new File(dataDir + File.separator + ".git"))) {
 			LOGGER.warning("No git repository found.");
@@ -66,8 +101,46 @@ public class GitManager {
     			5, 5, TimeUnit.MINUTES);
 	}
 	
+	private void initKeyAuth() {
+		JSch jsch = new JSch();
+	    try {
+	        jsch.addIdentity(gitKey);
+	        jsch.setKnownHosts(gitKnownHosts);
+	    } catch (JSchException e) {
+	        LOGGER.severe("Error configuring git key authentication: " + e.getMessage());  
+	    }
+	    JschConfigSessionFactory sessionFactory = new JschConfigSessionFactory() {
+	    	@Override
+	    	protected void configure(OpenSshConfig.Host hc, Session session) {
+	    	    CredentialsProvider provider = new CredentialsProvider() {
+	    	        @Override
+	    	        public boolean isInteractive() {
+	    	            return false;
+	    	        }
+
+	    	        @Override
+	    	        public boolean supports(CredentialItem... items) {
+	    	            return true;
+	    	        }
+
+	    	        @Override
+	    	        public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
+	    	            for (CredentialItem item : items) {
+	    	                ((CredentialItem.StringType) item).setValue(gitKeyPass);
+	    	            }
+	    	            return true;
+	    	        }
+	    	    };
+	    	    UserInfo userInfo = new CredentialsProviderUserInfo(session, provider);
+	    	    session.setUserInfo(userInfo);
+	    	}
+	    	};
+	    SshSessionFactory.setInstance(sessionFactory);
+	}
+	
 	void addToRepo(String key){
 		try {
+			
 			if (repository == null)
 				openGitRepository();
 			
@@ -76,9 +149,12 @@ public class GitManager {
 			.addFilepattern(key + ".xml")
 			.call();
 			
-			commit("Added " + key);
+			Status status = git.status().call();
+			if(!status.getAdded().isEmpty()){
+				commit("Added " + key);
+				push();
+			}
 			
-			push();
 		} catch (NoFilepatternException e) {
 			LOGGER.warning("Unable to add file to git repository");
 		} catch (GitAPIException e) {
@@ -118,8 +194,12 @@ public class GitManager {
 			openGitRepository();
 
 		Git git = new Git(repository);
-		GitCommand<?> pull = git.pull().setCredentialsProvider(
+		PullCommand pull = git.pull();
+		
+		if(!keyAuth){
+			pull.setCredentialsProvider(
 				new UsernamePasswordCredentialsProvider(gitUser, gitPassword));
+		}
 		GitRunner runner = new GitRunner(pull);
 		runner.start();
 	}
@@ -132,12 +212,16 @@ public class GitManager {
 	}
 	
 	private void cloneRepository() {
-		GitCommand<Git> command = Git
+		LOGGER.info("Cloning repo");
+		CloneCommand command = Git
 				.cloneRepository()
-				.setURI(Configuration.getParameterValue(GIT_URI))
-				.setCredentialsProvider(
+				.setURI(Configuration.getParameterValue(GIT_URI)).setDirectory(new File(gitDir));
+		
+		if(!keyAuth){
+				command.setCredentialsProvider(
 						new UsernamePasswordCredentialsProvider(gitUser,
-								gitPassword)).setDirectory(new File(gitDir));
+						gitPassword));
+		}
 
 		GitRunner runner = new GitRunner(command);
 		runner.start();
@@ -185,9 +269,14 @@ public class GitManager {
 				openGitRepository();
 
 			Git git = new Git(repository);
-			GitCommand<?> command = git.push().setCredentialsProvider(
-					new UsernamePasswordCredentialsProvider(gitUser,
-							gitPassword));
+			PushCommand command = git.push();
+			
+			if(!keyAuth) {
+				command.setCredentialsProvider(
+						new UsernamePasswordCredentialsProvider(gitUser,
+						gitPassword));
+			}
+			
 			GitRunner runner = new GitRunner(command);
 			runner.start();
 		}

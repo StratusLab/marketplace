@@ -105,8 +105,16 @@ public enum Parameter {
     	}
     },
 
+    GIT_KEY(false, "Private key for accessing Git repository"),
+    
+    GIT_KEY_PASSPHRASE(false, "Private key passphrase"),
+    
+    GIT_KNOWN_HOSTS(false, "Known hosts file"),
+    
     GIT_URI(false, "URI of Git repository"),
+    
     GIT_USER(false, "User credential for Git repository"),
+    
     GIT_PASSWORD(false, "Password credential for Git repository"),
     
     PENDING_DIR(true, "/var/lib/stratuslab/pending",
