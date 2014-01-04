@@ -34,6 +34,11 @@
         <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
       </Array>
     </Set>
+    <Set name="ExcludeProtocols">
+      <Array type="String">
+        <Item>SSLv2Hello</Item>
+      </Array>
+    </Set>
   </New>
 
   <!-- =========================================================== -->
