@@ -40,6 +40,15 @@ An important step is to ensure that the two directories data.dir and pending.dir
 
 By default the Marketplace will use a Memory store as the backend. This type of store is volatile, and any uploaded metadata will not persist if the Marketplace is restarted. For this reason, for use in a production environment the Marketplace should be configured to use a Native store as the storage backend.
 
+Starting the service
+---------------------
+
+The Marketplace can be started with the following command:
+
+/etc/init.d/marketplace start
+
+This will start the Jetty server. By default this will start on port 8081, meaning the Marketplace can be accessed on http://localhost:8081. The port can be changed by modifying the file /opt/stratuslab/marketplace/etc/jetty-stratuslab.xml.
+
 Configuration reference
 ------------------------
 
@@ -95,22 +104,24 @@ replication.type=public|private
 
 With replication enabled the Marketplace will periodically pull metadata files from the configured Git repository in order to update its internal index. If the replication type is set to public, metadata files uploaded to the Marketplace will be pushed to the Git repository. With private replication the files will not be pushed, and will only be available locally.
 
-The following settings are used to configure the Git repository to use.
+The Git repository to use is set with the following property:
 
 ```
 git.uri=https://github.com/repo/metadata.git
+```
+
+Authentication with the Git repository can be either by username and password or SSH key. For username/password set:
+```
 git.user=
 git.password=
 ```
 
-Starting the service
----------------------
-
-The Marketplace can be started with the following command:
-
-/etc/init.d/marketplace start
-
-This will start the Jetty server. By default this will start on port 8081, meaning the Marketplace can be accessed on http://localhost:8081. The port can be changed by modifying the file /opt/stratuslab/marketplace/etc/jetty-stratuslab.xml.
+For SSH key authentication use:
+```
+git.key=
+git.key.passphrase=
+git.known.hosts=
+```
 
 Email verification
 -------------------

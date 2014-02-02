@@ -117,7 +117,7 @@
             Jetty packaging that includes StratusLab Marketplace Server. 
           </description>
           <requires>
-            <require>java-1.6.0-openjdk</require>
+            <require>java-1.7.0-openjdk</require>
           </requires>
           <mappings>
 
