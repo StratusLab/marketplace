@@ -5,7 +5,7 @@
 # To get the service to restart correctly on reboot, uncomment below (3 lines):
 # ========================
 # chkconfig: 3 99 99
-# description: Jetty 7 webserver
+# description: Jetty 9 webserver
 # processname: jetty
 # ========================
 
@@ -50,9 +50,9 @@
 #   and /opt/jetty. The java system property "jetty.home" will be
 #   set to this value for use by configure.xml files, f.e.:
 #
-#    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty.war</Arg>
+#    <Arg><Property name="jetty.home" default="."/>/webapps/jetty.war</Arg>
 #
-# JETTY_PORT
+# JETTY_PORT (Deprecated - use JETTY_ARGS)
 #   Override the default port for Jetty servers. If not set then the
 #   default value in the xml configuration file will be used. The java
 #   system property "jetty.port" will be set to this value for use in
@@ -60,7 +60,7 @@
 #   used in the demo config files to respect this property in Listener
 #   configuration elements:
 #
-#    <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
+#    <Set name="Port"><Property name="jetty.port" default="8080"/></Set>
 #
 #   Note: that the config file could ignore this property simply by saying:
 #
@@ -68,13 +68,16 @@
 #
 # JETTY_RUN
 #   Where the jetty.pid file should be stored. It defaults to the
-#   first available of /var/run, /usr/var/run, and /tmp if not set.
+#   first available of /var/run, /usr/var/run, JETTY_HOME and /tmp 
+#   if not set.
 #  
 # JETTY_PID
 #   The Jetty PID file, defaults to $JETTY_RUN/jetty.pid
 #   
 # JETTY_ARGS
 #   The default arguments to pass to jetty.
+#   For example
+#      JETTY_ARGS=jetty.port=8080 jetty.spdy.port=8443 jetty.secure.port=443
 #
 # JETTY_USER
 #   if set, then used as a username to run the server as
@@ -82,7 +85,7 @@
 
 usage()
 {
-    echo "Usage: ${0##*/} [-d] {start|stop|run|restart|check|status|supervise} [ CONFIGS ... ] "
+    echo "Usage: ${0##*/} [-d] {start|stop|run|restart|check|supervise} [ CONFIGS ... ] "
     exit 1
 }
 
@@ -108,6 +111,24 @@ running()
   local PID=$(cat "$1" 2>/dev/null) || return 1
   kill -0 "$PID" 2>/dev/null
 }
+
+started()
+{
+  # wait for 60s to see "STARTED" in PID file, needs jetty-started.xml as argument
+  for T in 1 2 3 4 5 6 7 9 10 11 12 13 14 15 
+  do
+    sleep 4
+    [ -z "$(grep STARTED $1 2>/dev/null)" ] || return 0
+    [ -z "$(grep STOPPED $1 2>/dev/null)" ] || return 1
+    [ -z "$(grep FAILED $1 2>/dev/null)" ] || return 1
+    local PID=$(cat "$2" 2>/dev/null) || return 1
+    kill -0 "$PID" 2>/dev/null || return 1
+    echo -n ". "
+  done
+
+  return 1;
+}
+
 
 readConfig()
 {
@@ -136,7 +157,13 @@ shift
 ##################################################
 # Read any configuration files
 ##################################################
-for CONFIG in /etc/default/jetty{,7} $HOME/.jettyrc; do
+ETC=/etc
+if [ $UID != 0 ]
+then 
+  ETC=$HOME/etc
+fi
+
+for CONFIG in $ETC/default/marketplace $HOME/.jettyrc; do
   if [ -f "$CONFIG" ] ; then 
     readConfig "$CONFIG"
   fi
@@ -162,13 +189,15 @@ if [ -z "$JETTY_HOME" ]
 then
   JETTY_SH=$0
   case "$JETTY_SH" in
-    /*)   ;;
-    ./*)  ;;
-    *)    JETTY_SH=./$JETTY_SH ;;
+    /*)     JETTY_HOME=${JETTY_SH%/*/*} ;;
+    ./*/*)  JETTY_HOME=${JETTY_SH%/*/*} ;;
+    ./*)    JETTY_HOME=.. ;;
+    */*/*)  JETTY_HOME=./${JETTY_SH%/*/*} ;;
+    */*)    JETTY_HOME=. ;;
+    *)      JETTY_HOME=.. ;;
   esac
-  JETTY_HOME=${JETTY_SH%/*/*}
 
-  if [ ! -f "${JETTY_SH%/*/*}/$JETTY_INSTALL_TRACE_FILE" ]
+  if [ ! -f "$JETTY_HOME/$JETTY_INSTALL_TRACE_FILE" ]
   then 
     JETTY_HOME=
   fi
@@ -181,9 +210,28 @@ fi
 if [ -z "$JETTY_HOME" ] ; then
   STANDARD_LOCATIONS=(
         "/opt/stratuslab"
+        "/usr/share"
+        "/usr/share/java"
+        "${HOME}"
+        "${HOME}/src"
+        "${HOME}/opt"
+        "/opt"
+        "/java"
+        "/usr/local"
+        "/usr/local/share"
+        "/usr/local/share/java"
+        "/home"
         )
   JETTY_DIR_NAMES=(
         "marketplace"
+        "jetty-9"
+        "jetty9"
+        "jetty-9.*"
+        "jetty"
+        "Jetty-9"
+        "Jetty9"
+        "Jetty-9.*"
+        "Jetty"
         )
         
   for L in "${STANDARD_LOCATIONS[@]}"
@@ -245,9 +293,9 @@ fi
 ##################################################
 if [ -z "$JETTY_CONF" ] 
 then
-  if [ -f /etc/jetty.conf ]
+  if [ -f $ETC/jetty.conf ]
   then
-    JETTY_CONF=/etc/jetty.conf
+    JETTY_CONF=$ETC/jetty.conf
   elif [ -f "$JETTY_HOME/etc/jetty.conf" ]
   then
     JETTY_CONF=$JETTY_HOME/etc/jetty.conf
@@ -270,13 +318,13 @@ then
       # assume it's a directory with configure.xml files
       # for example: /etc/jetty.d/
       # sort the files before adding them to the list of CONFIGS
-      for file in "$CONF/"*.xml
+      for XMLFILE in "$CONF/"*.xml
       do
-        if [ -r "$FILE" ] && [ -f "$FILE" ] 
+        if [ -r "$XMLFILE" ] && [ -f "$XMLFILE" ] 
         then
-          CONFIGS+=("$FILE")
+          CONFIGS+=("$XMLFILE")
         else
-          echo "** WARNING: Cannot read '$FILE' specified in '$JETTY_CONF'" 
+          echo "** WARNING: Cannot read '$XMLFILE' specified in '$JETTY_CONF'" 
         fi
       done
     else
@@ -291,16 +339,23 @@ fi
 #####################################################
 if [ -z "$JETTY_RUN" ] 
 then
-  JETTY_RUN=$(findDirectory -w /var/run /usr/var/run /tmp)
+  JETTY_RUN=$(findDirectory -w /var/run /usr/var/run $JETTY_HOME /tmp)
 fi
 
 #####################################################
-# Find a PID for the pid file
+# Find a pid and state file
 #####################################################
 if [ -z "$JETTY_PID" ] 
 then
-  JETTY_PID="$JETTY_RUN/marketplace.pid"
+  JETTY_PID="$JETTY_RUN/jetty.pid"
 fi
+
+if [ -z "$JETTY_STATE" ] 
+then
+  JETTY_STATE=$JETTY_HOME/jetty.state
+fi
+JAVA_OPTIONS+=("-Djetty.state=$JETTY_STATE")
+rm -f $JETTY_STATE
 
 ##################################################
 # Setup JAVA if unset
@@ -321,7 +376,7 @@ fi
 #####################################################
 if [ "$JETTY_PORT" ] 
 then
-  JAVA_OPTIONS+=("-Djetty.port=$JETTY_PORT")
+  JETTY_ARGS+=("jetty.port=$JETTY_PORT")
 fi
 
 #####################################################
@@ -369,8 +424,8 @@ if (( DEBUG ))
 then
   echo "JETTY_HOME     =  $JETTY_HOME"
   echo "JETTY_CONF     =  $JETTY_CONF"
-  echo "JETTY_RUN      =  $JETTY_RUN"
   echo "JETTY_PID      =  $JETTY_PID"
+  echo "JETTY_START    =  $JETTY_START"
   echo "JETTY_ARGS     =  $JETTY_ARGS"
   echo "CONFIGS        =  ${CONFIGS[*]}"
   echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
@@ -390,25 +445,15 @@ case "$ACTION" in
       exit
     fi
 
-    $JETTY_HOME/etc/generate-jetty-certificate.sh
-
-    if type start-stop-daemon > /dev/null 2>&1 
+    if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1 
     then
       unset CH_USER
       if [ -n "$JETTY_USER" ]
       then
         CH_USER="-c$JETTY_USER"
       fi
-      if start-stop-daemon -S -p"$JETTY_PID" $CH_USER -d"$JETTY_HOME" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" --daemon
-      then
-        sleep 1
-        if running "$JETTY_PID"
-        then
-          echo "OK"
-        else
-          echo "FAILED"
-        fi
-      fi
+
+      start-stop-daemon -S -p"$JETTY_PID" $CH_USER -d"$JETTY_HOME" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" --daemon
 
     else
 
@@ -430,7 +475,7 @@ case "$ACTION" in
         chown "$JETTY_USER" "$JETTY_PID"
         # FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         su - "$JETTY_USER" -c "
-          ${RUN_CMD[*]} --daemon &
+          exec ${RUN_CMD[*]} --daemon &
           disown \$!
           echo \$! > '$JETTY_PID'"
       else
@@ -439,14 +484,25 @@ case "$ACTION" in
         echo $! > "$JETTY_PID"
       fi
 
-      echo "STARTED Jetty `date`" 
+    fi
+
+    if expr "${CONFIGS[*]}" : '.*etc/jetty-started.xml.*' >/dev/null
+    then
+      if started "$JETTY_STATE" "$JETTY_PID"
+      then
+        echo "OK `date`"
+      else
+        echo "FAILED `date`"
+      fi
+    else
+      echo "ok `date`"
     fi
 
     ;;
 
   stop)
     echo -n "Stopping Jetty: "
-    if type start-stop-daemon > /dev/null 2>&1; then
+    if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1; then
       start-stop-daemon -K -p"$JETTY_PID" -d"$JETTY_HOME" -a "$JAVA" -s HUP
       
       TIMEOUT=30
@@ -519,28 +575,27 @@ case "$ACTION" in
     fi
 
     exec "${RUN_CMD[@]}"
-
     ;;
 
   check|status)
     echo "Checking arguments to Jetty: "
+    echo "START_INI      =  $START_INI"
     echo "JETTY_HOME     =  $JETTY_HOME"
     echo "JETTY_CONF     =  $JETTY_CONF"
-    echo "JETTY_RUN      =  $JETTY_RUN"
     echo "JETTY_PID      =  $JETTY_PID"
-    echo "JETTY_PORT     =  $JETTY_PORT"
+    echo "JETTY_START    =  $JETTY_START"
     echo "JETTY_LOGS     =  $JETTY_LOGS"
-    echo "START_INI      =  $START_INI"
     echo "CONFIGS        =  ${CONFIGS[*]}"
-    echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
-    echo "JAVA           =  $JAVA"
     echo "CLASSPATH      =  $CLASSPATH"
+    echo "JAVA           =  $JAVA"
+    echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
+    echo "JETTY_ARGS     =  $JETTY_ARGS"
     echo "RUN_CMD        =  ${RUN_CMD[*]}"
     echo
     
-    if [ -f "$JETTY_RUN/marketplace.pid" ]
+    if [ -f "$JETTY_PID" ]
     then
-      echo "Jetty running pid=$(< "$JETTY_RUN/marketplace.pid")"
+      echo "Jetty running pid=$(< "$JETTY_PID")"
       exit 0
     fi
     exit 1
