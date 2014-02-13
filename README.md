@@ -13,7 +13,7 @@ with the descriptions of the virtual appliances.
 System Requirements
 -------------------
 
-The only requirement is JDK v1.6+. As such the Marketplace should install on most systems, once this dependency is met.
+The only requirement is JDK v1.7+. As such the Marketplace should install on most systems, once this dependency is met.
 
 The metadata files and searchable metadata index, are stored locally as flat files. The Marketplace host should have adequate storage for these.
 
