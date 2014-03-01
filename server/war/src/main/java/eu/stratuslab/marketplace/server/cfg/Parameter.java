@@ -249,6 +249,19 @@ public enum Parameter {
         }
     },
     
+    SOLR_URL(true, "Solr server URL.") {
+        @Override
+        public void validate(String value) {
+            super.validate(value);
+            try {
+                new URL(value);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("invalid solr URL: "
+                        + value, e);
+            }
+        }
+    },
+    
     SUPPORT_EMAIL(true, "Email address for support requests.") {
         @Override
         public void validate(String value) {
