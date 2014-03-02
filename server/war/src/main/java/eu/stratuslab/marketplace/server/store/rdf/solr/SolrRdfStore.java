@@ -12,22 +12,35 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.OS_ARCH;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.DEPRECATED;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.LOCATION;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.VALID;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.KIND;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.ALTERNATIVE;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.TITLE;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
+import eu.stratuslab.marketplace.server.utils.MarketplaceUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
@@ -39,8 +52,7 @@ public class SolrRdfStore extends RdfStore {
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
-		
+		solr.shutdown();
 	}
 
 	@Override
@@ -57,48 +69,123 @@ public class SolrRdfStore extends RdfStore {
 		SolrInputDocument document = new SolrInputDocument();
 		document.addField("id", identifier);
 		document.addField("identifier", XPathUtils.getValue(rdfDoc, IDENTIFIER_ELEMENT));
+		document.addField("title", XPathUtils.getValue(rdfDoc, TITLE));
 		document.addField("email", XPathUtils.getValue(rdfDoc, EMAIL));
 		document.addField("created", XPathUtils.getValue(rdfDoc, CREATED_DATE));
 		document.addField("description", XPathUtils.getValue(rdfDoc, DESCRIPTION));
 		document.addField("os", XPathUtils.getValue(rdfDoc, OS));
 		document.addField("osversion", XPathUtils.getValue(rdfDoc, OS_VERSION));
-		document.addField("osarch", XPathUtils.getValue(rdfDoc, OS_ARCH));
+		document.addField("arch", XPathUtils.getValue(rdfDoc, OS_ARCH));
 		document.addField("valid", XPathUtils.getValue(rdfDoc, VALID));
+		document.addField("kind", XPathUtils.getValue(rdfDoc, KIND));
 		document.addField("deprecated", XPathUtils.getValue(rdfDoc, DEPRECATED));
 		document.addField("location", XPathUtils.getValue(rdfDoc, LOCATION));
 		document.addField("alternative", XPathUtils.getValue(rdfDoc, ALTERNATIVE));
 		
-		try {
-			solr.add(document);
-			solr.commit();
-		} catch (SolrServerException e) {
-			LOGGER.severe("Error storing metadata entry: " + e.getMessage());
-			return false;
-		} catch (IOException e) {
-			LOGGER.severe("Error storing metadata entry: " + e.getMessage());
-			return false;
-		}
-		
-		return true;
+		return addToSolr(document);
 	}
 
 	@Override
 	public void tag(String identifier, String tag) {
-		// TODO Auto-generated method stub
+		SolrInputDocument document = new SolrInputDocument();
+		Map<String, String> partialUpdate = new HashMap<String, String>();
+		partialUpdate.put("set", tag);
+		document.addField("id", identifier);
+		document.addField("tag", partialUpdate);
 		
+		addToSolr(document);
 	}
 
 	@Override
 	public void removeTag(String identifier, String tag) {
-		// TODO Auto-generated method stub
-		
+		SolrQuery query = new SolrQuery();
+	    query.setQuery( "id:\"" + identifier + "\"" );
+	    
+	    QueryResponse rsp;
+		try {
+			rsp = solr.query( query );
+			
+			SolrDocumentList docs = rsp.getResults();
+			
+			if (docs.size() > 0) {
+				SolrDocument document = docs.get(0);
+				
+				if (document.containsKey("tag")) {
+					remove(identifier);
+					
+					document.remove("tag");
+					SolrInputDocument input = ClientUtils.
+							toSolrInputDocument(document);
+					addToSolr(input);
+				}
+				
+ 			}
+		} catch (SolrServerException e) {
+			LOGGER.severe("Unable to clear metadata entry: " + e.getMessage());
+		}    
+	    
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Map<String, String>> getRdfEntriesAsMap(String query)
 			throws MarketplaceException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+		
+		SolrQuery sQuery = new SolrQuery("*:*");
+		
+		QueryResponse rsp;
+		try {
+			rsp = solr.query( sQuery );
+			
+			SolrDocumentList docs = rsp.getResults();
+			
+			for (SolrDocument document : docs) {
+				Set<String> columnNames = document.keySet();
+				HashMap<String, String> row = new HashMap<String, String>(
+						columnNames.size(), 1);
+				
+				for (Iterator<String> namesIter = columnNames
+						.iterator(); namesIter.hasNext();) {
+					String columnName = namesIter.next();
+					Object columnValue = document.get(columnName);
+					if ((columnValue != null)) {
+						String stringValue = "";
+						if (columnValue instanceof Date) {
+							stringValue = MarketplaceUtils.getFormattedDate((Date)columnValue);
+						} else if (columnValue instanceof String) {
+							stringValue = (String)columnValue;
+							
+							if (stringValue.equals(""))
+								stringValue = "null";
+							
+						} else if (columnValue instanceof ArrayList) {
+							StringBuilder builder = new StringBuilder();
+							
+							for (String entry : (ArrayList<String>)columnValue) {
+								if (!entry.equals(""))
+									builder.append(entry + ", ");
+								else 
+									builder.append("null");
+							}
+							
+							stringValue = builder.toString();
+						}
+						stringValue = stringValue.trim().replaceAll(",$", "");
+						LOGGER.info("Column: " + columnName + " value: " + stringValue);
+						row.put(columnName, stringValue);
+					} else {
+						row.put(columnName, "null");
+					}
+				}
+				list.add(row);	
+			}
+			
+		} catch (SolrServerException e) {
+			throw new MarketplaceException(e.getMessage(), e);
+		}
+			
+		return list;	
 	}
 
 	@Override
@@ -121,14 +208,34 @@ public class SolrRdfStore extends RdfStore {
 
 	@Override
 	public void remove(String identifier) {
-		// TODO Auto-generated method stub
-		
+		try {
+			solr.deleteById(identifier);
+		} catch (SolrServerException e) {
+			LOGGER.severe("Error removing metadata entry: " + e.getMessage());
+		} catch (IOException e) {
+			LOGGER.severe("Error removing metadata entry: " + e.getMessage());
+		}
 	}
 
 	@Override
 	public int size() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	private boolean addToSolr(SolrInputDocument document) {
+		try {
+			solr.add(document);
+			solr.commit();
+		} catch (SolrServerException e) {
+			LOGGER.severe("Error storing metadata entry: " + e.getMessage());
+			return false;
+		} catch (IOException e) {
+			LOGGER.severe("Error storing metadata entry: " + e.getMessage());
+			return false;
+		}
+		
+		return true;
 	}
 
 }

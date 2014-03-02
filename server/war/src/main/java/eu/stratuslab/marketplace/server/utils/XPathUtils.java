@@ -48,12 +48,16 @@ public final class XPathUtils {
             "//rdf:RDF/rdf:Description/dcterms:description", "", "");
     public static final XPathQuery LOCATION = new XPathQuery(
             "//rdf:RDF/rdf:Description/slterms:location", "", "");
+    public static final XPathQuery KIND = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slterms:kind", "", "");
     public static final XPathQuery VALID = new XPathQuery(
             "//rdf:RDF/rdf:Description/dcterms:valid", "", "");
     public static final XPathQuery DEPRECATED = new XPathQuery(
             "//rdf:RDF/rdf:Description/slterms:deprecated", "", "");
     public static final XPathQuery ALTERNATIVE = new XPathQuery(
             "//rdf:RDF/rdf:Description/dcterms:alternative", "", "");
+    public static final XPathQuery TITLE = new XPathQuery(
+            "//rdf:RDF/rdf:Description/dcterms:title", "", "");
     
     private XPathUtils() {
 

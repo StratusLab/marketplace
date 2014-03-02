@@ -22,6 +22,8 @@ package eu.stratuslab.marketplace.server.store.rdf;
 public interface RdfStoreFactory {
 	
 	String SESAME_PROVIDER = "sesame";
+	String SOLR_PROVIDER = "solr";
+	
 	String MYSQL_BACKEND = "mysql";
 	String POSTGRESQL_BACKEND = "postgres";
 	String MEMORY_BACKEND = "memory";
