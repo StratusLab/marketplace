@@ -270,6 +270,23 @@
             </mapping>
 
             <mapping>
+              <directory>/etc/default</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
+                  <includes>
+                    <include>marketplace</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
               <directory>/etc/stratuslab/</directory>
               <filemode>0600</filemode>
               <username>root</username>
