@@ -3,7 +3,7 @@
  
   <groupId>eu.stratuslab.marketplace</groupId>
   <artifactId>marketplace</artifactId>
-  <version>14.03.0</version>
+  <version>14.03.1-SNAPSHOT</version>
   <name>Marketplace (POM)</name>
 
   <url>http://hudson.stratuslab.eu/marketplace</url>
@@ -35,7 +35,7 @@ metadata.
   <scm>
     <connection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/StratusLab/marketplace.git</developerConnection>
-    <tag>marketplace-14.03.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
