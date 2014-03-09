@@ -37,6 +37,9 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+
 import org.restlet.data.Disposition;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -47,7 +50,6 @@ import org.restlet.resource.ResourceException;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.talis.rdfwriters.json.JSONJenaWriter;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
@@ -154,9 +156,8 @@ public class MDatumResource extends BaseResource {
         rdfModel.read(new ByteArrayInputStream((MetadataFileUtils.stripSignature(datum))
 				        .getBytes(Charset.forName(ENCODING))), MARKETPLACE_URI);
 		
-        JSONJenaWriter jenaWriter = new JSONJenaWriter();
         ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
-        jenaWriter.write(rdfModel, jsonOut, MARKETPLACE_URI);
+        RDFDataMgr.write(jsonOut, rdfModel, RDFFormat.RDFJSON);
 
         StringRepresentation representation = new StringRepresentation(jsonOut.toString(), 
         		MediaType.APPLICATION_JSON);

@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>eu.stratuslab.marketplace</groupId>
 		<artifactId>marketplace-server</artifactId>
-		<version>14.02.0-SNAPSHOT</version>
+		<version>14.03.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -73,16 +73,12 @@
 			<artifactId>sesame-queryresultio-sparqljson</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>jena</artifactId>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.hp.hpl.jena</groupId>
-			<artifactId>arq</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.talis.jena</groupId>
-			<artifactId>rdf-json</artifactId>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
