@@ -35,10 +35,13 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.server.MarketplaceException;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.query.SolrUtils;
 import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.utils.MarketplaceUtils;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
@@ -68,19 +71,19 @@ public class SolrRdfStore extends RdfStore {
 		
 		SolrInputDocument document = new SolrInputDocument();
 		document.addField("id", identifier);
-		document.addField("identifier", XPathUtils.getValue(rdfDoc, IDENTIFIER_ELEMENT));
-		document.addField("title", XPathUtils.getValue(rdfDoc, TITLE));
-		document.addField("email", XPathUtils.getValue(rdfDoc, EMAIL));
-		document.addField("created", XPathUtils.getValue(rdfDoc, CREATED_DATE));
-		document.addField("description", XPathUtils.getValue(rdfDoc, DESCRIPTION));
-		document.addField("os", XPathUtils.getValue(rdfDoc, OS));
-		document.addField("osversion", XPathUtils.getValue(rdfDoc, OS_VERSION));
-		document.addField("arch", XPathUtils.getValue(rdfDoc, OS_ARCH));
-		document.addField("valid", XPathUtils.getValue(rdfDoc, VALID));
-		document.addField("kind", XPathUtils.getValue(rdfDoc, KIND));
-		document.addField("deprecated", XPathUtils.getValue(rdfDoc, DEPRECATED));
-		document.addField("location", XPathUtils.getValue(rdfDoc, LOCATION));
-		document.addField("alternative", XPathUtils.getValue(rdfDoc, ALTERNATIVE));
+		document.addField("identifier_ssi", XPathUtils.getValue(rdfDoc, IDENTIFIER_ELEMENT));
+		document.addField("title_tesi", XPathUtils.getValue(rdfDoc, TITLE));
+		document.addField("email_ssi", XPathUtils.getValue(rdfDoc, EMAIL));
+		document.addField("created_dtsi", XPathUtils.getValue(rdfDoc, CREATED_DATE));
+		document.addField("description_tesi", XPathUtils.getValue(rdfDoc, DESCRIPTION));
+		document.addField("os_ssi", XPathUtils.getValue(rdfDoc, OS));
+		document.addField("osversion_ssi", XPathUtils.getValue(rdfDoc, OS_VERSION));
+		document.addField("arch_ssi", XPathUtils.getValue(rdfDoc, OS_ARCH));
+		document.addField("valid_dtsi", XPathUtils.getValue(rdfDoc, VALID));
+		document.addField("kind_ssi", XPathUtils.getValue(rdfDoc, KIND));
+		document.addField("deprecated_tesi", XPathUtils.getValue(rdfDoc, DEPRECATED));
+		document.addField("location_ssim", XPathUtils.getValue(rdfDoc, LOCATION));
+		document.addField("alternative_ssi", XPathUtils.getValue(rdfDoc, ALTERNATIVE));
 		
 		return addToSolr(document);
 	}
@@ -91,7 +94,7 @@ public class SolrRdfStore extends RdfStore {
 		Map<String, String> partialUpdate = new HashMap<String, String>();
 		partialUpdate.put("set", tag);
 		document.addField("id", identifier);
-		document.addField("tag", partialUpdate);
+		document.addField("tag_ssi", partialUpdate);
 		
 		addToSolr(document);
 	}
@@ -110,10 +113,10 @@ public class SolrRdfStore extends RdfStore {
 			if (docs.size() > 0) {
 				SolrDocument document = docs.get(0);
 				
-				if (document.containsKey("tag")) {
+				if (document.containsKey("tag_ssi")) {
 					remove(identifier);
 					
-					document.remove("tag");
+					document.remove("tag_ssi");
 					SolrInputDocument input = ClientUtils.
 							toSolrInputDocument(document);
 					addToSolr(input);
@@ -132,53 +135,77 @@ public class SolrRdfStore extends RdfStore {
 			throws MarketplaceException {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		
-		SolrQuery sQuery = new SolrQuery("*:*");
+		boolean countQuery = false;
+		
+		LOGGER.info(query);
+		
+		SolrParams sQuery = SolrRequestParsers.parseQueryString(query);
+		
+		String rows = sQuery.get("rows");
+		if (rows != null && rows.equals("0")){
+			countQuery = true;
+		}
 		
 		QueryResponse rsp;
 		try {
 			rsp = solr.query( sQuery );
-			
+
 			SolrDocumentList docs = rsp.getResults();
-			
-			for (SolrDocument document : docs) {
-				Set<String> columnNames = document.keySet();
+			LOGGER.info("No results: " + docs.size());
+
+			if (countQuery) {
+				LOGGER.info("Count query");
+				long count = docs.getNumFound();
+				LOGGER.info("Found : " + count);
+
 				HashMap<String, String> row = new HashMap<String, String>(
-						columnNames.size(), 1);
-				
-				for (Iterator<String> namesIter = columnNames
-						.iterator(); namesIter.hasNext();) {
-					String columnName = namesIter.next();
-					Object columnValue = document.get(columnName);
-					if ((columnValue != null)) {
-						String stringValue = "";
-						if (columnValue instanceof Date) {
-							stringValue = MarketplaceUtils.getFormattedDate((Date)columnValue);
-						} else if (columnValue instanceof String) {
-							stringValue = (String)columnValue;
-							
-							if (stringValue.equals(""))
-								stringValue = "null";
-							
-						} else if (columnValue instanceof ArrayList) {
-							StringBuilder builder = new StringBuilder();
-							
-							for (String entry : (ArrayList<String>)columnValue) {
-								if (!entry.equals(""))
-									builder.append(entry + ", ");
-								else 
-									builder.append("null");
+						1, 1);
+				row.put("count", Long.toString(count));
+				list.add(row);
+			} else {
+
+				for (SolrDocument document : docs) {
+					Set<String> columnNames = document.keySet();
+					HashMap<String, String> row = new HashMap<String, String>(
+							columnNames.size(), 1);
+
+					for (Iterator<String> namesIter = columnNames
+							.iterator(); namesIter.hasNext();) {
+						String columnName = namesIter.next();
+						LOGGER.info(columnName);
+						
+						Object columnValue = document.get(columnName);
+						if ((columnValue != null)) {
+							String stringValue = "";
+							if (columnValue instanceof Date) {
+								stringValue = MarketplaceUtils.getFormattedDate((Date)columnValue);
+							} else if (columnValue instanceof String) {
+								stringValue = (String)columnValue;
+
+								if (stringValue.equals(""))
+									stringValue = "null";
+
+							} else if (columnValue instanceof ArrayList) {
+								StringBuilder builder = new StringBuilder();
+
+								for (String entry : (ArrayList<String>)columnValue) {
+									if (!entry.equals(""))
+										builder.append(entry + ", ");
+									else 
+										builder.append("null");
+								}
+
+								stringValue = builder.toString();
 							}
-							
-							stringValue = builder.toString();
+							stringValue = stringValue.trim().replaceAll(",$", "");
+							LOGGER.info("Column: " + columnName + " value: " + stringValue);
+							row.put(SolrUtils.getResultColumn(columnName), stringValue);
+						} else {
+							row.put(SolrUtils.getResultColumn(columnName), "null");
 						}
-						stringValue = stringValue.trim().replaceAll(",$", "");
-						LOGGER.info("Column: " + columnName + " value: " + stringValue);
-						row.put(columnName, stringValue);
-					} else {
-						row.put(columnName, "null");
 					}
+					list.add(row);	
 				}
-				list.add(row);	
 			}
 			
 		} catch (SolrServerException e) {
