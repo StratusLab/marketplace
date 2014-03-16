@@ -215,7 +215,7 @@ public class MDataResourceBase extends BaseResource {
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
 
-        if(results.size() <= 0 && hasFilter || (results.get(0).get("identifier").equals("null"))){
+        if(results.size() <= 0 && hasFilter || (results.size() <= 0 || (results.get(0).get("identifier").equals("null")))){
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "no metadata matching query found");
         } else {
