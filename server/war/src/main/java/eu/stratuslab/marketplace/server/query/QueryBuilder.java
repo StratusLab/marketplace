@@ -6,6 +6,8 @@ public interface QueryBuilder {
 	
 	String buildLatestEntryQuery(String identifier, String email);
 	
+	String getLatestField();
+	
 	String buildGetMetadataQuery(String status, String access,
 			Map<String, String> requestQueryValues, 
 			Map<String, Object> requestAttributes);
