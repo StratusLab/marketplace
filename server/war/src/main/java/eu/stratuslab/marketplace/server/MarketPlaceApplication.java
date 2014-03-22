@@ -59,7 +59,6 @@ import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.cfg.Parameter;
 import eu.stratuslab.marketplace.server.query.QueryBuilder;
 import eu.stratuslab.marketplace.server.query.SparqlBuilder;
-import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
 import eu.stratuslab.marketplace.server.resources.EndorsersResource;
 import eu.stratuslab.marketplace.server.resources.ErrorResource;
@@ -281,10 +280,6 @@ public class MarketPlaceApplication extends Application {
         	// Defines a route for the sync resource
         	router.attach("/sync", SyncResource.class);
         	router.attach("/sync/", SyncResource.class);
-
-        	// Define a route for the about page
-        	router.attach("/about", AboutResource.class);
-        	router.attach("/about/", AboutResource.class);
 
         	// Defines a router for actions
         	route = router.attach("/action/", new ActionRouter());
