@@ -264,6 +264,7 @@ public abstract class BaseResource extends ServerResource {
 	 * @return metadata entry
 	 */
 	protected String getMetadatum(String metadataPath) {
+		LOGGER.info("Getting: " + metadataPath);
 		String model = getMetadataFileStore().read(metadataPath);
 
 		return model;

@@ -131,7 +131,7 @@ public class MDataResourceBase extends BaseResource {
         	
         	if(results.size() > 0){
         		
-        		String latest = results.get(0).get("latest");
+        		String latest = results.get(0).get(getQueryBuilder().getLatestField());
         		if(!latest.equals("null")){
 
         			try {

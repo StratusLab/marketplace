@@ -33,7 +33,7 @@ import javax.mail.internet.InternetAddress;
 public enum Parameter {
 
     STORE_TYPE(true, "memory",
-            "Storage type for image metadata database (memory or native)") {
+            "Storage type for image metadata database (memory, native or solr)") {
         @Override
         public void validate(String value) {
             super.validate(value);
@@ -42,9 +42,9 @@ public enum Parameter {
                         " RDBMS support has been removed, please reconfigure"
                         + " the Marketplace to use store.type=native, restart, and"
                         + " execute the marketplace-rebuild-db script.");
-            } else if (!("memory".equals(value) || "native".equals(value))) {
+            } else if (!("memory".equals(value) || "native".equals(value) || "solr".equals(value))) {
                 throw new IllegalArgumentException(getKey()
-                        + " must be 'memory' or 'native'");
+                        + " must be 'memory', 'native' or 'solr'");
             }
         }
     },

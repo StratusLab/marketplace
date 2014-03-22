@@ -58,6 +58,7 @@ import org.restlet.service.StatusService;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
 import eu.stratuslab.marketplace.server.cfg.Parameter;
 import eu.stratuslab.marketplace.server.query.QueryBuilder;
+import eu.stratuslab.marketplace.server.query.SolrBuilder;
 import eu.stratuslab.marketplace.server.query.SparqlBuilder;
 import eu.stratuslab.marketplace.server.resources.AboutResource;
 import eu.stratuslab.marketplace.server.resources.EndorserResource;
@@ -169,10 +170,17 @@ public class MarketPlaceApplication extends Application {
         whitelist = new EndorserWhitelist();
 
         RdfStoreFactory factory = new RdfStoreFactoryImpl();
-        store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
-                storeType);
+        if (storeType.equals("native") || storeType.equals("memory")) {
+        	store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
+        			storeType);
+        	queryBuilder = new SparqlBuilder();
+        } else if ( storeType.equals("solr")){
+        	store = factory.createRdfStore(RdfStoreFactory.SOLR_PROVIDER,
+    				storeType);
+        	queryBuilder = new SolrBuilder();
+        }
         store.initialize();
-               
+        
         FileStore internalStore = null;
         
         if(fileStoreType.equals("file")){
@@ -197,8 +205,6 @@ public class MarketPlaceApplication extends Application {
         } else {
         	fileStore = internalStore;
         }
-
-        queryBuilder = new SparqlBuilder();
         
         final Runnable remind = new Runnable() {
             public void run() {
@@ -322,7 +328,6 @@ public class MarketPlaceApplication extends Application {
         dir.setNegotiatingContent(false);
         dir.setIndexName("index.html");
         router.attach(attachmentPoint, dir);
-
     }
 
     private void remind() {

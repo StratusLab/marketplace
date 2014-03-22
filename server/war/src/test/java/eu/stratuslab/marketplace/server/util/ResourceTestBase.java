@@ -117,7 +117,6 @@ public class ResourceTestBase {
 	protected Response postMetadataFile(String filename) throws Exception {
 		Request request = createPostRequest(filename);
 		Response response = executeMetadataPostRequest(request);
-		
 		return response;
 	}
 	

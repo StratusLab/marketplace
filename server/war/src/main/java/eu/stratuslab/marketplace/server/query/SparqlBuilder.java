@@ -14,7 +14,7 @@ public class SparqlBuilder implements QueryBuilder {
 	private static final String CREATED = "created";
 	private static final String IDENTIFIER = "identifier";
 	private static final String EMAIL = "email";
-	
+
 	private static final String WHERE = " WHERE {";
 	
 	public String buildLatestEntryQuery(String identifier, String endorser) {
@@ -357,6 +357,11 @@ public class SparqlBuilder implements QueryBuilder {
 	
 	public String buildEndorserTagsQuery(String email){
 		return String.format(SparqlUtils.ENDORSER_TAG_QUERY_TEMPLATE, email);
+	}
+
+	@Override
+	public String getLatestField() {
+		return "latest";
 	}
 	
 }

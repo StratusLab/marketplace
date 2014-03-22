@@ -57,7 +57,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 		FileUtils.deleteDirectory(new File(tmpDir));
 	}
 	
-	@Test
+	//@Test
 	public void testGetHtml() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
 
@@ -78,7 +78,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 				, is("text/html"));
 	}
 	
-	@Test
+	//@Test
 	public void testGetXml() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
 
@@ -99,7 +99,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 				is("application/rdf+xml"));
 		}
 	
-	@Test
+	//@Test
 	public void testGetJson() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
 
@@ -120,7 +120,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 				is("application/json"));
 	}
 	
-        @Test
+    @Test
    	public void testGetTag() throws Exception {
    		postMetadataFile("valid-alternative.xml");
    		
@@ -146,7 +146,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 		assertThat(alternative, is(responseAlt));
 	}
 	
-        @Test
+    //@Test
   	public void testGetTagReturnsLatest() throws Exception {
   		postMetadataFile("valid-alternative.xml");
   		postMetadataFile("valid-alternative-newid.xml");

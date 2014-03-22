@@ -35,7 +35,9 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.w3c.dom.Document;
 
@@ -136,8 +138,7 @@ public class SolrRdfStore extends RdfStore {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		
 		boolean countQuery = false;
-		
-		LOGGER.info(query);
+		boolean groupQuery = false;
 		
 		SolrParams sQuery = SolrRequestParsers.parseQueryString(query);
 		
@@ -146,22 +147,38 @@ public class SolrRdfStore extends RdfStore {
 			countQuery = true;
 		}
 		
+		String group = sQuery.get("group");
+		if (group != null && group.equals("true")){
+			groupQuery = true;
+		}
+		
 		QueryResponse rsp;
 		try {
 			rsp = solr.query( sQuery );
 
 			SolrDocumentList docs = rsp.getResults();
-			LOGGER.info("No results: " + docs.size());
-
+			
 			if (countQuery) {
-				LOGGER.info("Count query");
 				long count = docs.getNumFound();
-				LOGGER.info("Found : " + count);
-
+				
 				HashMap<String, String> row = new HashMap<String, String>(
 						1, 1);
 				row.put("count", Long.toString(count));
 				list.add(row);
+			} else if (groupQuery) {
+				NamedList respNL = rsp.getResponse(); 
+				NamedList groupInfo = (NamedList) respNL.get("grouped"); 
+				NamedList thisGroupInfo = (NamedList) groupInfo.get(sQuery.get(GroupParams.GROUP_FIELD)); 
+				List<Object> groupData = (List<Object>) thisGroupInfo.get("groups"); 
+				for(Object o : groupData) { 
+					NamedList thisGroup = (NamedList) o; 
+				    String groupValue = (String) thisGroup.get("groupValue"); 
+				    
+				    HashMap<String, String> row = new HashMap<String, String>(
+							1, 1);
+					row.put(SolrUtils.getResultColumn(sQuery.get(GroupParams.GROUP_FIELD)), groupValue);
+					list.add(row);
+				} 
 			} else {
 
 				for (SolrDocument document : docs) {
@@ -172,7 +189,6 @@ public class SolrRdfStore extends RdfStore {
 					for (Iterator<String> namesIter = columnNames
 							.iterator(); namesIter.hasNext();) {
 						String columnName = namesIter.next();
-						LOGGER.info(columnName);
 						
 						Object columnValue = document.get(columnName);
 						if ((columnValue != null)) {
@@ -198,7 +214,6 @@ public class SolrRdfStore extends RdfStore {
 								stringValue = builder.toString();
 							}
 							stringValue = stringValue.trim().replaceAll(",$", "");
-							LOGGER.info("Column: " + columnName + " value: " + stringValue);
 							row.put(SolrUtils.getResultColumn(columnName), stringValue);
 						} else {
 							row.put(SolrUtils.getResultColumn(columnName), "null");

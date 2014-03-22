@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.common.params.GroupParams;
 
 import eu.stratuslab.marketplace.PatternUtils;
 
@@ -88,8 +89,12 @@ public class SolrBuilder implements QueryBuilder {
 
 	@Override
 	public String buildEndorsersQuery() {
-		// TODO Auto-generated method stub
-		return null;
+		SolrQuery query = new SolrQuery();
+		query.setQuery("*:*");
+		query.set(GroupParams.GROUP, true);
+		query.set(GroupParams.GROUP_FIELD, "email_ssi");
+		
+		return query.toString();
 	}
 
 	@Override
@@ -105,9 +110,14 @@ public class SolrBuilder implements QueryBuilder {
 	}
 
 	@Override
-	public String buildTagQuery(String email, String tag) {
-		// TODO Auto-generated method stub
-		return null;
+	public String buildTagQuery(String tag, String email) {
+		SolrQuery tagQuery = new SolrQuery();
+		tagQuery.setQuery("*:*");
+		tagQuery.addFilterQuery("email_ssi:" + email, "alternative_ssi:" + tag);
+		tagQuery.setSort("created_dtsi", ORDER.desc);
+		tagQuery.setRows(1);
+		
+		return tagQuery.toString();
 	}
 
 	@Override
@@ -274,5 +284,10 @@ public class SolrBuilder implements QueryBuilder {
         }
           
     }
+    
+    @Override
+	public String getLatestField() {
+		return "created";
+	}
 
 }
