@@ -9,7 +9,7 @@
   <parent>
     <groupId>eu.stratuslab.marketplace</groupId>
     <artifactId>marketplace-server</artifactId>
-    <version>14.03.0-SNAPSHOT</version>
+    <version>14.06.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -17,7 +17,7 @@
       <groupId>eu.stratuslab.marketplace</groupId>
       <artifactId>marketplace-server-war</artifactId>
       <type>war</type>
-      <version>14.03.0-SNAPSHOT</version>
+      <version>14.06.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   
@@ -262,6 +262,23 @@
               <sources>
                 <source>
                   <location>src/main/scripts</location>
+                  <includes>
+                    <include>marketplace</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/default</directory>
+              <filemode>644</filemode>
+              <username>root</username>
+              <groupname>root</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
                   <includes>
                     <include>marketplace</include>
                   </includes>

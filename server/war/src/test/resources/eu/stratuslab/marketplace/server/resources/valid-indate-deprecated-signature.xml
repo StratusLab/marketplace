@@ -23,7 +23,7 @@
             <slreq:value>70cd8ad17fab1abe7fae230ff70f682ed3af4892225b3100e6a07fc2471b657def80fce93afd02aa7f3e716bb8cab02b745d032cdc4895d5fd242a7ac8403693</slreq:value>
         </slreq:checksum>
 
-        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2012-03-05T19:19:14Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</issuer></endorser></slreq:endorsement>
+        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2014-03-08T14:10:17Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=TestCA,OU=Test,O=StratusLab,C=EU</issuer></endorser></slreq:endorsement>
 
         <dcterms:type>base</dcterms:type>
         <slterms:kind>machine</slterms:kind>
@@ -40,7 +40,7 @@
         <dcterms:creator>Jane Tester</dcterms:creator>
 
         <dcterms:created>2011-09-09T14:12:57Z</dcterms:created>
-        <dcterms:valid>2014-03-05T14:12:57Z</dcterms:valid>
+        <dcterms:valid>2016-03-05T14:12:57Z</dcterms:valid>
 
         <dcterms:description/>
 
@@ -51,27 +51,23 @@
          <slterms:deprecated>This is a test of deprecation</slterms:deprecated>
 
     </rdf:Description>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>ur5soXc4/1xf36oyrlMam4lgtqY=</DigestValue></Reference></SignedInfo><SignatureValue>mjezIgcCbUdlm8IUFuJu0nltPl0nEFcfb9FsUsNDfnks0noSE2eKBUFMihcUtScJWi3pzX4ofUID
-WwI9izk+KPAxih/8Sqlz5nfwbjPVb0pzh6aQ4RX6CmSfVFjcoHDGJf+NtHknxGUxxqG1sAwgkscx
-3j2RjFXP52+6q1zixKcoft0Uqu0/XqdOSung1pfw6mLbR+vF+K7HvMSu59nUpd6GdG4IE27fAk7g
-4sOMzOX/WfeDUo5V+BkC6+X1XeETivME+2bDBqZsKEAO7BNlpesCMssFwIKSbLcmy7rQyFwSGg1A
-os952azmwgI+qXdfVxj0aDOWGghJwREnvpmOSQ==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIERjCCAy6gAwIBAgIJALTElVKI0aJGMA0GCSqGSIb3DQEBBQUAMF0xCzAJBgNVBAYTAkVVMRsw
-GQYDVQQKExJTdHJhdHVzTGFiIFByb2plY3QxGzAZBgNVBAsTElRlc3RpbmcgRGVwYXJ0bWVudDEU
-MBIGA1UEAxMLSmFuZSBUZXN0ZXIwHhcNMTEwOTA1MTEyODA1WhcNMTIwOTA0MTEyODA1WjBdMQsw
-CQYDVQQGEwJFVTEbMBkGA1UEChMSU3RyYXR1c0xhYiBQcm9qZWN0MRswGQYDVQQLExJUZXN0aW5n
-IERlcGFydG1lbnQxFDASBgNVBAMTC0phbmUgVGVzdGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
-MIIBCgKCAQEA0AZWMKhBWQOyY43bgYFwH7FIwRRZUqg0IS3r7HG414EVVYjKnEh3aADrcy4kjGYk
-esmDYQ5zNz0IZhq/w6wg4DBcZUQ3/L/MK28hnHR6uyvBRrzRiAddH3qU6Xb0Vm/ZEGZsjTcx2Qj8
-B3muEH455s/b3LhbEm/KrnZZ1j6sWNVcDwWzSGclzKhpgn66EPnK+jP0dI4gHBBzopxVNEqLHaaP
-Q7TsV7xU1iiSfakTbq56kR2YKilrOoxhOI5zhup+ALFbpxWIfXUILNQnYT/SSQeM0qohWGEfT0hc
-srUvzhDRqPz152HcJQeWcDoVAt/QRPDZ+0uzRUscTbhpvyydlQIDAQABo4IBBzCCAQMwCQYDVR0T
-BAIwADARBglghkgBhvhCAQEEBAMCBLAwDgYDVR0PAQH/BAQDAgP4MB0GA1UdDgQWBBRgJJVZ5PnB
-/ePwkDBDhsLM+GCoRzCBjwYDVR0jBIGHMIGEgBRgJJVZ5PnB/ePwkDBDhsLM+GCoR6FhpF8wXTEL
-MAkGA1UEBhMCRVUxGzAZBgNVBAoTElN0cmF0dXNMYWIgUHJvamVjdDEbMBkGA1UECxMSVGVzdGlu
-ZyBEZXBhcnRtZW50MRQwEgYDVQQDEwtKYW5lIFRlc3RlcoIJALTElVKI0aJGMCIGA1UdEQQbMBmB
-F2phbmUudGVzdGVyQGV4YW1wbGUub3JnMA0GCSqGSIb3DQEBBQUAA4IBAQBV9luB87VhjrY8l4tx
-KKTD4Vg//SerHJzD5dsj+shvZXXsg+q8pEsoVlKYT9XZttjVkKJQzkwc2IIqH1wixgP8tuKFMOH1
-dXoXmA3d22V+Qldq3l3koMpt2D8+/IdrUmzOy7XPeW9cuSlnl4jw0VkhqCrtYCwgPYzt197CzuEm
-cbRjQ17oclkPUr8YSmP1/2fTNSbLyGDd9U2n8lJmf0cG11YewKjIFTnzgJhbZlgvXraH7V65na9y
-IIavw2W9a0vmAZveA0pnN9GKgQV0yKL9jXUG1OpuSuFjj3E+MKxqdvdVmvSzPScOjzKT3W02eUQe
-7f97qlyl0I3eSn6956ZM</X509Certificate></X509Data></KeyInfo></Signature></rdf:RDF>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>vmTglqWGsxoqHT2FzePCYRg6aBI=</DigestValue></Reference></SignedInfo><SignatureValue>XrNuJGFKMbakdw6fwdG0oH2aikZbaHkpE/aEILVWTIg68fa50IqOTlAUs0P3Hv1x8dL1Qj+ki5Zr
+N33/vx2xtTMrS/vL+M/t0NOa2UJ1Thi7DPC6y9U8ZaNx/KswAe+TQk8N7uIa4hyHeiU4Y28sCQX0
+EhxGBssbtSbGUaZS2u5qqrK+TbYQn8XzDJoMuxlCXBbHRtZ+NEb0ZLIYFFmTvGfk3Bvcptt9bRQC
+rTaYQljjxsASU2aDoV+8V9Hx1NWZlciSr5aHlURX2SSke8MV8glmUW/iPMmn1jVBczs9s8wdt99s
+8ggYuUaepLSOvr/RFjgwJ3qDHh75PpRC3VpfhQ==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDXjCCAsegAwIBAgIBATANBgkqhkiG9w0BAQQFADBCMQswCQYDVQQGEwJFVTETMBEGA1UEChMK
+U3RyYXR1c0xhYjENMAsGA1UECxMEVGVzdDEPMA0GA1UEAxMGVGVzdENBMB4XDTE0MDMwODE0MDYw
+N1oXDTE0MDMxMzE0MDYwN1owXTELMAkGA1UEBhMCRVUxGzAZBgNVBAoTElN0cmF0dXNMYWIgUHJv
+amVjdDEbMBkGA1UECxMSVGVzdGluZyBEZXBhcnRtZW50MRQwEgYDVQQDEwtKYW5lIFRlc3RlcjCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAN9UOVJsqsWSkIGiuhQS14olvBmZVP0v1/sC
+nPilbbrvcP5i+O6cUaY6WDfImPOIWwUCz2A46X9kctibPjnvPVycnw5TUMGThMNWM9lKJhumWJ5R
+g4IPARy0pNAl5NKMIjOvGREW4CaCD6r8BXgwbzd+buHSNdZdVtfDfXkajsg95YTnBG3HUf2OujW8
+19VDKE5rWJfgOGUhTXqTtC5fWtpOMm7li2kSK50dHpNK65Yrm1DjkUSjiiLyfhw9g14o6PA5WLnq
+NxuNeHROAGRkSWyGZWg05SCyIb4yocfNNeKU+3ZG3FJb+dqgl32/pZWFqAg1c54X3ps9BVJjNV1D
+f1ECAwEAAaOBxDCBwTAJBgNVHRMEAjAAMBEGCWCGSAGG+EIBAQQEAwIEsDAOBgNVHQ8BAf8EBAMC
+BPAwHQYDVR0OBBYEFPrS8ZBbGjYVOZtlWCiHlYx1Mdq9MHIGA1UdIwRrMGmAFLtdn92rLlrybupa
+hV5/aag39dD6oUakRDBCMQswCQYDVQQGEwJFVTETMBEGA1UEChMKU3RyYXR1c0xhYjENMAsGA1UE
+CxMEVGVzdDEPMA0GA1UEAxMGVGVzdENBggkA+7CEBUOV//EwDQYJKoZIhvcNAQEEBQADgYEAtnt8
+dMg/NJnupNsUeA2E3kNuhfZz3cwO/edm1Iw2AUe/vGHP6qqRV4AMBUFKJT7VpfYAzA5GbURafjEl
+jIpg0pmvGaPR3DA1QCE/Fm/qpFbBxkQEjh4kpdZ3O+A2HvSpQsgYfEtvZjcPvbDHKy0q5QgoHBn2
+dBAWBryi3Qbu7As=</X509Certificate></X509Data></KeyInfo></Signature></rdf:RDF>

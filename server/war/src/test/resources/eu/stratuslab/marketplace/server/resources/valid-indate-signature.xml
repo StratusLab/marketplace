@@ -23,7 +23,7 @@
             <slreq:value>70cd8ad17fab1abe7fae230ff70f682ed3af4892225b3100e6a07fc2471b657def80fce93afd02aa7f3e716bb8cab02b745d032cdc4895d5fd242a7ac8403693</slreq:value>
         </slreq:checksum>
 
-        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2012-03-05T16:25:22Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</issuer></endorser></slreq:endorsement>
+        <slreq:endorsement rdf:parseType="Resource"><created xmlns="http://purl.org/dc/terms/">2014-03-08T14:10:40Z</created><endorser xmlns="http://mp.stratuslab.eu/slreq#" rdf:parseType="Resource"><email>jane.tester@example.org</email><subject>CN=Jane Tester,OU=Testing Department,O=StratusLab Project,C=EU</subject><issuer>CN=TestCA,OU=Test,O=StratusLab,C=EU</issuer></endorser></slreq:endorsement>
 
         <dcterms:type>base</dcterms:type>
         <slterms:kind>machine</slterms:kind>
@@ -40,7 +40,7 @@
         <dcterms:creator>Jane Tester</dcterms:creator>
 
         <dcterms:created>2011-09-09T14:12:57Z</dcterms:created>
-        <dcterms:valid>2014-03-05T14:12:57Z</dcterms:valid>
+        <dcterms:valid>2016-03-05T14:12:57Z</dcterms:valid>
 
         <dcterms:description/>
 
@@ -50,27 +50,23 @@
         
 
     </rdf:Description>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>sU29qzKDf3OaRrt9B588ksSILyo=</DigestValue></Reference></SignedInfo><SignatureValue>J9wj+QW/S2SLNL0BaR4EL2waFGouCbECQqAviJWVgEC5KRN8U0YvuQXMoaNt7m3O9GYyRzpFwLwT
-P96MTBFXYRDs9ZPbiKrJQlSPPAd1eMUTG7cnaj33VKStEiqz6Sp+L6o5B9gopAeoD00lG0Z3W+q4
-6aUfIKYJESFq3tTtfCbHgTxjTSnLPExeK2KRRXSSRb3d8dPhIPdRuUK6QqCVNfpMnTtjTYV+9Rdr
-DcdB1KHgfxD1FlRJTtAhfllMjjuVAs29IV0fsrtRg+HHnXvn+rwxI1YVVvu8Fm71BF3jwgzS5V8c
-ATPk9GZf2ixnECzCK6NLrUc90WYxX0FQK1YUhQ==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIERjCCAy6gAwIBAgIJALTElVKI0aJGMA0GCSqGSIb3DQEBBQUAMF0xCzAJBgNVBAYTAkVVMRsw
-GQYDVQQKExJTdHJhdHVzTGFiIFByb2plY3QxGzAZBgNVBAsTElRlc3RpbmcgRGVwYXJ0bWVudDEU
-MBIGA1UEAxMLSmFuZSBUZXN0ZXIwHhcNMTEwOTA1MTEyODA1WhcNMTIwOTA0MTEyODA1WjBdMQsw
-CQYDVQQGEwJFVTEbMBkGA1UEChMSU3RyYXR1c0xhYiBQcm9qZWN0MRswGQYDVQQLExJUZXN0aW5n
-IERlcGFydG1lbnQxFDASBgNVBAMTC0phbmUgVGVzdGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
-MIIBCgKCAQEA0AZWMKhBWQOyY43bgYFwH7FIwRRZUqg0IS3r7HG414EVVYjKnEh3aADrcy4kjGYk
-esmDYQ5zNz0IZhq/w6wg4DBcZUQ3/L/MK28hnHR6uyvBRrzRiAddH3qU6Xb0Vm/ZEGZsjTcx2Qj8
-B3muEH455s/b3LhbEm/KrnZZ1j6sWNVcDwWzSGclzKhpgn66EPnK+jP0dI4gHBBzopxVNEqLHaaP
-Q7TsV7xU1iiSfakTbq56kR2YKilrOoxhOI5zhup+ALFbpxWIfXUILNQnYT/SSQeM0qohWGEfT0hc
-srUvzhDRqPz152HcJQeWcDoVAt/QRPDZ+0uzRUscTbhpvyydlQIDAQABo4IBBzCCAQMwCQYDVR0T
-BAIwADARBglghkgBhvhCAQEEBAMCBLAwDgYDVR0PAQH/BAQDAgP4MB0GA1UdDgQWBBRgJJVZ5PnB
-/ePwkDBDhsLM+GCoRzCBjwYDVR0jBIGHMIGEgBRgJJVZ5PnB/ePwkDBDhsLM+GCoR6FhpF8wXTEL
-MAkGA1UEBhMCRVUxGzAZBgNVBAoTElN0cmF0dXNMYWIgUHJvamVjdDEbMBkGA1UECxMSVGVzdGlu
-ZyBEZXBhcnRtZW50MRQwEgYDVQQDEwtKYW5lIFRlc3RlcoIJALTElVKI0aJGMCIGA1UdEQQbMBmB
-F2phbmUudGVzdGVyQGV4YW1wbGUub3JnMA0GCSqGSIb3DQEBBQUAA4IBAQBV9luB87VhjrY8l4tx
-KKTD4Vg//SerHJzD5dsj+shvZXXsg+q8pEsoVlKYT9XZttjVkKJQzkwc2IIqH1wixgP8tuKFMOH1
-dXoXmA3d22V+Qldq3l3koMpt2D8+/IdrUmzOy7XPeW9cuSlnl4jw0VkhqCrtYCwgPYzt197CzuEm
-cbRjQ17oclkPUr8YSmP1/2fTNSbLyGDd9U2n8lJmf0cG11YewKjIFTnzgJhbZlgvXraH7V65na9y
-IIavw2W9a0vmAZveA0pnN9GKgQV0yKL9jXUG1OpuSuFjj3E+MKxqdvdVmvSzPScOjzKT3W02eUQe
-7f97qlyl0I3eSn6956ZM</X509Certificate></X509Data></KeyInfo></Signature></rdf:RDF>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>fpJ8hqpBrJYEVMD9GGK7+3xnTx4=</DigestValue></Reference></SignedInfo><SignatureValue>LakBjkGrtP3rDoZV+bdaKT0J7a0wYHbfbQrAf3fJ2apl7vqQQktuO6TgUSdxgSNPZcRXNxCtzJQQ
+/LIQkagjxgVSDpSln6R2707WPXuaPXTYHz7O9ADMZ37Jua2L5K2nNTDwdaB4c/EHSULARN1aG0dx
+UajG/z6DwPEEygq8TGYTUOzBvpam7I3hcDWB7R94GFF4/um99alUCWJLw1qg950Kbe+dSR2Cxozo
+OPDMmE5pBYudMx9v+mq4cq4PadK0OhNPVx+J1yACVuB/3vtdtW2Cl4ffv/vWmhKtHCGuI7QMyj5G
+r8flYcGPMCdcrk0Wlqk2oy9XB34ET5Amf0UOhg==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDXjCCAsegAwIBAgIBATANBgkqhkiG9w0BAQQFADBCMQswCQYDVQQGEwJFVTETMBEGA1UEChMK
+U3RyYXR1c0xhYjENMAsGA1UECxMEVGVzdDEPMA0GA1UEAxMGVGVzdENBMB4XDTE0MDMwODE0MDYw
+N1oXDTE0MDMxMzE0MDYwN1owXTELMAkGA1UEBhMCRVUxGzAZBgNVBAoTElN0cmF0dXNMYWIgUHJv
+amVjdDEbMBkGA1UECxMSVGVzdGluZyBEZXBhcnRtZW50MRQwEgYDVQQDEwtKYW5lIFRlc3RlcjCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAN9UOVJsqsWSkIGiuhQS14olvBmZVP0v1/sC
+nPilbbrvcP5i+O6cUaY6WDfImPOIWwUCz2A46X9kctibPjnvPVycnw5TUMGThMNWM9lKJhumWJ5R
+g4IPARy0pNAl5NKMIjOvGREW4CaCD6r8BXgwbzd+buHSNdZdVtfDfXkajsg95YTnBG3HUf2OujW8
+19VDKE5rWJfgOGUhTXqTtC5fWtpOMm7li2kSK50dHpNK65Yrm1DjkUSjiiLyfhw9g14o6PA5WLnq
+NxuNeHROAGRkSWyGZWg05SCyIb4yocfNNeKU+3ZG3FJb+dqgl32/pZWFqAg1c54X3ps9BVJjNV1D
+f1ECAwEAAaOBxDCBwTAJBgNVHRMEAjAAMBEGCWCGSAGG+EIBAQQEAwIEsDAOBgNVHQ8BAf8EBAMC
+BPAwHQYDVR0OBBYEFPrS8ZBbGjYVOZtlWCiHlYx1Mdq9MHIGA1UdIwRrMGmAFLtdn92rLlrybupa
+hV5/aag39dD6oUakRDBCMQswCQYDVQQGEwJFVTETMBEGA1UEChMKU3RyYXR1c0xhYjENMAsGA1UE
+CxMEVGVzdDEPMA0GA1UEAxMGVGVzdENBggkA+7CEBUOV//EwDQYJKoZIhvcNAQEEBQADgYEAtnt8
+dMg/NJnupNsUeA2E3kNuhfZz3cwO/edm1Iw2AUe/vGHP6qqRV4AMBUFKJT7VpfYAzA5GbURafjEl
+jIpg0pmvGaPR3DA1QCE/Fm/qpFbBxkQEjh4kpdZ3O+A2HvSpQsgYfEtvZjcPvbDHKy0q5QgoHBn2
+dBAWBryi3Qbu7As=</X509Certificate></X509Data></KeyInfo></Signature></rdf:RDF>

@@ -205,62 +205,13 @@ fi
 
 
 ##################################################
-# if no JETTY_HOME, search likely locations.
+# if no JETTY_HOME, use default.
 ##################################################
 if [ -z "$JETTY_HOME" ] ; then
-  STANDARD_LOCATIONS=(
-        "/opt/stratuslab"
-        "/usr/share"
-        "/usr/share/java"
-        "${HOME}"
-        "${HOME}/src"
-        "${HOME}/opt"
-        "/opt"
-        "/java"
-        "/usr/local"
-        "/usr/local/share"
-        "/usr/local/share/java"
-        "/home"
-        )
-  JETTY_DIR_NAMES=(
-        "marketplace"
-        "jetty-9"
-        "jetty9"
-        "jetty-9.*"
-        "jetty"
-        "Jetty-9"
-        "Jetty9"
-        "Jetty-9.*"
-        "Jetty"
-        )
-        
-  for L in "${STANDARD_LOCATIONS[@]}"
-  do
-    for N in "${JETTY_DIR_NAMES[@]}"
-    do
-      POSSIBLE_JETTY_HOME=("$L/"$N)
-      if [ ! -d "$POSSIBLE_JETTY_HOME" ]
-      then
-        # Not a directory. skip.
-        unset POSSIBLE_JETTY_HOME
-      elif [ ! -f "$POSSIBLE_JETTY_HOME/$JETTY_INSTALL_TRACE_FILE" ]
-      then
-        # Trace file not found. skip.
-        unset POSSIBLE_JETTY_HOME
-      else
-        # Good hit, Use it
-        JETTY_HOME=$POSSIBLE_JETTY_HOME
-        # Break out of JETTY_DIR_NAMES loop
-        break
-      fi
-    done
-    if [ -n "$POSSIBLE_JETTY_HOME" ]
-    then
-      # We have found our JETTY_HOME
-      # Break out of STANDARD_LOCATIONS loop
-      break
-    fi
-  done
+  POSSIBLE_JETTY_HOME="/opt/stratuslab/marketplace"
+  if [ -d "$POSSIBLE_JETTY_HOME" ]; then
+    JETTY_HOME=$POSSIBLE_JETTY_HOME
+  fi
 fi
 
 

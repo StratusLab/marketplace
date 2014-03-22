@@ -194,7 +194,7 @@ public class MDataResourceTest extends ResourceTestBase {
 		String created = getValueFromDoc(extractXmlDocument(response
 				.getEntity().getStream()), "created");
 
-		assertThat(created, is("2012-03-05T19:14:58Z"));
+		assertThat(created, is("2014-03-08T14:23:18Z"));
 	}
 
 	@Test
