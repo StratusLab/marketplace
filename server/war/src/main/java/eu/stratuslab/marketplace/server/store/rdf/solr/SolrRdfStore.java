@@ -15,6 +15,8 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.VALID;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.KIND;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.ALTERNATIVE;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.TITLE;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.SUBJECT;
+import static eu.stratuslab.marketplace.server.utils.XPathUtils.ISSUER;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,6 +88,8 @@ public class SolrRdfStore extends RdfStore {
 		document.addField("deprecated_tesi", XPathUtils.getValue(rdfDoc, DEPRECATED));
 		document.addField("location_ssim", XPathUtils.getValue(rdfDoc, LOCATION));
 		document.addField("alternative_ssi", XPathUtils.getValue(rdfDoc, ALTERNATIVE));
+		document.addField("subject_ssi", XPathUtils.getValue(rdfDoc, SUBJECT));
+		document.addField("issuer_ssi", XPathUtils.getValue(rdfDoc, ISSUER));
 		
 		return addToSolr(document);
 	}
@@ -132,7 +136,6 @@ public class SolrRdfStore extends RdfStore {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public List<Map<String, String>> getRdfEntriesAsMap(String query)
 			throws MarketplaceException {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
@@ -166,17 +169,57 @@ public class SolrRdfStore extends RdfStore {
 				row.put("count", Long.toString(count));
 				list.add(row);
 			} else if (groupQuery) {
-				NamedList respNL = rsp.getResponse(); 
-				NamedList groupInfo = (NamedList) respNL.get("grouped"); 
-				NamedList thisGroupInfo = (NamedList) groupInfo.get(sQuery.get(GroupParams.GROUP_FIELD)); 
+				NamedList<Object> respNL = rsp.getResponse(); 
+				NamedList<Object> groupInfo = (NamedList<Object>) respNL.get("grouped"); 
+				NamedList<Object> thisGroupInfo = (NamedList<Object>) groupInfo.get(sQuery.get(GroupParams.GROUP_FIELD)); 
 				List<Object> groupData = (List<Object>) thisGroupInfo.get("groups"); 
 				for(Object o : groupData) { 
-					NamedList thisGroup = (NamedList) o; 
+					NamedList<Object> thisGroup = (NamedList<Object>) o; 
+					SolrDocumentList sdl = (SolrDocumentList) thisGroup.get("doclist");
+					SolrDocument document = sdl.get(0); 
+					
 				    String groupValue = (String) thisGroup.get("groupValue"); 
 				    
-				    HashMap<String, String> row = new HashMap<String, String>(
-							1, 1);
+				    HashMap<String, String> row = new HashMap<String, String>();
 					row.put(SolrUtils.getResultColumn(sQuery.get(GroupParams.GROUP_FIELD)), groupValue);
+					
+					Set<String> columnNames = document.keySet();
+					
+					for (Iterator<String> namesIter = columnNames
+							.iterator(); namesIter.hasNext();) {
+						String columnName = namesIter.next();
+
+						Object columnValue = document.get(columnName);
+						if ((columnValue != null)) {
+							String stringValue = "";
+							if (columnValue instanceof Date) {
+								stringValue = MarketplaceUtils.getFormattedDate((Date)columnValue);
+							} else if (columnValue instanceof String) {
+								stringValue = (String)columnValue;
+
+								//if (stringValue.equals(""))
+								//	stringValue = "null";
+
+							} else if (columnValue instanceof ArrayList) {
+								StringBuilder builder = new StringBuilder();
+
+								for (String entry : (ArrayList<String>)columnValue) {
+									if (!entry.equals(""))
+										builder.append(entry + ", ");
+									else 
+										builder.append("null");
+								}
+
+								stringValue = builder.toString();
+							}
+							stringValue = stringValue.trim().replaceAll(",$", "");
+							row.put(SolrUtils.getResultColumn(columnName), stringValue);
+							LOGGER.info("Putting: " + SolrUtils.getResultColumn(columnName) + " " + stringValue);
+						} else {
+							row.put(SolrUtils.getResultColumn(columnName), "null");
+						}	
+					}
+					
 					list.add(row);
 				} 
 			} else {
@@ -198,8 +241,8 @@ public class SolrRdfStore extends RdfStore {
 							} else if (columnValue instanceof String) {
 								stringValue = (String)columnValue;
 
-								if (stringValue.equals(""))
-									stringValue = "null";
+								//if (stringValue.equals(""))
+								//	stringValue = "null";
 
 							} else if (columnValue instanceof ArrayList) {
 								StringBuilder builder = new StringBuilder();

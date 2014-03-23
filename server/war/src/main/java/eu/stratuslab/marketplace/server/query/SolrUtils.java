@@ -26,6 +26,8 @@ public class SolrUtils {
 		solrMap.put("location_ssim", "location");
 		solrMap.put("description_tesi", "description");
 		solrMap.put("title_tesi", "title");
+		solrMap.put("subject_ssi", "subject");
+		solrMap.put("issuer_ssi", "issuer");
 		
 		solrToColumn = Collections.unmodifiableMap(solrMap);
 	}

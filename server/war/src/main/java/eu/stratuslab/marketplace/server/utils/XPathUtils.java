@@ -35,6 +35,12 @@ public final class XPathUtils {
     public static final XPathQuery EMAIL = new XPathQuery(
             "//rdf:RDF/rdf:Description/slreq:endorsement/slreq:endorser/slreq:email",
             "", "");
+    public static final XPathQuery SUBJECT = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slreq:endorsement/slreq:endorser/slreq:subject",
+            "", "");
+    public static final XPathQuery ISSUER = new XPathQuery(
+            "//rdf:RDF/rdf:Description/slreq:endorsement/slreq:endorser/slreq:issuer",
+            "", "");
     public static final XPathQuery CREATED_DATE = new XPathQuery(
             "//rdf:RDF/rdf:Description/slreq:endorsement/dcterms:created", "",
             "");
