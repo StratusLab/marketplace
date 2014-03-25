@@ -119,13 +119,29 @@
           <requires>
             <require>java-1.7.0-openjdk</require>
           </requires>
+
+           <preinstallScriptlet>
+             <script>
+groupadd --force --system stratuslab
+          
+/bin/egrep  -i "^slmkpl:" /etc/passwd
+  if [ $? -ne 0 ]; then
+    adduser --system --no-user-group --g stratuslab \
+            --comment 'StratusLab Marketplace Service' \
+            slmkpl
+fi
+            </script>
+          </preinstallScriptlet>
+
+          <defaultDirmode>755</defaultDirmode>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultGroupname>stratuslab</defaultGroupname>
+          <defaultUsername>slmkpl</defaultUsername>
+
           <mappings>
 
             <mapping>
               <directory>${installation.dir}/stratuslab-webapps</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -139,9 +155,6 @@
 
 	    <mapping>
 	      <directory>${installation.dir}/resources</directory>
-	      <filemode>644</filemode>
-	      <username>root</username>
-	      <groupname>root</groupname>
 	      <directoryIncluded>false</directoryIncluded>
 	      <sources>
 		<source>
@@ -156,9 +169,6 @@
 
 	    <mapping>
 	      <directory>${installation.dir}/start.d</directory>
-	      <filemode>644</filemode>
-	      <username>root</username>
-	      <groupname>root</groupname>
 	      <directoryIncluded>true</directoryIncluded>
 	      <sources>
 		<source>
@@ -173,8 +183,8 @@
 	    <mapping>
 	      <directory>${installation.dir}/etc</directory>
 	      <filemode>755</filemode>
-	      <username>root</username>
-	      <groupname>root</groupname>
+	      <username>slmkpl</username>
+	      <groupname>stratuslab</groupname>
 	      <directoryIncluded>false</directoryIncluded>
 	      <sources>
 		<source>
@@ -189,8 +199,8 @@
             <mapping>
               <directory>${installation.dir}/bin</directory>
               <filemode>755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
+              <username>slmkpl</username>
+              <groupname>stratuslab</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -205,9 +215,6 @@
 
 	    <mapping>
 	      <directory>${installation.dir}/</directory>
-	      <filemode>644</filemode>
-	      <username>root</username>
-	      <groupname>root</groupname>
 	      <directoryIncluded>false</directoryIncluded>
 	      <sources>
 		<source>
@@ -227,9 +234,6 @@
 
             <mapping>
               <directory>${installation.dir}/</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -256,8 +260,8 @@
             <mapping>
               <directory>/etc/rc.d/init.d/</directory>
               <filemode>755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
+              <username>slmkpl</username>
+              <groupname>stratuslab</groupname>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -271,9 +275,6 @@
 
             <mapping>
               <directory>/etc/default</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
               <directoryIncluded>false</directoryIncluded>
               <configuration>noreplace</configuration>
               <sources>
@@ -289,8 +290,8 @@
             <mapping>
               <directory>/etc/stratuslab/</directory>
               <filemode>0600</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
+              <username>slmkpl</username>
+              <groupname>stratuslab</groupname>
               <directoryIncluded>false</directoryIncluded>
               <configuration>noreplace</configuration>
               <sources>
@@ -307,16 +308,16 @@
             <mapping>
               <directory>/var/lib/stratuslab/marketplace</directory>
               <filemode>0755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
+              <username>slmkpl</username>
+              <groupname>stratuslab</groupname>
               <directoryIncluded>true</directoryIncluded>
             </mapping>
 
             <mapping>
               <directory>/var/lib/stratuslab/pending</directory>
               <filemode>0755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
+              <username>slmkpl</username>
+              <groupname>stratuslab</groupname>
               <directoryIncluded>true</directoryIncluded>
             </mapping>
 
