@@ -126,7 +126,7 @@ groupadd --force --system stratuslab
           
 /bin/egrep  -i "^slmkpl:" /etc/passwd
   if [ $? -ne 0 ]; then
-    adduser --system --no-user-group --g stratuslab \
+    adduser --system --no-user-group --gid stratuslab \
             --comment 'StratusLab Marketplace Service' \
             slmkpl
 fi
