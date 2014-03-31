@@ -162,6 +162,11 @@ fi
             </mapping>
 
             <mapping>
+              <directory>/var/lib/stratuslab/marketplace/pending</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
               <directory>${installation.dir}/stratuslab-webapps</directory>
               <directoryIncluded>false</directoryIncluded>
               <sources>
@@ -324,22 +329,6 @@ fi
                   </includes>
                 </source>
               </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/var/lib/stratuslab/marketplace</directory>
-              <filemode>0755</filemode>
-              <username>slmkpl</username>
-              <groupname>stratuslab</groupname>
-              <directoryIncluded>true</directoryIncluded>
-            </mapping>
-
-            <mapping>
-              <directory>/var/lib/stratuslab/pending</directory>
-              <filemode>0755</filemode>
-              <username>slmkpl</username>
-              <groupname>stratuslab</groupname>
-              <directoryIncluded>true</directoryIncluded>
             </mapping>
 
           </mappings>
