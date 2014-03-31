@@ -178,7 +178,7 @@ done
 ##################################################
 # Set tmp if not already set.
 ##################################################
-TMPDIR=${TMPDIR:-/var/lib/stratuslab}
+TMPDIR=${TMPDIR:-/var/lib/stratuslab/marketplace}
 mkdir -p $TMPDIR
 
 ##################################################

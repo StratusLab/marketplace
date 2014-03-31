@@ -4,7 +4,7 @@ CONFIG=/etc/stratuslab/marketplace-sync.cfg
 
 MASTER=marketplace.stratuslab.eu
 SLAVE=http://localhost:8080
-DATADIR=/var/lib/stratuslab
+DATADIR=/var/lib/stratuslab/marketplace/sync
 MASTER_DIR=$DATADIR
 
 if [ -f $CONFIG ]; then
