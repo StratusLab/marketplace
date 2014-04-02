@@ -147,6 +147,11 @@ fi
             </mapping>
 
             <mapping>
+              <directory>${installation.dir}/logs</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
               <directory>/var/lib/stratuslab/marketplace</directory>
               <directoryIncluded>true</directoryIncluded>
             </mapping>
