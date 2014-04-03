@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -183,22 +183,18 @@ public class SolrRdfStore extends RdfStore {
 				    HashMap<String, String> row = new HashMap<String, String>();
 					row.put(SolrUtils.getResultColumn(sQuery.get(GroupParams.GROUP_FIELD)), groupValue);
 					
-					Set<String> columnNames = document.keySet();
+					Set<Entry<String, Object>> columns = document.entrySet();
 					
-					for (Iterator<String> namesIter = columnNames
-							.iterator(); namesIter.hasNext();) {
-						String columnName = namesIter.next();
-
-						Object columnValue = document.get(columnName);
+					for (Entry<String, Object> column : columns) {
+						String columnName = column.getKey();
+						Object columnValue = column.getValue();
+						
 						if ((columnValue != null)) {
 							String stringValue = "";
 							if (columnValue instanceof Date) {
 								stringValue = MarketplaceUtils.getFormattedDate((Date)columnValue);
 							} else if (columnValue instanceof String) {
 								stringValue = (String)columnValue;
-
-								//if (stringValue.equals(""))
-								//	stringValue = "null";
 
 							} else if (columnValue instanceof ArrayList) {
 								StringBuilder builder = new StringBuilder();
@@ -214,7 +210,7 @@ public class SolrRdfStore extends RdfStore {
 							}
 							stringValue = stringValue.trim().replaceAll(",$", "");
 							row.put(SolrUtils.getResultColumn(columnName), stringValue);
-							LOGGER.info("Putting: " + SolrUtils.getResultColumn(columnName) + " " + stringValue);
+							LOGGER.info("Putting: " + columnName + " " + SolrUtils.getResultColumn(columnName) + " " + stringValue);
 						} else {
 							row.put(SolrUtils.getResultColumn(columnName), "null");
 						}	
@@ -225,15 +221,13 @@ public class SolrRdfStore extends RdfStore {
 			} else {
 
 				for (SolrDocument document : docs) {
-					Set<String> columnNames = document.keySet();
+					Set<Entry<String, Object>> columns = document.entrySet();
 					HashMap<String, String> row = new HashMap<String, String>(
-							columnNames.size(), 1);
+							columns.size(), 1);
 
-					for (Iterator<String> namesIter = columnNames
-							.iterator(); namesIter.hasNext();) {
-						String columnName = namesIter.next();
-						
-						Object columnValue = document.get(columnName);
+					for (Entry<String, Object> column : columns) {
+						String columnName = column.getKey();
+						Object columnValue = column.getValue();
 						if ((columnValue != null)) {
 							String stringValue = "";
 							if (columnValue instanceof Date) {
@@ -241,15 +235,12 @@ public class SolrRdfStore extends RdfStore {
 							} else if (columnValue instanceof String) {
 								stringValue = (String)columnValue;
 
-								//if (stringValue.equals(""))
-								//	stringValue = "null";
-
 							} else if (columnValue instanceof ArrayList) {
 								StringBuilder builder = new StringBuilder();
 
-								for (String entry : (ArrayList<String>)columnValue) {
-									if (!entry.equals(""))
-										builder.append(entry + ", ");
+								for (String value : (ArrayList<String>)columnValue) {
+									if (!value.equals(""))
+										builder.append(value + ", ");
 									else 
 										builder.append("null");
 								}

@@ -83,8 +83,11 @@ public class SolrBuilder implements QueryBuilder {
 
 	@Override
 	public String buildEndorserQuery(String email, String historyRange) {
-		// TODO Auto-generated method stub
-		return null;
+		SolrQuery query = new SolrQuery();
+		query.setQuery("*:*");
+		query.addFilterQuery("email_ssi:" + email, "created_dtsi:[" + historyRange + " TO *]");
+		
+		return query.toString();
 	}
 
 	@Override
@@ -122,8 +125,13 @@ public class SolrBuilder implements QueryBuilder {
 
 	@Override
 	public String buildEndorserTagsQuery(String email) {
-		// TODO Auto-generated method stub
-		return null;
+		SolrQuery query = new SolrQuery();
+		query.setQuery("*:*");
+		query.addFilterQuery("email_ssi:" + email);
+		query.set(GroupParams.GROUP, true);
+		query.set(GroupParams.GROUP_FIELD, "alternative_ssi");
+		
+		return query.toString();
 	}
 	
 	private void buildBaseQuery(SolrQuery query, String status, String access,

@@ -28,6 +28,9 @@ public class SolrUtils {
 		solrMap.put("title_tesi", "title");
 		solrMap.put("subject_ssi", "subject");
 		solrMap.put("issuer_ssi", "issuer");
+		solrMap.put("alternative_ssi", "tag");
+		solrMap.put("deprecated_tesi", "deprecated");
+		solrMap.put("valid_dtsi", "valid");
 		
 		solrToColumn = Collections.unmodifiableMap(solrMap);
 	}
