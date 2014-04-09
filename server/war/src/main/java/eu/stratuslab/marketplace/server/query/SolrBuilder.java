@@ -102,14 +102,22 @@ public class SolrBuilder implements QueryBuilder {
 
 	@Override
 	public String buildExpiryQuery(String expiryDate) {
-		// TODO Auto-generated method stub
-		return null;
+		SolrQuery query = new SolrQuery();
+		query.setQuery("*:*");
+		query.addFilterQuery("tag_ssi:latest", 
+				"-deprecated_tesi:*", "valid_dtsi:[ NOW TO " + expiryDate + "]");
+		
+		return query.toString();
 	}
 
 	@Override
 	public String buildReminderQuery(String email) {
-		// TODO Auto-generated method stub
-		return null;
+		SolrQuery query = new SolrQuery();
+		query.setQuery("*:*");
+		query.addFilterQuery("email_ssi:" + email, "tag_ssi:latest", 
+				"-deprecated_tesi:*", "valid_dtsi:[ NOW TO *]");
+		
+		return query.toString();
 	}
 
 	@Override
