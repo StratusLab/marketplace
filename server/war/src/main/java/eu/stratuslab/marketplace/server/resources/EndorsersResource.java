@@ -41,7 +41,6 @@ public class EndorsersResource extends BaseResource {
    
 	@Get("html")
     public Representation toHtml() {
-		
 		List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
         	results = query(getQueryBuilder().buildEndorsersQuery());
@@ -60,7 +59,6 @@ public class EndorsersResource extends BaseResource {
         	} else {
         		name = subject;
         	}
-        		
         	resultRow.put("name", name);
         	results.set(i, resultRow);
         }
@@ -80,7 +78,7 @@ public class EndorsersResource extends BaseResource {
      */
     @Get("xml")
     public Representation toXml() {
-        // Generate the right representation according to its media type.
+    	// Generate the right representation according to its media type.
         String results = "";
 		try {
 			results = queryResultsAsXml(getQueryBuilder().buildEndorsersQuery());

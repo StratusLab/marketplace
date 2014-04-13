@@ -19,6 +19,7 @@ import static eu.stratuslab.marketplace.server.utils.XPathUtils.SUBJECT;
 import static eu.stratuslab.marketplace.server.utils.XPathUtils.ISSUER;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -57,6 +59,8 @@ public class SolrRdfStore extends RdfStore {
 
 	private SolrServer solr;
 
+	private String solrUrl;
+
 	@Override
 	public void shutdown() {
 		solr.shutdown();
@@ -65,7 +69,7 @@ public class SolrRdfStore extends RdfStore {
 	@Override
 	public void initialize() {
 		// TODO Auto-generated method stub
-		String solrUrl = Configuration.getParameterValue(SOLR_URL);
+		solrUrl = Configuration.getParameterValue(SOLR_URL);
 		solr = new HttpSolrServer(solrUrl);
 	}
 
@@ -210,7 +214,6 @@ public class SolrRdfStore extends RdfStore {
 							}
 							stringValue = stringValue.trim().replaceAll(",$", "");
 							row.put(SolrUtils.getResultColumn(columnName), stringValue);
-							LOGGER.info("Putting: " + columnName + " " + SolrUtils.getResultColumn(columnName) + " " + stringValue);
 						} else {
 							row.put(SolrUtils.getResultColumn(columnName), "null");
 						}	
@@ -266,8 +269,17 @@ public class SolrRdfStore extends RdfStore {
 
 	@Override
 	public String getRdfEntriesAsXml(String query) throws MarketplaceException {
-		// TODO Auto-generated method stub
-		return null;
+		URL url;
+		String xmlResponse = "";
+		
+		try {
+			url = new URL(solrUrl + "/select?" + query);
+			xmlResponse = IOUtils.toString(url);
+		} catch (IOException e) {
+			throw new MarketplaceException(e.getMessage(), e);
+		} 
+		
+		return xmlResponse;
 	}
 
 	@Override
@@ -286,6 +298,7 @@ public class SolrRdfStore extends RdfStore {
 	public void remove(String identifier) {
 		try {
 			solr.deleteById(identifier);
+			solr.commit();
 		} catch (SolrServerException e) {
 			LOGGER.severe("Error removing metadata entry: " + e.getMessage());
 		} catch (IOException e) {
