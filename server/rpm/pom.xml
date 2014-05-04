@@ -126,7 +126,8 @@ groupadd --force --system stratuslab
           
 /bin/egrep  -i "^slmkpl:" /etc/passwd
   if [ $? -ne 0 ]; then
-    adduser --system --no-user-group --g stratuslab \
+    adduser --system --home-dir /opt/stratuslab/marketplace \
+            --no-user-group --gid stratuslab \
             --comment 'StratusLab Marketplace Service' \
             slmkpl
 fi
@@ -139,6 +140,36 @@ fi
           <defaultUsername>slmkpl</defaultUsername>
 
           <mappings>
+
+            <mapping>
+              <directory>${installation.dir}</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/logs</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
+              <directory>/var/lib/stratuslab/marketplace</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
+              <directory>/var/lib/stratuslab/marketplace/data</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
+              <directory>/var/lib/stratuslab/marketplace/sync</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
+              <directory>/var/lib/stratuslab/marketplace/pending</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
 
             <mapping>
               <directory>${installation.dir}/stratuslab-webapps</directory>
@@ -303,22 +334,6 @@ fi
                   </includes>
                 </source>
               </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/var/lib/stratuslab/marketplace</directory>
-              <filemode>0755</filemode>
-              <username>slmkpl</username>
-              <groupname>stratuslab</groupname>
-              <directoryIncluded>true</directoryIncluded>
-            </mapping>
-
-            <mapping>
-              <directory>/var/lib/stratuslab/pending</directory>
-              <filemode>0755</filemode>
-              <username>slmkpl</username>
-              <groupname>stratuslab</groupname>
-              <directoryIncluded>true</directoryIncluded>
             </mapping>
 
           </mappings>

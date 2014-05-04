@@ -71,7 +71,7 @@ public enum Parameter {
     	}
     },
     
-    DATA_DIR(true, "/var/lib/stratuslab/metadata",
+    DATA_DIR(true, "/var/lib/stratuslab/metadata/data",
             "Directory containing raw metadata data entries.") {
         @Override
         public void validate(String value) {
@@ -117,7 +117,7 @@ public enum Parameter {
     
     GIT_PASSWORD(false, "Password credential for Git repository"),
     
-    PENDING_DIR(true, "/var/lib/stratuslab/pending",
+    PENDING_DIR(true, "/var/lib/stratuslab/marketplace/pending",
             "Directory for pending (unconfirmed) entries.") {
         @Override
         public void validate(String value) {

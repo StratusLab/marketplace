@@ -53,7 +53,7 @@ public class ParameterTest {
     @Test
     public void checkValidDataDirValues() {
         DATA_DIR.validate("/tmp");
-        DATA_DIR.validate("/var/lib/stratuslab");
+        DATA_DIR.validate("/var/lib/stratuslab/marketplace");
     }
 
     @Test(expected = IllegalArgumentException.class)
