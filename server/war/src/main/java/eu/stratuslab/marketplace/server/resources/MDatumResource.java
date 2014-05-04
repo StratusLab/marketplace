@@ -70,16 +70,25 @@ public class MDatumResource extends BaseResource {
     @Override
     protected void doInit() {
     	String metadataPath = "";
+    	String email = (String)getRequest().getAttributes().get("email");
     	
     	if(getRequest().getAttributes().containsKey("tag")){
-    		String email = (String)getRequest().getAttributes().get("email");
     		String tag = getTag((String)getRequest().getAttributes().get("tag"));
 			
     		url = getTaggedEntry(tag, email);
     		metadataPath = url;
     	} else {
     		url = getRequest().getResourceRef().getPath();
-    		metadataPath = url.substring(METADATA_ROUTE.length());
+    		
+    		String entryId = getEntryId(url);
+    		
+    		if (!Character.isDigit(entryId.charAt(0))){
+    			String tag = getTag(entryId);
+    			url = getTaggedEntry(tag, email);
+    			metadataPath = url;
+    		} else {
+    			metadataPath = url.substring(METADATA_ROUTE.length());
+    		}
     	}
     	
     	datum = getMetadatum(metadataPath);
@@ -90,7 +99,7 @@ public class MDatumResource extends BaseResource {
     	String decodedTag = "";
     	
     	try {
-			decodedTag = URLDecoder.decode((String)getRequest().getAttributes().get("tag"), ENCODING)
+			decodedTag = URLDecoder.decode(tag, ENCODING)
 					.replaceAll("^\"|\"$", "");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.severe("Unable to decode tag query: " + e.getMessage());
@@ -210,4 +219,9 @@ public class MDatumResource extends BaseResource {
 
         return representation;
     }   
+    
+    private static String getEntryId(final String url){
+        // return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
+        return url.replaceFirst(".*/([^/?]+).*", "$1");
+    }
 }

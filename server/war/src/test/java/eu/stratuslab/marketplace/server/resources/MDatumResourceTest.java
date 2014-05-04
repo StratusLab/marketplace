@@ -145,6 +145,36 @@ public class MDatumResourceTest extends ResourceTestBase {
 		assertThat(identifier, is(responseId));
 		assertThat(alternative, is(responseAlt));
 	}
+        
+    @Test
+    public void testGetTagOtherRoute() throws Exception {
+    	postMetadataFile("valid-alternative.xml");
+   		
+   		Document metadata = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-alternative.xml"));
+		
+   		String identifier = getValueFromDoc(metadata, "identifier");
+   		String email = getValueFromDoc(metadata, "email");
+   		String alternative = getValueFromDoc(metadata, "alternative");
+   		
+   		String iri = "/metadata/" + identifier
+				+ "/" + email
+				+ "/" + alternative;
+   		
+   		Map<String, Object> attributes = createAttributes("email", email);
+   		Request request = createRequest(attributes, Method.GET,
+				null, iri);
+   		
+   		Response response = executeRequest(request);
+   		Document responseDoc = extractXmlDocument(response.getEntity()
+				.getStream());
+   		
+   		String responseId = getValueFromDoc(responseDoc, "identifier");
+   		String responseAlt = getValueFromDoc(responseDoc, "alternative");
+		
+		assertThat(identifier, is(responseId));
+		assertThat(alternative, is(responseAlt));
+    }
 	
         @Test
   	public void testGetTagReturnsLatest() throws Exception {
