@@ -18,16 +18,20 @@ import org.restlet.Response;
 import org.restlet.data.Method;
 import org.restlet.data.Protocol;
 import org.restlet.data.Status;
+import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.server.MarketPlaceApplication;
+import eu.stratuslab.marketplace.server.store.rdf.RdfStore;
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
 public class EndorserResourceTest extends ResourceTestBase {
 	
-	String email;
-	String identifier;
+	private static String email;
+	private static String identifier;
+	private static String created;
 	
 	static String tmpDir;
+	private static RdfStore store;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -35,15 +39,18 @@ public class EndorserResourceTest extends ResourceTestBase {
 		
 		// Create a new Component.
         Component component = new Component();
-		application = new MarketPlaceApplication(tmpDir, "memory", "file");
+		application = new MarketPlaceApplication(tmpDir, "solr", "file");
 		component.getDefaultHost().attach("/", application);
 		component.getClients().add(Protocol.CLAP);
 		application.setContext(component.getDefaultHost().getContext());
 		application.createInboundRoot();
+		
+		store = application.getMetadataRdfStore();
 	}
 	
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		store.remove(identifier + "/" + email + "/" + created);	
 		application.stop();
 		
 		FileUtils.deleteDirectory(new File(tmpDir));
@@ -53,12 +60,12 @@ public class EndorserResourceTest extends ResourceTestBase {
 	public void setUp() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
 		
-		email = getValueFromDoc(extractXmlDocument(
-				this.getClass().getResourceAsStream("valid-indate-signature.xml")),
-				"email");
-		identifier = getValueFromDoc(extractXmlDocument(
-				this.getClass().getResourceAsStream("valid-indate-signature.xml")),
-				"identifier");
+		Document doc = extractXmlDocument(
+				this.getClass().getResourceAsStream("valid-indate-signature.xml"));
+		
+		identifier = getValueFromDoc(doc, "identifier");
+		email = getValueFromDoc(doc, "email");
+		created = getValueFromDoc(doc, "created");
 	}
 	
 	@Test

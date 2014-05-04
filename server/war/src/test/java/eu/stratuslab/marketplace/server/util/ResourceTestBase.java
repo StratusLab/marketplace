@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.commons.io.FileUtils;
-import org.restlet.Application;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
@@ -22,12 +21,13 @@ import org.restlet.resource.ServerResource;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.XMLUtils;
+import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.resources.MDataResource;
 import eu.stratuslab.marketplace.server.utils.XPathUtils;
 
 public class ResourceTestBase {
 
-	protected static Application application;
+	protected static MarketPlaceApplication application;
 	
 	public Request createRequest(Map<String, Object> attributes, Method method)
 			throws Exception {
