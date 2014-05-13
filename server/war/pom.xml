@@ -122,7 +122,7 @@
 			<scope>compile</scope>
 		</dependency>
                 <dependency>
-                        <groupId>couchbase</groupId>
+                        <groupId>com.couchbase.client</groupId>
                         <artifactId>couchbase-client</artifactId>
                 </dependency>
                 <dependency>
