@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,13 +30,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.restlet.Request;
 import org.restlet.data.MediaType;
+import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.ext.freemarker.TemplateRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+import org.restlet.util.Series;
 import org.w3c.dom.Document;
 
 import eu.stratuslab.marketplace.XMLUtils;
@@ -56,19 +59,19 @@ import eu.stratuslab.marketplace.server.utils.XPathUtils;
  */
 /**
  * @author Stuart Kenny
- * 
+ *
  */
 public abstract class BaseResource extends ServerResource {
 
 	protected static final Logger LOGGER = Logger.getLogger("org.restlet");
-   
+
 	protected static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 	protected static final String NO_TITLE = null;
-	
+
 	protected RdfStore getMetadataRdfStore() {
 		return ((MarketPlaceApplication) getApplication()).getMetadataRdfStore();
 	}
-	
+
 	protected FileStore getMetadataFileStore() {
 		return ((MarketPlaceApplication) getApplication()).getMetadataFileStore();
 	}
@@ -76,7 +79,7 @@ public abstract class BaseResource extends ServerResource {
 	protected QueryBuilder getQueryBuilder() {
 		return ((MarketPlaceApplication) getApplication()).getQueryBuilder();
 	}
-	
+
 	protected String getDataDir() {
 		return ((MarketPlaceApplication) getApplication()).getDataDir();
 	}
@@ -104,7 +107,7 @@ public abstract class BaseResource extends ServerResource {
 		Map<String, Object> info = new HashMap<String, Object>();
 
 		// Add the standard base URL declaration.
-		info.put("baseurl", getRequest().getRootRef().toString());
+		info.put("baseurl", getBaseUrl(getRequest()));
 
 		// Add the title if appropriate.
 		if (title != null && !"".equals(title)) {
@@ -116,7 +119,7 @@ public abstract class BaseResource extends ServerResource {
 
 	protected String commitMetadataEntry(File uploadedFile, Document doc) {
 		writeMetadataToFileStore(doc);
-		
+
 		String metadataPath = null;
 		try {
 			metadataPath = writeMetadataToRdfStore(doc);
@@ -132,7 +135,7 @@ public abstract class BaseResource extends ServerResource {
 
 		return metadataPath;
 	}
-	
+
 	protected void writeMetadataToFileStore(Document doc) {
 
 		String[] coordinates = getMetadataEntryCoordinates(doc);
@@ -141,11 +144,11 @@ public abstract class BaseResource extends ServerResource {
 		String endorser = coordinates[1];
 		String created = coordinates[2];
 
-		String key = 
-			identifier + File.separator 
-		+ endorser + File.separator 
+		String key =
+			identifier + File.separator
+		+ endorser + File.separator
 		+ created;
-		
+
 		getMetadataFileStore().store(key, doc);
 	}
 
@@ -162,7 +165,7 @@ public abstract class BaseResource extends ServerResource {
 
 		getMetadataFileStore().remove(key);
 	}
-	
+
 	// Create a deep copy of the document and strip signature elements.
 	protected String createRdfEntry(Document doc) {
 		Document copy = (Document) doc.cloneNode(true);
@@ -179,33 +182,33 @@ public abstract class BaseResource extends ServerResource {
 		String newPath = coordinates[0] + "/" + coordinates[1] + "/" + coordinates[2];
 		getMetadataRdfStore().tag(newPath, "latest");
 	}
-	
+
 	private void removeTag(String[] coordinates, String previousLatest){
 		if(previousLatest != null && !previousLatest.equals("null")){
 			String path = coordinates[0] + "/" + coordinates[1] + "/" + previousLatest;
 			getMetadataRdfStore().removeTag(path, "latest");
 		}
 	}
-	
+
 	private String getPreviousLatest(String[] coordinates) {
 		String previousLatest = null;
-						
+
 		String identifier = coordinates[0];
         String endorser = coordinates[1];
-        
+
         String query = getQueryBuilder().buildLatestEntryQuery(
         		identifier, endorser);
-        
+
         try {
         	List<Map<String, String>> results = query(query);
-        	
+
         	if(results.size() > 0){
         		previousLatest = results.get(0).get("latest");
         	}
         } catch(MarketplaceException e){
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
         }
-		
+
 		return previousLatest;
 	}
 
@@ -230,21 +233,49 @@ public abstract class BaseResource extends ServerResource {
 
 		String metadataPath = identifier + "/" + endorser + "/" + created;
 		String previousLatest = getPreviousLatest(coordinates);
-				
+
 		String rdfEntry = createRdfEntry(datumDoc);
 		if (!storeMetadatum(metadataPath, rdfEntry)) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
-		
+
 		removeTag(coordinates, previousLatest);
 		tagEntry(coordinates);
-				
+
 		return metadataPath;
 	}
 
-	/**
+    // always has a trailing slash!
+    public static String getBaseUrl(Request request) {
+
+        Series headers = (Series) request.getAttributes().get("org.restlet.http.headers");
+
+        String scheme = null;
+        String authority = null;
+        if (headers != null) {
+            scheme = headers.getFirstValue("X-Forwarded-Scheme");
+            authority = headers.getFirstValue("Host");
+        }
+
+        Reference ref = request.getRootRef();
+        if (authority != null) {
+            ref.setAuthority(authority);
+        }
+        if (scheme != null) {
+            ref.setScheme(scheme);
+        }
+
+        String url = ref.toString();
+        if (url.endsWith("/")) {
+            return url;
+        } else {
+            return url + "/";
+        }
+    }
+
+    /**
 	 * Stores a new metadata entry
-	 * 
+	 *
 	 * @param metadataPath
 	 *            identifier of the metadata entry
 	 * @param rdf
@@ -258,7 +289,7 @@ public abstract class BaseResource extends ServerResource {
 
 	/**
 	 * Retrieve a particular metadata entry
-	 * 
+	 *
 	 * @param metadataPath
 	 *            identifier of the metadata entry
 	 * @return metadata entry
@@ -271,7 +302,7 @@ public abstract class BaseResource extends ServerResource {
 
 	/**
 	 * Remove a metadata entry
-	 * 
+	 *
 	 * @param iri
 	 *            identifier of the metadata entry
 	 */
@@ -297,7 +328,7 @@ public abstract class BaseResource extends ServerResource {
 
 	/**
 	 * Query the metadata
-	 * 
+	 *
 	 * @param queryString
 	 *            the query
 	 * @return the resultset as a Java Collection
@@ -309,7 +340,7 @@ public abstract class BaseResource extends ServerResource {
 
 		return list;
 	}
-	
+
 	protected Representation createStatusRepresentation(String title,
 			String message) {
 		Representation status = null;

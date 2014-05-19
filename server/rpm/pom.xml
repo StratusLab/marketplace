@@ -142,6 +142,11 @@ fi
           <mappings>
 
             <mapping>
+              <directory>/var/log/stratuslab/marketplace</directory>
+              <directoryIncluded>true</directoryIncluded>
+            </mapping>
+
+            <mapping>
               <directory>${installation.dir}</directory>
               <directoryIncluded>true</directoryIncluded>
             </mapping>
@@ -207,22 +212,6 @@ fi
 		  <excludes>
 		    <exclude>*</exclude>
 		  </excludes>
-		</source>
-	      </sources>
-	    </mapping>
-
-	    <mapping>
-	      <directory>${installation.dir}/etc</directory>
-	      <filemode>755</filemode>
-	      <username>slmkpl</username>
-	      <groupname>stratuslab</groupname>
-	      <directoryIncluded>false</directoryIncluded>
-	      <sources>
-		<source>
-		  <location>src/main/scripts</location>
-		  <includes>
-		    <include>generate-jetty-certificate.sh</include>
-		  </includes>
 		</source>
 	      </sources>
 	    </mapping>
@@ -332,6 +321,29 @@ fi
                     <include>marketplace.cfg</include>
                     <include>marketplace-sync.cfg</include>
                   </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/nginx/conf.d/stratuslab-locations</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>src/main/resources/conf.d</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/usr/share/nginx/stratuslab</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <username>root</username>
+              <groupname>root</groupname>
+              <sources>
+                <source>
+                  <location>src/main/html</location>
                 </source>
               </sources>
             </mapping>

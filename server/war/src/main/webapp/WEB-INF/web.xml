@@ -5,7 +5,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
             version="2.5">
 
-    <display-name>StratusLab Market-Place</display-name>
+    <display-name>StratusLab Marketplace</display-name>
 
     <context-param>
       <param-name>org.restlet.clients</param-name>

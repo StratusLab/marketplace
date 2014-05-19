@@ -401,8 +401,6 @@ case "$ACTION" in
       exit
     fi
 
-    $JETTY_HOME/etc/generate-jetty-certificate.sh
-
     if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1 
     then
       unset CH_USER

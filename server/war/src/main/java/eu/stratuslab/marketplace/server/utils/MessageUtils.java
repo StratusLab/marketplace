@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,32 +37,32 @@ public final class MessageUtils {
 
     private static final String ABUSE_MSG = "%n"
     	+ "Abuse has been reported for the following entry: %s%n";
-    
+
     private MessageUtils() {
 
     }
 
-    public static String createNotification(String baseUrl, File file, 
+    public static String createNotification(String baseUrl, File file,
     		String[] coords, String deprecated) {
         String identifier = coords[0];
         String created = coords[2];
     	String tag = (!deprecated.equals("")) ? "deprecating" : "for";
-        
+
     	String uuid = extractUUIDFromFile(file);
-        
-        String confirmUrl = baseUrl + "/action/" + uuid + "/confirm/";
-        String abortUrl = baseUrl + "/action/" + uuid + "/abort/";
-        String abuseUrl = baseUrl + "/action/" + uuid + "/abuse/";
-        return String.format(CONFIRM_MSG, tag, identifier, created, 
+
+        String confirmUrl = baseUrl + "action/" + uuid + "/confirm/";
+        String abortUrl = baseUrl + "action/" + uuid + "/abort/";
+        String abuseUrl = baseUrl + "action/" + uuid + "/abuse/";
+        return String.format(CONFIRM_MSG, tag, identifier, created,
         		confirmUrl, abortUrl, abuseUrl);
     }
 
     public static String createAbuseNotification(File file){
     	String uuid = extractUUIDFromFile(file);
-    	
+
     	return String.format(ABUSE_MSG, uuid);
     }
-    
+
     private static String extractUUIDFromFile(File file) {
         String name = file.getName();
         int index = name.indexOf('.');

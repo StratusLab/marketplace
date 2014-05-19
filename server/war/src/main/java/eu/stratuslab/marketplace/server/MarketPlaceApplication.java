@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import eu.stratuslab.marketplace.server.resources.BaseResource;
 import org.json.simple.JSONValue;
 import org.restlet.Application;
 import org.restlet.Context;
@@ -86,36 +87,36 @@ import eu.stratuslab.marketplace.server.utils.Reminder;
 public class MarketPlaceApplication extends Application {
 
     private static final Logger LOGGER = Logger.getLogger("org.restlet");
-    
+
     private final ScheduledExecutorService scheduler = Executors
             .newScheduledThreadPool(2);
     private final ScheduledExecutorService indexUpdater = Executors.newScheduledThreadPool(1);
-    
+
     private ScheduledFuture<?> reminderHandle;
     private ScheduledFuture<?> indexUpdateHandle;
 
     private static final int REMINDER_INTERVAL = 30;
     private static final int EXPIRY_INTERVAL = 1;
-    
+
     private Reminder reminder;
     private Reminder expiry;
-    
+
     private RdfStore store = null;
     private FileStore fileStore = null;
     private QueryBuilder queryBuilder = null;
-    
+
     private String dataDir = null;
 
     private freemarker.template.Configuration freeMarkerConfiguration = null;
 
     private EndorserWhitelist whitelist;
-    
+
     private RdfStoreUpdater rdfUpdater;
-   
+
 	private boolean invalidConfig = false;
 
 	public MarketPlaceApplication() {
-		try {		
+		try {
 			String storeType = Configuration.getParameterValue(STORE_TYPE);
 			String fileStoreType = Configuration.getParameterValue(FILESTORE_TYPE);
 			String dataDir = Configuration.getParameterValue(DATA_DIR);
@@ -144,42 +145,42 @@ public class MarketPlaceApplication extends Application {
                 MediaType.APPLICATION_RDF_XML, true);
         getMetadataService().addExtension("application_xml",
                 MediaType.APPLICATION_XML, false);
-        
+
         getMetadataService().setDefaultMediaType(MediaType.APPLICATION_XML);
 
         setStatusService(new MarketPlaceStatusService());
 
         getTunnelService().setUserAgentTunnel(true);
-        
+
         this.dataDir = dataDir;
-        
+
         boolean success = MetadataFileUtils.createIfNotExists(dataDir);
         if(!success){
         	LOGGER.severe("Unable to create directory: " + dataDir);
         }
-        
+
         success = MetadataFileUtils.createIfNotExists(
         		Configuration.getParameterValue(PENDING_DIR));
         if(!success){
-        	LOGGER.severe("Unable to create directory: " 
+        	LOGGER.severe("Unable to create directory: "
         			+ Configuration.getParameterValue(PENDING_DIR));
         }
-        
+
         whitelist = new EndorserWhitelist();
 
         RdfStoreFactory factory = new RdfStoreFactoryImpl();
         store = factory.createRdfStore(RdfStoreFactory.SESAME_PROVIDER,
                 storeType);
         store.initialize();
-               
+
         FileStore internalStore = null;
-        
+
         if(fileStoreType.equals("file")){
         	internalStore = new FlatFileStore(dataDir);
         } else if(fileStoreType.equals("couchbase")){
         	internalStore = new CouchbaseStore(dataDir);
         }
-        
+
         if(Configuration.getParameterValueAsBoolean(REPLICATION_ENABLED)){
         	 fileStore = new GitStore(dataDir, internalStore);
 
@@ -191,14 +192,14 @@ public class MarketPlaceApplication extends Application {
         	};
 
         	rdfUpdater = new RdfStoreUpdater(fileStore, new Processor(this));
-        	indexUpdateHandle = indexUpdater.scheduleWithFixedDelay(update, 
+        	indexUpdateHandle = indexUpdater.scheduleWithFixedDelay(update,
         			1, 5, TimeUnit.MINUTES);
         } else {
         	fileStore = internalStore;
         }
 
         queryBuilder = new SparqlBuilder();
-        
+
         final Runnable remind = new Runnable() {
             public void run() {
                 remind();
@@ -210,17 +211,17 @@ public class MarketPlaceApplication extends Application {
                 expiry();
             }
         };
-        
+
         reminder = new Reminder(this);
         expiry = new Reminder(this);
-        
+
         if (Configuration.getParameterValueAsBoolean(ENDORSER_REMINDER)) {
-        	reminderHandle = scheduler.scheduleWithFixedDelay(remind, REMINDER_INTERVAL, 
+        	reminderHandle = scheduler.scheduleWithFixedDelay(remind, REMINDER_INTERVAL,
         			REMINDER_INTERVAL, TimeUnit.DAYS);
-            reminderHandle = scheduler.scheduleWithFixedDelay(expires, EXPIRY_INTERVAL, 
+            reminderHandle = scheduler.scheduleWithFixedDelay(expires, EXPIRY_INTERVAL,
             		EXPIRY_INTERVAL, TimeUnit.DAYS);
         }
-        
+
     }
 
     /**
@@ -236,11 +237,11 @@ public class MarketPlaceApplication extends Application {
 
         // Create a router Restlet that defines routes.
         Router router = new Router(context);
-        
+
         if(invalidConfig){
         	router.attach("/", ErrorResource.class);
         } else {
-        	TemplateRoute route = router.attach("/metadata/{email}?tag={tag}", MDatumResource.class);       
+        	TemplateRoute route = router.attach("/metadata/{email}?tag={tag}", MDatumResource.class);
         	route.setMatchingQuery(true);
 
         	// Defines a route for the resource "list of metadata entries"
@@ -285,11 +286,11 @@ public class MarketPlaceApplication extends Application {
         	route = router.attach("/action/", new ActionRouter());
         	route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 
-        	attachDirectory(router, getContext(), "/css/", 
+        	attachDirectory(router, getContext(), "/css/",
         			Configuration.getParameterValue(Parameter.STYLE_PATH)
         			);
 
-        	attachDirectory(router, getContext(), "/js/", 
+        	attachDirectory(router, getContext(), "/js/",
         			Configuration.getParameterValue(Parameter.JS_PATH)
         			);
 
@@ -300,10 +301,10 @@ public class MarketPlaceApplication extends Application {
         	// Unknown root pages get the home page.
         	router.attachDefault(HomeResource.class);
         }
-        
+
         Filter filter = new DoubleSlashFilter();
         filter.setNext(router);
-        
+
         return filter;
     }
 
@@ -327,11 +328,11 @@ public class MarketPlaceApplication extends Application {
     private void expiry() {
         expiry.expiry();
     }
-    
+
     private void rdfIndexUpdate() {
     	rdfUpdater.update();
     }
-    
+
     @Override
     public void stop() {
     	if(store != null){
@@ -341,11 +342,11 @@ public class MarketPlaceApplication extends Application {
     	if(fileStore != null){
     		fileStore.shutdown();
     	}
-    	
+
         if (reminderHandle != null) {
             reminderHandle.cancel(true);
         }
-        
+
         if(indexUpdateHandle != null){
         	indexUpdateHandle.cancel(true);
         }
@@ -358,11 +359,11 @@ public class MarketPlaceApplication extends Application {
     public FileStore getMetadataFileStore(){
     	return fileStore;
     }
-    
+
     public QueryBuilder getQueryBuilder() {
 		return queryBuilder;
 	}
-    
+
     public String getDataDir() {
         return dataDir;
     }
@@ -402,7 +403,7 @@ public class MarketPlaceApplication extends Application {
     		return Filter.CONTINUE;
     	}
     }
-    
+
     class MarketPlaceStatusService extends StatusService {
 
         public Representation getRepresentation(Status status, Request request,
@@ -428,7 +429,7 @@ public class MarketPlaceApplication extends Application {
             } else {
                 // Create the data model
                 Map<String, String> dataModel = new TreeMap<String, String>();
-                dataModel.put("baseurl", request.getRootRef().toString());
+                dataModel.put("baseurl", BaseResource.getBaseUrl(request));
                 dataModel.put("statusName", response.getStatus().getReasonPhrase());
                 dataModel.put("statusDescription", response.getStatus()
                         .getDescription());
@@ -462,5 +463,5 @@ public class MarketPlaceApplication extends Application {
         }
 
     }
-	
+
 }
