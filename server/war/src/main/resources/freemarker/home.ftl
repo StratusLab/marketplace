@@ -1,7 +1,6 @@
 <html>
-
   <head> 
-<meta http-equiv="REFRESH" content="0;url=/metadata">
+    <base href="${baseurl}"> 
+    <meta http-equiv="REFRESH" content="0;url=metadata">
   </head>
-
 </html>
