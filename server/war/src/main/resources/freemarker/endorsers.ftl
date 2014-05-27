@@ -39,8 +39,8 @@
       </tfoot>
 </table>
 
-<script type="text/javascript" language="javascript" src="/js/endorsers.js"></script>
-  
+<script type="text/javascript" language="javascript" src="js/endorsers.js"></script>
+
 </div>
 </div>
 

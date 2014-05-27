@@ -7,7 +7,7 @@
      <div class="Banner">
      </div>
   </div>
-  
+
 <div class="Content">
 
 <h1>${title}</h1>
@@ -19,7 +19,7 @@
         <option value="60">60 days</option>
         <option value="90">90 days</option>
         </select>
-     </form> 
+     </form>
 
      <table cellpadding="0" cellspacing="0" border="0" class="display" id="endorserhistory">
 	  <thead>
@@ -40,9 +40,9 @@
               </tr>
              </#list>
            </tbody>
-      </table> 
+      </table>
 
-      <script type="text/javascript" language="javascript" src="/js/endorser.js"></script>
+      <script type="text/javascript" language="javascript" src="js/endorser.js"></script>
 
 </div>
 </div>

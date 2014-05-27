@@ -5,12 +5,12 @@
 
   <title>${title!}</title>
 
-  <base href="${baseurl}"> 
+  <base href="${baseurl}">
 
-  <script type="text/javascript" language="javascript" src="/js/jquery.min.js"></script>
-  <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" language="javascript" src="/js/jquery.datatable.listbox.plugin.js"></script>
-  <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.pipelining.js"></script>
+  <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" language="javascript" src="js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" language="javascript" src="js/jquery.datatable.listbox.plugin.js"></script>
+  <script type="text/javascript" language="javascript" src="js/jquery.dataTables.pipelining.js"></script>
 
   <script type="text/javascript">
         $(function() {

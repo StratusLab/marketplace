@@ -78,7 +78,7 @@
 </form>
 </div>
 
-<script type="text/javascript" language="javascript" src="/js/metadata.js"></script>
+<script type="text/javascript" language="javascript" src="js/metadata.js"></script>
 
 </div>
 

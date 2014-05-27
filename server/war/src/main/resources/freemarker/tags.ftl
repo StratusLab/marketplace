@@ -7,7 +7,7 @@
      <div class="Banner">
      </div>
   </div>
-  
+
 <div class="Content">
 
 <h1>${title}</h1>
@@ -25,9 +25,9 @@
               </tr>
              </#list>
            </tbody>
-      </table> 
+      </table>
 
-      <script type="text/javascript" language="javascript" src="/js/tags.js"></script>
+      <script type="text/javascript" language="javascript" src="js/tags.js"></script>
 
 </div>
 </div>
