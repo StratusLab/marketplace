@@ -28,14 +28,14 @@ import eu.stratuslab.marketplace.server.MarketPlaceApplication;
 import eu.stratuslab.marketplace.server.util.ResourceTestBase;
 
 public class MDatumResourceTest extends ResourceTestBase {
-	
+
 	private static String tmpDir;
-	
+
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		tmpDir = getTempDir("marketplace");
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		// Create a new Component.
@@ -46,17 +46,17 @@ public class MDatumResourceTest extends ResourceTestBase {
 		application.setContext(component.getDefaultHost().getContext());
 		application.createInboundRoot();
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		application.stop();
 	}
-	
+
 	@AfterClass
 	public static void tearDownClass() throws Exception {
 		FileUtils.deleteDirectory(new File(tmpDir));
 	}
-	
+
 	@Test
 	public void testGetHtml() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
@@ -77,7 +77,7 @@ public class MDatumResourceTest extends ResourceTestBase {
 		assertThat(response.getEntity().getMediaType().getName()
 				, is("text/html"));
 	}
-	
+
 	@Test
 	public void testGetXml() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
@@ -95,10 +95,10 @@ public class MDatumResourceTest extends ResourceTestBase {
 		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.TEXT_XML));
 		request.setClientInfo(info);
 		Response response = executeRequest(request);
-		assertThat(response.getEntity().getMediaType().getName(), 
+		assertThat(response.getEntity().getMediaType().getName(),
 				is("application/rdf+xml"));
 		}
-	
+
 	@Test
 	public void testGetJson() throws Exception {
 		postMetadataFile("valid-indate-signature.xml");
@@ -116,86 +116,85 @@ public class MDatumResourceTest extends ResourceTestBase {
 		info.getAcceptedMediaTypes().add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
 		request.setClientInfo(info);
 		Response response = executeRequest(request);
-		assertThat(response.getEntity().getMediaType().getName(), 
+		assertThat(response.getEntity().getMediaType().getName(),
 				is("application/json"));
 	}
-	
+
         @Test
    	public void testGetTag() throws Exception {
    		postMetadataFile("valid-alternative.xml");
-   		
+
    		Document metadata = extractXmlDocument(
 				this.getClass().getResourceAsStream("valid-alternative.xml"));
-		
+
    		String identifier = getValueFromDoc(metadata, "identifier");
    		String email = getValueFromDoc(metadata, "email");
    		String alternative = getValueFromDoc(metadata, "alternative");
-   		
+
    		Map<String, Object> attributes = createAttributes("email", email);
    		attributes.put("tag", alternative);
-   		
+
 		Request getRequest = createGetRequest(attributes);
 		Response response = executeRequest(getRequest);
-		
+
 		Document responseDoc = extractXmlDocument(response.getEntity()
 				.getStream());
 		String responseId = getValueFromDoc(responseDoc, "identifier");
    		String responseAlt = getValueFromDoc(responseDoc, "alternative");
-		
+
 		assertThat(identifier, is(responseId));
 		assertThat(alternative, is(responseAlt));
 	}
-        
+
     @Test
     public void testGetTagOtherRoute() throws Exception {
     	postMetadataFile("valid-alternative.xml");
-   		
+
    		Document metadata = extractXmlDocument(
 				this.getClass().getResourceAsStream("valid-alternative.xml"));
-		
+
    		String identifier = getValueFromDoc(metadata, "identifier");
    		String email = getValueFromDoc(metadata, "email");
    		String alternative = getValueFromDoc(metadata, "alternative");
-   		
-   		String iri = "/metadata/" + identifier
-				+ "/" + email
-				+ "/" + alternative;
-   		
+
+   		String iri = "/tag/" + email + "/" + alternative;
+
    		Map<String, Object> attributes = createAttributes("email", email);
+        attributes.put("tag", alternative);
    		Request request = createRequest(attributes, Method.GET,
 				null, iri);
-   		
+
    		Response response = executeRequest(request);
    		Document responseDoc = extractXmlDocument(response.getEntity()
 				.getStream());
-   		
+
    		String responseId = getValueFromDoc(responseDoc, "identifier");
    		String responseAlt = getValueFromDoc(responseDoc, "alternative");
-		
+
 		assertThat(identifier, is(responseId));
 		assertThat(alternative, is(responseAlt));
     }
-	
+
         @Test
   	public void testGetTagReturnsLatest() throws Exception {
   		postMetadataFile("valid-alternative.xml");
   		postMetadataFile("valid-alternative-newid.xml");
-  		
+
   		Document metadata = extractXmlDocument(
 				this.getClass().getResourceAsStream("valid-alternative-newid.xml"));
-  				
+
   		String identifier = getValueFromDoc(metadata, "identifier");
   		String email = getValueFromDoc(metadata, "email");
   		String created = getValueFromDoc(metadata, "created");
   		String alternative = getValueFromDoc(metadata, "alternative");
   		String description = getValueFromDoc(metadata, "description");
-  		
+
   		Map<String, Object> attributes = createAttributes("email", email);
   		attributes.put("tag", alternative);
-  		
+
 		Request getRequest = createGetRequest(attributes);
 		Response response = executeRequest(getRequest);
-		
+
 		Document responseDoc = extractXmlDocument(response.getEntity()
 				.getStream());
 		String responseId = getValueFromDoc(responseDoc, "identifier");
@@ -203,16 +202,16 @@ public class MDatumResourceTest extends ResourceTestBase {
   		String responseAlt = getValueFromDoc(responseDoc, "alternative");
   		String responseCreated = getValueFromDoc(responseDoc, "created");
   		String responseDesc = getValueFromDoc(responseDoc, "description");
-		
+
 		assertThat(identifier, is(responseId));
 		assertThat(email, is(responseEmail));
 		assertThat(alternative, is(responseAlt));
 		assertThat(description, is(responseDesc));
 		assertThat(created, is(responseCreated));
 	}
-   
+
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDatumResource());
 	}
-			
+
 }

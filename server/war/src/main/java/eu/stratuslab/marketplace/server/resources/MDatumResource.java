@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -69,31 +70,29 @@ public class MDatumResource extends BaseResource {
 
     @Override
     protected void doInit() {
-    	String metadataPath = "";
-    	String email = (String)getRequest().getAttributes().get("email");
+    	String metadataPath = null;
+        ConcurrentMap<String, Object> attrs = getRequest().getAttributes();
+    	String email = (String) attrs.get("email");
 
-    	if(getRequest().getAttributes().containsKey("tag")){
-    		String tag = getTag((String)getRequest().getAttributes().get("tag"));
+    	if(attrs.containsKey("tag")){
+    		String tag = getTag((String) attrs.get("tag"));
 
     		url = getTaggedEntry(tag, email);
     		metadataPath = url;
     	} else {
     		url = getRequest().getResourceRef().getPath();
 
-    		String entryId = getEntryId(url);
-
-    		if (!Character.isDigit(entryId.charAt(0))){
-    			String tag = getTag(entryId);
-    			url = getTaggedEntry(tag, email);
-    			metadataPath = url;
-    		} else {
-    			metadataPath = url.substring(METADATA_ROUTE.length());
-    		}
+            int i = url.indexOf(METADATA_ROUTE);
+            if (i >= 0) {
+                i += METADATA_ROUTE.length();
+                metadataPath = url.substring(i);
+            }
     	}
 
-        System.err.println("DEBUG metadata path: " + metadataPath);
-    	datum = getMetadatum(metadataPath);
-    	identifier = metadataPath.substring(0, metadataPath.indexOf('/'));
+        if (metadataPath != null) {
+            datum = getMetadatum(metadataPath);
+            identifier = metadataPath.substring(0, metadataPath.indexOf('/'));
+        }
     }
 
     private String getTag(String tag){
