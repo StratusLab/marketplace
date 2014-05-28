@@ -34,7 +34,7 @@ function buildHtmlDisplay( aData )
                         + "<tr><td><div id='detail'>Kind:</div></td>" 
                         + "<td><div id='detail'>" + aData[5] + "</div></td></tr>" + "<tr></tr></div>"
                         + "<tr><td colspan='3'><div id='description'>" + aData[9] + "</div></td></tr>"
-                        + "<tr><td><a href='/metadata/" + aData[7] + "/" + aData[4] + "/" + aData[6] + "'>More...</a></td></tr>"
+                        + "<tr><td><a href='metadata/" + aData[7] + "/" + aData[4] + "/" + aData[6] + "'>More...</a></td></tr>"
                         + "</table>";
 
         return display;
