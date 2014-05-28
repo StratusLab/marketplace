@@ -80,13 +80,15 @@ public class MDatumResource extends BaseResource {
     	} else {
     		url = getRequest().getResourceRef().getPath();
 
-            int i = url.indexOf(METADATA_ROUTE);
-            if (i >= 0) {
-                metadataPath = url.substring(i);
-            } else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
-                        "metadata entry not found.\n");
-            }
+    		String entryId = getEntryId(url);
+
+    		if (!Character.isDigit(entryId.charAt(0))){
+    			String tag = getTag(entryId);
+    			url = getTaggedEntry(tag, email);
+    			metadataPath = url;
+    		} else {
+    			metadataPath = url.substring(METADATA_ROUTE.length());
+    		}
     	}
 
         System.err.println("DEBUG metadata path: " + metadataPath);
@@ -219,4 +221,8 @@ public class MDatumResource extends BaseResource {
         return representation;
     }
 
+    private static String getEntryId(final String url){
+        // return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
+        return url.replaceFirst(".*/([^/?]+).*", "$1");
+    }
 }

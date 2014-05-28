@@ -21,7 +21,7 @@
           <tbody>
             <#list content as tags>
               <tr>
-              <td><a href="tag/${email}/${tags.tag}">${tags.tag}</a></td>
+              <td><a href=metadata/${email}?tag="${tags.tag}">${tags.tag}</a></td>
               </tr>
              </#list>
            </tbody>

@@ -244,11 +244,7 @@ public class MarketPlaceApplication extends Application {
         	TemplateRoute route = router.attach("/metadata/{email}?tag={tag}", MDatumResource.class);
         	route.setMatchingQuery(true);
 
-            // Defines routes for the endorser tags.
-            router.attach("/tag/{email}/{tag}", MDatumResource.class);
-            router.attach("/tag/{email}/{tag}/", MDatumResource.class);
-
-            // Defines a route for the resource "list of metadata entries"
+        	// Defines a route for the resource "list of metadata entries"
         	router.attach("/metadata", MDataResource.class);
         	router.attach("/metadata/", MDataResource.class);
         	router.attach("/metadata/{arg1}", MDataResource.class);
