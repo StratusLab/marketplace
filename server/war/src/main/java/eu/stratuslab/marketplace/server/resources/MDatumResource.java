@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,28 +60,28 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 public class MDatumResource extends BaseResource {
 
 	private static final String ENCODING = "UTF-8";
-	
+
 	private static final String METADATA_ROUTE = "/metadata/";
-	
+
     private String datum = null;
     private String identifier = null;
-    private String url = null;        
+    private String url = null;
 
     @Override
     protected void doInit() {
     	String metadataPath = "";
     	String email = (String)getRequest().getAttributes().get("email");
-    	
+
     	if(getRequest().getAttributes().containsKey("tag")){
     		String tag = getTag((String)getRequest().getAttributes().get("tag"));
-			
+
     		url = getTaggedEntry(tag, email);
     		metadataPath = url;
     	} else {
     		url = getRequest().getResourceRef().getPath();
-    		
+
     		String entryId = getEntryId(url);
-    		
+
     		if (!Character.isDigit(entryId.charAt(0))){
     			String tag = getTag(entryId);
     			url = getTaggedEntry(tag, email);
@@ -90,26 +90,27 @@ public class MDatumResource extends BaseResource {
     			metadataPath = url.substring(METADATA_ROUTE.length());
     		}
     	}
-    	
+
+        System.err.println("DEBUG metadata path: " + metadataPath);
     	datum = getMetadatum(metadataPath);
     	identifier = metadataPath.substring(0, metadataPath.indexOf('/'));
     }
 
     private String getTag(String tag){
     	String decodedTag = "";
-    	
+
     	try {
 			decodedTag = URLDecoder.decode(tag, ENCODING)
 					.replaceAll("^\"|\"$", "");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.severe("Unable to decode tag query: " + e.getMessage());
 		}
-    	
+
     	return decodedTag;
     }
-    
+
     private String getTaggedEntry(String tag, String email){
-    	
+
     	List<Map<String, String>> results = new ArrayList<Map<String, String>>();
         try {
         	String query = getQueryBuilder().buildTagQuery(tag, email);
@@ -117,37 +118,37 @@ public class MDatumResource extends BaseResource {
         } catch(MarketplaceException e){
         	throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e);
         }
-        
+
         String identifier = "";
         String created = "";
-        
+
         if (results.size() > 0) {
         	Map<String, String> resultRow = results.get(0);
         	identifier = resultRow.get("identifier");
         	created = resultRow.get("created");
         }
-        
+
         if (identifier == "null" || created == "null")
         	throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
-        
+
     	return identifier + "/" + email + "/" + created;
     }
-    
+
     @Get("xml")
     public Representation toXml() {
     	if (this.datum == null) {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
-    	
+
     	StringRepresentation representation = new StringRepresentation(
                 new StringBuilder(datum), MediaType.APPLICATION_RDF_XML);
 
         Disposition disposition = new Disposition();
         disposition.setFilename(identifier + ".xml");
         disposition.setType(Disposition.TYPE_ATTACHMENT);
-        representation.setDisposition(disposition);            	
+        representation.setDisposition(disposition);
 
         // Returns the XML representation of this document.
         return representation;
@@ -159,16 +160,16 @@ public class MDatumResource extends BaseResource {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND,
                     "metadata entry not found.\n");
         }
-        
+
         Model rdfModel = ModelFactory.createMemModelMaker()
                 .createDefaultModel();
         rdfModel.read(new ByteArrayInputStream((MetadataFileUtils.stripSignature(datum))
 				        .getBytes(Charset.forName(ENCODING))), MARKETPLACE_URI);
-		
+
         ByteArrayOutputStream jsonOut = new ByteArrayOutputStream();
         RDFDataMgr.write(jsonOut, rdfModel, RDFFormat.RDFJSON);
 
-        StringRepresentation representation = new StringRepresentation(jsonOut.toString(), 
+        StringRepresentation representation = new StringRepresentation(jsonOut.toString(),
         		MediaType.APPLICATION_JSON);
 
         Disposition disposition = new Disposition();
@@ -218,8 +219,8 @@ public class MDatumResource extends BaseResource {
                 "mdatum.ftl", data, MediaType.TEXT_HTML);
 
         return representation;
-    }   
-    
+    }
+
     private static String getEntryId(final String url){
         // return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
         return url.replaceFirst(".*/([^/?]+).*", "$1");
