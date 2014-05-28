@@ -2,7 +2,7 @@
 body {
   margin: 10px 95px;
   font-family:"Lucida Grande","bitstream vera sans","trebuchet ms",sans-serif,verdana;
-  background-image: url('/img/logo_vertical.png');
+  background-image: url('img/logo_vertical.png');
   background-repeat: no-repeat;
   background-position: 10px 25px;
   
@@ -138,7 +138,7 @@ table.search th {
 .dataTables_filter input {
         padding:3px 15px 3px 30px;
 	margin:0px; 
-	background: url('/img/search.png') no-repeat 8px 3px;
+	background: url('img/search.png') no-repeat 8px 3px;
         border-radius:15px; 
 	-moz-border-radius:15px; 
 	-webkit-border-radius:15px;

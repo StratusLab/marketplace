@@ -18,7 +18,7 @@ function buildHtmlDisplay( aData )
         var downloadLink = "";
         if(aData[8].substring(0, "http".length) == "http"){
             downloadLink = "<a href='" + aData[8]
-                        + "'><img src='/img/download.png'/></a>";
+                        + "'><img src='img/download.png'/></a>";
         } 
 
         var display = "<table class='vmpanel'>"
