@@ -117,6 +117,7 @@
             Jetty packaging that includes StratusLab Marketplace Server. 
           </description>
           <requires>
+            <require>stratuslab-nginx-cfg</require>
             <require>java-1.7.0-openjdk</require>
           </requires>
 
