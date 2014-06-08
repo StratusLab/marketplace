@@ -246,8 +246,6 @@ fi
 		  <excludes>
                     <exclude>marketplace.cfg</exclude>
                     <exclude>marketplace-sync.cfg</exclude>
-		    <exclude>etc/login/*</exclude>
-		    <exclude>etc/overrides/*</exclude>
 		  </excludes>
 		</source>
 	      </sources>
@@ -272,7 +270,6 @@ fi
                   <excludes>
                     <exclude>lib/setuid/**/*</exclude>
                     <exclude>etc/jetty-setuid.xml</exclude>
-                    <exclude>etc/jetty.conf</exclude>
 		  </excludes>
                 </source>
               </sources>
