@@ -24,20 +24,10 @@
   <properties> 
     <installation.dir>/opt/stratuslab/marketplace</installation.dir>
     <marketplace-war>marketplace-server-war-${project.version}.war</marketplace-war>
-    <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format> 
-    <RELEASE>0.${maven.build.timestamp}.${package.os}</RELEASE>
   </properties>
   <build>
     
     <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <arguments>-DRELEASE=1</arguments>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
