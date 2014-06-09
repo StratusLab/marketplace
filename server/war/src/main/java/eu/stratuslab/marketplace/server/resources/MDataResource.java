@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,14 +53,14 @@ import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
  * This resource represents a list of all Metadata entries
  */
 public class MDataResource extends MDataResourceBase {
-    		
+
 	@Post("www_form")
 	public Representation acceptDatatablesQueryString(Representation entity){
 		if (entity == null) {
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                     "post with null entity");
         }
-		
+
 		String query = "";
     	try {
     		query = entity.getText();
@@ -70,7 +70,7 @@ public class MDataResource extends MDataResourceBase {
 
     	return toJSON();
 	}
-	
+
 	@Post("multipart")
     public Representation acceptMetadataWebUpload(Representation entity) {
 		if (entity == null) {
@@ -79,12 +79,12 @@ public class MDataResource extends MDataResourceBase {
         }
 
 		isUploadPermitted();
-		
+
         File upload = processMultipartForm();
-       
+
         return acceptMetadataEntry(upload);
     }
-	
+
 	@Post("application_rdf|application_xml")
     public Representation acceptMetadataUpload(Representation entity) {
 		if (entity == null) {
@@ -93,21 +93,21 @@ public class MDataResource extends MDataResourceBase {
         }
 
 		isUploadPermitted();
-		
+
 		File upload = MetadataFileUtils.writeContentsToDisk(entity);
-        		
+
         return acceptMetadataEntry(upload);
     }
 
 	private void isUploadPermitted(){
 		String type = Configuration.getParameterValue(MARKETPLACE_TYPE);
-		
+
 		if(type != null && type.equalsIgnoreCase("replica")){
 			throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
             "read-only repository");
 		}
 	}
-	
+
     // Currently this method will only process the first uploaded file. This is
     // done to simplify the logic for treating a post request. This should be
     // extended in the future to handle multiple files.
@@ -149,10 +149,10 @@ public class MDataResource extends MDataResourceBase {
         throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST,
                 "no valid file uploaded");
     }
-	
+
     @Get("html")
     public Representation toHtml() throws IOException {
-    	
+
     	Map<String, Object> data = createInfoStructure("Metadata");
 
     	// Load the FreeMarker template
@@ -169,18 +169,18 @@ public class MDataResource extends MDataResourceBase {
      */
     @Get("xml")
     public Representation toXml() {
-    	
+
     	String status = getRequestFlag("status", "valid");
     	String access = getRequestFlag("location", "all");
-    	
+
     	List<Map<String, String>> metadata = getMetadata(status, access,
     			getRequestQueryValues());
     	metadata.remove(0);
-    	
+
         List<String> pathsToMetadata = buildPathsToMetadata(metadata);
 
         String xmlOutput = buildXmlOutput(pathsToMetadata);
-                
+
         // Returns the XML representation of this document.
         StringRepresentation representation = new StringRepresentation(xmlOutput,
                 MediaType.APPLICATION_XML);
@@ -189,21 +189,21 @@ public class MDataResource extends MDataResourceBase {
     }
 
     private List<String> buildPathsToMetadata(List<Map<String, String>> metadata){
-    	
+
     	List<String> pathsToMetadata = new ArrayList<String>(metadata.size());
         for (Map<String, String> entry : metadata) {
-        	String path = entry.get("identifier") 
-        	+ File.separator + entry.get("email") 
-        	+ File.separator + entry.get("created"); 
-        			       	            
+        	String path = entry.get("identifier")
+        	+ File.separator + entry.get("email")
+        	+ File.separator + entry.get("created");
+
             pathsToMetadata.add(path);
         }
-        
+
         return pathsToMetadata;
     }
-    
+
 	private String buildXmlOutput(List<String> pathsToMetadata) {
-		
+
 		StringBuilder output = new StringBuilder(XML_HEADER);
 
 		output.append("<metadata>");
@@ -218,10 +218,10 @@ public class MDataResource extends MDataResourceBase {
 			}
 		}
 		output.append("</metadata>");
-		
+
 		return output.toString();
 	}
-    
+
     /**
      * Returns a listing of all registered metadata or a particular entry if
      * specified.
@@ -230,11 +230,11 @@ public class MDataResource extends MDataResourceBase {
     public Representation toJSON() {
     	String status = getRequestFlag("status", "valid");
     	String access = getRequestFlag("location", "all");
-    	
+
     	List<Map<String, String>> metadata = null;
-    	
+
     	String msg = "no metadata matching query found";
-    	
+
     	try {
     		metadata = getMetadata(status, access,
     				getRequestQueryValues());
@@ -244,47 +244,47 @@ public class MDataResource extends MDataResourceBase {
         		msg = "ERROR: " + r.getCause().getMessage();
         	}
     	}
-    	
+
 		String iTotalDisplayRecords = "0";
 		String iTotalRecords = "0";
 		if (metadata.size() > 0) {
 			Map<String, String> recordCounts = (Map<String, String>) metadata
-					.remove(0);			
+					.remove(0);
 			iTotalDisplayRecords = recordCounts.get("iTotalDisplayRecords");
-			iTotalRecords = recordCounts.get("iTotalRecords");	
+			iTotalRecords = recordCounts.get("iTotalRecords");
 		}
 
 		Map<String, Object> json = buildJsonHeader(iTotalRecords,
 				iTotalDisplayRecords, msg);
 		List<ArrayList<String>> jsonResults = buildJsonResults(metadata);
-		
+
 		json.put("aaData", jsonResults);
 
 		// Returns the XML representation of this document.
-		return new StringRepresentation(JSONValue.toJSONString(json), 
+		return new StringRepresentation(JSONValue.toJSONString(json),
 				MediaType.APPLICATION_JSON);
     }
-       
-   private Map<String, Object> buildJsonHeader(String iTotalRecords, 
+
+   private Map<String, Object> buildJsonHeader(String iTotalRecords,
     		String iTotalDisplayRecords, String msg){
     	Map<String, Object> json = new HashMap<String, Object>();
-    	
-    	Integer sEcho = (getRequestQueryValues().get("sEcho") != null 
-    			? Integer.valueOf(getRequestQueryValues().get("sEcho")) : 0);
-    	
+
+    	Integer sEcho = (getRequestQueryValues().get("sEcho") != null
+    			? Integer.parseInt(getRequestQueryValues().get("sEcho")) : 0);
+
         json.put("sEcho", sEcho);
         json.put("iTotalRecords", Long.valueOf(iTotalRecords));
         json.put("iTotalDisplayRecords", Long.valueOf(iTotalDisplayRecords));
         json.put("rMsg", msg);
-    	    	
+
     	return json;
     }
-    
+
     private List<ArrayList<String>> buildJsonResults(List<Map<String, String>> metadata){
     	int numberOfRows = metadata.size();
-    	
+
     	List<ArrayList<String>> aaData = new ArrayList<ArrayList<String>>(numberOfRows);
-    	
+
     	for(int i = 0; i < metadata.size(); i++){
     		Map<String, String> resultRow = (Map<String, String>)metadata.get(i);
 
@@ -300,36 +300,36 @@ public class MDataResource extends MDataResourceBase {
             row.add(resultRow.get("location"));
             row.add(resultRow.get("description"));
             row.add(resultRow.get("title"));
-            
-            aaData.add(row);		    		
+
+            aaData.add(row);
     	}
 
     	return aaData;
     }
-    
+
     private String getRequestFlag(String flag, String defaultValue){
     	Map<String, String> requestValues = getRequestQueryValues();
-    	
-    	String value = (requestValues.containsKey(flag)) ? 
+
+    	String value = (requestValues.containsKey(flag)) ?
     			getFlagValue(requestValues.get(flag), defaultValue) : defaultValue;
-    			
+
         return value;
     }
-    
+
     /*
      * Gets the value of the request flag from the query
-     * 
+     *
      * @param the value taken from the request
-     * 
+     *
      * @return the value of flag
      */
     private String getFlagValue(String flag, String defaultValue){
     	return (flag == null) ? defaultValue : flag;
     }
-    
+
     private Map<String, String> getRequestQueryValues(){
     	Form form = getRequest().getResourceRef().getQueryAsForm();
-    	
+
     	return form.getValuesMap();
     }
 }
