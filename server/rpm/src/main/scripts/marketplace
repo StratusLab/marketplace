@@ -168,7 +168,7 @@ then
   ETC=$HOME/etc
 fi
 
-for CONFIG in $ETC/default/marketplace $HOME/.jettyrc; do
+for CONFIG in $ETC/default/marketplace; do
   if [ -f "$CONFIG" ] ; then 
     readConfig "$CONFIG"
   fi
