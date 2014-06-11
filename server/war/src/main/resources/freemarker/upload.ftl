@@ -11,7 +11,7 @@
 
     <h1>${title}</h1>
 
-    <form action="../metadata/" enctype="multipart/form-data" method="POST">
+    <form action="metadata" enctype="multipart/form-data" method="POST">
       <table>
         <tbody>
           <tr>
