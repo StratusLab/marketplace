@@ -308,7 +308,7 @@ fi
 
 if [ -z "$JETTY_STATE" ] 
 then
-  JETTY_STATE=$JETTY_HOME/marketplace.state
+  JETTY_STATE=$JETTY_HOME/jetty.state  # don't change name
 fi
 JAVA_OPTIONS+=("-Djetty.state=$JETTY_STATE")
 rm -f $JETTY_STATE
