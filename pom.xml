@@ -77,6 +77,38 @@ metadata.
 
   </repositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>eu.stratuslab.authn</groupId>
+        <artifactId>authn-ssl</artifactId>
+        <version>14.06.0_RC4</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.stratuslab.authn</groupId>
+        <artifactId>authn-login-module</artifactId>
+        <version>14.06.0_RC4</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.stratuslab.authn</groupId>
+        <artifactId>authn-one-proxy-war</artifactId>
+        <version>14.06.0_RC4</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.stratuslab.metadata</groupId>
+        <artifactId>metadata</artifactId>
+        <version>14.06.0_RC4</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.stratuslab.metadata</groupId>
+        <artifactId>metadata-fatjar</artifactId>
+        <version>14.06.0_RC4</version>
+        <type>jar</type>
+        <classifier>jar-with-dependencies</classifier>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <build>
     <pluginManagement>
       <plugins>
