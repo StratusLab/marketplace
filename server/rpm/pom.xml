@@ -132,6 +132,17 @@ groupadd --force --system stratuslab
 fi
             </script>
           </preinstallScriptlet>
+          <postinstallScriptlet>
+            <script>
+/sbin/chkconfig --add marketplace || true
+</script>
+          </postinstallScriptlet>
+          <preremoveScriptlet>
+            <script>
+/sbin/service marketplace stop || true
+/sbin/chkconfig --del marketplace || true
+</script>
+          </preremoveScriptlet>
 
           <defaultDirmode>755</defaultDirmode>
           <defaultFilemode>644</defaultFilemode>
