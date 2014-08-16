@@ -6,9 +6,9 @@ function fnFormatDetails ( oTable, nTr )
 	sOut += '<tr><td>Subject:</td><td>'+aData[2]+'</td></tr>';
         sOut += '<tr><td>Issuer:</td><td>'+aData[3]+'</td></tr>'
         sOut += '<tr><td>Email:</td><td>'+aData[4]+'</td><td/></tr>';
-	sOut += '<tr><td>View:</td><td><a href=/metadata/'
-             +aData[4]+'>Current</a> <a href=/endorsers/'
-             +aData[4]+'>History</a> <a href=/endorsers/'
+	sOut += '<tr><td>View:</td><td><a href=metadata/'
+             +aData[4]+'>Current</a> <a href=endorsers/'
+             +aData[4]+'>History</a> <a href=endorsers/'
              +aData[4]+'/tags>Tags</a></td></tr>';
         sOut += '</table>';
 	return sOut;

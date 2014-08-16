@@ -33,7 +33,7 @@
           <tbody>
             <#list content as history>
               <tr>
-              <td><a href=metadata/${history.identifier}/${history.email}/${history.created}>${history.identifier}</a></td>
+              <td><a href="metadata/${history.identifier}/${history.email}/${history.created}">${history.identifier}</a></td>
               <td>${history.created}</td>
 	      <td>${history.location}</td>
 	      <td><b><font color="red">${history.deprecated}</font></b></td>
