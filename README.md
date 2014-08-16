@@ -5,10 +5,7 @@ Marketplace
 
 Contains the Marketplace, a registry of virtual appliances, that 
 promotes sharing of those appliances and trust between the creators, 
-users, and cloud administrators.  
-
-This repository also contains the metadata utilities associated 
-with the descriptions of the virtual appliances.
+users, and cloud administrators.
 
 System Requirements
 -------------------
