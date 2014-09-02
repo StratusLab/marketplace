@@ -114,15 +114,21 @@ public final class SparqlUtils {
     
     public static final String ACCESS_PUBLIC_FILTER = "FILTER (!BOUND(?location) || regex(?location, \"^(https?|ftp)://.*$\")) ";
     public static final String ACCESS_PRIVATE_FILTER = "FILTER regex(?location, \"^pdisk.*\") ";
-    
-    public static final String TAG_QUERY_TEMPLATE = "SELECT ?identifier (MAX(?created) as ?created) "
-    		+ "WHERE { ?x <http://purl.org/dc/terms/identifier>  ?identifier;" +
-    		" <http://purl.org/dc/terms/alternative> \"%s\"; "
-    		+  "<http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . "
-    		+ "?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; "
-            + "<http://purl.org/dc/terms/created> ?created . "
-    		+ "?endorser <http://mp.stratuslab.eu/slreq#email> \"%s\" . "
-            + "} GROUP BY ?identifier ORDER BY desc(?created) LIMIT 1";
+   
+    public static final String TAG_QUERY_TEMPLATE = 
+    	"SELECT ?identifier ?created where {"
+    	+ "{"
+    	+ "SELECT ?identifier (MAX(?created) as ?created) (sample(?deprecated) as ?dep) "
+    	+ "WHERE { ?x <http://purl.org/dc/terms/identifier>  ?identifier; " +
+    	"<http://purl.org/dc/terms/alternative> \"%s\"; " +
+        "<http://mp.stratuslab.eu/slreq#endorsement> ?endorsement . " +
+    	"?endorsement <http://mp.stratuslab.eu/slreq#endorser> ?endorser; " +
+    	"<http://purl.org/dc/terms/created> ?created . " +
+    	"?endorser <http://mp.stratuslab.eu/slreq#email> \"%s\"  " +
+    	". OPTIONAL { ?x <http://mp.stratuslab.eu/slterms#deprecated> ?deprecated .} " +
+    	"} GROUP BY ?identifier " +
+    	"}  . FILTER (!bound(?dep)) " +
+    	"} ORDER BY desc(?created) LIMIT 1";
     
     public static final String ENDORSER_TAG_QUERY_TEMPLATE = "SELECT DISTINCT ?tag "
     		+ "WHERE { ?x <http://purl.org/dc/terms/alternative> ?tag; "

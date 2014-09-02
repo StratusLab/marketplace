@@ -210,6 +210,42 @@ public class MDatumResourceTest extends ResourceTestBase {
 		assertThat(created, is(responseCreated));
 	}
 
+        @Test 
+        public void testGetTagReturnsLatestWithDeprecatedEntry() throws Exception {
+        	postMetadataFile("valid-alternative.xml");
+        	postMetadataFile("valid-alternative-newid.xml");
+        	postMetadataFile("valid-alternative-deprecated-signed.xml");
+
+        	Document metadata = extractXmlDocument(
+        			this.getClass().getResourceAsStream("valid-alternative-newid.xml"));
+
+        	String identifier = getValueFromDoc(metadata, "identifier");
+        	String email = getValueFromDoc(metadata, "email");
+        	String created = getValueFromDoc(metadata, "created");
+        	String alternative = getValueFromDoc(metadata, "alternative");
+        	String description = getValueFromDoc(metadata, "description");
+
+        	Map<String, Object> attributes = createAttributes("email", email);
+        	attributes.put("tag", alternative);
+
+        	Request getRequest = createGetRequest(attributes);
+        	Response response = executeRequest(getRequest);
+
+        	Document responseDoc = extractXmlDocument(response.getEntity()
+        			.getStream());
+        	String responseId = getValueFromDoc(responseDoc, "identifier");
+        	String responseEmail = getValueFromDoc(metadata, "email");
+        	String responseAlt = getValueFromDoc(responseDoc, "alternative");
+        	String responseCreated = getValueFromDoc(responseDoc, "created");
+        	String responseDesc = getValueFromDoc(responseDoc, "description");
+
+        	assertThat(responseId, is(identifier));
+        	assertThat(email, is(responseEmail));
+        	assertThat(alternative, is(responseAlt));
+        	assertThat(description, is(responseDesc));
+        	assertThat(created, is(responseCreated));	
+        }
+        
 	private Response executeRequest(Request request) {
 		return executeRequest(request, new MDatumResource());
 	}
