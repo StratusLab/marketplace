@@ -25,8 +25,10 @@ public class GitStore extends FileStore {
 	private FileMonitor monitor;
 	
 	public GitStore(String dataDir, FileStore store) {
-		monitor = new FileMonitor(dataDir, ".xml");
-		manager = new GitManager(dataDir);
+		String gitDir = dataDir + File.separator + "metadata";
+		MetadataFileUtils.createIfNotExists(gitDir);
+		monitor = new FileMonitor(gitDir, ".xml");
+		manager = new GitManager(gitDir);
 		fileStore = store;
     }
 	

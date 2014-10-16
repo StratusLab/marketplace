@@ -83,7 +83,7 @@ public class GitManager {
 			initKeyAuth();
 		}
 		
-		if (!isGitRepository(new File(dataDir + File.separator + ".git"))) {
+		if (!isGitRepository(new File(gitDir + File.separator + ".git"))) {
 			LOGGER.warning("No git repository found.");
 			cloneRepository();
 		} else {

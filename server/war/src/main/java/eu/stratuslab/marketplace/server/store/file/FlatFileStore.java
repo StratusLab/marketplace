@@ -39,7 +39,7 @@ public class FlatFileStore extends FileStore {
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
 	public FlatFileStore(String dataDir){
-		this.dataDir = dataDir;
+		this.dataDir = dataDir + File.separator + "metadata";
 		MetadataFileUtils.createIfNotExists(dataDir);
 	}
 	
