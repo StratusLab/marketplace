@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
@@ -35,14 +36,17 @@ import com.couchbase.client.protocol.views.ViewRow;
 
 import eu.stratuslab.marketplace.XMLUtils;
 import eu.stratuslab.marketplace.server.cfg.Configuration;
+import eu.stratuslab.marketplace.server.utils.Metadata;
 import eu.stratuslab.marketplace.server.utils.MetadataFileUtils;
 
 public class CouchbaseStore extends FileStore {
 
 	private static final Logger LOGGER = Logger.getLogger("org.restlet");
 	
-	private static final String DESIGN_DOC = "marketplace_views";
-	private static final String VIEW = "by_timestamp";
+	private static final String DESIGN_DOC = "marketplace_update_views";
+	private static final String QUERY_DESIGN_DOC = "marketplace_query_views";
+	private static final String UPDATES_VIEW = "by_timestamp";
+	private static final String LATEST_VIEW = "latest";
 	
 	CouchbaseClient client = null;
 	private String marketplaceId;
@@ -71,39 +75,67 @@ public class CouchbaseStore extends FileStore {
 			
 			client = new CouchbaseClient(hosts, bucket, password);
 			
-			createView();
+			createViews();
 	    } catch (Exception e){
 	    	LOGGER.severe("Error connecting to Couchbase: " + e.getMessage());
 		}
 	}
 	
-	private void createView() {
+	private void createViews() {
 		DesignDocument designDoc = new DesignDocument(DESIGN_DOC);
 
-	    String viewName = VIEW;
+		ViewDesign updateView = createUpdatesView();
+	    ViewDesign latestView = createLatestView();
+	    
+	    List<ViewDesign> views = designDoc.getViews();
+	    
+	    views.add(updateView);
+	    views.add(latestView);
+	    client.createDesignDoc( designDoc );
+	}
+	
+	private ViewDesign createUpdatesView(){
+		String viewName = UPDATES_VIEW;
 	    String mapFunction =
 	            "function (doc, meta) {\n" +
 	            "    emit(doc.uploaded);\n" +
 	            "}";
 
 	    ViewDesign viewDesign = new ViewDesign(viewName,mapFunction);
-	    designDoc.getViews().add(viewDesign);
-	    client.createDesignDoc( designDoc );
+	    
+	    return viewDesign;
 	}
+	
+	private ViewDesign createLatestView(){
+		String viewName = LATEST_VIEW;
+	    String mapFunction =
+	            "function (doc, meta) {\n" +
+	            "    emit([doc.identifier, doc.email], [doc.title, doc.os, doc.os_version, doc.description, doc.created, doc.valid, doc.location]);" +
+	            "}";
+	    
+	    String reduceFunction = 
+	    		"function (key, values, rereduce) {\n" +
+	    		"    for(int i = 0; i < values.length; i++) {\n" +
+	    		"        ";
 
+	    ViewDesign viewDesign = new ViewDesign(viewName,mapFunction, reduceFunction);
+	    
+	    return viewDesign;
+	}
+	
 	@Override
 	public void store(String key, Document metadata) {
 		String contents = XMLUtils.documentToString(metadata);
 		String uploaded = Long.toString(System.currentTimeMillis());
 		
-		Map<String, String> jsonDocument = new HashMap<String, String>();
-		jsonDocument.put("uploaded", uploaded);
-		jsonDocument.put("marketplaceId", marketplaceId);
-		jsonDocument.put("metadata", contents);
+		JSONObject json = new Metadata(metadata).toJson();
+		json.put("uploaded", uploaded);
+		json.put("marketplaceId", marketplaceId);
+		json.put("metadata", contents);
 		
 		try {
 			if(client.get(key) == null){
-				client.set(key, JSONValue.toJSONString(jsonDocument));
+				client.set(key, json.toString());
 			}
 		} catch(Exception e){
 			LOGGER.severe("unable to store to couchbase: " + e.getMessage());
@@ -131,7 +163,7 @@ public class CouchbaseStore extends FileStore {
 				@SuppressWarnings("unchecked")
 				Map<String, String> document = (HashMap<String, String>)JSONValue.parse(jsonDocument);
 		
-				metadata = (String)document.get("metadata");
+				metadata = document.get("metadata");
 			} catch(Exception e){
 				LOGGER.severe("unable to read from couchbase: " + e.getMessage());
 				throw new ResourceException(Status.SERVER_ERROR_INTERNAL, e.getMessage());
@@ -145,7 +177,7 @@ public class CouchbaseStore extends FileStore {
 		String startKey = getLastKey();
 		String lastKey = "";
 		
-		View view = client.getView(DESIGN_DOC, VIEW);
+		View view = client.getView(DESIGN_DOC, UPDATES_VIEW);
 		Query query = new Query();
 		query.setLimit(limit);
 		

@@ -54,7 +54,9 @@ public final class XPathUtils {
             "//rdf:RDF/rdf:Description/slterms:deprecated", "", "");
     public static final XPathQuery ALTERNATIVE = new XPathQuery(
             "//rdf:RDF/rdf:Description/dcterms:alternative", "", "");
-    
+    public static final XPathQuery TITLE = new XPathQuery(
+            "//rdf:RDF/rdf:Description/dcterms:title", "", "");
+   
     private XPathUtils() {
 
     }
