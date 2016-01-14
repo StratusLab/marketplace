@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/bin/sh
 #=============================================================================
-# 
-#  File      : stratuslab_images_uri.py
+#
+#  File      : stratuslab_download_and_convert_images_to_qcow2.sh
 #  Date      : Jan 13th, 2016
 #  Author    : Oleg Lodygensky
 #
@@ -25,28 +25,30 @@
 #
 #=============================================================================
 
-import json
-import sys
+DOWNLOADER="wget"
+DOWNLOADEROPTS="--output-document="
+type $DOWNLOADER > /dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  DOWNLOADER="curl"
+  DOWNLOADEROPTS="--output"
+  type $DOWNLOADER > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    echo "Please install wget or curl"
+    exit 1
+  fi
+fi
 
+currentDir=`pwd`
 
-debugging = 0
-
-def debug(arg):
-    if debugging == 1:
-        print "DEBUG : ", arg
-
-
-def usage():
-    print "Usage : ", __file__, " [jsonfileFromMarketplace]"
-    sys.exit(1)
-
-if len(sys.argv) < 2:
-    usage()
-
-jsonFile = open(sys.argv[1])
-decoded = json.load(jsonFile)
-
-
-for image in decoded['images']:
-    print image['uri']
-
+for uriDir in `find . -type d` ; do
+  [ "$uriDir" == "." ] && continue
+  [ "$uriDir" == ".." ] && continue
+  #echo $uriDir
+  cd $uriDir
+  URIPATH=`cat uri.txt`
+  URIFILENAME=${URIPATH##http:*/}
+  #echo path=$URIPATH
+  #echo filename=$URIFILENAME
+  echo $DOWNLOADER `cat uri.txt` $DOWNLOADEROPTS$URIFILENAME
+  cd $currentDir
+done
