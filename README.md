@@ -190,7 +190,7 @@ This has been written to be able to test and use Stratuslab appliances (e.g. loc
 It is made of two python scripts: one saving appliances metadata having an HTTP URI; one retrieving URI from metadata.
 
 1. stratuslab_getimages.py.
-This downloads applicances metadata and dumps those that are subject to be downloaded (aka. images with an HTTP URI).
+This downloads appliances metadata and dumps those that are subject to be downloaded (aka. images with an HTTP URI).
 This script expects a valid stratuslab marketplace endpoint either read from $HOME/.stratuslab/stratuslab-ser.cfg or provided on the command line.
 
 2. stratuslab_images_uri.py.
