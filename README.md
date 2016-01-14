@@ -187,19 +187,20 @@ Using the client
 ----------------
 The client eases appliances update/migration.
 This has been written to be able to test and use Stratuslab appliances (e.g. locally, with other cloud middlewares).
-It is made of two python scripts: one saving appliances metadata having an HTTP URI; one retrieving URI from metadata.
+It is made of a python script that saves appliances metadata having an HTTP URI, each appliance on their own directory labelled by the appliance uuid.
+It also contains a shell script as exemple.
 
-1. stratuslab_getimages.py.
+* stratuslab_getimages.py
 This downloads appliances metadata and dumps those that are subject to be downloaded (aka. images with an HTTP URI).
 This script expects a valid stratuslab marketplace endpoint either read from $HOME/.stratuslab/stratuslab-ser.cfg or provided on the command line.
+The appliance metadata are dump to stdout
+(an 'images.json' is provided as an output example).
+For each appliance, this scripts creates one directory labelled with the appliance uuid where it stores two files:
+appliance.json contains the appliance metadata; uri.txt contains the appliance image URI only.
 
-An 'images.json' is provided as an output example.
-
-2. stratuslab_images_uri.py.
-This dumps URI only from a file containing the above script output. 
-
+* stratuslab_download_and_convert_images_to_qcow2.sh
 Having this URI, the user can download appliances image to test them locally, convert them to another format etc.
-
+A shell script is provided as exemple.
 
 License
 -------
