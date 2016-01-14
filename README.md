@@ -185,9 +185,9 @@ If necessary you can also perform the same operation for the service javascript.
 
 Using the client
 ----------------
-On January 13th, 2016, a client has been added in the marketplace package in order to ease appliances update/migration.
-This client has been written to be able to use and test Stratuslab appliances with other cloud middlewares.
-The client is made of two python scripts: one saving appliances metadata having an HTTP URI; one retrieving URI from metadata.
+The client eases appliances update/migration.
+This has been written to be able to test and use Stratuslab appliances (e.g. locally, with other cloud middlewares).
+It is made of two python scripts: one saving appliances metadata having an HTTP URI; one retrieving URI from metadata.
 
 1. stratuslab_getimages.py.
 This downloads applicances metadata and dumps those that are subject to be downloaded (aka. images with an HTTP URI).
