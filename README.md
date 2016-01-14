@@ -200,7 +200,7 @@ appliance.json contains the appliance metadata; uri.txt contains the appliance i
 
 * stratuslab_download_and_convert_images_to_qcow2.sh
 Having this URI, the user can download appliances image to test them locally, convert them to another format etc.
-A shell script is provided as exemple.
+A shell script is provided as exemple; this read uri.txt from each found directory.
 
 License
 -------
