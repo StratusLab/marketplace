@@ -193,6 +193,8 @@ It is made of two python scripts: one saving appliances metadata having an HTTP 
 This downloads appliances metadata and dumps those that are subject to be downloaded (aka. images with an HTTP URI).
 This script expects a valid stratuslab marketplace endpoint either read from $HOME/.stratuslab/stratuslab-ser.cfg or provided on the command line.
 
+An 'images.json' is provided as an output example.
+
 2. stratuslab_images_uri.py.
 This dumps URI only from a file containing the above script output. 
 
