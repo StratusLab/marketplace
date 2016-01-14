@@ -30,7 +30,7 @@ DOWNLOADEROPTS="--output-document="
 type $DOWNLOADER > /dev/null 2>&1
 if [ $? -ne 0 ] ; then
   DOWNLOADER="curl"
-  DOWNLOADEROPTS="--output"
+  DOWNLOADEROPTS="--output "
   type $DOWNLOADER > /dev/null 2>&1
   if [ $? -ne 0 ] ; then
     echo "Please install wget or curl"
