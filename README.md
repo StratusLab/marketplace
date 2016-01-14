@@ -196,7 +196,7 @@ This script expects a valid stratuslab marketplace endpoint either read from $HO
 2. stratuslab_images_uri.py.
 This dumps URI only from a file containing the above script output. 
 
-Having this URI, the user may download appliances image to test them locally, convert them to another format etc.
+Having this URI, the user can download appliances image to test them locally, convert them to another format etc.
 
 
 License
