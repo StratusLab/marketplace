@@ -91,9 +91,20 @@ for data in decoded['aaData']:
     
     if appliance['uri'].find("pdisk") != -1 :
         debug ("Excluding ", appliance)
+        continue
+    
+    if dataLength > 0 :
+        print json.dumps(appliance), ","
     else:
-        if dataLength > 0 :
-            print json.dumps(appliance), ","
-        else:
-            print json.dumps(appliance)
+        print json.dumps(appliance)
+
+    os.mkdir(appliance['uuid'])
+    uriFilePath = os.path.join(os.curdir, appliance['uuid'], "uri.txt")
+    with open(uriFilePath, 'w') as sortie:
+        sortie.write(appliance['uri'])
+
+    jsonFilePath = os.path.join(os.curdir, appliance['uuid'], "appliance.json")
+    with open(jsonFilePath, 'w') as sortie:
+        json.dump(appliance, sortie)
+
 print "] }"
