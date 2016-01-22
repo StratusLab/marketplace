@@ -208,6 +208,8 @@ for uriDir in $DIRECTORIES ; do
     	mv uri.txt uri.txt.downloaded
     else
         mv uri.txt uri.txt.error.$DOWNLOADER.$DOWNLOADERROR
+	    cd $currentDir
+	    continue
     fi
   else
     info "(could do) $DOWNLOADER `cat uri.txt` $DOWNLOADEROPTS$URIFILENAME"
