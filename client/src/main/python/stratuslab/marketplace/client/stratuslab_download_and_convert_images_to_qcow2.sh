@@ -168,13 +168,17 @@ for uriDir in $DIRECTORIES ; do
   cd $uriDir
   if [ ! -r uri.txt ] ; then
   	warn "file not found: $uriDir/uri.txt"
+    cd $currentDir
+  	continue
   fi
+
   URIPATH=`cat uri.txt`
 
 
   echo $URIPATH | grep -E "^http://" > /dev/null 2>&1
   if [ $? -ne 0 ] ; then
     warn "unable to download $URIPATH"
+   	mv uri.txt uri.txt.cant_download
     cd $currentDir
     continue
   fi
@@ -183,6 +187,7 @@ for uriDir in $DIRECTORIES ; do
   echo $URIPATH | grep -E "^http://172\.|^http://10\.|^http://192\." > /dev/null 2>&1
   if [ $? -eq 0 ] ; then
     warn "unable to download $URIPATH"
+   	mv uri.txt uri.txt.cant_download
     cd $currentDir
     continue
   fi
