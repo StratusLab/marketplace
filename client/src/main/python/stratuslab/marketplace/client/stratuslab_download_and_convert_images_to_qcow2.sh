@@ -69,15 +69,17 @@ message() {
 usage () {
   cat << USAGEEOF
 
-Usage: $0 [ --help | --download | --log [ 1 | 2 | 3 | 4  ] ]
-   --help     : to see this help
-   --download : to download and convert images
-              : if not provided this scripts only shows what it could do
-   --log      : to pecify the logger level
-              : 1 - DEBUG
-              : 2 - INFO
-              : 3 - WARN
-              : 4 - ERROR
+Usage: $0 [ --help | -h | --download | -d | [--input | -i] <dirname0 dirname1 ... > | [--log | -l ] [ 1 | 2 | 3 | 4  ] ]
+   --help     | -h : to see this help
+   --download | -d : to download and convert images
+                   : if not provided this scripts only shows what it could do
+   --input    | -i : to download and convert images from provided directories only
+                   : please enclose directory names, if more than one directory
+   --log      | -l : to pecify the logger level
+                   : 1 - DEBUG
+                   : 2 - INFO
+                   : 3 - WARN
+                   : 4 - ERROR
 
  This script :
   * crosses first level subdirectories and looks for 'uri.txt' file
@@ -91,6 +93,8 @@ USAGEEOF
 
 
 DOWNLOAD=""
+DIRECTORIES=`find . -type d`
+
 
 while [ $# -gt 0 ]
 do
@@ -101,8 +105,13 @@ do
     usage
     ;;
 
-  --download )
+  --download | -d )
     DOWNLOAD="1"
+    ;;  
+
+  --dir | -i )
+    shift
+    DIRECTORIES=$1
     ;;  
 
   --log )
@@ -150,7 +159,9 @@ if [ ! "$DOWNLOAD" ] ; then
   message "demo mode only (not downloading anything)"
 fi
 
-for uriDir in `find . -type d` ; do
+debug "Input = $DIRECTORIES"
+
+for uriDir in $DIRECTORIES ; do
   [ "$uriDir" == "." ] && continue
   [ "$uriDir" == ".." ] && continue
   debug "LOCALPATH $uriDir"
