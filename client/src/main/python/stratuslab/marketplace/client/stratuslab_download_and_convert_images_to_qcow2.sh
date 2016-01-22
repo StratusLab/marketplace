@@ -166,6 +166,9 @@ for uriDir in $DIRECTORIES ; do
   [ "$uriDir" == ".." ] && continue
   debug "LOCALPATH $uriDir"
   cd $uriDir
+  if [ ! -r uri.txt ] ; then
+  	warn "file not found: $uriDir/uri.txt"
+  fi
   URIPATH=`cat uri.txt`
 
 
@@ -196,6 +199,11 @@ for uriDir in $DIRECTORIES ; do
     info "(exec) $DOWNLOADER `cat uri.txt` $DOWNLOADEROPTS$URIFILENAME"
     $DOWNLOADER `cat uri.txt` $DOWNLOADEROPTS$URIFILENAME
     DOWNLOADERROR=$?
+    if [ $DOWNLOADERROR -eq 0 ] ; then
+    	mv uri.txt uri.txt.downloaded
+    else
+        mv uri.txt uri.txt.error.$DOWNLOADER.$DOWNLOADERROR
+    fi
   else
     info "(could do) $DOWNLOADER `cat uri.txt` $DOWNLOADEROPTS$URIFILENAME"
   fi
